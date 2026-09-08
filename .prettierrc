@@ -1,0 +1,30 @@
+{
+	"semi": false,
+	"singleQuote": true,
+	"trailingComma": "es5",
+	"tabWidth": 2,
+	"useTabs": false,
+	"printWidth": 80,
+	"proseWrap": "preserve",
+	"overrides": [
+		{
+			"files": ["*.yml", "*.yaml"],
+			"options": {
+				"parser": "yaml",
+				"useTabs": false
+			}
+		},
+		{
+			"files": ["*.md", "*.sh", "*.jsonc"],
+			"options": {
+				"parser": "markdown"
+			}
+		},
+		{
+			"files": "*.sh",
+			"options": {
+				"parser": "sh"
+			}
+		}
+	]
+}

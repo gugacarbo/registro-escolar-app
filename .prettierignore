@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+.git
+.tanstack
+.wrangler
+.output
+.vinxi
+public
+bun.lock
+worker-configuration.d.ts
+*.lock
+*.svg
+docs/templates/*.yml
+docs/templates/*.yaml
+bun-workspace.yaml
+scripts

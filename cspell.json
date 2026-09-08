@@ -1,0 +1,73 @@
+{
+	"version": "0.2",
+	"language": "en,pt",
+	"dictionaries": [
+		"pt-br",
+		"pt-pt",
+		"typescript",
+		"node",
+		"npm",
+		"html"
+	],
+	"dictionaryDefinitions": [
+		{
+			"name": "pt-br",
+			"path": "./node_modules/@cspell/dict-pt-br/pt_BR.trie.gz",
+			"addWords": true
+		},
+		{
+			"name": "pt-pt",
+			"path": "./node_modules/@cspell/dict-pt-pt/dict/Portuguese-European.trie.gz",
+			"addWords": true
+		}
+	],
+	"ignorePaths": [
+		"node_modules",
+		"dist",
+		"dist-ssr",
+		".git",
+		"bun.lock",
+		"worker-configuration.d.ts",
+		"*.lock",
+		"*.svg",
+		"public",
+		"scripts",
+		"docs/templates",
+		"docs/context"
+	],
+	"words": [
+		"Aproveie",
+		"autoscrolling",
+		"better-auth",
+		"biomejs",
+		"bunx",
+		"clsx",
+		"cmdk",
+		"commitar",
+		"deployar",
+		"drizzle",
+		"embla",
+		"Fraunces",
+		"frontmatter",
+		"gitleaks",
+		"hookform",
+		"lightningcss",
+		"lucide",
+		"platon",
+		"pytest",
+		"refetches",
+		"reseta",
+		"shadcn",
+		"sonner",
+		"supabase",
+		"Supabase",
+		"tailwindcss",
+		"tanstack",
+		"trivago",
+		"unixepoch",
+		"vinxi",
+		"vaul",
+		"workerd",
+		"wrangler"
+	]
+}

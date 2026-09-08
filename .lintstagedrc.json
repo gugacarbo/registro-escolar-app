@@ -1,0 +1,9 @@
+{
+	"*.{ts,tsx,mjs,cjs,json,jsonc,md,sh,yml,yaml}": [
+		"cspell lint --no-progress",
+		"biome check --no-errors-on-unmatched --files-ignore-unknown=true"
+	],
+	"*.{md,sh,yml,yaml}": [
+		"prettier --check"
+	]
+}

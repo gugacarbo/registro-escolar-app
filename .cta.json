@@ -2,7 +2,7 @@
   "projectName": "registro-escolar-app",
   "mode": "file-router",
   "typescript": true,
-  "packageManager": "pnpm",
+  "packageManager": "bun",
   "includeExamples": false,
   "tailwind": true,
   "projectPreset": "default",

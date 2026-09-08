@@ -1,0 +1,19 @@
+title = "Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for false positives"
+paths = [
+	'''node_modules''',
+	'''dist''',
+	'''dist-ssr''',
+	'''.git''',
+	'''.tanstack''',
+	'''.wrangler''',
+	'''bun.lock''',
+	'''worker-configuration.d.ts''',
+	'''\.env\.local''',
+	'''\.dev\.vars''',
+]
