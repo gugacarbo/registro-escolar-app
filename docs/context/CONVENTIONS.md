@@ -146,3 +146,25 @@ function ExampleForm() {
 - Não use `<input value={state} onChange={...} />` controlado por `useState`.
 - Não use componentes de formulário de outras bibliotecas ou cópias manuais dos wrappers.
 - Não acesse `form.control` fora de `FormField` sem necessidade; prefira `useWatch` ou `useFormContext`.
+
+## Schemas derivados de modelos do banco de dados
+
+- Todo schema que represente um modelo persistido no banco de dados **DEVE** ser derivado do schema do **Drizzle ORM** correspondente.
+- **NUNCA** recrie manualmente interfaces (`interface`, `type`) ou schemas de validação (`z.object({ ... })`) que já existam como derivados do Drizzle.
+- Use os helpers gerados pelo Drizzle:
+  - `insertSchema` para validar dados de criação.
+  - `updateSchema` para validar dados de atualização.
+  - `selectSchema` (ou o próprio schema de tabela) para leitura/retorno de dados.
+- Isso garante que alterações no modelo do banco se propaguem automaticamente para validação, formulários, contratos de API e estados do cliente.
+
+### O que fazer
+
+- Importe os schemas do arquivo de definição da tabela em `src/db/schema/` (ou equivalente).
+- Para criação: `const createSchema = insertSchema(tabela)`.
+- Para atualização: `const updateSchema = updateSchema(tabela)`.
+- Quando necessário, refine com `.pick()`, `.omit()` ou `.extend()`, mas mantenha a base vinda do Drizzle.
+
+### O que não fazer
+
+- Não declare `z.object({ id: z.string(), nome: z.string() })` para uma tabela que já tem schema no Drizzle.
+- Não duplique `interface Tabela { ... }` como contrato de API ou props de componente; use inferência via `z.infer<typeof tabela.$inferSelect>` ou os schemas derivados.
