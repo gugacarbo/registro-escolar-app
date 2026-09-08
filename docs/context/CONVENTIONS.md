@@ -168,3 +168,26 @@ function ExampleForm() {
 
 - Não declare `z.object({ id: z.string(), nome: z.string() })` para uma tabela que já tem schema no Drizzle.
 - Não duplique `interface Tabela { ... }` como contrato de API ou props de componente; use inferência via `z.infer<typeof tabela.$inferSelect>` ou os schemas derivados.
+
+## Migrations do banco de dados
+
+- Toda migration do banco de dados **DEVE** ser gerada com o **Drizzle Kit** (`drizzle-kit generate`).
+- **NUNCA** escreva arquivos de migration manualmente nem os edite diretamente após a geração.
+- Cada migration **DEVE** ser **nomeada explicitamente** com a flag `--name=<nome-descritivo>` (ou equivalente suportado pelo kit).
+- **NUNCA** deixe o nome aleatório/auto-gerado pelo Drizzle Kit; nomes descritivos tornam a ordem histórica e o propósito de cada migration imediatamente legível.
+
+### O que fazer
+
+- Execute `npx drizzle-kit generate --name=<nome-descritivo>` (ou via script do repo, ex.: `npm run db:generate -- --name=<nome-descritivo>`).
+- Use nomes em `kebab-case`, descritivos e em português quando o restante do repo estiver em português, por exemplo:
+  - `--name=cria-tabela-alunos`
+  - `--name=adiciona-coluna-status-usuarios`
+  - `--name=remove-indice-unico-cpf`
+- Revise o arquivo gerado em `src/db/migrations/` (ou caminho configurado) antes de commitar, mas apenas para validar; não edite o SQL/JS manualmente.
+- Commit migrations junto com o código que as necessita, na mesma PR.
+
+### O que não fazer
+
+- Não execute `drizzle-kit generate` sem `--name`, deixando nomes como `0000_random_slug.sql`.
+- Não renomeie manualmente arquivos de migration já aplicados ou em ambiente compartilhado.
+- Não crie migrations vazias ou sem propósito claro apenas para “resetar” a ordem.
