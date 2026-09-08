@@ -3,7 +3,6 @@ import { z } from "zod";
 
 export const env = createEnv({
 	server: {
-		DATABASE_URL: z.string().min(1),
 		BETTER_AUTH_URL: z.string().url(),
 		BETTER_AUTH_SECRET: z.string().min(1),
 	},
@@ -21,8 +20,11 @@ export const env = createEnv({
 	/**
 	 * What object holds the environment variables at runtime. This is usually
 	 * `process.env` or `import.meta.env`.
+	 *
+	 * TanStack Start with the Cloudflare Vite plugin exposes env vars on
+	 * `process.env` during SSR, while client code uses `import.meta.env`.
 	 */
-	runtimeEnv: import.meta.env,
+	runtimeEnv: typeof process !== "undefined" ? process.env : import.meta.env,
 
 	/**
 	 * By default, this library will feed the environment variables directly to
