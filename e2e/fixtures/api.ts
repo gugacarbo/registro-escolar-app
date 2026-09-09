@@ -279,6 +279,18 @@ export async function generateMinute(
 	return res.json();
 }
 
+export async function updateMeetingTemplate(
+	ctx: ApiContext,
+	meetingId: string,
+	templateId: string,
+): Promise<{ id: string; templateId: string | null }> {
+	const res = await api("PATCH", `/api/meetings/${meetingId}`, ctx.cookies, {
+		templateId,
+	});
+	if (!res.ok) throw new Error(`updateMeetingTemplate failed: ${res.status}`);
+	return res.json();
+}
+
 export async function previewMinute(
 	ctx: ApiContext,
 	meetingId: string,

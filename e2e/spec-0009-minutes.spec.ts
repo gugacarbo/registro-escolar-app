@@ -11,6 +11,7 @@ import {
 	generateMinute,
 	previewMinute,
 	startMeeting,
+	updateMeetingTemplate,
 	transitionMeetingResponse,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
@@ -126,13 +127,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 			name: "Template B",
 			headerText: "Cabeçalho B",
 		});
-		// A API pública de update de reunião é usada para trocar o template.
-		const update = await fetch(`${baseURL}/api/meetings/${meeting.id}`, {
-			method: "PATCH",
-			headers: { Cookie: apiContext.cookies, "Content-Type": "application/json" },
-			body: JSON.stringify({ templateId: secondTemplate.id }),
-		});
-		expect(update.status).toBe(200);
+		await updateMeetingTemplate(apiContext, meeting.id, secondTemplate.id);
 		const secondPreview = await previewMinute(apiContext, meeting.id);
 		expect(secondPreview.templateId).toBe(secondTemplate.id);
 		expect(secondPreview.content).toContain("CABEÇALHO B");
@@ -168,7 +163,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 			incluirNaAta: false,
 		});
 		await createLinkedRecord(apiContext, meeting.id, studentB.id, "Registro B público");
-		await createIndependentRecord(apiContext, studentB.id, "Contexto B excluído", {
+		await createIndependentRecord(apiContext, studentB.id, "Contexto B incluído por padrão", {
 			turmaId: klassB.id,
 		});
 
@@ -180,6 +175,6 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(preview.content).toContain("Aluno Ata B: Registro B público");
 		expect(preview.content).not.toContain("Registro A interno");
 		// Independent default is included when no explicit inclusion row exists.
-		expect(preview.content).toContain("Contexto B excluído");
+		expect(preview.content).toContain("Contexto B incluído por padrão");
 	});
 });
