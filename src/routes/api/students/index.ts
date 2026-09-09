@@ -2,9 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
+import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import {
 	createStudent,
 	findStudentsByNameOrDocument,
+	listStudents,
 } from "#/lib/students/repository";
 import { createStudentSchema } from "#/lib/students/schema";
 import { normalizeDocument, normalizeName } from "#/lib/students/shared";
@@ -14,19 +16,54 @@ export const Route = createFileRoute("/api/students/")({
 	server: {
 		middleware: [d1Middleware],
 		handlers: {
+			GET: listStudentsHandler,
 			POST: createStudentHandler,
 		},
 	},
 });
+
+export async function listStudentsHandler({
+	request,
+	context,
+}: {
+	request: Request;
+	context: { env?: Env };
+}) {
+	const env = context.env ?? (await getRuntimeEnv());
+	const session = await getSession(request, env);
+	if (!session) {
+		return new Response(JSON.stringify({ error: "Não autenticado" }), {
+			status: 401,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+
+	const url = new URL(request.url);
+	const search = url.searchParams.get("search") ?? undefined;
+	const limit = Number(url.searchParams.get("limit") ?? "50");
+	const offset = Number(url.searchParams.get("offset") ?? "0");
+
+	const db = createDb(requireD1(env));
+	const students = await listStudents(db, {
+		search,
+		limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 200) : 50,
+		offset: Number.isFinite(offset) && offset >= 0 ? offset : 0,
+	});
+	return new Response(JSON.stringify(students), {
+		status: 200,
+		headers: { "Content-Type": "application/json" },
+	});
+}
 
 export async function createStudentHandler({
 	request,
 	context,
 }: {
 	request: Request;
-	context: { env: Env };
+	context: { env?: Env };
 }) {
-	const session = await getSession(request, context.env);
+	const env = context.env ?? (await getRuntimeEnv());
+	const session = await getSession(request, env);
 	if (!session) {
 		return new Response(JSON.stringify({ error: "Não autenticado" }), {
 			status: 401,
@@ -46,7 +83,7 @@ export async function createStudentHandler({
 		);
 	}
 
-	const db = createDb(context.env.DB);
+	const db = createDb(requireD1(env));
 	const normalizedName = normalizeName(parsed.data.name);
 	const normalizedDocument = parsed.data.document
 		? normalizeDocument(parsed.data.document)

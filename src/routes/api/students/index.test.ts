@@ -3,9 +3,10 @@ import { getSession } from "#/lib/auth/session";
 import {
 	createStudent,
 	findStudentsByNameOrDocument,
+	listStudents,
 } from "#/lib/students/repository";
 
-import { createStudentHandler } from "./index";
+import { createStudentHandler, listStudentsHandler } from "./index";
 
 vi.mock("#/lib/auth/session", () => ({
 	getSession: vi.fn(),
@@ -14,6 +15,7 @@ vi.mock("#/lib/auth/session", () => ({
 vi.mock("#/lib/students/repository", () => ({
 	createStudent: vi.fn(),
 	findStudentsByNameOrDocument: vi.fn().mockResolvedValue([]),
+	listStudents: vi.fn().mockResolvedValue([]),
 }));
 
 function createMockSession() {
@@ -37,6 +39,46 @@ function createMockSession() {
 		},
 	};
 }
+
+describe("GET /api/students", () => {
+	it("returns 401 when not authenticated", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request("http://localhost/api/students", {
+			method: "GET",
+		});
+		const response = await listStudentsHandler({ request, context: { env } });
+		expect(response.status).toBe(401);
+	});
+
+	it("returns 200 with the student list", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStudents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([{ id: "student-1", name: "João Silva" }]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request("http://localhost/api/students?search=João", {
+			method: "GET",
+		});
+		const response = await listStudentsHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as Array<{ name: string }>;
+		expect(body).toHaveLength(1);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ search: "João" }),
+		);
+	});
+});
 
 describe("POST /api/students", () => {
 	it("returns 401 when not authenticated", async () => {

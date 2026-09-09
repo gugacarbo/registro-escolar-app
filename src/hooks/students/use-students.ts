@@ -4,11 +4,18 @@ import type { Student } from "#/lib/students/schema";
 
 const STUDENTS_QUERY_KEY = ["students"] as const;
 
-export function useStudents() {
+export function useStudents(search?: string) {
 	return useQuery<Student[]>({
-		queryKey: STUDENTS_QUERY_KEY,
+		queryKey: [...STUDENTS_QUERY_KEY, search ?? ""],
 		queryFn: async () => {
-			const response = await fetch("/api/students");
+			const params = new URLSearchParams();
+			if (search) {
+				params.set("search", search);
+			}
+			const query = params.toString();
+			const response = await fetch(
+				query ? `/api/students?${query}` : "/api/students",
+			);
 			if (!response.ok) {
 				throw new Error("Falha ao carregar alunos");
 			}
