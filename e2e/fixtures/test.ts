@@ -1,9 +1,9 @@
 import { test as base, expect, type Page } from "@playwright/test";
 
 import { createAuthenticatedContext, type ApiContext } from "./api";
+import { resetDatabase } from "./db";
 
 export type { ApiContext };
-import { resetDatabase } from "./db";
 
 export * from "@playwright/test";
 

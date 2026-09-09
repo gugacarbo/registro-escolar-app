@@ -7,8 +7,8 @@ import {
 	startMeeting,
 	updateStudentStatus,
 } from "./fixtures/api";
-import { expect, test, type ApiContext } from "./fixtures/test";
 import { restoreEnrollmentAsActive } from "./fixtures/db";
+import { expect, test, type ApiContext } from "./fixtures/test";
 
 type TrackingStatus = "pendente" | "em_discussao" | "concluido" | "nao_discutido";
 
@@ -35,7 +35,7 @@ async function setupStartedMeeting(
 	ctx: ApiContext,
 	names: string[],
 ) {
-	const klass = await createClass(ctx, "Turma Acompanhamento", "2026");
+	const klass = await createClass(ctx, `Turma Acompanhamento ${names.length}`, "2026");
 	const students = await Promise.all(names.map((name) => createStudent(ctx, name)));
 	for (const student of students) {
 		await createEnrollment(ctx, {
