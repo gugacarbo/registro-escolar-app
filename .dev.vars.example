@@ -4,7 +4,7 @@ CLOUDFLARE_DATABASE_ID=
 CLOUDFLARE_API_TOKEN=
 
 # Better Auth configuration
-BETTER_AUTH_URL=http://100.81.99.14:3001
+BETTER_AUTH_URL=http://localhost:3001
 BETTER_AUTH_SECRET=
 
 # Optional public app title (client-side)

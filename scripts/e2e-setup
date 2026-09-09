@@ -8,6 +8,12 @@ STATE_DIR="${E2E_PERSIST_STATE:-.wrangler/state/e2e}"
 mkdir -p "$STATE_DIR"
 
 # Use an existing uniquely materialized e2e D1 database, or initialize it once.
-if ! bunx tsx -e "import { E2E_DB_PATH } from './e2e/fixtures/db'; console.log(E2E_DB_PATH)" >/dev/null 2>&1; then
+DEV_VARS=.dev.vars
+if [ ! -f "$DEV_VARS" ]; then
+  cp .dev.vars.example "$DEV_VARS"
+fi
+
+E2E_DB_COUNT="$(find "$STATE_DIR/v3/d1/miniflare-D1DatabaseObject" -maxdepth 1 -type f -name '*.sqlite' ! -name 'metadata.sqlite' 2>/dev/null | wc -l || true)"
+if [ "$E2E_DB_COUNT" -eq 0 ]; then
   bunx wrangler d1 migrations apply registro-escolar-db --local --persist-to "$STATE_DIR"
 fi
