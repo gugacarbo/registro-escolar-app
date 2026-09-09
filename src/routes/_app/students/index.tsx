@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-
+import { useState } from "react";
+import { DataTable } from "#/components/data-table";
 import { CreateStudentDialog } from "#/components/students/create-student-dialog";
 import { Button } from "#/components/ui/button";
-import { DataTable } from "#/components/ui/data-table";
 import { Input } from "#/components/ui/input";
 import { useStudents } from "#/hooks/students/use-students";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
@@ -38,10 +37,14 @@ export function StudentsPage() {
 	const [pageSize, setPageSize] = useState(10);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const debouncedSearch = useDebouncedValue(search, 300);
+	const [activeSearch, setActiveSearch] = useState(debouncedSearch);
 
-	useEffect(() => {
-		setPage(1);
-	}, [debouncedSearch]);
+	if (activeSearch !== debouncedSearch) {
+		setActiveSearch(debouncedSearch);
+		if (page !== 1) {
+			setPage(1);
+		}
+	}
 
 	const {
 		data: studentsPage,

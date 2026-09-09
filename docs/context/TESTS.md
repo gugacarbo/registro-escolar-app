@@ -14,15 +14,27 @@ bun run test:coverage   # mesma suíte com relatório de cobertura (mínimo 95%)
 bun run test:watch      # Vitest em modo watch
 bun run e2e             # testes end-to-end com Playwright (headless, CI)
 bun run e2e:ui          # Playwright com UI mode (debug local)
+bun run storybook       # catálogo local de estados visuais em http://localhost:6006
+bun run build-storybook # build estático do Storybook
+bun run chromatic       # publica as histórias para comparação visual (requer CHROMATIC_PROJECT_TOKEN)
 ```
 
 ## Tipos de teste
 
-| Tipo | Ferramenta | O que cobre |
-| ---- | ---------- | ----------- |
-| **Unitário** | Vitest + happy-dom | Funções puras, utilitários, schemas, hooks isolados. |
-| **Integração** | Vitest + `@testing-library/react` | Componentes próprios, formulários com react-hook-form, provedores (TanStack Query, Tooltip). |
-| **End-to-end (e2e)** | Playwright | Fluxos reais no navegador: autenticação, cadastros, geração de ata, PDF, etc. |
+| Tipo                 | Ferramenta                        | O que cobre                                                                                  |
+| -------------------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Unitário**         | Vitest + happy-dom                | Funções puras, utilitários, schemas, hooks isolados.                                         |
+| **Integração**       | Vitest + `@testing-library/react` | Componentes próprios, formulários com react-hook-form, provedores (TanStack Query, Tooltip). |
+| **End-to-end (e2e)** | Playwright                        | Fluxos reais no navegador: autenticação, cadastros, geração de ata, PDF, etc.                |
+| **Visual**           | Storybook + Chromatic             | Estados visuais estáveis dos componentes e detecção de regressões de interface.              |
+
+## Testes visuais
+
+- Crie histórias colocalizadas com o componente, usando o sufixo `*.stories.tsx`.
+- Cubra variantes, estados de erro, desabilitado e demais estados visualmente relevantes.
+- Use `bun run storybook` para desenvolver e revisar histórias localmente.
+- Execute `bun run chromatic` com `CHROMATIC_PROJECT_TOKEN` configurado como segredo do ambiente ou da CI.
+- A primeira execução no Chromatic estabelece a baseline; as seguintes apontam diferenças visuais para revisão.
 
 ## Onde criar testes
 

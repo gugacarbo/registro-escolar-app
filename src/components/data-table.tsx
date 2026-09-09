@@ -178,6 +178,7 @@ export function DataTable<TData>({
 							<PaginationItem>
 								<PaginationPrevious
 									href="#"
+									aria-label="Página anterior"
 									aria-disabled={page <= 1}
 									className={
 										page <= 1 ? "pointer-events-none opacity-50" : undefined
@@ -189,7 +190,7 @@ export function DataTable<TData>({
 										}
 									}}
 								>
-									<span className="hidden sm:block">Anterior</span>
+									Anterior
 								</PaginationPrevious>
 							</PaginationItem>
 							{getVisiblePages(page, totalPages).map((visible, index) =>
@@ -215,6 +216,7 @@ export function DataTable<TData>({
 							<PaginationItem>
 								<PaginationNext
 									href="#"
+									aria-label="Próxima página"
 									aria-disabled={page >= totalPages}
 									className={
 										page >= totalPages
@@ -228,7 +230,7 @@ export function DataTable<TData>({
 										}
 									}}
 								>
-									<span className="hidden sm:block">Próxima</span>
+									Próxima
 								</PaginationNext>
 							</PaginationItem>
 						</PaginationContent>
