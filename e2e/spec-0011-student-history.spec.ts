@@ -41,7 +41,7 @@ async function getStudentHistory(
 }
 
 test.describe("SPEC-0011 histórico do aluno", () => {
-	test("inclui registros de duas turmas na mesma linha histórica", async ({
+	test("inclui eventos de duas turmas na mesma linha histórica", async ({
 		apiContext,
 	}) => {
 		const student = await createStudent(apiContext, "Aluno Histórico");
@@ -50,8 +50,8 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 		await createEnrollment(apiContext, {
 			alunoId: student.id,
 			turmaId: first.id,
-			dataInicio: "2025-01-01",
-			dataTermino: "2025-12-31",
+			dataInicio: "2026-01-01",
+			dataTermino: "2026-12-31",
 		});
 		await createEnrollment(apiContext, {
 			alunoId: student.id,
@@ -129,8 +129,8 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 		await createEnrollment(apiContext, {
 			alunoId: student.id,
 			turmaId: first.id,
-			dataInicio: "2025-01-01",
-			dataTermino: "2025-12-31",
+			dataInicio: "2026-01-01",
+			dataTermino: "2026-12-31",
 		});
 		await createEnrollment(apiContext, {
 			alunoId: student.id,
@@ -147,6 +147,9 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 		const component = await createComponent(apiContext, "História Componente");
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro com componente", {
 			componenteId: component.id,
+		});
+		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro com categoria", {
+			categoriaId: "categoria-historico",
 		});
 		await createIndependentRecord(apiContext, student.id, "Registro independente componente", {
 			turmaId: second.id,
@@ -189,22 +192,31 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 		expect(byComponent.eventos.map((event) => event.texto)).toContain(
 			"Registro independente componente",
 		);
+
+		const byCategory = await getStudentHistory(
+			apiContext,
+			student.id,
+			"?categoriaId=categoria-historico",
+		);
+		expect(byCategory.eventos.map((event) => event.texto)).toContain(
+			"Registro com categoria",
+		);
 	});
 
-	test("relaciona reunião antiga ao contexto da turma na data", async ({
+	test("relaciona reunião anterior ao contexto da turma na data", async ({
 		apiContext,
 	}) => {
 		const student = await createStudent(apiContext, "Aluno Contexto Antigo");
-		const oldClass = await createClass(apiContext, "Turma Contexto Antiga", "2025");
+		const oldClass = await createClass(apiContext, "Turma Contexto Antiga", "2026");
 		await createEnrollment(apiContext, {
 			alunoId: student.id,
 			turmaId: oldClass.id,
-			dataInicio: "2025-01-01",
-			dataTermino: "2025-12-31",
+			dataInicio: "2026-01-01",
+			dataTermino: "2026-12-31",
 		});
 		const meeting = await createMeeting(apiContext, {
 			title: "Reunião Antiga",
-			heldAt: "2025-06-15",
+			heldAt: "2026-06-15",
 			classIds: [oldClass.id],
 			participants: [],
 		});
