@@ -1,4 +1,4 @@
-import { createAuth } from "#/lib/auth";
+import { createAuth } from "@/lib/auth";
 
 export async function getSession(request: Request, env: Env) {
 	const db = env.DB;
