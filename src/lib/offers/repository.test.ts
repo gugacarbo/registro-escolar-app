@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 import { describe, expect, it } from "vitest";
 
 import type { DB } from "#/db";
@@ -8,9 +8,9 @@ import * as schema from "#/db/schema";
 import { createComponent } from "#/lib/components/repository";
 
 import {
+	createOffer,
 	DuplicateOfferError,
 	InvalidProfessorError,
-	createOffer,
 	listOffersByClass,
 } from "./repository";
 
@@ -134,7 +134,10 @@ describe("offers repository", () => {
 			.insert(schema.staff)
 			.values({ id: "p2", name: "Maria Souza" })
 			.returning();
-		await db.update(schema.staff).set({ deletedAt: new Date() }).where(eq(schema.staff.id, "p2"));
+		await db
+			.update(schema.staff)
+			.set({ deletedAt: new Date() })
+			.where(eq(schema.staff.id, "p2"));
 
 		await expect(
 			createOffer(db, {

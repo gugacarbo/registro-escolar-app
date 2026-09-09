@@ -14,7 +14,10 @@ export const createComponentSchema = createInsertSchema(components)
 		updatedAt: true,
 	})
 	.extend({
-		name: createInsertSchema(components).shape.name.min(1, "Nome é obrigatório"),
+		name: createInsertSchema(components).shape.name.min(
+			1,
+			"Nome é obrigatório",
+		),
 	});
 
 export const updateComponentSchema = createUpdateSchema(components).omit({

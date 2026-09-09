@@ -167,4 +167,12 @@ describe("POST /api/enrollments", () => {
 		expect(body.enrollment).toEqual({ id: "e2" });
 		expect(body.closedEnrollments).toEqual([{ id: "e1" }]);
 	});
+
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = postRequest(validBody);
+		const response = await createEnrollmentHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenCalledWith(request, undefined);
+	});
 });

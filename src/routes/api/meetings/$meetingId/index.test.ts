@@ -191,4 +191,44 @@ describe("PATCH /api/meetings/:id", () => {
 		const body = (await response.json()) as { title: string };
 		expect(body.title).toBe("Novo título");
 	});
+
+	it("resolve env via fallback no PATCH e atualiza campos opcionais", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			status: "draft",
+		});
+		(updateMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			title: "Reunião",
+			heldAt: new Date(Date.UTC(2026, 8, 9)),
+			templateId: null,
+			status: "draft",
+		});
+		const request = new Request("http://localhost/api/meetings/meeting-1/", {
+			method: "PATCH",
+			body: JSON.stringify({
+				title: "Reunião",
+				heldAt: "2026-09-09",
+				templateId: null,
+			}),
+		});
+		const response = await updateMeetingHandler({
+			request,
+			context: { env: createEnv() },
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(200);
+		expect(sessionMock).toHaveBeenCalledWith(request, expect.anything());
+		expect(updateMeeting).toHaveBeenCalledWith(
+			expect.anything(),
+			"meeting-1",
+			expect.objectContaining({
+				title: "Reunião",
+				heldAt: new Date("2026-09-09T00:00:00.000Z"),
+				templateId: null,
+			}),
+		);
+	});
 });

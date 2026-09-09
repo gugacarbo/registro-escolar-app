@@ -34,7 +34,9 @@ type AppRoute =
 	| "/staff"
 	| "/staff/new"
 	| "/roles"
-	| "/roles/new";
+	| "/roles/new"
+	| "/components"
+	| "/components/new";
 
 interface NavSubItem {
 	title: string;
@@ -86,7 +88,15 @@ const NAV_GROUPS: NavGroup[] = [
 					{ title: "Novo papel", to: "/roles/new" },
 				],
 			},
-			{ title: "Componentes", icon: BookOpenText },
+			{
+				title: "Componentes",
+				to: "/components",
+				icon: BookOpenText,
+				children: [
+					{ title: "Todos os componentes", to: "/components" },
+					{ title: "Novo componente", to: "/components/new" },
+				],
+			},
 		],
 	},
 	{

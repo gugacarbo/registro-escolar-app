@@ -97,13 +97,16 @@ export const classOfferRelations = relations(classOffers, ({ one, many }) => ({
 	professors: many(offerProfessors),
 }));
 
-export const offerProfessorRelations = relations(offerProfessors, ({ one }) => ({
-	offer: one(classOffers, {
-		fields: [offerProfessors.offerId],
-		references: [classOffers.id],
+export const offerProfessorRelations = relations(
+	offerProfessors,
+	({ one }) => ({
+		offer: one(classOffers, {
+			fields: [offerProfessors.offerId],
+			references: [classOffers.id],
+		}),
+		staff: one(staff, {
+			fields: [offerProfessors.staffId],
+			references: [staff.id],
+		}),
 	}),
-	staff: one(staff, {
-		fields: [offerProfessors.staffId],
-		references: [staff.id],
-	}),
-}));
+);

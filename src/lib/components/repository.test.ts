@@ -7,8 +7,8 @@ import * as schema from "#/db/schema";
 
 import {
 	createComponent,
-	findComponentByNormalizedName,
 	findComponentById,
+	findComponentByNormalizedName,
 	listComponents,
 } from "./repository";
 
@@ -54,5 +54,12 @@ describe("components repository", () => {
 		const results = await listComponents(db, { search: "Progr" });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Programação");
+	});
+
+	it("permite busca vazia e opcional", async () => {
+		const { db } = createTestDb();
+		await createComponent(db, { name: "Matemática" });
+		const rows = await listComponents(db);
+		expect(rows).toHaveLength(1);
 	});
 });

@@ -1,9 +1,25 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0011
-implemented-by: []
+implemented-by:
+  - src/db/components-schema.ts
+  - src/lib/components/schema.ts
+  - src/lib/components/repository.ts
+  - src/lib/offers/schema.ts
+  - src/lib/offers/repository.ts
+  - src/routes/api/components/index.ts
+  - src/routes/api/classes/$id/offers.ts
+  - src/components/components/component-form.tsx
+  - src/components/offers/offer-form.tsx
+  - src/hooks/components/use-components.ts
+  - src/hooks/components/use-create-component.ts
+  - src/hooks/offers/use-offers.ts
+  - src/hooks/offers/use-create-offer.ts
+  - src/routes/_app/components/index.tsx
+  - src/routes/_app/components/new.tsx
+  - src/routes/_app/classes/$id/offers.tsx
 ---
 
 # Cadastro de componentes curriculares e ofertas por turma
@@ -40,21 +56,35 @@ Permitir cadastrar componentes curriculares reutilizáveis e relacioná-los a tu
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os quatro casos de borda estão cobertos por testes.
 
 ## Definition of Done
 
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run db:local:migrate ............ exit 0 (migrations 0004/0005 aplicadas)
+bun run typecheck .................. exit 0
+bun run check ...................... exit 0 (250 arquivos)
+bun run test --run ................. 44 arquivos, 317 testes verdes
+bun run test:coverage .............. 98,13% stmts/linhas, 98,85% funcs, 95,07% branches
+scripts/docs-check ................ exit 0
 ```
 
 ## Revisão humana
 
-- Nomenclatura dos componentes padrão; UX de múltiplos professores por componente.
+- Resolvido no fechamento: componentes são cadastrados livremente pelo operador;
+  a UI usa seleção múltipla simples de servidores ativos (checkboxes) para a
+  oferta, com estado vazio explicando que a oferta pode existir sem professor.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09. As tabelas `components`, `class_offers` e
+`offer_professors` são criadas pelas migrations 0004/0005 já aplicadas localmente
+(`bun run db:local:migrate` exit 0). Casos de borda: (1) componente duplicado é
+sinalizado com 409 e `existingComponent` após normalização de nome; (2) oferta
+com `professorIds: []` é criada com 201; (3) professor inexistente ou
+soft-deleted é rejeitado com 400 (`InvalidProfessorError`); (4) a mesma tupla
+turma+componente é rejeitada com 409 (`DuplicateOfferError`), enquanto o mesmo
+componente pode ser ofertado em outra turma. UI entrega listagem/criação de
+componentes em `/components` e ofertas em `/classes/:id/offers`, com navegação
+habilitada. Gates finais no estado integrado: typecheck/check/test/coverage/docs
+conforme DoD acima.

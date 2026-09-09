@@ -1,7 +1,4 @@
-import {
-	createInsertSchema,
-	createSelectSchema,
-} from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import { classOffers } from "#/db/schema";
@@ -21,9 +18,7 @@ export const createOfferApiSchema = createInsertSchema(classOffers)
 			1,
 			"Componente é obrigatório",
 		),
-		professorIds: z
-			.array(z.string().min(1, "Professor inválido"))
-			.default([]),
+		professorIds: z.array(z.string().min(1, "Professor inválido")).default([]),
 	});
 
 export const selectOfferSchema = createSelectSchema(classOffers);

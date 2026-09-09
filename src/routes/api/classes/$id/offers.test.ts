@@ -125,6 +125,20 @@ describe("GET /api/classes/:id/offers", () => {
 		expect(await response.json()).toEqual([offer]);
 		expect(listOffersByClass).toHaveBeenCalledWith(expect.anything(), "t1");
 	});
+
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/classes/t1/offers", {
+			method: "GET",
+		});
+		const response = await listOffersHandler({
+			request,
+			context: {},
+			params: { id: "t1" },
+		});
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenCalledWith(request, undefined);
+	});
 });
 
 describe("POST /api/classes/:id/offers", () => {
@@ -312,5 +326,17 @@ describe("POST /api/classes/:id/offers", () => {
 				params: { id: "t1" },
 			}),
 		).rejects.toThrow("boom");
+	});
+
+	it("resolve env via fallback no POST quando o contexto não traz env", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = post({ componenteId: "c1", professorIds: [] });
+		const response = await createOfferHandler({
+			request,
+			context: {},
+			params: { id: "t1" },
+		});
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenCalledWith(request, undefined);
 	});
 });

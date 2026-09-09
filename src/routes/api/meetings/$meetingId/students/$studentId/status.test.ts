@@ -85,6 +85,19 @@ describe("PATCH /api/meetings/:id/students/:studentId/status", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = patchRequest({ status: "concluido", classId: "class-1" });
+		const response = await updateStudentStatusHandler({
+			request,
+			context: {},
+			params: { meetingId: "meeting-1", studentId: "student-1" },
+		});
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
+	});
+
 	it("retorna 400 com payload inválido", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());

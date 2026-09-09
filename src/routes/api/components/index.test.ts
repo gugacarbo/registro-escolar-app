@@ -117,6 +117,18 @@ describe("GET /api/components", () => {
 			expect.objectContaining({ limit: 50, offset: 0 }),
 		);
 	});
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/components", {
+			method: "GET",
+		});
+		const response = await listComponentsHandler({
+			request,
+			context: {},
+		});
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenCalledWith(request, undefined);
+	});
 });
 
 describe("POST /api/components", () => {
@@ -194,5 +206,18 @@ describe("POST /api/components", () => {
 		};
 		expect(body.error).toBe("Componente já existe");
 		expect(body.existingComponent.id).toBe("c1");
+	});
+	it("resolve env via fallback no POST quando o contexto não traz env", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/components", {
+			method: "POST",
+			body: JSON.stringify({ name: "Matemática" }),
+		});
+		const response = await createComponentHandler({
+			request,
+			context: {},
+		});
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenCalledWith(request, undefined);
 	});
 });

@@ -317,12 +317,29 @@
     "path": "docs/specs/0004-componentes-ofertas.md",
     "layer": "specs",
     "title": "Cadastro de componentes curriculares e ofertas por turma",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0011"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/components-schema.ts",
+      "src/lib/components/schema.ts",
+      "src/lib/components/repository.ts",
+      "src/lib/offers/schema.ts",
+      "src/lib/offers/repository.ts",
+      "src/routes/api/components/index.ts",
+      "src/routes/api/classes/$id/offers.ts",
+      "src/components/components/component-form.tsx",
+      "src/components/offers/offer-form.tsx",
+      "src/hooks/components/use-components.ts",
+      "src/hooks/components/use-create-component.ts",
+      "src/hooks/offers/use-offers.ts",
+      "src/hooks/offers/use-create-offer.ts",
+      "src/routes/_app/components/index.tsx",
+      "src/routes/_app/components/new.tsx",
+      "src/routes/_app/classes/$id/offers.tsx"
+    ]
   },
   {
     "id": "SPEC-0005",

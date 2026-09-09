@@ -58,6 +58,43 @@ describe("GET /api/classes", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("propaga paginação com defaults e teto", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValue(
+			createMockSession(),
+		);
+		const listMock = listClasses as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValue([]);
+		const capped = await listClassesHandler({
+			request: new Request("http://localhost/api/classes?limit=999&offset=2"),
+			context: { env: createEnv() },
+		});
+		expect(capped.status).toBe(200);
+		expect(listMock).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 200, offset: 2, search: undefined }),
+		);
+		const defaulted = await listClassesHandler({
+			request: new Request("http://localhost/api/classes?limit=0&offset=-1"),
+			context: { env: createEnv() },
+		});
+		expect(defaulted.status).toBe(200);
+		expect(listMock).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 50, offset: 0, search: undefined }),
+		);
+	});
+
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/classes");
+		const response = await listClassesHandler({
+			request,
+			context: {},
+		});
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenCalledWith(request, undefined);
+	});
+
 	it("retorna 200 com a lista de turmas", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
@@ -125,5 +162,16 @@ describe("POST /api/classes", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(201);
+	});
+
+	it("resolve env via fallback no POST quando o contexto não traz env", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/classes", {
+			method: "POST",
+			body: JSON.stringify({ nome: "7º A", periodoLetivo: "2026" }),
+		});
+		const response = await createClassHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenCalledWith(request, undefined);
 	});
 });
