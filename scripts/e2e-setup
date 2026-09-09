@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+STATE_DIR="${E2E_PERSIST_STATE:-.wrangler/state/e2e}"
+mkdir -p "$STATE_DIR"
+
+# Use an existing uniquely materialized e2e D1 database, or initialize it once.
+if ! bunx tsx -e "import { E2E_DB_PATH } from './e2e/fixtures/db'; console.log(E2E_DB_PATH)" >/dev/null 2>&1; then
+  bunx wrangler d1 migrations apply registro-escolar-db --local --persist-to "$STATE_DIR"
+fi

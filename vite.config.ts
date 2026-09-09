@@ -9,7 +9,12 @@ const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [
 		devtools(),
-		cloudflare({ viteEnvironment: { name: "ssr" } }),
+		cloudflare({
+			viteEnvironment: { name: "ssr" },
+			persistState: process.env.E2E_PERSIST_STATE
+				? { path: process.env.E2E_PERSIST_STATE }
+				: undefined,
+		}),
 		tailwindcss(),
 		tanstackStart({
 			router: {
