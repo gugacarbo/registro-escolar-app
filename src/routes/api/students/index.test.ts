@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { getSession } from "#/lib/auth/session";
 import {
+	countStudents,
 	createStudent,
 	findStudentsByNameOrDocument,
 	listStudents,
@@ -13,6 +14,7 @@ vi.mock("#/lib/auth/session", () => ({
 }));
 
 vi.mock("#/lib/students/repository", () => ({
+	countStudents: vi.fn().mockResolvedValue(0),
 	createStudent: vi.fn(),
 	findStudentsByNameOrDocument: vi.fn().mockResolvedValue([]),
 	listStudents: vi.fn().mockResolvedValue([]),
@@ -67,11 +69,13 @@ describe("GET /api/students", () => {
 		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
-	it("returns 200 with the student list", async () => {
+	it("returns 200 with the paginated envelope", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listStudents as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValueOnce([{ id: "student-1", name: "João Silva" }]);
+		const countMock = countStudents as ReturnType<typeof vi.fn>;
+		countMock.mockResolvedValueOnce(1);
 		const env = {
 			DB: {} as D1Database,
 			BETTER_AUTH_SECRET: "secret",
@@ -82,9 +86,19 @@ describe("GET /api/students", () => {
 		});
 		const response = await listStudentsHandler({ request, context: { env } });
 		expect(response.status).toBe(200);
-		const body = (await response.json()) as Array<{ name: string }>;
-		expect(body).toHaveLength(1);
+		const body = (await response.json()) as {
+			data: Array<{ name: string }>;
+			total: number;
+			page: number;
+			pageSize: number;
+		};
+		expect(body.data).toHaveLength(1);
+		expect(body).toMatchObject({ total: 1, page: 1, pageSize: 10 });
 		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ search: "João", limit: 10, offset: 0 }),
+		);
+		expect(countMock).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.objectContaining({ search: "João" }),
 		);
@@ -100,18 +114,20 @@ describe("GET /api/students", () => {
 			BETTER_AUTH_SECRET: "secret",
 			BETTER_AUTH_URL: "http://localhost:3000",
 		} as Env;
-		const request = new Request("http://localhost/api/students?limit=0", {
+		const request = new Request("http://localhost/api/students?page=0", {
 			method: "GET",
 		});
 		const response = await listStudentsHandler({ request, context: { env } });
 		expect(response.status).toBe(200);
 		expect(listMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 50, offset: 0, search: undefined }),
+			expect.objectContaining({ limit: 10, offset: 0, search: undefined }),
 		);
+		const body = (await response.json()) as { page: number; pageSize: number };
+		expect(body).toMatchObject({ page: 1, pageSize: 10 });
 	});
 
-	it("caps the limit at the maximum allowed", async () => {
+	it("caps the pageSize at the maximum allowed", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listStudents as ReturnType<typeof vi.fn>;
@@ -122,18 +138,20 @@ describe("GET /api/students", () => {
 			BETTER_AUTH_URL: "http://localhost:3000",
 		} as Env;
 		const request = new Request(
-			"http://localhost/api/students?limit=999&offset=7",
+			"http://localhost/api/students?page=2&pageSize=999",
 			{ method: "GET" },
 		);
 		const response = await listStudentsHandler({ request, context: { env } });
 		expect(response.status).toBe(200);
 		expect(listMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 200, offset: 7 }),
+			expect.objectContaining({ limit: 100, offset: 100 }),
 		);
+		const body = (await response.json()) as { page: number; pageSize: number };
+		expect(body).toMatchObject({ page: 2, pageSize: 100 });
 	});
 
-	it("applies default offset with invalid offset param", async () => {
+	it("maps legacy limit/offset params to page and pageSize", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listStudents as ReturnType<typeof vi.fn>;
@@ -144,15 +162,17 @@ describe("GET /api/students", () => {
 			BETTER_AUTH_URL: "http://localhost:3000",
 		} as Env;
 		const request = new Request(
-			"http://localhost/api/students?limit=10&offset=-3",
+			"http://localhost/api/students?limit=10&offset=10",
 			{ method: "GET" },
 		);
 		const response = await listStudentsHandler({ request, context: { env } });
 		expect(response.status).toBe(200);
 		expect(listMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 10, offset: 0 }),
+			expect.objectContaining({ limit: 10, offset: 10 }),
 		);
+		const body = (await response.json()) as { page: number; pageSize: number };
+		expect(body).toMatchObject({ page: 2, pageSize: 10 });
 	});
 });
 

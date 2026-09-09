@@ -6,6 +6,7 @@ import type { DB } from "#/db";
 import * as schema from "#/db/schema";
 
 import {
+	countStudents,
 	createStudent,
 	findStudentById,
 	findStudentsByNameOrDocument,
@@ -103,5 +104,15 @@ describe("students repository", () => {
 		const results = await listStudents(db, { search: "Carlos" });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Carlos Andrade");
+	});
+
+	it("counts students with the same filter as list", async () => {
+		const { db } = createTestDb();
+		await createStudent(db, { name: "Carlos Andrade", document: "111" });
+		await createStudent(db, { name: "Bruna Lima", document: "222" });
+		expect(await countStudents(db)).toBe(2);
+		expect(await countStudents(db, { search: "Carlos" })).toBe(1);
+		expect(await countStudents(db, { search: "222" })).toBe(1);
+		expect(await countStudents(db, { search: "  " })).toBe(2);
 	});
 });

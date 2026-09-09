@@ -45,7 +45,8 @@ export function EnrollmentForm({
 	serverError?: string | null;
 	defaultTurmaId?: string;
 }) {
-	const { data: students } = useStudents();
+	const { data: studentsPage } = useStudents({ pageSize: 100 });
+	const students = studentsPage?.data ?? [];
 	const { data: classes } = useClasses();
 
 	const form = useForm<EnrollmentFormValues>({

@@ -4,6 +4,7 @@ import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import {
+	countStudents,
 	createStudent,
 	findStudentsByNameOrDocument,
 	listStudents,
@@ -39,20 +40,46 @@ export async function listStudentsHandler({
 	}
 
 	const url = new URL(request.url);
-	const search = url.searchParams.get("search") ?? undefined;
-	const limit = Number(url.searchParams.get("limit") ?? "50");
-	const offset = Number(url.searchParams.get("offset") ?? "0");
+	const rawSearch = url.searchParams.get("search")?.trim();
+	const search = rawSearch ? rawSearch : undefined;
+
+	const rawPage = Number(url.searchParams.get("page"));
+	const rawPageSize = Number(url.searchParams.get("pageSize"));
+	const rawLimit = Number(url.searchParams.get("limit"));
+	const rawOffset = Number(url.searchParams.get("offset"));
+
+	let page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
+	let pageSize =
+		Number.isFinite(rawPageSize) && rawPageSize >= 1
+			? Math.min(Math.floor(rawPageSize), 100)
+			: 10;
+	if (!url.searchParams.has("page") && !url.searchParams.has("pageSize")) {
+		const limit =
+			Number.isFinite(rawLimit) && rawLimit > 0
+				? Math.min(Math.floor(rawLimit), 200)
+				: 10;
+		const offset =
+			Number.isFinite(rawOffset) && rawOffset >= 0 ? Math.floor(rawOffset) : 0;
+		page = Math.floor(offset / limit) + 1;
+		pageSize = limit;
+	}
 
 	const db = createDb(requireD1(env));
-	const students = await listStudents(db, {
-		search,
-		limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 200) : 50,
-		offset: Number.isFinite(offset) && offset >= 0 ? offset : 0,
-	});
-	return new Response(JSON.stringify(students), {
-		status: 200,
-		headers: { "Content-Type": "application/json" },
-	});
+	const [students, total] = await Promise.all([
+		listStudents(db, {
+			search,
+			limit: pageSize,
+			offset: (page - 1) * pageSize,
+		}),
+		countStudents(db, { search }),
+	]);
+	return new Response(
+		JSON.stringify({ data: students, total, page, pageSize }),
+		{
+			status: 200,
+			headers: { "Content-Type": "application/json" },
+		},
+	);
 }
 
 export async function createStudentHandler({

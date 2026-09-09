@@ -56,14 +56,20 @@ export async function findStudentsByNameOrDocument(
 	});
 }
 
+function buildStudentsWhere(search?: string) {
+	const term = search?.trim();
+	if (!term) {
+		return undefined;
+	}
+	return or(
+		like(students.name, sql`'%' || ${term} || '%'`),
+		like(students.document, sql`'%' || ${term} || '%'`),
+	);
+}
+
 export async function listStudents(db: DB, options: ListStudentsOptions = {}) {
 	const { limit = 50, offset = 0, search } = options;
-	const where = search
-		? or(
-				like(students.name, sql`'%' || ${search} || '%'`),
-				like(students.document, sql`'%' || ${search} || '%'`),
-			)
-		: undefined;
+	const where = buildStudentsWhere(search);
 
 	return db.query.students.findMany({
 		where,
@@ -71,4 +77,12 @@ export async function listStudents(db: DB, options: ListStudentsOptions = {}) {
 		offset,
 		orderBy: (students, { desc }) => [desc(students.createdAt)],
 	});
+}
+
+export async function countStudents(
+	db: DB,
+	options: Pick<ListStudentsOptions, "search"> = {},
+) {
+	const where = buildStudentsWhere(options.search);
+	return db.$count(students, where);
 }
