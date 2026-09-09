@@ -6,6 +6,7 @@ import type { DB } from "#/db";
 import * as schema from "#/db/schema";
 
 import {
+	countComponents,
 	createComponent,
 	findComponentById,
 	findComponentByNormalizedName,
@@ -61,5 +62,14 @@ describe("components repository", () => {
 		await createComponent(db, { name: "Matemática" });
 		const rows = await listComponents(db);
 		expect(rows).toHaveLength(1);
+	});
+
+	it("conta componentes respeitando a busca", async () => {
+		const { db } = createTestDb();
+		await createComponent(db, { name: "Matemática" });
+		await createComponent(db, { name: "Programação" });
+		expect(await countComponents(db, {})).toBe(2);
+		expect(await countComponents(db, { search: "Progr" })).toBe(1);
+		expect(await countComponents(db, { search: "  " })).toBe(2);
 	});
 });

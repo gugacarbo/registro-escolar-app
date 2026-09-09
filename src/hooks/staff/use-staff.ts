@@ -1,26 +1,36 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import type { StaffMember } from "#/lib/staff/schema";
+import type { StaffPageResult } from "#/lib/staff/types";
 
 const STAFF_QUERY_KEY = ["staff"] as const;
 
-export function useStaff(search?: string) {
-	return useQuery<StaffMember[]>({
-		queryKey: [...STAFF_QUERY_KEY, search ?? ""],
+export type UseStaffParams = {
+	search?: string;
+	page?: number;
+	pageSize?: number;
+};
+
+export function useStaff({
+	search,
+	page = 1,
+	pageSize = 10,
+}: UseStaffParams = {}) {
+	return useQuery<StaffPageResult>({
+		queryKey: [...STAFF_QUERY_KEY, { search: search ?? "", page, pageSize }],
 		queryFn: async () => {
 			const params = new URLSearchParams();
 			if (search) {
 				params.set("search", search);
 			}
-			const query = params.toString();
-			const response = await fetch(
-				query ? `/api/staff?${query}` : "/api/staff",
-			);
+			params.set("page", String(page));
+			params.set("pageSize", String(pageSize));
+			const response = await fetch(`/api/staff?${params.toString()}`);
 			if (!response.ok) {
 				throw new Error("Falha ao carregar servidores");
 			}
-			return response.json() as Promise<StaffMember[]>;
+			return response.json() as Promise<StaffPageResult>;
 		},
+		placeholderData: keepPreviousData,
 		staleTime: 30_000,
 	});
 }

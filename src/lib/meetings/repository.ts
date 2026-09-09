@@ -53,23 +53,36 @@ export async function findMeetingById(db: DB, id: string) {
 	});
 }
 
+function buildMeetingsWhere(
+	options: Pick<ListMeetingsOptions, "search" | "status"> = {},
+) {
+	const conditions = [];
+	const term = options.search?.trim();
+	if (term) {
+		conditions.push(like(meetings.title, sql`'%' || ${term} || '%'`));
+	}
+	if (options.status) {
+		conditions.push(eq(meetings.status, options.status));
+	}
+	return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
 export async function listMeetings(db: DB, options: ListMeetingsOptions = {}) {
 	const { limit = 50, offset = 0, search, status } = options;
-	const conditions = [];
-	if (search) {
-		conditions.push(like(meetings.title, sql`'%' || ${search} || '%'`));
-	}
-	if (status) {
-		conditions.push(eq(meetings.status, status));
-	}
-	const where = conditions.length > 0 ? and(...conditions) : undefined;
 
 	return db.query.meetings.findMany({
-		where,
+		where: buildMeetingsWhere({ search, status }),
 		limit,
 		offset,
 		orderBy: (meetings, { desc }) => [desc(meetings.createdAt)],
 	});
+}
+
+export async function countMeetings(
+	db: DB,
+	options: Pick<ListMeetingsOptions, "search" | "status"> = {},
+) {
+	return db.$count(meetings, buildMeetingsWhere(options));
 }
 
 export type CreateMeetingWithRelationsInput = {

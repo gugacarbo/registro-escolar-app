@@ -5,7 +5,12 @@ import { describe, expect, it } from "vitest";
 import type { DB } from "#/db";
 import * as schema from "#/db/schema";
 
-import { createClass, findClassById, listClasses } from "./repository";
+import {
+	countClasses,
+	createClass,
+	findClassById,
+	listClasses,
+} from "./repository";
 
 function createTestDb() {
 	const sqlite = new Database(":memory:");
@@ -61,5 +66,14 @@ describe("classes repository", () => {
 		const results = await listClasses(db, { search: "7º" });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("7º A");
+	});
+
+	it("conta turmas respeitando a busca", async () => {
+		const { db } = createTestDb();
+		await createClass(db, { name: "7º A", academicPeriod: "2026" });
+		await createClass(db, { name: "8º B", academicPeriod: "2026" });
+		expect(await countClasses(db, {})).toBe(2);
+		expect(await countClasses(db, { search: "7º" })).toBe(1);
+		expect(await countClasses(db, { search: "  " })).toBe(2);
 	});
 });

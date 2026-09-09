@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
 import {
+	countComponents,
 	createComponent,
 	findComponentByNormalizedName,
 	listComponents,
@@ -14,6 +15,7 @@ vi.mock("#/lib/auth/session", () => ({
 }));
 
 vi.mock("#/lib/components/repository", () => ({
+	countComponents: vi.fn().mockResolvedValue(0),
 	createComponent: vi.fn(),
 	findComponentByNormalizedName: vi.fn().mockResolvedValue(undefined),
 	listComponents: vi.fn().mockResolvedValue([]),
@@ -61,13 +63,14 @@ describe("GET /api/components", () => {
 		expect(response.status).toBe(401);
 	});
 
-	it("retorna 200 com a lista de componentes", async () => {
+	it("retorna 200 com o envelope paginado", async () => {
 		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
 			createMockSession(),
 		);
 		(listComponents as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
 			{ id: "c1", name: "Matemática" },
 		]);
+		(countComponents as ReturnType<typeof vi.fn>).mockResolvedValueOnce(1);
 		const response = await listComponentsHandler({
 			request: new Request("http://localhost/api/components", {
 				method: "GET",
@@ -75,12 +78,22 @@ describe("GET /api/components", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(200);
-		const body = (await response.json()) as Array<{ name: string }>;
-		expect(body).toHaveLength(1);
-		expect(body[0].name).toBe("Matemática");
+		const body = (await response.json()) as {
+			data: Array<{ name: string }>;
+			total: number;
+			page: number;
+			pageSize: number;
+		};
+		expect(body.data).toHaveLength(1);
+		expect(body.data[0].name).toBe("Matemática");
+		expect(body).toMatchObject({ total: 1, page: 1, pageSize: 10 });
+		expect(countComponents).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ search: undefined }),
+		);
 	});
 
-	it("propaga search/limit/offset com defaults e teto", async () => {
+	it("propaga search/page/pageSize com defaults e teto", async () => {
 		(getSession as ReturnType<typeof vi.fn>).mockResolvedValue(
 			createMockSession(),
 		);
@@ -89,7 +102,7 @@ describe("GET /api/components", () => {
 
 		const capped = await listComponentsHandler({
 			request: new Request(
-				"http://localhost/api/components?limit=999&offset=2",
+				"http://localhost/api/components?page=2&pageSize=999",
 				{
 					method: "GET",
 				},
@@ -99,8 +112,13 @@ describe("GET /api/components", () => {
 		expect(capped.status).toBe(200);
 		expect(listMock).toHaveBeenLastCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 200, offset: 2 }),
+			expect.objectContaining({ limit: 100, offset: 100 }),
 		);
+		const cappedBody = (await capped.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(cappedBody).toMatchObject({ page: 2, pageSize: 100 });
 
 		const defaulted = await listComponentsHandler({
 			request: new Request(
@@ -114,8 +132,33 @@ describe("GET /api/components", () => {
 		expect(defaulted.status).toBe(200);
 		expect(listMock).toHaveBeenLastCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 50, offset: 0 }),
+			expect.objectContaining({ limit: 10, offset: 0 }),
 		);
+	});
+
+	it("mapeia limit/offset legados para page e pageSize", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			createMockSession(),
+		);
+		const listMock = listComponents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const response = await listComponentsHandler({
+			request: new Request(
+				"http://localhost/api/components?limit=10&offset=10",
+				{ method: "GET" },
+			),
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 10, offset: 10 }),
+		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 10 });
 	});
 	it("resolve env via fallback quando o contexto não traz env", async () => {
 		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);

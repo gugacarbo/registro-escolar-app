@@ -15,6 +15,8 @@ bun run test:watch      # Vitest em modo watch
 bun run e2e             # testes end-to-end com Playwright (headless, CI)
 bun run e2e:ui          # Playwright com UI mode (debug local)
 bun run test:visual     # snapshots visuais do Playwright
+bun run storybook       # catálogo local de componentes em http://localhost:6006
+bun run build-storybook # valida o build estático do catálogo
 ```
 
 ## Tipos de teste

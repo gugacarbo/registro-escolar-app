@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
 import {
+	countStaff,
 	createStaff,
 	findStaffById,
 	findStaffByName,
@@ -16,6 +17,7 @@ vi.mock("#/lib/auth/session", () => ({
 }));
 
 vi.mock("#/lib/staff/repository", () => ({
+	countStaff: vi.fn().mockResolvedValue(0),
 	createStaff: vi.fn(),
 	findStaffById: vi.fn(),
 	findStaffByName: vi.fn().mockResolvedValue([]),
@@ -78,11 +80,13 @@ describe("GET /api/staff", () => {
 		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
-	it("retorna 200 com a lista de servidores", async () => {
+	it("retorna 200 com o envelope paginado", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listStaff as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValueOnce([{ id: "staff-1", name: "João Silva" }]);
+		const countMock = countStaff as ReturnType<typeof vi.fn>;
+		countMock.mockResolvedValueOnce(1);
 		const request = new Request("http://localhost/api/staff?search=João", {
 			method: "GET",
 		});
@@ -91,9 +95,19 @@ describe("GET /api/staff", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(200);
-		const body = (await response.json()) as Array<{ name: string }>;
-		expect(body).toHaveLength(1);
+		const body = (await response.json()) as {
+			data: Array<{ name: string }>;
+			total: number;
+			page: number;
+			pageSize: number;
+		};
+		expect(body.data).toHaveLength(1);
+		expect(body).toMatchObject({ total: 1, page: 1, pageSize: 10 });
 		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ search: "João", limit: 10, offset: 0 }),
+		);
+		expect(countMock).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.objectContaining({ search: "João" }),
 		);
@@ -114,17 +128,17 @@ describe("GET /api/staff", () => {
 		expect(response.status).toBe(200);
 		expect(listMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 50, offset: 0, search: undefined }),
+			expect.objectContaining({ limit: 10, offset: 0, search: undefined }),
 		);
 	});
 
-	it("restringe o limite ao máximo permitido", async () => {
+	it("restringe o pageSize ao máximo permitido", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listStaff as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValueOnce([]);
 		const request = new Request(
-			"http://localhost/api/staff?limit=999&offset=5",
+			"http://localhost/api/staff?page=2&pageSize=999",
 			{ method: "GET" },
 		);
 		const response = await listStaffHandler({
@@ -134,8 +148,38 @@ describe("GET /api/staff", () => {
 		expect(response.status).toBe(200);
 		expect(listMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 200, offset: 5 }),
+			expect.objectContaining({ limit: 100, offset: 100 }),
 		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 100 });
+	});
+
+	it("mapeia limit/offset legados para page e pageSize", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStaff as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const request = new Request(
+			"http://localhost/api/staff?limit=10&offset=10",
+			{ method: "GET" },
+		);
+		const response = await listStaffHandler({
+			request,
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 10, offset: 10 }),
+		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 10 });
 	});
 });
 

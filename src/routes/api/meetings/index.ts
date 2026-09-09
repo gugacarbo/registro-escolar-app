@@ -5,6 +5,7 @@ import { getSession } from "#/lib/auth/session";
 import { findClassById } from "#/lib/classes/repository";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import {
+	countMeetings,
 	createMeetingWithRelations,
 	listMeetings,
 } from "#/lib/meetings/repository";
@@ -12,6 +13,7 @@ import {
 	createMeetingApiSchema,
 	meetingStatusSchema,
 } from "#/lib/meetings/schema";
+import { parsePageParams } from "#/lib/pagination";
 import { findRoleById } from "#/lib/roles/repository";
 import { findActiveStaffById } from "#/lib/staff/repository";
 import { d1Middleware } from "#/middleware/d1";
@@ -47,24 +49,22 @@ export async function listMeetingsHandler({
 	}
 
 	const url = new URL(request.url);
-	const search = url.searchParams.get("search") ?? undefined;
+	const { page, pageSize, limit, offset, search } = parsePageParams(
+		url.searchParams,
+	);
 	const statusParam = url.searchParams.get("status");
 	const status = statusParam
 		? meetingStatusSchema.safeParse(statusParam).success
 			? (statusParam as "draft" | "in_progress" | "finished" | "reopened")
 			: undefined
 		: undefined;
-	const limit = Number(url.searchParams.get("limit") ?? "50");
-	const offset = Number(url.searchParams.get("offset") ?? "0");
 
 	const db = createDb(requireD1(env));
-	const meetings = await listMeetings(db, {
-		search,
-		status,
-		limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 200) : 50,
-		offset: Number.isFinite(offset) && offset >= 0 ? offset : 0,
-	});
-	return json(meetings, 200);
+	const [meetings, total] = await Promise.all([
+		listMeetings(db, { search, status, limit, offset }),
+		countMeetings(db, { search, status }),
+	]);
+	return json({ data: meetings, total, page, pageSize }, 200);
 }
 
 export async function createMeetingHandler({

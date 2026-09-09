@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { DataTable } from "#/components/data-table";
 import { CreateMeetingDialog } from "#/components/meetings/create-meeting-dialog";
 import { MeetingStatusBadge } from "#/components/meetings/meeting-status-badge";
 import { TransitionButtons } from "#/components/meetings/transition-buttons";
@@ -14,7 +15,8 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { useMeetings } from "#/hooks/meetings/use-meetings";
-import type { MeetingStatus } from "#/lib/meetings/schema";
+import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import type { Meeting, MeetingStatus } from "#/lib/meetings/schema";
 
 export const Route = createFileRoute("/_app/meetings/")({
 	component: MeetingsPage,
@@ -27,14 +29,57 @@ const STATUS_OPTIONS: Array<{ value: MeetingStatus; label: string }> = [
 	{ value: "reopened", label: "Reaberta" },
 ];
 
-function MeetingsPage() {
+const columns = [
+	{
+		header: "Status",
+		cell: (meeting: Meeting) => <MeetingStatusBadge status={meeting.status} />,
+	},
+	{
+		header: "Título",
+		cell: (meeting: Meeting) => (
+			<Link
+				to="/meetings/$meetingId"
+				params={{ meetingId: meeting.id }}
+				className="underline"
+			>
+				{meeting.title}
+			</Link>
+		),
+	},
+	{
+		header: "Ações",
+		cell: (meeting: Meeting) => (
+			<TransitionButtons meetingId={meeting.id} status={meeting.status} />
+		),
+	},
+];
+
+export function MeetingsPage() {
 	const [search, setSearch] = useState("");
 	const [status, setStatus] = useState<MeetingStatus | "">("");
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const navigate = useNavigate();
-	const { data: meetings, isLoading } = useMeetings({
-		search: search || undefined,
+	const debouncedSearch = useDebouncedValue(search, 300);
+	const [activeSearch, setActiveSearch] = useState(debouncedSearch);
+
+	if (activeSearch !== debouncedSearch) {
+		setActiveSearch(debouncedSearch);
+		if (page !== 1) {
+			setPage(1);
+		}
+	}
+
+	const {
+		data: meetingsPage,
+		isLoading,
+		isError,
+	} = useMeetings({
+		search: debouncedSearch || undefined,
 		status: status || undefined,
+		page,
+		pageSize,
 	});
 
 	return (
@@ -49,10 +94,14 @@ function MeetingsPage() {
 					placeholder="Buscar por nome"
 					value={search}
 					onChange={(event) => setSearch(event.target.value)}
+					aria-label="Buscar por nome"
 				/>
 				<Select
 					value={status}
-					onValueChange={(value) => setStatus(value as MeetingStatus | "")}
+					onValueChange={(value) => {
+						setStatus(value as MeetingStatus | "");
+						setPage(1);
+					}}
 				>
 					<SelectTrigger aria-label="Status" className="w-44">
 						<SelectValue placeholder="Todos os status" />
@@ -66,32 +115,24 @@ function MeetingsPage() {
 					</SelectContent>
 				</Select>
 			</div>
-			{isLoading && <p>Carregando...</p>}
-			{meetings && meetings.length === 0 && <p>Nenhuma reunião encontrada.</p>}
-			{meetings && meetings.length > 0 && (
-				<ul className="space-y-2">
-					{meetings.map((meeting) => (
-						<li key={meeting.id} className="rounded border p-2">
-							<div className="flex flex-wrap items-center justify-between gap-2">
-								<div className="flex items-center gap-2">
-									<MeetingStatusBadge status={meeting.status} />
-									<Link
-										to="/meetings/$meetingId"
-										params={{ meetingId: meeting.id }}
-										className="underline"
-									>
-										{meeting.title}
-									</Link>
-								</div>
-								<TransitionButtons
-									meetingId={meeting.id}
-									status={meeting.status}
-								/>
-							</div>
-						</li>
-					))}
-				</ul>
-			)}
+			<DataTable
+				columns={columns}
+				rows={meetingsPage?.data ?? []}
+				getRowKey={(meeting) => meeting.id}
+				total={meetingsPage?.total ?? 0}
+				page={page}
+				pageSize={pageSize}
+				onPageChange={setPage}
+				onPageSizeChange={(size) => {
+					setPageSize(size);
+					setPage(1);
+				}}
+				isLoading={isLoading}
+				isError={isError}
+				ariaLabel="Tabela de reuniões"
+				emptyTitle="Nenhuma reunião encontrada"
+				emptyDescription="Ajuste a busca ou crie uma nova reunião."
+			/>
 			<CreateMeetingDialog
 				open={dialogOpen}
 				onOpenChange={setDialogOpen}

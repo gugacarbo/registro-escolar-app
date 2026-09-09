@@ -1,17 +1,47 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { DataTable } from "#/components/data-table";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { useStaff } from "#/hooks/staff/use-staff";
+import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import type { StaffMember } from "#/lib/staff/schema";
 
 export const Route = createFileRoute("/_app/staff/")({
 	component: StaffPage,
 });
 
-function StaffPage() {
+const columns = [
+	{
+		header: "Nome",
+		cell: (member: StaffMember) => member.name,
+	},
+	{
+		header: "Email",
+		cell: (member: StaffMember) => member.email ?? "—",
+	},
+];
+
+export function StaffPage() {
 	const [search, setSearch] = useState("");
-	const { data: staff, isLoading } = useStaff(search);
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
+	const debouncedSearch = useDebouncedValue(search, 300);
+	const [activeSearch, setActiveSearch] = useState(debouncedSearch);
+
+	if (activeSearch !== debouncedSearch) {
+		setActiveSearch(debouncedSearch);
+		if (page !== 1) {
+			setPage(1);
+		}
+	}
+
+	const {
+		data: staffPage,
+		isLoading,
+		isError,
+	} = useStaff({ search: debouncedSearch || undefined, page, pageSize });
 
 	return (
 		<div className="space-y-4">
@@ -25,17 +55,26 @@ function StaffPage() {
 				placeholder="Buscar por nome ou email"
 				value={search}
 				onChange={(event) => setSearch(event.target.value)}
+				aria-label="Buscar por nome ou email"
 			/>
-			{isLoading && <p>Carregando...</p>}
-			{staff && (
-				<ul className="space-y-2">
-					{staff.map((member) => (
-						<li key={member.id} className="rounded border p-2">
-							{member.name}
-						</li>
-					))}
-				</ul>
-			)}
+			<DataTable
+				columns={columns}
+				rows={staffPage?.data ?? []}
+				getRowKey={(member) => member.id}
+				total={staffPage?.total ?? 0}
+				page={page}
+				pageSize={pageSize}
+				onPageChange={setPage}
+				onPageSizeChange={(size) => {
+					setPageSize(size);
+					setPage(1);
+				}}
+				isLoading={isLoading}
+				isError={isError}
+				ariaLabel="Tabela de servidores"
+				emptyTitle="Nenhum servidor encontrado"
+				emptyDescription="Ajuste a busca ou cadastre um novo servidor."
+			/>
 		</div>
 	);
 }

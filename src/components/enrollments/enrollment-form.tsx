@@ -47,7 +47,8 @@ export function EnrollmentForm({
 }) {
 	const { data: studentsPage } = useStudents({ pageSize: 100 });
 	const students = studentsPage?.data ?? [];
-	const { data: classes } = useClasses();
+	const { data: classesPage } = useClasses({ pageSize: 100 });
+	const classes = classesPage?.data ?? [];
 
 	const form = useForm<EnrollmentFormValues>({
 		resolver: zodResolver(enrollmentFormSchema),
@@ -79,7 +80,7 @@ export function EnrollmentForm({
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{(students ?? []).map((student) => (
+									{students.map((student) => (
 										<SelectItem key={student.id} value={student.id}>
 											{student.name}
 										</SelectItem>
@@ -103,7 +104,7 @@ export function EnrollmentForm({
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{(classes ?? []).map((classRow) => (
+									{classes.map((classRow) => (
 										<SelectItem key={classRow.id} value={classRow.id}>
 											{classRow.name} — {classRow.academicPeriod}
 										</SelectItem>

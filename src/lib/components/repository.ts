@@ -6,6 +6,7 @@ import { components } from "#/db/schema";
 import { normalizeName } from "#/lib/students/shared";
 
 import type { CreateComponentInput } from "./schema";
+import type { ListComponentsOptions } from "./types";
 
 export async function createComponent(db: DB, input: CreateComponentInput) {
 	return db
@@ -34,19 +35,31 @@ export async function findComponentByNormalizedName(
 	return candidates.find((c) => normalizeName(c.name) === normalized);
 }
 
+function buildComponentsWhere(search?: string) {
+	const term = search?.trim();
+	if (!term) {
+		return undefined;
+	}
+	return like(components.name, sql`'%' || ${term} || '%'`);
+}
+
 export async function listComponents(
 	db: DB,
-	options: { limit?: number; offset?: number; search?: string } = {},
+	options: ListComponentsOptions = {},
 ) {
 	const { limit = 50, offset = 0, search } = options;
-	const where = search
-		? like(components.name, sql`'%' || ${search} || '%'`)
-		: undefined;
 
 	return db.query.components.findMany({
-		where,
+		where: buildComponentsWhere(search),
 		limit,
 		offset,
 		orderBy: (components, { desc }) => [desc(components.createdAt)],
 	});
+}
+
+export async function countComponents(
+	db: DB,
+	options: Pick<ListComponentsOptions, "search"> = {},
+) {
+	return db.$count(components, buildComponentsWhere(options.search));
 }

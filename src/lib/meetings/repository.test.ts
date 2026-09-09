@@ -16,6 +16,7 @@ import {
 } from "./errors";
 import {
 	addMeetingClass,
+	countMeetings,
 	createMeeting,
 	createMeetingWithRelations,
 	createParticipant,
@@ -148,6 +149,19 @@ describe("meetings repository", () => {
 		expect(
 			await listMeetings(db, { search: "Reunião", status: "draft" }),
 		).toHaveLength(1);
+	});
+
+	it("conta reuniões combinando busca e status", async () => {
+		const { db } = createTestDb();
+		await createMeeting(db, { title: "Reunião 1", status: "draft" });
+		await createMeeting(db, { title: "Reunião 2", status: "finished" });
+		expect(await countMeetings(db, {})).toBe(2);
+		expect(await countMeetings(db, { status: "draft" })).toBe(1);
+		expect(await countMeetings(db, { search: "Reunião 2" })).toBe(1);
+		expect(
+			await countMeetings(db, { search: "Reunião", status: "draft" }),
+		).toBe(1);
+		expect(await countMeetings(db, { search: "  " })).toBe(2);
 	});
 
 	it("adiciona participante e impede duplicidade na mesma reunião", async () => {

@@ -21,8 +21,10 @@ export const Route = createFileRoute("/_app/meetings/$meetingId/participants")({
 function ParticipantsPage() {
 	const { meetingId } = Route.useParams();
 	const { data: participants, isLoading } = useParticipants(meetingId);
-	const { data: staff } = useStaff();
-	const { data: roles } = useRoles();
+	const { data: staffPage } = useStaff({ pageSize: 100 });
+	const staff = staffPage?.data ?? [];
+	const { data: rolesPage } = useRoles({ pageSize: 100 });
+	const roles = rolesPage?.data ?? [];
 	const addParticipant = useAddParticipant(meetingId);
 	const [staffId, setStaffId] = useState("");
 	const [roleId, setRoleId] = useState("");
@@ -54,7 +56,7 @@ function ParticipantsPage() {
 						<SelectValue placeholder="Servidor" />
 					</SelectTrigger>
 					<SelectContent>
-						{(staff ?? []).map((member) => (
+						{staff.map((member) => (
 							<SelectItem key={member.id} value={member.id}>
 								{member.name}
 							</SelectItem>
@@ -66,7 +68,7 @@ function ParticipantsPage() {
 						<SelectValue placeholder="Papel" />
 					</SelectTrigger>
 					<SelectContent>
-						{(roles ?? []).map((role) => (
+						{roles.map((role) => (
 							<SelectItem key={role.id} value={role.id}>
 								{role.name}
 							</SelectItem>

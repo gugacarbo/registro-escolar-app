@@ -50,25 +50,37 @@ export async function findStaffByName(db: DB, name: string) {
 	);
 }
 
+function buildStaffWhere(search?: string) {
+	const active = isNull(staff.deletedAt);
+	const term = search?.trim();
+	if (!term) {
+		return active;
+	}
+	return and(
+		active,
+		or(
+			like(staff.name, sql`'%' || ${term} || '%'`),
+			like(staff.email, sql`'%' || ${term} || '%'`),
+		),
+	);
+}
+
 export async function listStaff(db: DB, options: ListStaffOptions = {}) {
 	const { limit = 50, offset = 0, search } = options;
-	const active = isNull(staff.deletedAt);
-	const where = search
-		? and(
-				active,
-				or(
-					like(staff.name, sql`'%' || ${search} || '%'`),
-					like(staff.email, sql`'%' || ${search} || '%'`),
-				),
-			)
-		: active;
 
 	return db.query.staff.findMany({
-		where,
+		where: buildStaffWhere(search),
 		limit,
 		offset,
 		orderBy: (staff, { desc }) => [desc(staff.createdAt)],
 	});
+}
+
+export async function countStaff(
+	db: DB,
+	options: Pick<ListStaffOptions, "search"> = {},
+) {
+	return db.$count(staff, buildStaffWhere(options.search));
 }
 
 export async function softDeleteStaff(db: DB, id: string) {

@@ -32,11 +32,17 @@ export async function findClassById(db: DB, id: string) {
 	});
 }
 
+function buildClassesWhere(search?: string) {
+	const term = search?.trim();
+	if (!term) {
+		return undefined;
+	}
+	return like(classes.name, sql`'%' || ${term} || '%'`);
+}
+
 export async function listClasses(db: DB, options: ListClassesOptions = {}) {
 	const { limit = 50, offset = 0, search } = options;
-	const where = search
-		? like(classes.name, sql`'%' || ${search} || '%'`)
-		: undefined;
+	const where = buildClassesWhere(search);
 
 	return db.query.classes.findMany({
 		where,
@@ -44,4 +50,11 @@ export async function listClasses(db: DB, options: ListClassesOptions = {}) {
 		offset,
 		orderBy: (classes, { desc }) => [desc(classes.createdAt)],
 	});
+}
+
+export async function countClasses(
+	db: DB,
+	options: Pick<ListClassesOptions, "search"> = {},
+) {
+	return db.$count(classes, buildClassesWhere(options.search));
 }

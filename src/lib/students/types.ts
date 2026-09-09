@@ -1,3 +1,5 @@
+import type { PaginatedResult } from "#/lib/pagination";
+
 import type { Student } from "./schema";
 
 export type ListStudentsOptions = {
@@ -6,9 +8,4 @@ export type ListStudentsOptions = {
 	search?: string;
 };
 
-export type StudentsPageResult = {
-	data: Student[];
-	total: number;
-	page: number;
-	pageSize: number;
-};
+export type StudentsPageResult = PaginatedResult<Student>;

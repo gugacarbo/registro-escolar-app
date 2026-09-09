@@ -3,7 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
+import { parsePageParams } from "#/lib/pagination";
 import {
+	countStaff,
 	createStaff,
 	findStaffByName,
 	listStaff,
@@ -39,17 +41,16 @@ export async function listStaffHandler({
 	}
 
 	const url = new URL(request.url);
-	const search = url.searchParams.get("search") ?? undefined;
-	const limit = Number(url.searchParams.get("limit") ?? "50");
-	const offset = Number(url.searchParams.get("offset") ?? "0");
+	const { page, pageSize, limit, offset, search } = parsePageParams(
+		url.searchParams,
+	);
 
 	const db = createDb(requireD1(env));
-	const staff = await listStaff(db, {
-		search,
-		limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 200) : 50,
-		offset: Number.isFinite(offset) && offset >= 0 ? offset : 0,
-	});
-	return new Response(JSON.stringify(staff), {
+	const [staff, total] = await Promise.all([
+		listStaff(db, { search, limit, offset }),
+		countStaff(db, { search }),
+	]);
+	return new Response(JSON.stringify({ data: staff, total, page, pageSize }), {
 		status: 200,
 		headers: { "Content-Type": "application/json" },
 	});

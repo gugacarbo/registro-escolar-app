@@ -2,10 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
-import { createClass, listClasses } from "#/lib/classes/repository";
+import {
+	countClasses,
+	createClass,
+	listClasses,
+} from "#/lib/classes/repository";
 import { createClassSchema } from "#/lib/classes/schema";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import { mapClassRequestToRow } from "#/lib/enrollments/mapping";
+import { parsePageParams } from "#/lib/pagination";
 import { d1Middleware } from "#/middleware/d1";
 
 export const Route = createFileRoute("/api/classes/")({
@@ -39,17 +44,16 @@ export async function listClassesHandler({
 	}
 
 	const url = new URL(request.url);
-	const search = url.searchParams.get("search") ?? undefined;
-	const limit = Number(url.searchParams.get("limit") ?? "50");
-	const offset = Number(url.searchParams.get("offset") ?? "0");
+	const { page, pageSize, limit, offset, search } = parsePageParams(
+		url.searchParams,
+	);
 
 	const db = createDb(requireD1(env));
-	const classes = await listClasses(db, {
-		search,
-		limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 200) : 50,
-		offset: Number.isFinite(offset) && offset >= 0 ? offset : 0,
-	});
-	return json(classes, 200);
+	const [classes, total] = await Promise.all([
+		listClasses(db, { search, limit, offset }),
+		countClasses(db, { search }),
+	]);
+	return json({ data: classes, total, page, pageSize }, 200);
 }
 
 export async function createClassHandler({

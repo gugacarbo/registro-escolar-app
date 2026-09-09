@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
+import { parsePageParams } from "#/lib/pagination";
 import {
 	countStudents,
 	createStudent,
@@ -40,37 +41,13 @@ export async function listStudentsHandler({
 	}
 
 	const url = new URL(request.url);
-	const rawSearch = url.searchParams.get("search")?.trim();
-	const search = rawSearch ? rawSearch : undefined;
-
-	const rawPage = Number(url.searchParams.get("page"));
-	const rawPageSize = Number(url.searchParams.get("pageSize"));
-	const rawLimit = Number(url.searchParams.get("limit"));
-	const rawOffset = Number(url.searchParams.get("offset"));
-
-	let page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
-	let pageSize =
-		Number.isFinite(rawPageSize) && rawPageSize >= 1
-			? Math.min(Math.floor(rawPageSize), 100)
-			: 10;
-	if (!url.searchParams.has("page") && !url.searchParams.has("pageSize")) {
-		const limit =
-			Number.isFinite(rawLimit) && rawLimit > 0
-				? Math.min(Math.floor(rawLimit), 200)
-				: 10;
-		const offset =
-			Number.isFinite(rawOffset) && rawOffset >= 0 ? Math.floor(rawOffset) : 0;
-		page = Math.floor(offset / limit) + 1;
-		pageSize = limit;
-	}
+	const { page, pageSize, limit, offset, search } = parsePageParams(
+		url.searchParams,
+	);
 
 	const db = createDb(requireD1(env));
 	const [students, total] = await Promise.all([
-		listStudents(db, {
-			search,
-			limit: pageSize,
-			offset: (page - 1) * pageSize,
-		}),
+		listStudents(db, { search, limit, offset }),
 		countStudents(db, { search }),
 	]);
 	return new Response(

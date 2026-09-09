@@ -41,7 +41,10 @@ type ApproveFormValues = {
 
 function MinutesPage() {
 	const [meetingId, setMeetingId] = useState<string>("");
-	const { data: meetings, isLoading: isLoadingMeetings } = useMeetings({});
+	const { data: meetingsPage, isLoading: isLoadingMeetings } = useMeetings({
+		pageSize: 100,
+	});
+	const meetings = meetingsPage?.data;
 	const { data: templates } = useMinuteTemplates();
 	const preview = useMinutePreview(meetingId || undefined);
 	const versions = useMinuteVersions(meetingId || undefined);

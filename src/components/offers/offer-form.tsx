@@ -42,9 +42,12 @@ export function OfferForm({
 	defaultValues?: Partial<OfferFormValues>;
 	serverError?: string | null;
 }) {
-	const { data: classes } = useClasses();
-	const { data: components } = useComponents();
-	const { data: staff } = useStaff();
+	const { data: classesPage } = useClasses({ pageSize: 100 });
+	const classes = classesPage?.data ?? [];
+	const { data: componentsPage } = useComponents({ pageSize: 100 });
+	const components = componentsPage?.data ?? [];
+	const { data: staffPage } = useStaff({ pageSize: 100 });
+	const staff = staffPage?.data ?? [];
 
 	const form = useForm<OfferFormValues>({
 		resolver: zodResolver(offerFormSchema),
@@ -75,7 +78,7 @@ export function OfferForm({
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{(classes ?? []).map((classRow) => (
+									{classes.map((classRow) => (
 										<SelectItem key={classRow.id} value={classRow.id}>
 											{classRow.name} — {classRow.academicPeriod}
 										</SelectItem>
@@ -99,7 +102,7 @@ export function OfferForm({
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{(components ?? []).map((component) => (
+									{components.map((component) => (
 										<SelectItem key={component.id} value={component.id}>
 											{component.name}
 										</SelectItem>
@@ -116,13 +119,13 @@ export function OfferForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Professores</FormLabel>
-							{(staff ?? []).length === 0 && (
+							{staff.length === 0 && (
 								<p className="text-sm text-muted-foreground">
 									Nenhum servidor cadastrado — a oferta pode ficar sem
 									professor.
 								</p>
 							)}
-							{(staff ?? []).map((member) => {
+							{staff.map((member) => {
 								const checked = field.value.includes(member.id);
 								return (
 									<label

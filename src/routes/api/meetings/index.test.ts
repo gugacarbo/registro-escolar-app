@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { getSession } from "#/lib/auth/session";
 import { findClassById } from "#/lib/classes/repository";
 import {
+	countMeetings,
 	createMeetingWithRelations,
 	listMeetings,
 } from "#/lib/meetings/repository";
@@ -16,6 +17,7 @@ vi.mock("#/lib/auth/session", () => ({
 }));
 
 vi.mock("#/lib/meetings/repository", () => ({
+	countMeetings: vi.fn().mockResolvedValue(0),
 	listMeetings: vi.fn().mockResolvedValue([]),
 	createMeetingWithRelations: vi.fn(),
 }));
@@ -102,22 +104,29 @@ describe("GET /api/meetings/", () => {
 		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
-	it("retorna 200 com a lista de reuniões", async () => {
+	it("retorna 200 com o envelope paginado", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(listMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
 			{ id: "meeting-1", title: "Reunião 1", status: "draft" },
 		]);
+		(countMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce(1);
 		const response = await listMeetingsHandler({
 			request: new Request("http://localhost/api/meetings/", { method: "GET" }),
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(200);
-		const body = (await response.json()) as Array<{ id: string }>;
-		expect(body).toHaveLength(1);
+		const body = (await response.json()) as {
+			data: Array<{ id: string }>;
+			total: number;
+			page: number;
+			pageSize: number;
+		};
+		expect(body.data).toHaveLength(1);
+		expect(body).toMatchObject({ total: 1, page: 1, pageSize: 10 });
 	});
 
-	it("repasse o filtro de status para o repository", async () => {
+	it("repasse o filtro de status para o repository e o count", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(listMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce([]);
@@ -132,6 +141,10 @@ describe("GET /api/meetings/", () => {
 			expect.anything(),
 			expect.objectContaining({ status: "draft" }),
 		);
+		expect(countMeetings).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ status: "draft" }),
+		);
 	});
 
 	it("normaliza paginação inválida", async () => {
@@ -141,7 +154,7 @@ describe("GET /api/meetings/", () => {
 		(listMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce([]);
 		const response = await listMeetingsHandler({
 			request: new Request(
-				"http://localhost/api/meetings/?limit=999&offset=-2",
+				"http://localhost/api/meetings/?page=2&pageSize=999",
 				{ method: "GET" },
 			),
 			context: { env: createEnv() },
@@ -149,8 +162,37 @@ describe("GET /api/meetings/", () => {
 		expect(response.status).toBe(200);
 		expect(listMeetings).toHaveBeenLastCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 200, offset: 0, status: undefined }),
+			expect.objectContaining({ limit: 100, offset: 100, status: undefined }),
 		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 100 });
+	});
+
+	it("mapeia limit/offset legados para page e pageSize", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			createMockSession(),
+		);
+		(listMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce([]);
+		const response = await listMeetingsHandler({
+			request: new Request(
+				"http://localhost/api/meetings/?limit=10&offset=10",
+				{ method: "GET" },
+			),
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMeetings).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 10, offset: 10 }),
+		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 10 });
 	});
 
 	it("ignore status inválido sem quebrar a listagem", async () => {

@@ -54,9 +54,12 @@ export function MeetingForm({
 	defaultValues?: Partial<MeetingFormValues>;
 	serverError?: string | null;
 }) {
-	const { data: classes } = useClasses();
-	const { data: staff } = useStaff();
-	const { data: roles } = useRoles();
+	const { data: classesPage } = useClasses({ pageSize: 100 });
+	const classes = classesPage?.data ?? [];
+	const { data: staffPage } = useStaff({ pageSize: 100 });
+	const staff = staffPage?.data ?? [];
+	const { data: rolesPage } = useRoles({ pageSize: 100 });
+	const roles = rolesPage?.data ?? [];
 
 	const form = useForm<MeetingFormValues>({
 		resolver: zodResolver(meetingFormSchema),
@@ -114,7 +117,7 @@ export function MeetingForm({
 						<FormItem>
 							<FormLabel>Turmas *</FormLabel>
 							<div className="grid gap-2">
-								{(classes ?? []).map((classRow) => (
+								{classes.map((classRow) => (
 									<label
 										key={classRow.id}
 										className="flex items-center gap-2 text-sm"
@@ -154,7 +157,7 @@ export function MeetingForm({
 												<SelectValue placeholder="Servidor" />
 											</SelectTrigger>
 											<SelectContent>
-												{(staff ?? []).map((member) => (
+												{staff.map((member) => (
 													<SelectItem key={member.id} value={member.id}>
 														{member.name}
 													</SelectItem>
@@ -172,7 +175,7 @@ export function MeetingForm({
 												<SelectValue placeholder="Papel" />
 											</SelectTrigger>
 											<SelectContent>
-												{(roles ?? []).map((role) => (
+												{roles.map((role) => (
 													<SelectItem key={role.id} value={role.id}>
 														{role.name}
 													</SelectItem>

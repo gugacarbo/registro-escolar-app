@@ -6,6 +6,7 @@ import type { DB } from "#/db";
 import * as schema from "#/db/schema";
 
 import {
+	countRoles,
 	createRole,
 	DEFAULT_ROLES,
 	ensureDefaultRoles,
@@ -71,6 +72,15 @@ describe("roles repository", () => {
 		const results = await listRoles(db, { search: "Dir" });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Direção");
+	});
+
+	it("conta papéis respeitando a busca", async () => {
+		const { db } = createTestDb();
+		await createRole(db, { name: "Professor" });
+		await createRole(db, { name: "Direção" });
+		expect(await countRoles(db, {})).toBe(2);
+		expect(await countRoles(db, { search: "Dir" })).toBe(1);
+		expect(await countRoles(db, { search: "  " })).toBe(2);
 	});
 
 	it("atualiza o nome do papel", async () => {

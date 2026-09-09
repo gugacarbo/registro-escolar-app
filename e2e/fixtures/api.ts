@@ -95,7 +95,10 @@ export async function createRoleResponse(ctx: ApiContext, name: string) {
 export async function listRoles(ctx: ApiContext) {
 	const res = await api("GET", "/api/roles", ctx.cookies);
 	if (!res.ok) throw new Error(`listRoles failed: ${res.status}`);
-	return res.json() as Promise<Array<{ id: string; name: string }>>;
+	const body = (await res.json()) as {
+		data: Array<{ id: string; name: string }>;
+	};
+	return body.data;
 }
 
 export async function softDeleteStaff(ctx: ApiContext, staffId: string) {

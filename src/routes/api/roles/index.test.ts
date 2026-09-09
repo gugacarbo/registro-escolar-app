@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
 import {
+	countRoles,
 	createRole,
 	ensureDefaultRoles,
 	findRoleByNormalizedName,
@@ -15,6 +16,7 @@ vi.mock("#/lib/auth/session", () => ({
 }));
 
 vi.mock("#/lib/roles/repository", () => ({
+	countRoles: vi.fn().mockResolvedValue(0),
 	createRole: vi.fn(),
 	ensureDefaultRoles: vi.fn().mockResolvedValue(undefined),
 	findRoleByNormalizedName: vi.fn().mockResolvedValue(undefined),
@@ -76,11 +78,13 @@ describe("GET /api/roles", () => {
 		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
-	it("retorna 200 com a lista de papéis após garantir o padrão", async () => {
+	it("retorna 200 com o envelope paginado após garantir o padrão", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listRoles as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValueOnce([{ id: "role-1", name: "Professor" }]);
+		const countMock = countRoles as ReturnType<typeof vi.fn>;
+		countMock.mockResolvedValueOnce(1);
 		const request = new Request("http://localhost/api/roles", {
 			method: "GET",
 		});
@@ -90,8 +94,18 @@ describe("GET /api/roles", () => {
 		});
 		expect(response.status).toBe(200);
 		expect(ensureDefaultRoles).toHaveBeenCalled();
-		const body = (await response.json()) as Array<{ name: string }>;
-		expect(body).toHaveLength(1);
+		const body = (await response.json()) as {
+			data: Array<{ name: string }>;
+			total: number;
+			page: number;
+			pageSize: number;
+		};
+		expect(body.data).toHaveLength(1);
+		expect(body).toMatchObject({ total: 1, page: 1, pageSize: 10 });
+		expect(countMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ search: undefined }),
+		);
 	});
 
 	it("limita e pagina com parâmetros inválidos usando padrões", async () => {
@@ -110,17 +124,17 @@ describe("GET /api/roles", () => {
 		expect(response.status).toBe(200);
 		expect(listMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 50, offset: 0 }),
+			expect.objectContaining({ limit: 10, offset: 0, search: undefined }),
 		);
 	});
 
-	it("restringe o limite ao máximo permitido", async () => {
+	it("restringe o pageSize ao máximo permitido", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listRoles as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValueOnce([]);
 		const request = new Request(
-			"http://localhost/api/roles?limit=500&offset=10",
+			"http://localhost/api/roles?page=2&pageSize=500",
 			{ method: "GET" },
 		);
 		const response = await listRolesHandler({
@@ -130,8 +144,38 @@ describe("GET /api/roles", () => {
 		expect(response.status).toBe(200);
 		expect(listMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 200, offset: 10 }),
+			expect.objectContaining({ limit: 100, offset: 100 }),
 		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 100 });
+	});
+
+	it("mapeia limit/offset legados para page e pageSize", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listRoles as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const request = new Request(
+			"http://localhost/api/roles?limit=10&offset=10",
+			{ method: "GET" },
+		);
+		const response = await listRolesHandler({
+			request,
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 10, offset: 10 }),
+		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 10 });
 	});
 });
 

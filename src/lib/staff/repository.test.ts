@@ -6,6 +6,7 @@ import type { DB } from "#/db";
 import * as schema from "#/db/schema";
 
 import {
+	countStaff,
 	createStaff,
 	findActiveStaffById,
 	findStaffById,
@@ -96,5 +97,19 @@ describe("staff repository", () => {
 		expect(byName).toHaveLength(1);
 		const byEmail = await listStaff(db, { search: "ana@example" });
 		expect(byEmail).toHaveLength(1);
+	});
+
+	it("conta servidores ativos respeitando a busca", async () => {
+		const { db } = createTestDb();
+		await createStaff(db, {
+			name: "Ana Paula",
+			email: "ana@example.com",
+		});
+		const deleted = await createStaff(db, { name: "Bruna Lima" });
+		await softDeleteStaff(db, deleted.id);
+		expect(await countStaff(db, {})).toBe(1);
+		expect(await countStaff(db, { search: "Ana" })).toBe(1);
+		expect(await countStaff(db, { search: "Bruna" })).toBe(0);
+		expect(await countStaff(db, { search: "  " })).toBe(1);
 	});
 });

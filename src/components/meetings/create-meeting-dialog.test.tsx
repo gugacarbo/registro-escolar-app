@@ -28,14 +28,23 @@ beforeEach(() => {
 	vi.unstubAllGlobals();
 	vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
 		const url = typeof input === "string" ? input : String(input);
-		if (url === "/api/classes") {
-			return new Response(JSON.stringify([]), { status: 200 });
+		if (url.startsWith("/api/classes")) {
+			return new Response(
+				JSON.stringify({ data: [], total: 0, page: 1, pageSize: 100 }),
+				{ status: 200 },
+			);
 		}
-		if (url === "/api/staff") {
-			return new Response(JSON.stringify([]), { status: 200 });
+		if (url.startsWith("/api/staff")) {
+			return new Response(
+				JSON.stringify({ data: [], total: 0, page: 1, pageSize: 100 }),
+				{ status: 200 },
+			);
 		}
-		if (url === "/api/roles") {
-			return new Response(JSON.stringify([]), { status: 200 });
+		if (url.startsWith("/api/roles")) {
+			return new Response(
+				JSON.stringify({ data: [], total: 0, page: 1, pageSize: 100 }),
+				{ status: 200 },
+			);
 		}
 		return new Response(JSON.stringify([]), { status: 200 });
 	});
@@ -73,11 +82,14 @@ describe("CreateMeetingDialog", () => {
 					status: 201,
 				});
 			}
-			if (url === "/api/classes") {
+			if (url.startsWith("/api/classes")) {
 				return new Response(
-					JSON.stringify([
-						{ id: "class-1", name: "9º Ano", academicPeriod: "2026" },
-					]),
+					JSON.stringify({
+						data: [{ id: "class-1", name: "9º Ano", academicPeriod: "2026" }],
+						total: 1,
+						page: 1,
+						pageSize: 100,
+					}),
 					{ status: 200 },
 				);
 			}
@@ -116,11 +128,14 @@ describe("CreateMeetingDialog", () => {
 					status: 409,
 				});
 			}
-			if (url === "/api/classes") {
+			if (url.startsWith("/api/classes")) {
 				return new Response(
-					JSON.stringify([
-						{ id: "class-1", name: "9º Ano", academicPeriod: "2026" },
-					]),
+					JSON.stringify({
+						data: [{ id: "class-1", name: "9º Ano", academicPeriod: "2026" }],
+						total: 1,
+						page: 1,
+						pageSize: 100,
+					}),
 					{ status: 200 },
 				);
 			}

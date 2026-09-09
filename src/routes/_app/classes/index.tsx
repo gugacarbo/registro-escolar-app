@@ -2,18 +2,61 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { CreateClassDialog } from "#/components/classes/create-class-dialog";
+import { DataTable } from "#/components/data-table";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { useClasses } from "#/hooks/classes/use-classes";
+import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import type { Class } from "#/lib/classes/schema";
 
 export const Route = createFileRoute("/_app/classes/")({
 	component: ClassesPage,
 });
 
-function ClassesPage() {
+const columns = [
+	{
+		header: "Nome",
+		cell: (classRow: Class) => classRow.name,
+	},
+	{
+		header: "Período letivo",
+		cell: (classRow: Class) => classRow.academicPeriod,
+	},
+	{
+		header: "Ações",
+		cell: (classRow: Class) => (
+			<Link
+				to="/classes/$id/students"
+				params={{ id: classRow.id }}
+				search={{ date: undefined }}
+				className="text-sm underline"
+			>
+				Ver alunos
+			</Link>
+		),
+	},
+];
+
+export function ClassesPage() {
 	const [search, setSearch] = useState("");
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const { data: classes, isLoading } = useClasses(search);
+	const debouncedSearch = useDebouncedValue(search, 300);
+	const [activeSearch, setActiveSearch] = useState(debouncedSearch);
+
+	if (activeSearch !== debouncedSearch) {
+		setActiveSearch(debouncedSearch);
+		if (page !== 1) {
+			setPage(1);
+		}
+	}
+
+	const {
+		data: classesPage,
+		isLoading,
+		isError,
+	} = useClasses({ search: debouncedSearch || undefined, page, pageSize });
 
 	return (
 		<div className="space-y-4">
@@ -30,30 +73,26 @@ function ClassesPage() {
 				placeholder="Buscar por nome"
 				value={search}
 				onChange={(event) => setSearch(event.target.value)}
+				aria-label="Buscar por nome"
 			/>
-			{isLoading && <p>Carregando...</p>}
-			{classes && classes.length === 0 && <p>Nenhuma turma encontrada.</p>}
-			{classes && classes.length > 0 && (
-				<ul className="space-y-2">
-					{classes.map((classRow) => (
-						<li key={classRow.id} className="rounded border p-2">
-							<div className="flex items-center justify-between">
-								<span>
-									{classRow.name} — {classRow.academicPeriod}
-								</span>
-								<Link
-									to="/classes/$id/students"
-									params={{ id: classRow.id }}
-									search={{ date: undefined }}
-									className="text-sm underline"
-								>
-									Ver alunos
-								</Link>
-							</div>
-						</li>
-					))}
-				</ul>
-			)}
+			<DataTable
+				columns={columns}
+				rows={classesPage?.data ?? []}
+				getRowKey={(classRow) => classRow.id}
+				total={classesPage?.total ?? 0}
+				page={page}
+				pageSize={pageSize}
+				onPageChange={setPage}
+				onPageSizeChange={(size) => {
+					setPageSize(size);
+					setPage(1);
+				}}
+				isLoading={isLoading}
+				isError={isError}
+				ariaLabel="Tabela de turmas"
+				emptyTitle="Nenhuma turma encontrada"
+				emptyDescription="Ajuste a busca ou cadastre uma nova turma."
+			/>
 			<CreateClassDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 		</div>
 	);

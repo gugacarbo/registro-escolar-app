@@ -39,18 +39,30 @@ export async function findRoleByNormalizedName(
 	return candidates.find((r) => normalizeRoleName(r.name) === normalized);
 }
 
+function buildRolesWhere(search?: string) {
+	const term = search?.trim();
+	if (!term) {
+		return undefined;
+	}
+	return like(roles.name, sql`'%' || ${term} || '%'`);
+}
+
 export async function listRoles(db: DB, options: ListRolesOptions = {}) {
 	const { limit = 50, offset = 0, search } = options;
-	const where = search
-		? like(roles.name, sql`'%' || ${search} || '%'`)
-		: undefined;
 
 	return db.query.roles.findMany({
-		where,
+		where: buildRolesWhere(search),
 		limit,
 		offset,
 		orderBy: (roles, { desc }) => [desc(roles.createdAt)],
 	});
+}
+
+export async function countRoles(
+	db: DB,
+	options: Pick<ListRolesOptions, "search"> = {},
+) {
+	return db.$count(roles, buildRolesWhere(options.search));
 }
 
 export async function ensureDefaultRoles(db: DB) {

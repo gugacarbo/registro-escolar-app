@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
-import { createClass, listClasses } from "#/lib/classes/repository";
+import {
+	countClasses,
+	createClass,
+	listClasses,
+} from "#/lib/classes/repository";
 
 import { createClassHandler, listClassesHandler } from "./index";
 
@@ -10,6 +14,7 @@ vi.mock("#/lib/auth/session", () => ({
 }));
 
 vi.mock("#/lib/classes/repository", () => ({
+	countClasses: vi.fn().mockResolvedValue(0),
 	createClass: vi.fn(),
 	listClasses: vi.fn().mockResolvedValue([]),
 }));
@@ -65,13 +70,13 @@ describe("GET /api/classes", () => {
 		const listMock = listClasses as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValue([]);
 		const capped = await listClassesHandler({
-			request: new Request("http://localhost/api/classes?limit=999&offset=2"),
+			request: new Request("http://localhost/api/classes?page=2&pageSize=999"),
 			context: { env: createEnv() },
 		});
 		expect(capped.status).toBe(200);
 		expect(listMock).toHaveBeenLastCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 200, offset: 2, search: undefined }),
+			expect.objectContaining({ limit: 100, offset: 100, search: undefined }),
 		);
 		const defaulted = await listClassesHandler({
 			request: new Request("http://localhost/api/classes?limit=0&offset=-1"),
@@ -80,8 +85,30 @@ describe("GET /api/classes", () => {
 		expect(defaulted.status).toBe(200);
 		expect(listMock).toHaveBeenLastCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 50, offset: 0, search: undefined }),
+			expect.objectContaining({ limit: 10, offset: 0, search: undefined }),
 		);
+	});
+
+	it("mapeia limit/offset legados para page e pageSize", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValue(
+			createMockSession(),
+		);
+		const listMock = listClasses as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValue([]);
+		const response = await listClassesHandler({
+			request: new Request("http://localhost/api/classes?limit=10&offset=10"),
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 10, offset: 10 }),
+		);
+		const body = (await response.json()) as {
+			page: number;
+			pageSize: number;
+		};
+		expect(body).toMatchObject({ page: 2, pageSize: 10 });
 	});
 
 	it("resolve env via fallback quando o contexto não traz env", async () => {
@@ -95,13 +122,15 @@ describe("GET /api/classes", () => {
 		expect(getSession).toHaveBeenCalledWith(request, undefined);
 	});
 
-	it("retorna 200 com a lista de turmas", async () => {
+	it("retorna 200 com o envelope paginado", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listClasses as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValueOnce([
 			{ id: "t1", name: "7º A", academicPeriod: "2026" },
 		]);
+		const countMock = countClasses as ReturnType<typeof vi.fn>;
+		countMock.mockResolvedValueOnce(1);
 		const request = new Request("http://localhost/api/classes", {
 			method: "GET",
 		});
@@ -110,8 +139,18 @@ describe("GET /api/classes", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(200);
-		const body = await response.json();
-		expect(body).toHaveLength(1);
+		const body = (await response.json()) as {
+			data: Array<{ name: string }>;
+			total: number;
+			page: number;
+			pageSize: number;
+		};
+		expect(body.data).toHaveLength(1);
+		expect(body).toMatchObject({ total: 1, page: 1, pageSize: 10 });
+		expect(countMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ search: undefined }),
+		);
 	});
 });
 
