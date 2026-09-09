@@ -8,24 +8,31 @@ export class StudentsPage {
 	}
 
 	async clickNew() {
-		await this.page.getByRole("link", { name: "Novo aluno" }).last().click();
+		await this.page.getByRole("button", { name: "Novo aluno" }).click();
+		await expect(
+			this.page.getByRole("dialog").getByRole("textbox", { name: "Nome" }),
+		).toBeVisible();
 	}
 
 	async fillName(name: string) {
-		const nameField = this.page.getByRole("textbox", { name: "Nome" });
+		const nameField = this.page
+			.getByRole("dialog")
+			.getByRole("textbox", { name: "Nome" });
 		await nameField.click();
 		await nameField.fill(name);
 		await expect(nameField).toHaveValue(name);
 	}
 
 	async submit() {
-		await this.page.getByRole("button", { name: /salvar/i }).click();
+		await this.page
+			.getByRole("dialog")
+			.getByRole("button", { name: /salvar/i })
+			.click();
 	}
 
 	async create(name: string) {
 		await this.goto();
 		await this.clickNew();
-		await this.page.waitForURL("/students/new");
 		await this.fillName(name);
 		await this.submit();
 	}

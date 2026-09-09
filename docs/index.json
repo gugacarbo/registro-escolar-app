@@ -252,7 +252,7 @@
       "src/lib/students/schema.ts",
       "src/lib/students/shared.ts",
       "src/routes/_app/students/index.tsx",
-      "src/routes/_app/students/new.tsx",
+      "src/components/students/create-student-dialog.tsx",
       "src/routes/_app/students/import.tsx",
       "src/components/students/student-form.tsx",
       "src/components/students/import-preview-table.tsx",

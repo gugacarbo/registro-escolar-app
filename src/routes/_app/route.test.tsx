@@ -13,8 +13,14 @@ vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
 	Outlet: () => <div>conteúdo privado</div>,
 	useNavigate: () => mocks.navigate,
-	Link: ({ children }: { children: React.ReactNode }) => (
-		<span>{children}</span>
+	Link: ({
+		children,
+		to,
+		...rest
+	}: { children: React.ReactNode; to: string } & Record<string, unknown>) => (
+		<a href={to} {...rest}>
+			{children}
+		</a>
 	),
 	useLocation: (opts?: { select?: (s: { pathname: string }) => string }) =>
 		opts?.select ? opts.select({ pathname: "/" }) : "/",
@@ -78,15 +84,21 @@ describe("AppLayout", () => {
 		expect(screen.getByText("operador@escola.test")).toBeInTheDocument();
 	});
 
-	it("exibe a navegação com seções existentes e futuras", async () => {
+	it("exibe somente o botão Alunos na navegação", async () => {
 		mocks.getSession.mockResolvedValue({ data: session });
 
 		render(<AppLayout />);
 
-		expect(await screen.findByText("Alunos")).toBeInTheDocument();
-		expect(screen.getByText("Turmas")).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /turmas/i })).toBeDisabled();
-		expect(screen.getAllByText("Em breve").length).toBeGreaterThan(0);
+		const alunos = await screen.findByRole("link", { name: "Alunos" });
+		expect(alunos).toHaveAttribute("href", "/students");
+		expect(screen.getAllByRole("link")).toHaveLength(1);
+		expect(screen.queryByText("Início")).not.toBeInTheDocument();
+		expect(screen.queryByText("Turmas")).not.toBeInTheDocument();
+		expect(screen.queryByText("Servidores")).not.toBeInTheDocument();
+		expect(screen.queryByText("Papéis")).not.toBeInTheDocument();
+		expect(screen.queryByText("Componentes")).not.toBeInTheDocument();
+		expect(screen.queryByText("Reuniões")).not.toBeInTheDocument();
+		expect(screen.queryByText("Atas")).not.toBeInTheDocument();
 	});
 
 	it("expõe o controle de tema no header", async () => {

@@ -17,6 +17,7 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		const studentsPage = new StudentsPage(page);
 		await studentsPage.create("Aluno Manual E2E");
 
+		await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10_000 });
 		await expect.poll(async () => page.url()).toBe(`${baseURL}/students`);
 		await expect(page.getByText("Aluno Manual E2E")).toBeVisible();
 		const response = await fetch(`${baseURL}/api/students`, {

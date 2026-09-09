@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { CreateStudentDialog } from "#/components/students/create-student-dialog";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { useStudents } from "#/hooks/students/use-students";
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/_app/students/")({
 
 function StudentsPage() {
 	const [search, setSearch] = useState("");
+	const [dialogOpen, setDialogOpen] = useState(false);
 	const { data: students, isLoading } = useStudents(search);
 
 	return (
@@ -18,9 +20,7 @@ function StudentsPage() {
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-bold">Alunos</h1>
 				<div className="flex gap-2">
-					<Link to="/students/new">
-						<Button>Novo aluno</Button>
-					</Link>
+					<Button onClick={() => setDialogOpen(true)}>Novo aluno</Button>
 					<Link to="/students/import">
 						<Button variant="secondary">Importar alunos</Button>
 					</Link>
@@ -41,6 +41,7 @@ function StudentsPage() {
 					))}
 				</ul>
 			)}
+			<CreateStudentDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 		</div>
 	);
 }

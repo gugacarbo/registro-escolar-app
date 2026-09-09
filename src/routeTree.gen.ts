@@ -20,13 +20,14 @@ import { Route as AppComponentsIndexRouteImport } from './routes/_app/components
 import { Route as AppComponentsNewRouteImport } from './routes/_app/components/new'
 import { Route as AppMeetingsIndexRouteImport } from './routes/_app/meetings/index'
 import { Route as AppMeetingsNewRouteImport } from './routes/_app/meetings/new'
+import { Route as AppMinutesIndexRouteImport } from './routes/_app/minutes/index'
+import { Route as AppMinutesTemplatesRouteImport } from './routes/_app/minutes/templates'
 import { Route as AppRolesIndexRouteImport } from './routes/_app/roles/index'
 import { Route as AppRolesNewRouteImport } from './routes/_app/roles/new'
 import { Route as AppStaffIndexRouteImport } from './routes/_app/staff/index'
 import { Route as AppStaffNewRouteImport } from './routes/_app/staff/new'
 import { Route as AppStudentsIndexRouteImport } from './routes/_app/students/index'
 import { Route as AppStudentsImportRouteImport } from './routes/_app/students/import'
-import { Route as AppStudentsNewRouteImport } from './routes/_app/students/new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiClassesIndexRouteImport } from './routes/api/classes/index'
 import { Route as ApiComponentsIndexRouteImport } from './routes/api/components/index'
@@ -121,6 +122,16 @@ const AppMeetingsNewRoute = AppMeetingsNewRouteImport.update({
   path: '/meetings/new',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppMinutesIndexRoute = AppMinutesIndexRouteImport.update({
+  id: '/minutes/',
+  path: '/minutes/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMinutesTemplatesRoute = AppMinutesTemplatesRouteImport.update({
+  id: '/minutes/templates',
+  path: '/minutes/templates',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppRolesIndexRoute = AppRolesIndexRouteImport.update({
   id: '/roles/',
   path: '/roles/',
@@ -149,11 +160,6 @@ const AppStudentsIndexRoute = AppStudentsIndexRouteImport.update({
 const AppStudentsImportRoute = AppStudentsImportRouteImport.update({
   id: '/students/import',
   path: '/students/import',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppStudentsNewRoute = AppStudentsNewRouteImport.update({
-  id: '/students/new',
-  path: '/students/new',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -383,15 +389,16 @@ export interface FileRoutesByFullPath {
   '/classes/new': typeof AppClassesNewRoute
   '/components/new': typeof AppComponentsNewRoute
   '/meetings/new': typeof AppMeetingsNewRoute
+  '/minutes/templates': typeof AppMinutesTemplatesRoute
   '/roles/new': typeof AppRolesNewRoute
   '/staff/new': typeof AppStaffNewRoute
   '/students/import': typeof AppStudentsImportRoute
-  '/students/new': typeof AppStudentsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/students/import': typeof ApiStudentsImportRouteWithChildren
   '/classes/': typeof AppClassesIndexRoute
   '/components/': typeof AppComponentsIndexRoute
   '/meetings/': typeof AppMeetingsIndexRoute
+  '/minutes/': typeof AppMinutesIndexRoute
   '/roles/': typeof AppRolesIndexRoute
   '/staff/': typeof AppStaffIndexRoute
   '/students/': typeof AppStudentsIndexRoute
@@ -441,15 +448,16 @@ export interface FileRoutesByTo {
   '/classes/new': typeof AppClassesNewRoute
   '/components/new': typeof AppComponentsNewRoute
   '/meetings/new': typeof AppMeetingsNewRoute
+  '/minutes/templates': typeof AppMinutesTemplatesRoute
   '/roles/new': typeof AppRolesNewRoute
   '/staff/new': typeof AppStaffNewRoute
   '/students/import': typeof AppStudentsImportRoute
-  '/students/new': typeof AppStudentsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/students/import': typeof ApiStudentsImportRouteWithChildren
   '/classes': typeof AppClassesIndexRoute
   '/components': typeof AppComponentsIndexRoute
   '/meetings': typeof AppMeetingsIndexRoute
+  '/minutes': typeof AppMinutesIndexRoute
   '/roles': typeof AppRolesIndexRoute
   '/staff': typeof AppStaffIndexRoute
   '/students': typeof AppStudentsIndexRoute
@@ -501,15 +509,16 @@ export interface FileRoutesById {
   '/_app/classes/new': typeof AppClassesNewRoute
   '/_app/components/new': typeof AppComponentsNewRoute
   '/_app/meetings/new': typeof AppMeetingsNewRoute
+  '/_app/minutes/templates': typeof AppMinutesTemplatesRoute
   '/_app/roles/new': typeof AppRolesNewRoute
   '/_app/staff/new': typeof AppStaffNewRoute
   '/_app/students/import': typeof AppStudentsImportRoute
-  '/_app/students/new': typeof AppStudentsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/students/import': typeof ApiStudentsImportRouteWithChildren
   '/_app/classes/': typeof AppClassesIndexRoute
   '/_app/components/': typeof AppComponentsIndexRoute
   '/_app/meetings/': typeof AppMeetingsIndexRoute
+  '/_app/minutes/': typeof AppMinutesIndexRoute
   '/_app/roles/': typeof AppRolesIndexRoute
   '/_app/staff/': typeof AppStaffIndexRoute
   '/_app/students/': typeof AppStudentsIndexRoute
@@ -561,15 +570,16 @@ export interface FileRouteTypes {
     | '/classes/new'
     | '/components/new'
     | '/meetings/new'
+    | '/minutes/templates'
     | '/roles/new'
     | '/staff/new'
     | '/students/import'
-    | '/students/new'
     | '/api/auth/$'
     | '/api/students/import'
     | '/classes/'
     | '/components/'
     | '/meetings/'
+    | '/minutes/'
     | '/roles/'
     | '/staff/'
     | '/students/'
@@ -619,15 +629,16 @@ export interface FileRouteTypes {
     | '/classes/new'
     | '/components/new'
     | '/meetings/new'
+    | '/minutes/templates'
     | '/roles/new'
     | '/staff/new'
     | '/students/import'
-    | '/students/new'
     | '/api/auth/$'
     | '/api/students/import'
     | '/classes'
     | '/components'
     | '/meetings'
+    | '/minutes'
     | '/roles'
     | '/staff'
     | '/students'
@@ -678,15 +689,16 @@ export interface FileRouteTypes {
     | '/_app/classes/new'
     | '/_app/components/new'
     | '/_app/meetings/new'
+    | '/_app/minutes/templates'
     | '/_app/roles/new'
     | '/_app/staff/new'
     | '/_app/students/import'
-    | '/_app/students/new'
     | '/api/auth/$'
     | '/api/students/import'
     | '/_app/classes/'
     | '/_app/components/'
     | '/_app/meetings/'
+    | '/_app/minutes/'
     | '/_app/roles/'
     | '/_app/staff/'
     | '/_app/students/'
@@ -846,6 +858,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingsNewRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/minutes/': {
+      id: '/_app/minutes/'
+      path: '/minutes'
+      fullPath: '/minutes/'
+      preLoaderRoute: typeof AppMinutesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/minutes/templates': {
+      id: '/_app/minutes/templates'
+      path: '/minutes/templates'
+      fullPath: '/minutes/templates'
+      preLoaderRoute: typeof AppMinutesTemplatesRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/roles/': {
       id: '/_app/roles/'
       path: '/roles'
@@ -886,13 +912,6 @@ declare module '@tanstack/react-router' {
       path: '/students/import'
       fullPath: '/students/import'
       preLoaderRoute: typeof AppStudentsImportRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/students/new': {
-      id: '/_app/students/new'
-      path: '/students/new'
-      fullPath: '/students/new'
-      preLoaderRoute: typeof AppStudentsNewRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/api/auth/$': {
@@ -1177,13 +1196,14 @@ interface AppRouteRouteChildren {
   AppClassesNewRoute: typeof AppClassesNewRoute
   AppComponentsNewRoute: typeof AppComponentsNewRoute
   AppMeetingsNewRoute: typeof AppMeetingsNewRoute
+  AppMinutesTemplatesRoute: typeof AppMinutesTemplatesRoute
   AppRolesNewRoute: typeof AppRolesNewRoute
   AppStaffNewRoute: typeof AppStaffNewRoute
   AppStudentsImportRoute: typeof AppStudentsImportRoute
-  AppStudentsNewRoute: typeof AppStudentsNewRoute
   AppClassesIndexRoute: typeof AppClassesIndexRoute
   AppComponentsIndexRoute: typeof AppComponentsIndexRoute
   AppMeetingsIndexRoute: typeof AppMeetingsIndexRoute
+  AppMinutesIndexRoute: typeof AppMinutesIndexRoute
   AppRolesIndexRoute: typeof AppRolesIndexRoute
   AppStaffIndexRoute: typeof AppStaffIndexRoute
   AppStudentsIndexRoute: typeof AppStudentsIndexRoute
@@ -1201,13 +1221,14 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppClassesNewRoute: AppClassesNewRoute,
   AppComponentsNewRoute: AppComponentsNewRoute,
   AppMeetingsNewRoute: AppMeetingsNewRoute,
+  AppMinutesTemplatesRoute: AppMinutesTemplatesRoute,
   AppRolesNewRoute: AppRolesNewRoute,
   AppStaffNewRoute: AppStaffNewRoute,
   AppStudentsImportRoute: AppStudentsImportRoute,
-  AppStudentsNewRoute: AppStudentsNewRoute,
   AppClassesIndexRoute: AppClassesIndexRoute,
   AppComponentsIndexRoute: AppComponentsIndexRoute,
   AppMeetingsIndexRoute: AppMeetingsIndexRoute,
+  AppMinutesIndexRoute: AppMinutesIndexRoute,
   AppRolesIndexRoute: AppRolesIndexRoute,
   AppStaffIndexRoute: AppStaffIndexRoute,
   AppStudentsIndexRoute: AppStudentsIndexRoute,
