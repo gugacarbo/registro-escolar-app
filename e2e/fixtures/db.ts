@@ -86,3 +86,19 @@ export function resetDatabase() {
 		sqlite.close();
 	}
 }
+
+export function restoreEnrollmentAsActive(enrollmentId: string) {
+	const sqlite = new Database(E2E_DB_PATH);
+	try {
+		const result = sqlite
+			.prepare(
+				"UPDATE enrollments SET end_date = NULL, status = 'ativa' WHERE id = ?",
+			)
+			.run(enrollmentId);
+		if (result.changes !== 1) {
+			throw new Error(`Enrollment not found: ${enrollmentId}`);
+		}
+	} finally {
+		sqlite.close();
+	}
+}

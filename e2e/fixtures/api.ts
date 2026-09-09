@@ -57,8 +57,14 @@ export async function createClass(
 
 export async function createEnrollment(
 	ctx: ApiContext,
-	input: object,
-): Promise<{ enrollment: unknown; closedEnrollments: unknown[] }> {
+	input: {
+		alunoId: string;
+		turmaId: string;
+		dataInicio: string;
+		dataTermino?: string;
+		status?: string;
+	},
+): Promise<{ enrollment: { id: string }; closedEnrollments: Array<{ id: string }> }> {
 	const res = await api("POST", "/api/enrollments", ctx.cookies, input);
 	if (!res.ok) throw new Error(`createEnrollment failed: ${res.status}`);
 	return res.json();
@@ -251,7 +257,13 @@ export async function approveMinute(ctx: ApiContext, meetingId: string, data?: s
 	return res.json();
 }
 
-export async function updateStudentStatus(ctx: ApiContext, meetingId: string, studentId: string, status: string, classId: string) {
+export async function updateStudentStatus(
+	ctx: ApiContext,
+	meetingId: string,
+	studentId: string,
+	status: "pendente" | "em_discussao" | "concluido" | "nao_discutido",
+	classId: string,
+): Promise<{ id: string; status: string }> {
 	const res = await api("PATCH", `/api/meetings/${meetingId}/students/${studentId}/status`, ctx.cookies, { status, classId });
 	if (!res.ok) throw new Error(`updateStudentStatus failed: ${res.status}`);
 	return res.json();
