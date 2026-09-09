@@ -45,8 +45,11 @@ export async function createStudent(
 
 export async function createClass(
 	ctx: ApiContext,
-	input: object,
+	nome: string,
+	periodoLetivo: string,
+	extra?: { curso?: string; serie?: string; turno?: string },
 ): Promise<{ id: string; name: string }> {
+	const input = { nome, periodoLetivo, ...extra };
 	const res = await api("POST", "/api/classes", ctx.cookies, input);
 	if (!res.ok) throw new Error(`createClass failed: ${res.status}`);
 	return res.json();

@@ -1,16 +1,11 @@
-import { baseURL, createEnrollment, createStudent, type ApiContext } from "./fixtures/api";
+import {
+	baseURL,
+	createClass,
+	createEnrollment,
+	createStudent,
+} from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
 import { ClassesPage } from "./pages/classes-page";
-
-async function createClass(ctx: ApiContext, nome: string, periodoLetivo: string) {
-	const response = await fetch(`${baseURL}/api/classes`, {
-		method: "POST",
-		headers: { Cookie: ctx.cookies, "Content-Type": "application/json" },
-		body: JSON.stringify({ nome, periodoLetivo }),
-	});
-	if (!response.ok) throw new Error(`createClass failed: ${response.status}`);
-	return (await response.json()) as { id: string; name: string };
-}
 
 test.describe("SPEC-0002 turmas e matrículas", () => {
 	test("cria e lista turmas pela UI", async ({
@@ -95,7 +90,7 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		}>;
 		expect(history).toHaveLength(1);
 		expect(history[0]?.student.id).toBe(student.id);
-		expect(history[0]?.enrollment.status).not.toBe("ativa");
+		expect(history[0]?.enrollment.status).toBe("transferida");
 	});
 
 	test("não inclui aluno fora do intervalo do vínculo", async ({
