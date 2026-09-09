@@ -5,6 +5,7 @@ import {
 	createComponentResponse,
 	createOfferResponse,
 	createStaff,
+	softDeleteStaff,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
 
@@ -41,7 +42,7 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 		const component = await createComponent(apiContext, "Biologia E2E");
 
 		await page.goto(`/classes/${klass.id}/offers`);
-		const componentTrigger = page.getByRole("combobox").nth(1);
+		const componentTrigger = page.getByRole("combobox", { name: "Componente *" });
 		await componentTrigger.click();
 		const option = page
 			.locator('[data-slot="select-item"]')
@@ -70,10 +71,7 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 		const klass = await createClass(apiContext, "Turma Professor Removido", "2026");
 		const component = await createComponent(apiContext, "Química E2E");
 		const professor = await createStaff(apiContext, "Professor Removido");
-		await fetch(`${baseURL}/api/staff/${professor.id}`, {
-			method: "DELETE",
-			headers: { Cookie: apiContext.cookies },
-		});
+		await softDeleteStaff(apiContext, professor.id);
 		const response = await createOfferResponse(apiContext, klass.id, component.id, [
 			professor.id,
 		]);
