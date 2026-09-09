@@ -7,11 +7,15 @@ import type { z } from "zod";
 
 import { students } from "#/db/schema";
 
-export const createStudentSchema = createInsertSchema(students).omit({
-	id: true,
-	createdAt: true,
-	updatedAt: true,
-});
+export const createStudentSchema = createInsertSchema(students)
+	.omit({
+		id: true,
+		createdAt: true,
+		updatedAt: true,
+	})
+	.extend({
+		name: createInsertSchema(students).shape.name.min(1, "Nome é obrigatório"),
+	});
 
 export const updateStudentSchema = createUpdateSchema(students).omit({
 	id: true,
