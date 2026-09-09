@@ -8,9 +8,9 @@ import {
 	startMeeting,
 	transitionMeetingResponse,
 } from "./fixtures/api";
-import { expect, test } from "./fixtures/test";
+import { expect, test, type ApiContext } from "./fixtures/test";
 
-async function setupFinishedMeeting(apiContext: Parameters<typeof createClass>[0]) {
+async function setupFinishedMeeting(apiContext: ApiContext) {
 	const klass = await createClass(apiContext, "Turma Versões", "2026");
 	const meeting = await createMeeting(apiContext, {
 		title: "Ata Versões",
@@ -18,8 +18,10 @@ async function setupFinishedMeeting(apiContext: Parameters<typeof createClass>[0
 		classIds: [klass.id],
 		participants: [],
 	});
-	await startMeeting(apiContext, meeting.id);
-	await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+	const setupStart = await startMeeting(apiContext, meeting.id);
+	expect(setupStart.status).toBe("in_progress");
+	const setupFinish = await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+	expect(setupFinish.status).toBe(200);
 	return meeting;
 }
 
@@ -29,10 +31,12 @@ test.describe("SPEC-0010 versionamento e aprovação de ata", () => {
 	}) => {
 		const meeting = await setupFinishedMeeting(apiContext);
 		await generateMinute(apiContext, meeting.id, "Versão v1");
-		await transitionMeetingResponse(apiContext, meeting.id, "reopen");
+		const reopen = await transitionMeetingResponse(apiContext, meeting.id, "reopen");
+		expect(reopen.status).toBe(200);
 		const resume = await transitionMeetingResponse(apiContext, meeting.id, "start");
 		expect(resume.status).toBe(200);
-		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		const finish = await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		expect(finish.status).toBe(200);
 		const second = await generateMinute(apiContext, meeting.id, "Versão v2");
 
 		expect(second.version).toBe(2);
@@ -81,9 +85,12 @@ test.describe("SPEC-0010 versionamento e aprovação de ata", () => {
 		expect(first.approvalStatus).toBe("pendente_aprovacao");
 		await approveMinute(apiContext, meeting.id);
 
-		await transitionMeetingResponse(apiContext, meeting.id, "reopen");
-		await transitionMeetingResponse(apiContext, meeting.id, "start");
-		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		const reopen = await transitionMeetingResponse(apiContext, meeting.id, "reopen");
+		expect(reopen.status).toBe(200);
+		const resume = await transitionMeetingResponse(apiContext, meeting.id, "start");
+		expect(resume.status).toBe(200);
+		const finish = await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		expect(finish.status).toBe(200);
 		const second = await generateMinute(apiContext, meeting.id, "Correção");
 		expect(second.version).toBe(2);
 		expect(second.approvalStatus).toBe("pendente_aprovacao");
