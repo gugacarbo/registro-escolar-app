@@ -73,10 +73,29 @@ export async function createStaff(
 	return res.json();
 }
 
-export async function createRole(ctx: ApiContext, name: string) {
+export async function createRole(
+	ctx: ApiContext,
+	name: string,
+): Promise<{ id: string; name: string }> {
 	const res = await api("POST", "/api/roles", ctx.cookies, { name });
 	if (!res.ok) throw new Error(`createRole failed: ${res.status}`);
 	return res.json();
+}
+
+export async function createRoleResponse(ctx: ApiContext, name: string) {
+	return api("POST", "/api/roles", ctx.cookies, { name });
+}
+
+export async function listRoles(ctx: ApiContext) {
+	const res = await api("GET", "/api/roles", ctx.cookies);
+	if (!res.ok) throw new Error(`listRoles failed: ${res.status}`);
+	return res.json() as Promise<Array<{ id: string; name: string }>>;
+}
+
+export async function softDeleteStaff(ctx: ApiContext, staffId: string) {
+	const res = await api("DELETE", `/api/staff/${staffId}`, ctx.cookies);
+	if (!res.ok) throw new Error(`softDeleteStaff failed: ${res.status}`);
+	return res.json() as Promise<{ id: string; deletedAt: string | null }>;
 }
 
 export async function createComponent(ctx: ApiContext, name: string) {

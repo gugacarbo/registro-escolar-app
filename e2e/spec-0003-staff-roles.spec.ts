@@ -2,26 +2,12 @@ import {
 	baseURL,
 	addParticipant,
 	createMeeting,
+	createRoleResponse,
 	createStaff,
-	type ApiContext,
+	listRoles,
+	softDeleteStaff,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
-
-async function createRole(ctx: ApiContext, name: string) {
-	const response = await fetch(`${baseURL}/api/roles`, {
-		method: "POST",
-		headers: { Cookie: ctx.cookies, "Content-Type": "application/json" },
-		body: JSON.stringify({ name }),
-	});
-	return response;
-}
-
-async function listRoles(ctx: ApiContext) {
-	const response = await fetch(`${baseURL}/api/roles`, {
-		headers: { Cookie: ctx.cookies },
-	});
-	return (await response.json()) as Array<{ id: string; name: string }>;
-}
 
 test.describe("SPEC-0003 servidores e papéis", () => {
 	test("cadastra e lista servidor pela UI", async ({
@@ -55,12 +41,12 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 	test("garante papel padrão Professor", async ({ apiContext }) => {
 		const roles = await listRoles(apiContext);
 		expect(roles.filter((role) => role.name === "Professor")).toHaveLength(1);
-		await createRole(apiContext, "Professor");
-		expect((await listRoles(apiContext)).filter((r) => r.name === "Professor")).toHaveLength(1);
+		const duplicateDefault = await createRoleResponse(apiContext, "Professor");
+		expect(duplicateDefault.status).toBe(409);
 	});
 
 	test("normaliza papel duplicado", async ({ apiContext }) => {
-		const normalizedResponse = await createRole(
+		const normalizedResponse = await createRoleResponse(
 			apiContext,
 			"Coordenacao Pedagogica",
 		);
@@ -68,7 +54,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		const normalized = (await normalizedResponse.json()) as { name: string };
 		expect(normalized.name).toBe("Coordenacao Pedagogica");
 
-		const duplicateResponse = await createRole(
+		const duplicateResponse = await createRoleResponse(
 			apiContext,
 			"COORDENAÇÃO PEDAGÓGICA",
 		);
@@ -139,12 +125,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		});
 		await addParticipant(apiContext, meeting.id, staff.id, role.id);
 
-		const deleteResponse = await fetch(`${baseURL}/api/staff/${staff.id}`, {
-			method: "DELETE",
-			headers: { Cookie: apiContext.cookies },
-		});
-		expect(deleteResponse.status).toBe(200);
-		const deleted = (await deleteResponse.json()) as { deletedAt: string | null };
+		const deleted = await softDeleteStaff(apiContext, staff.id);
 		expect(deleted.deletedAt).not.toBeNull();
 
 		const activeListResponse = await fetch(`${baseURL}/api/staff`, {

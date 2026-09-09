@@ -3,10 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 import { getSession } from "#/lib/auth/session";
 import {
 	createStaff,
+	findStaffById,
 	findStaffByName,
 	listStaff,
+	softDeleteStaff,
 } from "#/lib/staff/repository";
-
+import { deleteStaffHandler } from "./$id/index";
 import { createStaffHandler, listStaffHandler } from "./index";
 
 vi.mock("#/lib/auth/session", () => ({
@@ -15,8 +17,10 @@ vi.mock("#/lib/auth/session", () => ({
 
 vi.mock("#/lib/staff/repository", () => ({
 	createStaff: vi.fn(),
+	findStaffById: vi.fn(),
 	findStaffByName: vi.fn().mockResolvedValue([]),
 	listStaff: vi.fn().mockResolvedValue([]),
+	softDeleteStaff: vi.fn(),
 }));
 
 function createMockSession() {
@@ -228,5 +232,44 @@ describe("POST /api/staff", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(409);
+	});
+});
+
+describe("DELETE /api/staff/:id", () => {
+	it("soft deletes staff and hides from active list", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const staff = { id: "staff-1", deletedAt: null };
+		vi.mocked(findStaffById).mockResolvedValueOnce(staff as never);
+		vi.mocked(softDeleteStaff).mockResolvedValueOnce({
+			...staff,
+			deletedAt: new Date(),
+		} as never);
+		const request = new Request("http://localhost/api/staff/staff-1", {
+			method: "DELETE",
+		});
+		const response = await deleteStaffHandler({
+			request,
+			params: { id: "staff-1" },
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as { deletedAt: string | null };
+		expect(body.deletedAt).not.toBeNull();
+	});
+
+	it("returns 404 for missing or already deleted staff", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		vi.mocked(findStaffById).mockResolvedValueOnce(undefined);
+		const request = new Request("http://localhost/api/staff/staff-missing", {
+			method: "DELETE",
+		});
+		const response = await deleteStaffHandler({
+			request,
+			params: { id: "staff-missing" },
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(404);
 	});
 });
