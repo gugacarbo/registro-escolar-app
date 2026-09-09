@@ -2,8 +2,8 @@ import { and, eq, isNull, like, or, sql } from "drizzle-orm";
 
 import type { DB } from "#/db";
 import { staff } from "#/db/schema";
-
 import type { CreateStaffInput, UpdateStaffInput } from "./schema";
+import { normalizeStaffName } from "./shared";
 import type { ListStaffOptions } from "./types";
 
 export async function createStaff(db: DB, input: CreateStaffInput) {
@@ -34,10 +34,20 @@ export async function findActiveStaffById(db: DB, id: string) {
 }
 
 export async function findStaffByName(db: DB, name: string) {
-	return db.query.staff.findMany({
+	const exact = await db.query.staff.findMany({
 		where: and(eq(staff.name, name), isNull(staff.deletedAt)),
 		limit: 10,
 	});
+	if (exact.length > 0) return exact;
+
+	const normalized = normalizeStaffName(name);
+	const active = await db.query.staff.findMany({
+		where: isNull(staff.deletedAt),
+		limit: 200,
+	});
+	return active.filter(
+		(member) => normalizeStaffName(member.name) === normalized,
+	);
 }
 
 export async function listStaff(db: DB, options: ListStaffOptions = {}) {

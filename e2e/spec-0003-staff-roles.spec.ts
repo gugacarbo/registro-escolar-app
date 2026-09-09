@@ -124,7 +124,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		expect(await response.json()).toMatchObject({ error: "Papel não encontrado" });
 	});
 
-	test("remoção de servidor preserva participações históricas", async ({
+	test("soft delete de servidor preserva participações históricas", async ({
 		apiContext,
 	}) => {
 		const staff = await createStaff(apiContext, "Servidor Removido");
@@ -139,8 +139,20 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		});
 		await addParticipant(apiContext, meeting.id, staff.id, role.id);
 
-		// API pública não expõe soft delete; validamos que o participante histórico
-		// permanece e o servidor permanece representado pelo ID na listagem.
+		const deleteResponse = await fetch(`${baseURL}/api/staff/${staff.id}`, {
+			method: "DELETE",
+			headers: { Cookie: apiContext.cookies },
+		});
+		expect(deleteResponse.status).toBe(200);
+		const deleted = (await deleteResponse.json()) as { deletedAt: string | null };
+		expect(deleted.deletedAt).not.toBeNull();
+
+		const activeListResponse = await fetch(`${baseURL}/api/staff`, {
+			headers: { Cookie: apiContext.cookies },
+		});
+		const activeStaff = (await activeListResponse.json()) as Array<{ id: string }>;
+		expect(activeStaff.map((member) => member.id)).not.toContain(staff.id);
+
 		const response = await fetch(
 			`${baseURL}/api/meetings/${meeting.id}/participants`,
 			{ headers: { Cookie: apiContext.cookies } },

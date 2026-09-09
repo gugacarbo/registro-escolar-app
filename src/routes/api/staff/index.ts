@@ -86,15 +86,6 @@ export async function createStaffHandler({
 	const db = createDb(requireD1(env));
 	const normalizedName = normalizeStaffName(parsed.data.name);
 	const existing = await findStaffByName(db, parsed.data.name);
-	// Matching normalizado cobre caixa, acentos e espaços extras.
-	if (existing.length === 0) {
-		const activeStaff = await listStaff(db, { limit: 200 });
-		existing.push(
-			...activeStaff.filter(
-				(s) => normalizeStaffName(s.name) === normalizedName,
-			),
-		);
-	}
 	const duplicate = existing.find(
 		(s) => normalizeStaffName(s.name) === normalizedName,
 	);
