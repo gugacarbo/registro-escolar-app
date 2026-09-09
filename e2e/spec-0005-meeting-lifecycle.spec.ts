@@ -11,7 +11,29 @@ import {
 import { expect, test } from "./fixtures/test";
 
 test.describe("SPEC-0005 ciclo de vida da reunião", () => {
-	test("cria reunião em rascunho", async ({ apiContext }) => {
+	test("cria reunião em rascunho pela UI", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const klass = await createClass(apiContext, "Turma UI Reunião", "2026");
+		await page.goto("/meetings/new");
+		const nameField = page.getByRole("textbox", { name: "Nome" });
+		await nameField.click();
+		await nameField.fill("Conselho UI");
+		await expect(nameField).toHaveValue("Conselho UI");
+		await page.locator("input[type=date]").fill("2026-05-10");
+		await page
+			.locator("label")
+			.filter({ hasText: `${klass.name} — 2026` })
+			.locator("button")
+			.first()
+			.click();
+		await page.getByRole("button", { name: "Salvar" }).click();
+		await expect(page.getByRole("heading", { name: "Conselho UI" })).toBeVisible();
+		await expect(page.getByText("Rascunho")).toBeVisible();
+	});
+
+	test("cria reunião em rascunho via API", async ({ apiContext }) => {
 		const meeting = await createMeeting(apiContext, {
 			title: "Conselho Rascunho",
 			heldAt: "2026-05-10",
@@ -45,7 +67,11 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 		expect(start.status).toBe(200);
 		expect(((await start.json()) as { status: string }).status).toBe("in_progress");
 
-		const finish = await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		const finish = await transitionMeetingResponse(
+			apiContext,
+			meeting.id,
+			"finalize",
+		);
 		expect(finish.status).toBe(200);
 		expect(((await finish.json()) as { status: string }).status).toBe("finished");
 
@@ -64,7 +90,8 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await transitionMeetingResponse(apiContext, meeting.id, "start");
+		const setupStart = await transitionMeetingResponse(apiContext, meeting.id, "start");
+		expect(setupStart.status).toBe(200);
 		const response = await transitionMeetingResponse(apiContext, meeting.id, "start");
 		expect(response.status).toBe(409);
 	});
@@ -85,9 +112,15 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await transitionMeetingResponse(apiContext, meeting.id, "start");
+		const setupStart = await transitionMeetingResponse(apiContext, meeting.id, "start");
+		expect(setupStart.status).toBe(200);
 		const record = await createLinkedRecord(apiContext, meeting.id, student.id, "Registro antes do fim");
-		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		const setupFinish = await transitionMeetingResponse(
+			apiContext,
+			meeting.id,
+			"finalize",
+		);
+		expect(setupFinish.status).toBe(200);
 
 		const createResponse = await fetch(
 			`${baseURL}/api/meetings/${meeting.id}/students/${student.id}/records`,
@@ -123,8 +156,14 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await transitionMeetingResponse(apiContext, meeting.id, "start");
-		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		const setupStart = await transitionMeetingResponse(apiContext, meeting.id, "start");
+		expect(setupStart.status).toBe(200);
+		const setupFinish = await transitionMeetingResponse(
+			apiContext,
+			meeting.id,
+			"finalize",
+		);
+		expect(setupFinish.status).toBe(200);
 		const record = await createIndependentRecord(
 			apiContext,
 			student.id,

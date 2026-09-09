@@ -16,6 +16,7 @@ import {
 	useFieldArray,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -136,8 +137,8 @@ export function MeetingForm({
 						</FormItem>
 					)}
 				/>
-				<FormItem>
-					<FormLabel>Participantes</FormLabel>
+				<div className="grid gap-2">
+					<Label htmlFor={undefined}>Participantes</Label>
 					<div className="space-y-2">
 						{fields.map((participantField, index) => (
 							<div
@@ -197,16 +198,14 @@ export function MeetingForm({
 							Adicionar participante
 						</Button>
 					</div>
-				</FormItem>
-				<FormItem>
-					<FormLabel>Modelo de ata</FormLabel>
-					<FormControl>
-						<Input
-							disabled
-							placeholder="Seleção de modelo disponível após spec 0009"
-						/>
-					</FormControl>
-				</FormItem>
+				</div>
+				<div className="grid gap-2">
+					<Label htmlFor={undefined}>Modelo de ata</Label>
+					<Input
+						disabled
+						placeholder="Seleção de modelo disponível após spec 0009"
+					/>
+				</div>
 				{serverError && (
 					<p className="text-sm text-destructive">{serverError}</p>
 				)}
