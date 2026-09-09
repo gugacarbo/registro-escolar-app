@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-09-08
 builds-on:
   - ADR-0014
@@ -40,7 +40,7 @@ As atas precisam ser geradas como PDF oficiais a partir dos dados da reunião e 
 
 ## Decisão
 
-Adotar **Opção 3**: gerar PDF das atas dentro do runtime serverless/edge (Cloudflare Workers) usando biblioteca compatível com o ambiente (ex.: `@react-pdf/renderer` ou similar validado). Cada versão da ata gera e armazena seu próprio PDF.
+Adotar **Opção 3**: gerar PDF das atas dentro do runtime serverless/edge (Cloudflare Workers) usando biblioteca compatível com o ambiente (atualmente `pdf-lib`). Cada versão da ata gera e armazena seu próprio PDF.
 
 ## Consequências
 
@@ -53,7 +53,7 @@ Adotar **Opção 3**: gerar PDF das atas dentro do runtime serverless/edge (Clou
 
 ```bash
 grep -E "pdf|PDF|ataVersao" src/ 2>/dev/null && \
-grep -q "@react-pdf\|pdf-lib\|puppeteer" package.json && \
+grep -q "pdf-lib" package.json && \
 echo "geração de PDF presente"
 ```
 
