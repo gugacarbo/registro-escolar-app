@@ -64,6 +64,17 @@ describe("meetings schema", () => {
 		expect(invalid.success).toBe(false);
 	});
 
+	it("createMeetingApiSchema converte data ISO da UI para Date", () => {
+		const parsed = createMeetingApiSchema.safeParse({
+			title: "Conselho",
+			heldAt: "2026-06-01",
+		});
+		expect(parsed.success).toBe(true);
+		if (parsed.success) {
+			expect(parsed.data.heldAt).toBeInstanceOf(Date);
+		}
+	});
+
 	it("transitionMeetingSchema aceita apenas start, finalize e reopen", () => {
 		expect(transitionMeetingSchema.safeParse("start").success).toBe(true);
 		expect(transitionMeetingSchema.safeParse("finalize").success).toBe(true);

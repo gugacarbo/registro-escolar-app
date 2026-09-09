@@ -62,5 +62,18 @@ bun run check                            # exit 0
 ## Verificação
 
 ```text
-(preencher no fechamento)
+2026-09-09 — implementação API + UI completa:
+- bunx tsc --noEmit --skipLibCheck → exit 0
+- bun run test → 44 arquivos, 306 testes, tudo verde
+- biome nos 44 arquivos do escopo (db meetings, lib/meetings, routes/api/meetings,
+  hooks/meetings, components/meetings, routes/_app/meetings) → limpo
+- bun run check → exit 1 por 6 erros de formatação PREEXISTENTES fora do escopo
+  (db/components-schema, lib/components, lib/offers — donos: specs 0004/0006)
+- cobertura global 93.98% funções / 92.17% branches (abaixo de 95% por
+  lib/classes/repository.ts 78% — fora do escopo); escopo meetings ≥95%
+  (lib/meetings 99.3%, routes/api/meetings 95–100%)
+- Endpoints: POST /api/meetings (201 sempre draft), PATCH :id/start (422 sem
+  turmas, 409 transição inválida), PATCH :id/finalize, PATCH :id/reopen + hint
+- UI: /meetings (lista+filtros+transições), /meetings/new, /meetings/:id,
+  /meetings/:id/council (placeholders 0006/0007, vinculado desabilitado)
 ```

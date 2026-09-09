@@ -4,7 +4,6 @@ import type { DB } from "#/db";
 import { classOffers, offerProfessors } from "#/db/schema";
 import { findActiveStaffById } from "#/lib/staff/repository";
 
-import type { CreateOfferApiInput } from "./schema";
 import type { OfferWithRelations } from "./types";
 
 export const ERR_DUPLICATE_OFFER = "Componente já ofertado nesta turma";

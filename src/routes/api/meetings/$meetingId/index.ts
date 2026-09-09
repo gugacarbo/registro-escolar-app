@@ -64,6 +64,10 @@ export async function updateMeetingHandler({
 	}
 
 	const body = (await request.json()) as Record<string, unknown>;
+	// Aceita data ISO (input date da UI) convertendo para Date.
+	if (typeof body.heldAt === "string" && body.heldAt.length > 0) {
+		body.heldAt = new Date(body.heldAt);
+	}
 	const parsed = updateMeetingSchema.safeParse(body);
 	if (!parsed.success) {
 		return json({ error: "Dados inválidos", issues: parsed.error.issues }, 400);

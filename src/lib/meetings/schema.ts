@@ -35,6 +35,13 @@ export const createMeetingSchema = createInsertSchema(meetings)
 // Campos extras de API podem usar z.object/z.array; os campos do
 // drizzle continuam vindos de createInsertSchema.
 export const createMeetingApiSchema = createMeetingSchema.extend({
+	// UI envia data ISO (input date); converter para Date antes da validação
+	// do timestamp_ms (mesmo padrão de mapEnrollmentRequestToRow).
+	heldAt: z.preprocess(
+		(value) =>
+			typeof value === "string" && value.length > 0 ? new Date(value) : value,
+		createInsertSchema(meetings).shape.heldAt,
+	),
 	classIds: z.array(z.string().min(1)).default([]),
 	participants: z
 		.array(
