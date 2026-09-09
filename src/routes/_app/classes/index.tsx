@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { CreateClassDialog } from "#/components/classes/create-class-dialog";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { useClasses } from "#/hooks/classes/use-classes";
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/_app/classes/")({
 
 function ClassesPage() {
 	const [search, setSearch] = useState("");
+	const [dialogOpen, setDialogOpen] = useState(false);
 	const { data: classes, isLoading } = useClasses(search);
 
 	return (
@@ -18,9 +20,7 @@ function ClassesPage() {
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-bold">Turmas</h1>
 				<div className="flex gap-2">
-					<Link to="/classes/new">
-						<Button>Nova turma</Button>
-					</Link>
+					<Button onClick={() => setDialogOpen(true)}>Nova turma</Button>
 					<Link to="/classes/enroll">
 						<Button variant="secondary">Matricular aluno</Button>
 					</Link>
