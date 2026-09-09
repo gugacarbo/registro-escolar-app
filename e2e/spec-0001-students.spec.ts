@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures/test";
+import { baseURL } from "./fixtures/api";
 import { StudentsPage } from "./pages/students-page";
 
 test.describe("SPEC-0001 cadastro e importação de alunos", () => {
@@ -16,9 +17,9 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		const studentsPage = new StudentsPage(page);
 		await studentsPage.create("Aluno Manual E2E");
 
-		await expect.poll(async () => page.url()).toBe("http://localhost:3001/students");
+		await expect.poll(async () => page.url()).toBe(`${baseURL}/students`);
 		await expect(page.getByText("Aluno Manual E2E")).toBeVisible();
-		const response = await fetch("http://localhost:3001/api/students", {
+		const response = await fetch(`${baseURL}/api/students`, {
 			headers: { Cookie: apiContext.cookies },
 		});
 		const students = (await response.json()) as Array<{ name: string }>;
@@ -56,7 +57,7 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		await expect(page.getByText("Importação concluída")).toBeVisible();
 		await expect(page.getByText(/Criados: 2/)).toBeVisible();
 
-		const response = await fetch("http://localhost:3001/api/students", {
+		const response = await fetch(`${baseURL}/api/students`, {
 			headers: { Cookie: apiContext.cookies },
 		});
 		const students = (await response.json()) as Array<{ name: string }>;
@@ -68,7 +69,7 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		apiContext,
 	}) => {
 		const existing = (await (
-			await fetch("http://localhost:3001/api/students", {
+			await fetch(`${baseURL}/api/students`, {
 				method: "POST",
 				headers: {
 					Cookie: apiContext.cookies,
@@ -92,7 +93,7 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		await page.getByRole("button", { name: "Confirmar importação" }).click();
 		await expect(page.getByText(/Vinculados: 1/)).toBeVisible();
 
-		const response = await fetch("http://localhost:3001/api/students", {
+		const response = await fetch(`${baseURL}/api/students`, {
 			headers: { Cookie: apiContext.cookies },
 		});
 		const students = (await response.json()) as Array<{ id: string }>;

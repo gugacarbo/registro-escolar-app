@@ -1,6 +1,6 @@
 import { signInTestUser, signUpTestUser, type TestUser } from "./auth";
 
-const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3001";
+export const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3001";
 
 export type ApiContext = {
 	cookies: string;
