@@ -1,3 +1,4 @@
 {
-	"pre-commit": "bunx lint-staged"
+  "pre-commit": "bunx lint-staged",
+  "pre-push": "bun pre-push"
 }
