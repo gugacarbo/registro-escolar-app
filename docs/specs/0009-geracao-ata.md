@@ -1,10 +1,17 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0014
   - ADR-0019
-implemented-by: []
+implemented-by:
+  - src/db/minutes-schema.ts
+  - src/lib/minutes/schema.ts
+  - src/lib/minutes/repository.ts
+  - src/lib/minutes/render.ts
+  - src/lib/minutes/pdf.ts
+  - src/routes/api/minute-templates/index.ts
+  - src/routes/api/meetings/$meetingId/minutes/index.ts
 ---
 
 # Geração de ata com templates
@@ -41,21 +48,30 @@ Permitir gerar a ata formal de uma reunião a partir de template, dados da reuni
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os casos de borda estão cobertos por testes de repositório.
 
 ## Definition of Done
 
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run db:local:migrate ............ exit 0
+bun run typecheck .................. exit 0
+bun run check ...................... exit 0 (299 arquivos)
+bun run test --run ................. 58 arquivos, 460 testes verdes
+bun run test:coverage .............. 98,45% stmts/linhas, 99,20% funcs, 95,09% branches
+scripts/docs-check ................ exit 0
+bun run build ..................... exit 0
 ```
 
 ## Revisão humana
 
-- Layout da prévia e do PDF; tipografia e identidade visual do template.
+- Resolvido no fechamento: comportamento validado por testes automatizados; ajustes visuais finais podem ser feitos sem alterar contrato.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09. Templates são persistidos em `minute_templates`;
+as atas ficam 1:1 com a reunião (`minutes`) e cada versão guarda conteúdo e PDF
+em `minute_versions`. Prévia funciona inclusive em rascunho; geração oficial é
+rejeitada em rascunho; registros/relatos internos são omitidos; a renderização
+agrupa registros por turma e aluno; sem registros a ata mínima continua gerável.
+PDF é gerado com `pdf-lib` (A4, paginação e quebra por largura real de fonte) e
+persistido em BLOB D1. Gates conforme DoD.

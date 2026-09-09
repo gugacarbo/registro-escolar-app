@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	index,
 	integer,
@@ -90,3 +90,32 @@ export const meetingClasses = sqliteTable(
 		index("meeting_classes_class_idx").on(table.classId),
 	],
 );
+
+export const meetingParticipantsRelations = relations(
+	meetingParticipants,
+	({ one }) => ({
+		meeting: one(meetings, {
+			fields: [meetingParticipants.meetingId],
+			references: [meetings.id],
+		}),
+		staff: one(staff, {
+			fields: [meetingParticipants.staffId],
+			references: [staff.id],
+		}),
+		role: one(roles, {
+			fields: [meetingParticipants.roleId],
+			references: [roles.id],
+		}),
+	}),
+);
+
+export const meetingClassesRelations = relations(meetingClasses, ({ one }) => ({
+	meeting: one(meetings, {
+		fields: [meetingClasses.meetingId],
+		references: [meetings.id],
+	}),
+	class: one(classes, {
+		fields: [meetingClasses.classId],
+		references: [classes.id],
+	}),
+}));

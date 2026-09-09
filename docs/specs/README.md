@@ -12,7 +12,7 @@
 | [SPEC-0006](0006-acompanhamento-alunos-reuniao.md) | Acompanhamento dos alunos durante a reunião | draft |
 | [SPEC-0007](0007-registros-aluno.md) | Registros de aluno | implemented |
 | [SPEC-0008](0008-relatos-gerais.md) | Relatos gerais da reunião | implemented |
-| [SPEC-0009](0009-geracao-ata.md) | Geração de ata com templates | draft |
-| [SPEC-0010](0010-versionamento-aprovacao-ata.md) | Versionamento e aprovação de ata | draft |
+| [SPEC-0009](0009-geracao-ata.md) | Geração de ata com templates | implemented |
+| [SPEC-0010](0010-versionamento-aprovacao-ata.md) | Versionamento e aprovação de ata | implemented |
 | [SPEC-0011](0011-historico-aluno.md) | Histórico do aluno | implemented |
 | [SPEC-0012](0012-historico-turma.md) | Histórico da turma | implemented |

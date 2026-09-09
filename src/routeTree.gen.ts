@@ -32,6 +32,7 @@ import { Route as ApiClassesIndexRouteImport } from './routes/api/classes/index'
 import { Route as ApiComponentsIndexRouteImport } from './routes/api/components/index'
 import { Route as ApiEnrollmentsIndexRouteImport } from './routes/api/enrollments/index'
 import { Route as ApiMeetingsIndexRouteImport } from './routes/api/meetings/index'
+import { Route as ApiMinuteTemplatesIndexRouteImport } from './routes/api/minute-templates/index'
 import { Route as ApiRolesIndexRouteImport } from './routes/api/roles/index'
 import { Route as ApiStaffIndexRouteImport } from './routes/api/staff/index'
 import { Route as ApiStudentsIndexRouteImport } from './routes/api/students/index'
@@ -55,9 +56,13 @@ import { Route as ApiStudentsIdRecordsRouteImport } from './routes/api/students/
 import { Route as ApiStudentsImportResolveRouteImport } from './routes/api/students/import.resolve'
 import { Route as ApiMeetingsMeetingIdGeneralReportsIndexRouteImport } from './routes/api/meetings/$meetingId/general-reports/index'
 import { Route as ApiMeetingsMeetingIdGeneralReportsReportIdRouteImport } from './routes/api/meetings/$meetingId/general-reports/$reportId'
+import { Route as ApiMeetingsMeetingIdMinutesIndexRouteImport } from './routes/api/meetings/$meetingId/minutes/index'
+import { Route as ApiMeetingsMeetingIdMinutesApproveRouteImport } from './routes/api/meetings/$meetingId/minutes/approve'
 import { Route as ApiMeetingsMeetingIdRecordsRecordIdRouteImport } from './routes/api/meetings/$meetingId/records/$recordId'
 import { Route as ApiMeetingsMeetingIdClassesClassIdStudentsRouteImport } from './routes/api/meetings/$meetingId/classes/$classId/students'
+import { Route as ApiMeetingsMeetingIdMinutesVersionsIndexRouteImport } from './routes/api/meetings/$meetingId/minutes/versions/index'
 import { Route as ApiMeetingsMeetingIdStudentsStudentIdStatusRouteImport } from './routes/api/meetings/$meetingId/students/$studentId/status'
+import { Route as ApiMeetingsMeetingIdMinutesVersionsVersionPdfRouteImport } from './routes/api/meetings/$meetingId/minutes/versions/$version/pdf'
 import { Route as ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRouteImport } from './routes/api/meetings/$meetingId/students/$studentId/records/index'
 import { Route as ApiMeetingsMeetingIdStudentsStudentIdRecordsRecordIdIncludeRouteImport } from './routes/api/meetings/$meetingId/students/$studentId/records/$recordId/include'
 
@@ -173,6 +178,11 @@ const ApiEnrollmentsIndexRoute = ApiEnrollmentsIndexRouteImport.update({
 const ApiMeetingsIndexRoute = ApiMeetingsIndexRouteImport.update({
   id: '/api/meetings/',
   path: '/api/meetings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMinuteTemplatesIndexRoute = ApiMinuteTemplatesIndexRouteImport.update({
+  id: '/api/minute-templates/',
+  path: '/api/minute-templates/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiRolesIndexRoute = ApiRolesIndexRouteImport.update({
@@ -302,6 +312,18 @@ const ApiMeetingsMeetingIdGeneralReportsReportIdRoute =
     path: '/api/meetings/$meetingId/general-reports/$reportId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiMeetingsMeetingIdMinutesIndexRoute =
+  ApiMeetingsMeetingIdMinutesIndexRouteImport.update({
+    id: '/api/meetings/$meetingId/minutes/',
+    path: '/api/meetings/$meetingId/minutes/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiMeetingsMeetingIdMinutesApproveRoute =
+  ApiMeetingsMeetingIdMinutesApproveRouteImport.update({
+    id: '/api/meetings/$meetingId/minutes/approve',
+    path: '/api/meetings/$meetingId/minutes/approve',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiMeetingsMeetingIdRecordsRecordIdRoute =
   ApiMeetingsMeetingIdRecordsRecordIdRouteImport.update({
     id: '/api/meetings/$meetingId/records/$recordId',
@@ -314,10 +336,22 @@ const ApiMeetingsMeetingIdClassesClassIdStudentsRoute =
     path: '/api/meetings/$meetingId/classes/$classId/students',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiMeetingsMeetingIdMinutesVersionsIndexRoute =
+  ApiMeetingsMeetingIdMinutesVersionsIndexRouteImport.update({
+    id: '/api/meetings/$meetingId/minutes/versions/',
+    path: '/api/meetings/$meetingId/minutes/versions/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiMeetingsMeetingIdStudentsStudentIdStatusRoute =
   ApiMeetingsMeetingIdStudentsStudentIdStatusRouteImport.update({
     id: '/api/meetings/$meetingId/students/$studentId/status',
     path: '/api/meetings/$meetingId/students/$studentId/status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute =
+  ApiMeetingsMeetingIdMinutesVersionsVersionPdfRouteImport.update({
+    id: '/api/meetings/$meetingId/minutes/versions/$version/pdf',
+    path: '/api/meetings/$meetingId/minutes/versions/$version/pdf',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute =
@@ -359,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/api/components/': typeof ApiComponentsIndexRoute
   '/api/enrollments/': typeof ApiEnrollmentsIndexRoute
   '/api/meetings/': typeof ApiMeetingsIndexRoute
+  '/api/minute-templates/': typeof ApiMinuteTemplatesIndexRoute
   '/api/roles/': typeof ApiRolesIndexRoute
   '/api/staff/': typeof ApiStaffIndexRoute
   '/api/students/': typeof ApiStudentsIndexRoute
@@ -380,10 +415,14 @@ export interface FileRoutesByFullPath {
   '/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
+  '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   '/api/meetings/$meetingId/general-reports/': typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
+  '/api/meetings/$meetingId/minutes/': typeof ApiMeetingsMeetingIdMinutesIndexRoute
   '/api/meetings/$meetingId/classes/$classId/students': typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
   '/api/meetings/$meetingId/students/$studentId/status': typeof ApiMeetingsMeetingIdStudentsStudentIdStatusRoute
+  '/api/meetings/$meetingId/minutes/versions/': typeof ApiMeetingsMeetingIdMinutesVersionsIndexRoute
+  '/api/meetings/$meetingId/minutes/versions/$version/pdf': typeof ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute
   '/api/meetings/$meetingId/students/$studentId/records/': typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute
   '/api/meetings/$meetingId/students/$studentId/records/$recordId/include': typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsRecordIdIncludeRoute
 }
@@ -411,6 +450,7 @@ export interface FileRoutesByTo {
   '/api/components': typeof ApiComponentsIndexRoute
   '/api/enrollments': typeof ApiEnrollmentsIndexRoute
   '/api/meetings': typeof ApiMeetingsIndexRoute
+  '/api/minute-templates': typeof ApiMinuteTemplatesIndexRoute
   '/api/roles': typeof ApiRolesIndexRoute
   '/api/staff': typeof ApiStaffIndexRoute
   '/api/students': typeof ApiStudentsIndexRoute
@@ -432,10 +472,14 @@ export interface FileRoutesByTo {
   '/meetings/$meetingId': typeof AppMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId': typeof ApiMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
+  '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   '/api/meetings/$meetingId/general-reports': typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
+  '/api/meetings/$meetingId/minutes': typeof ApiMeetingsMeetingIdMinutesIndexRoute
   '/api/meetings/$meetingId/classes/$classId/students': typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
   '/api/meetings/$meetingId/students/$studentId/status': typeof ApiMeetingsMeetingIdStudentsStudentIdStatusRoute
+  '/api/meetings/$meetingId/minutes/versions': typeof ApiMeetingsMeetingIdMinutesVersionsIndexRoute
+  '/api/meetings/$meetingId/minutes/versions/$version/pdf': typeof ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute
   '/api/meetings/$meetingId/students/$studentId/records': typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute
   '/api/meetings/$meetingId/students/$studentId/records/$recordId/include': typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsRecordIdIncludeRoute
 }
@@ -465,6 +509,7 @@ export interface FileRoutesById {
   '/api/components/': typeof ApiComponentsIndexRoute
   '/api/enrollments/': typeof ApiEnrollmentsIndexRoute
   '/api/meetings/': typeof ApiMeetingsIndexRoute
+  '/api/minute-templates/': typeof ApiMinuteTemplatesIndexRoute
   '/api/roles/': typeof ApiRolesIndexRoute
   '/api/staff/': typeof ApiStaffIndexRoute
   '/api/students/': typeof ApiStudentsIndexRoute
@@ -486,10 +531,14 @@ export interface FileRoutesById {
   '/_app/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
+  '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   '/api/meetings/$meetingId/general-reports/': typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
+  '/api/meetings/$meetingId/minutes/': typeof ApiMeetingsMeetingIdMinutesIndexRoute
   '/api/meetings/$meetingId/classes/$classId/students': typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
   '/api/meetings/$meetingId/students/$studentId/status': typeof ApiMeetingsMeetingIdStudentsStudentIdStatusRoute
+  '/api/meetings/$meetingId/minutes/versions/': typeof ApiMeetingsMeetingIdMinutesVersionsIndexRoute
+  '/api/meetings/$meetingId/minutes/versions/$version/pdf': typeof ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute
   '/api/meetings/$meetingId/students/$studentId/records/': typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute
   '/api/meetings/$meetingId/students/$studentId/records/$recordId/include': typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsRecordIdIncludeRoute
 }
@@ -519,6 +568,7 @@ export interface FileRouteTypes {
     | '/api/components/'
     | '/api/enrollments/'
     | '/api/meetings/'
+    | '/api/minute-templates/'
     | '/api/roles/'
     | '/api/staff/'
     | '/api/students/'
@@ -540,10 +590,14 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId/'
     | '/api/meetings/$meetingId/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
+    | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
     | '/api/meetings/$meetingId/general-reports/'
+    | '/api/meetings/$meetingId/minutes/'
     | '/api/meetings/$meetingId/classes/$classId/students'
     | '/api/meetings/$meetingId/students/$studentId/status'
+    | '/api/meetings/$meetingId/minutes/versions/'
+    | '/api/meetings/$meetingId/minutes/versions/$version/pdf'
     | '/api/meetings/$meetingId/students/$studentId/records/'
     | '/api/meetings/$meetingId/students/$studentId/records/$recordId/include'
   fileRoutesByTo: FileRoutesByTo
@@ -571,6 +625,7 @@ export interface FileRouteTypes {
     | '/api/components'
     | '/api/enrollments'
     | '/api/meetings'
+    | '/api/minute-templates'
     | '/api/roles'
     | '/api/staff'
     | '/api/students'
@@ -592,10 +647,14 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId'
     | '/api/meetings/$meetingId'
     | '/api/meetings/$meetingId/general-reports/$reportId'
+    | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
     | '/api/meetings/$meetingId/general-reports'
+    | '/api/meetings/$meetingId/minutes'
     | '/api/meetings/$meetingId/classes/$classId/students'
     | '/api/meetings/$meetingId/students/$studentId/status'
+    | '/api/meetings/$meetingId/minutes/versions'
+    | '/api/meetings/$meetingId/minutes/versions/$version/pdf'
     | '/api/meetings/$meetingId/students/$studentId/records'
     | '/api/meetings/$meetingId/students/$studentId/records/$recordId/include'
   id:
@@ -624,6 +683,7 @@ export interface FileRouteTypes {
     | '/api/components/'
     | '/api/enrollments/'
     | '/api/meetings/'
+    | '/api/minute-templates/'
     | '/api/roles/'
     | '/api/staff/'
     | '/api/students/'
@@ -645,10 +705,14 @@ export interface FileRouteTypes {
     | '/_app/meetings/$meetingId/'
     | '/api/meetings/$meetingId/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
+    | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
     | '/api/meetings/$meetingId/general-reports/'
+    | '/api/meetings/$meetingId/minutes/'
     | '/api/meetings/$meetingId/classes/$classId/students'
     | '/api/meetings/$meetingId/students/$studentId/status'
+    | '/api/meetings/$meetingId/minutes/versions/'
+    | '/api/meetings/$meetingId/minutes/versions/$version/pdf'
     | '/api/meetings/$meetingId/students/$studentId/records/'
     | '/api/meetings/$meetingId/students/$studentId/records/$recordId/include'
   fileRoutesById: FileRoutesById
@@ -663,6 +727,7 @@ export interface RootRouteChildren {
   ApiComponentsIndexRoute: typeof ApiComponentsIndexRoute
   ApiEnrollmentsIndexRoute: typeof ApiEnrollmentsIndexRoute
   ApiMeetingsIndexRoute: typeof ApiMeetingsIndexRoute
+  ApiMinuteTemplatesIndexRoute: typeof ApiMinuteTemplatesIndexRoute
   ApiRolesIndexRoute: typeof ApiRolesIndexRoute
   ApiStaffIndexRoute: typeof ApiStaffIndexRoute
   ApiStudentsIndexRoute: typeof ApiStudentsIndexRoute
@@ -677,10 +742,14 @@ export interface RootRouteChildren {
   ApiStudentsIdRecordsRoute: typeof ApiStudentsIdRecordsRoute
   ApiMeetingsMeetingIdIndexRoute: typeof ApiMeetingsMeetingIdIndexRoute
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute: typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
+  ApiMeetingsMeetingIdMinutesApproveRoute: typeof ApiMeetingsMeetingIdMinutesApproveRoute
   ApiMeetingsMeetingIdRecordsRecordIdRoute: typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   ApiMeetingsMeetingIdGeneralReportsIndexRoute: typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
+  ApiMeetingsMeetingIdMinutesIndexRoute: typeof ApiMeetingsMeetingIdMinutesIndexRoute
   ApiMeetingsMeetingIdClassesClassIdStudentsRoute: typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
   ApiMeetingsMeetingIdStudentsStudentIdStatusRoute: typeof ApiMeetingsMeetingIdStudentsStudentIdStatusRoute
+  ApiMeetingsMeetingIdMinutesVersionsIndexRoute: typeof ApiMeetingsMeetingIdMinutesVersionsIndexRoute
+  ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute: typeof ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute
   ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute: typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute
   ApiMeetingsMeetingIdStudentsStudentIdRecordsRecordIdIncludeRoute: typeof ApiMeetingsMeetingIdStudentsStudentIdRecordsRecordIdIncludeRoute
 }
@@ -848,6 +917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMeetingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/minute-templates/': {
+      id: '/api/minute-templates/'
+      path: '/api/minute-templates'
+      fullPath: '/api/minute-templates/'
+      preLoaderRoute: typeof ApiMinuteTemplatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/roles/': {
       id: '/api/roles/'
       path: '/api/roles'
@@ -1009,6 +1085,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMeetingsMeetingIdGeneralReportsReportIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/meetings/$meetingId/minutes/': {
+      id: '/api/meetings/$meetingId/minutes/'
+      path: '/api/meetings/$meetingId/minutes'
+      fullPath: '/api/meetings/$meetingId/minutes/'
+      preLoaderRoute: typeof ApiMeetingsMeetingIdMinutesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/meetings/$meetingId/minutes/approve': {
+      id: '/api/meetings/$meetingId/minutes/approve'
+      path: '/api/meetings/$meetingId/minutes/approve'
+      fullPath: '/api/meetings/$meetingId/minutes/approve'
+      preLoaderRoute: typeof ApiMeetingsMeetingIdMinutesApproveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/meetings/$meetingId/records/$recordId': {
       id: '/api/meetings/$meetingId/records/$recordId'
       path: '/api/meetings/$meetingId/records/$recordId'
@@ -1023,11 +1113,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMeetingsMeetingIdClassesClassIdStudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/meetings/$meetingId/minutes/versions/': {
+      id: '/api/meetings/$meetingId/minutes/versions/'
+      path: '/api/meetings/$meetingId/minutes/versions'
+      fullPath: '/api/meetings/$meetingId/minutes/versions/'
+      preLoaderRoute: typeof ApiMeetingsMeetingIdMinutesVersionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/meetings/$meetingId/students/$studentId/status': {
       id: '/api/meetings/$meetingId/students/$studentId/status'
       path: '/api/meetings/$meetingId/students/$studentId/status'
       fullPath: '/api/meetings/$meetingId/students/$studentId/status'
       preLoaderRoute: typeof ApiMeetingsMeetingIdStudentsStudentIdStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/meetings/$meetingId/minutes/versions/$version/pdf': {
+      id: '/api/meetings/$meetingId/minutes/versions/$version/pdf'
+      path: '/api/meetings/$meetingId/minutes/versions/$version/pdf'
+      fullPath: '/api/meetings/$meetingId/minutes/versions/$version/pdf'
+      preLoaderRoute: typeof ApiMeetingsMeetingIdMinutesVersionsVersionPdfRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/meetings/$meetingId/students/$studentId/records/': {
@@ -1120,6 +1224,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiComponentsIndexRoute: ApiComponentsIndexRoute,
   ApiEnrollmentsIndexRoute: ApiEnrollmentsIndexRoute,
   ApiMeetingsIndexRoute: ApiMeetingsIndexRoute,
+  ApiMinuteTemplatesIndexRoute: ApiMinuteTemplatesIndexRoute,
   ApiRolesIndexRoute: ApiRolesIndexRoute,
   ApiStaffIndexRoute: ApiStaffIndexRoute,
   ApiStudentsIndexRoute: ApiStudentsIndexRoute,
@@ -1135,14 +1240,21 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMeetingsMeetingIdIndexRoute: ApiMeetingsMeetingIdIndexRoute,
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute:
     ApiMeetingsMeetingIdGeneralReportsReportIdRoute,
+  ApiMeetingsMeetingIdMinutesApproveRoute:
+    ApiMeetingsMeetingIdMinutesApproveRoute,
   ApiMeetingsMeetingIdRecordsRecordIdRoute:
     ApiMeetingsMeetingIdRecordsRecordIdRoute,
   ApiMeetingsMeetingIdGeneralReportsIndexRoute:
     ApiMeetingsMeetingIdGeneralReportsIndexRoute,
+  ApiMeetingsMeetingIdMinutesIndexRoute: ApiMeetingsMeetingIdMinutesIndexRoute,
   ApiMeetingsMeetingIdClassesClassIdStudentsRoute:
     ApiMeetingsMeetingIdClassesClassIdStudentsRoute,
   ApiMeetingsMeetingIdStudentsStudentIdStatusRoute:
     ApiMeetingsMeetingIdStudentsStudentIdStatusRoute,
+  ApiMeetingsMeetingIdMinutesVersionsIndexRoute:
+    ApiMeetingsMeetingIdMinutesVersionsIndexRoute,
+  ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute:
+    ApiMeetingsMeetingIdMinutesVersionsVersionPdfRoute,
   ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute:
     ApiMeetingsMeetingIdStudentsStudentIdRecordsIndexRoute,
   ApiMeetingsMeetingIdStudentsStudentIdRecordsRecordIdIncludeRoute:

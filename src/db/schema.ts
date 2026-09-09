@@ -5,6 +5,7 @@ export * from "./enrollments-schema.ts";
 export * from "./general-reports-schema.ts";
 export * from "./meeting-student-status-schema.ts";
 export * from "./meetings-schema.ts";
+export * from "./minutes-schema.ts";
 export * from "./records-schema.ts";
 export * from "./roles-schema.ts";
 export * from "./staff-schema.ts";

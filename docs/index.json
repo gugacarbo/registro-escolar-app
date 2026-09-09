@@ -421,25 +421,39 @@
     "path": "docs/specs/0009-geracao-ata.md",
     "layer": "specs",
     "title": "Geração de ata com templates",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0014",
       "ADR-0019"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/minutes-schema.ts",
+      "src/lib/minutes/schema.ts",
+      "src/lib/minutes/repository.ts",
+      "src/lib/minutes/render.ts",
+      "src/lib/minutes/pdf.ts",
+      "src/routes/api/minute-templates/index.ts",
+      "src/routes/api/meetings/$meetingId/minutes/index.ts"
+    ]
   },
   {
     "id": "SPEC-0010",
     "path": "docs/specs/0010-versionamento-aprovacao-ata.md",
     "layer": "specs",
     "title": "Versionamento e aprovação de ata",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0014"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/minutes-schema.ts",
+      "src/lib/minutes/repository.ts",
+      "src/routes/api/meetings/$meetingId/minutes/versions/index.ts",
+      "src/routes/api/meetings/$meetingId/minutes/versions/$version/pdf.ts",
+      "src/routes/api/meetings/$meetingId/minutes/approve.ts"
+    ]
   },
   {
     "id": "SPEC-0011",
