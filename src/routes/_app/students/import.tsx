@@ -7,7 +7,7 @@ import {
 	useResolveImport,
 } from "#/hooks/students/use-import-students";
 
-export const Route = createFileRoute("/app/students/import")({
+export const Route = createFileRoute("/_app/students/import")({
 	component: ImportStudentsPage,
 });
 
@@ -103,7 +103,7 @@ function ImportStudentsPage() {
 					Criados: {result.created} | Vinculados: {result.linked} | Ignorados:{" "}
 					{result.skipped}
 				</p>
-				<Button onClick={() => navigate({ to: "/app/students" })}>
+				<Button onClick={() => navigate({ to: "/students" })}>
 					Ver alunos
 				</Button>
 			</div>

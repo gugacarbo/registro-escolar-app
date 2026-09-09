@@ -4,7 +4,7 @@ import { useState } from "react";
 import { StudentForm } from "#/components/students/student-form";
 import { useCreateStudent } from "#/hooks/students/use-create-student";
 
-export const Route = createFileRoute("/app/students/new")({
+export const Route = createFileRoute("/_app/students/new")({
 	component: NewStudentPage,
 });
 
@@ -17,7 +17,7 @@ function NewStudentPage() {
 		setServerError(null);
 		try {
 			await createStudent.mutateAsync(values);
-			void navigate({ to: "/app/students" });
+			void navigate({ to: "/students" });
 		} catch (error) {
 			if (error instanceof Error) {
 				setServerError(error.message);

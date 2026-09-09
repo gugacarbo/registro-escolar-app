@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/app/")({
+export const Route = createFileRoute("/_app/")({
 	component: AppHome,
 });
 
@@ -10,7 +10,7 @@ function AppHome() {
 			<h1 className="text-3xl font-bold">Registro Escolar</h1>
 			<div className="flex gap-4">
 				<Link
-					to="/app/students"
+					to="/students"
 					className="rounded bg-primary px-4 py-2 text-primary-foreground"
 				>
 					Alunos

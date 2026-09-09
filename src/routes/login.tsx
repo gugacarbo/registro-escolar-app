@@ -53,7 +53,7 @@ export function LoginPage() {
 			.getSession()
 			.then(({ data }) => {
 				if (!active) return;
-				if (data) void navigate({ to: "/app" });
+				if (data) void navigate({ to: "/" });
 			})
 			.finally(() => {
 				if (active) setIsCheckingSession(false);
@@ -69,7 +69,7 @@ export function LoginPage() {
 		const { error } = await authClient.signIn.email({
 			email: values.email,
 			password: values.password,
-			callbackURL: "/app",
+			callbackURL: "/",
 		});
 
 		if (error) {
@@ -77,7 +77,7 @@ export function LoginPage() {
 			return;
 		}
 
-		void navigate({ to: "/app" });
+		void navigate({ to: "/" });
 	}
 
 	if (isCheckingSession) {

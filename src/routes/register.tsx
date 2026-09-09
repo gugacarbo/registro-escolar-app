@@ -54,7 +54,7 @@ export function RegisterPage() {
 			.getSession()
 			.then(({ data }) => {
 				if (!active) return;
-				if (data) void navigate({ to: "/app" });
+				if (data) void navigate({ to: "/" });
 			})
 			.finally(() => {
 				if (active) setIsCheckingSession(false);
@@ -71,7 +71,7 @@ export function RegisterPage() {
 			name: values.name,
 			email: values.email,
 			password: values.password,
-			callbackURL: "/app",
+			callbackURL: "/",
 		});
 
 		if (error) {
@@ -79,7 +79,7 @@ export function RegisterPage() {
 			return;
 		}
 
-		void navigate({ to: "/app" });
+		void navigate({ to: "/" });
 	}
 
 	if (isCheckingSession) {

@@ -9,22 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as AppIndexRouteImport } from './routes/app/index'
-import { Route as App_layoutRouteImport } from './routes/app/__layout'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppStudentsIndexRouteImport } from './routes/_app/students/index'
+import { Route as AppStudentsImportRouteImport } from './routes/_app/students/import'
+import { Route as AppStudentsNewRouteImport } from './routes/_app/students/new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiStudentsIndexRouteImport } from './routes/api/students/index'
 import { Route as ApiStudentsImportRouteImport } from './routes/api/students/import'
-import { Route as AppStudentsIndexRouteImport } from './routes/app/students/index'
-import { Route as AppStudentsImportRouteImport } from './routes/app/students/import'
-import { Route as AppStudentsNewRouteImport } from './routes/app/students/new'
 import { Route as ApiStudentsImportResolveRouteImport } from './routes/api/students/import.resolve'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -38,14 +36,24 @@ const RegisterRoute = RegisterRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/app/',
-  path: '/app/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const App_layoutRoute = App_layoutRouteImport.update({
-  id: '/app/__layout',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
+const AppStudentsIndexRoute = AppStudentsIndexRouteImport.update({
+  id: '/students/',
+  path: '/students/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppStudentsImportRoute = AppStudentsImportRouteImport.update({
+  id: '/students/import',
+  path: '/students/import',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppStudentsNewRoute = AppStudentsNewRouteImport.update({
+  id: '/students/new',
+  path: '/students/new',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -62,21 +70,6 @@ const ApiStudentsImportRoute = ApiStudentsImportRouteImport.update({
   path: '/api/students/import',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppStudentsIndexRoute = AppStudentsIndexRouteImport.update({
-  id: '/app/students/',
-  path: '/app/students/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppStudentsImportRoute = AppStudentsImportRouteImport.update({
-  id: '/app/students/import',
-  path: '/app/students/import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppStudentsNewRoute = AppStudentsNewRouteImport.update({
-  id: '/app/students/new',
-  path: '/app/students/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiStudentsImportResolveRoute =
   ApiStudentsImportResolveRouteImport.update({
     id: '/resolve',
@@ -85,45 +78,41 @@ const ApiStudentsImportResolveRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/app': typeof App_layoutRoute
-  '/app/': typeof AppIndexRoute
+  '/students/import': typeof AppStudentsImportRoute
+  '/students/new': typeof AppStudentsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/students/import': typeof ApiStudentsImportRouteWithChildren
-  '/app/students/import': typeof AppStudentsImportRoute
-  '/app/students/new': typeof AppStudentsNewRoute
+  '/students/': typeof AppStudentsIndexRoute
   '/api/students/': typeof ApiStudentsIndexRoute
-  '/app/students/': typeof AppStudentsIndexRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/app': typeof AppIndexRoute
+  '/': typeof AppIndexRoute
+  '/students/import': typeof AppStudentsImportRoute
+  '/students/new': typeof AppStudentsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/students/import': typeof ApiStudentsImportRouteWithChildren
-  '/app/students/import': typeof AppStudentsImportRoute
-  '/app/students/new': typeof AppStudentsNewRoute
+  '/students': typeof AppStudentsIndexRoute
   '/api/students': typeof ApiStudentsIndexRoute
-  '/app/students': typeof AppStudentsIndexRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/app/__layout': typeof App_layoutRoute
-  '/app/': typeof AppIndexRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/students/import': typeof AppStudentsImportRoute
+  '/_app/students/new': typeof AppStudentsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/students/import': typeof ApiStudentsImportRouteWithChildren
-  '/app/students/import': typeof AppStudentsImportRoute
-  '/app/students/new': typeof AppStudentsNewRoute
+  '/_app/students/': typeof AppStudentsIndexRoute
   '/api/students/': typeof ApiStudentsIndexRoute
-  '/app/students/': typeof AppStudentsIndexRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
 }
 export interface FileRouteTypes {
@@ -132,65 +121,56 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
-    | '/app'
-    | '/app/'
+    | '/students/import'
+    | '/students/new'
     | '/api/auth/$'
     | '/api/students/import'
-    | '/app/students/import'
-    | '/app/students/new'
+    | '/students/'
     | '/api/students/'
-    | '/app/students/'
     | '/api/students/import/resolve'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/login'
     | '/register'
-    | '/app'
+    | '/'
+    | '/students/import'
+    | '/students/new'
     | '/api/auth/$'
     | '/api/students/import'
-    | '/app/students/import'
-    | '/app/students/new'
+    | '/students'
     | '/api/students'
-    | '/app/students'
     | '/api/students/import/resolve'
   id:
     | '__root__'
-    | '/'
+    | '/_app'
     | '/login'
     | '/register'
-    | '/app/__layout'
-    | '/app/'
+    | '/_app/'
+    | '/_app/students/import'
+    | '/_app/students/new'
     | '/api/auth/$'
     | '/api/students/import'
-    | '/app/students/import'
-    | '/app/students/new'
+    | '/_app/students/'
     | '/api/students/'
-    | '/app/students/'
     | '/api/students/import/resolve'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  App_layoutRoute: typeof App_layoutRoute
-  AppIndexRoute: typeof AppIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStudentsImportRoute: typeof ApiStudentsImportRouteWithChildren
-  AppStudentsImportRoute: typeof AppStudentsImportRoute
-  AppStudentsNewRoute: typeof AppStudentsNewRoute
   ApiStudentsIndexRoute: typeof ApiStudentsIndexRoute
-  AppStudentsIndexRoute: typeof AppStudentsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -207,19 +187,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
-      path: '/app'
-      fullPath: '/app/'
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/app/__layout': {
-      id: '/app/__layout'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof App_layoutRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_app/students/': {
+      id: '/_app/students/'
+      path: '/students'
+      fullPath: '/students/'
+      preLoaderRoute: typeof AppStudentsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/students/import': {
+      id: '/_app/students/import'
+      path: '/students/import'
+      fullPath: '/students/import'
+      preLoaderRoute: typeof AppStudentsImportRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/students/new': {
+      id: '/_app/students/new'
+      path: '/students/new'
+      fullPath: '/students/new'
+      preLoaderRoute: typeof AppStudentsNewRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -242,27 +236,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStudentsImportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/students/': {
-      id: '/app/students/'
-      path: '/app/students'
-      fullPath: '/app/students/'
-      preLoaderRoute: typeof AppStudentsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/students/import': {
-      id: '/app/students/import'
-      path: '/app/students/import'
-      fullPath: '/app/students/import'
-      preLoaderRoute: typeof AppStudentsImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/students/new': {
-      id: '/app/students/new'
-      path: '/app/students/new'
-      fullPath: '/app/students/new'
-      preLoaderRoute: typeof AppStudentsNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/students/import/resolve': {
       id: '/api/students/import/resolve'
       path: '/resolve'
@@ -272,6 +245,24 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppRouteRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+  AppStudentsImportRoute: typeof AppStudentsImportRoute
+  AppStudentsNewRoute: typeof AppStudentsNewRoute
+  AppStudentsIndexRoute: typeof AppStudentsIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+  AppStudentsImportRoute: AppStudentsImportRoute,
+  AppStudentsNewRoute: AppStudentsNewRoute,
+  AppStudentsIndexRoute: AppStudentsIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
 
 interface ApiStudentsImportRouteChildren {
   ApiStudentsImportResolveRoute: typeof ApiStudentsImportResolveRoute
@@ -285,17 +276,12 @@ const ApiStudentsImportRouteWithChildren =
   ApiStudentsImportRoute._addFileChildren(ApiStudentsImportRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  App_layoutRoute: App_layoutRoute,
-  AppIndexRoute: AppIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStudentsImportRoute: ApiStudentsImportRouteWithChildren,
-  AppStudentsImportRoute: AppStudentsImportRoute,
-  AppStudentsNewRoute: AppStudentsNewRoute,
   ApiStudentsIndexRoute: ApiStudentsIndexRoute,
-  AppStudentsIndexRoute: AppStudentsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

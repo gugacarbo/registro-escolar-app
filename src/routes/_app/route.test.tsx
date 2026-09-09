@@ -20,7 +20,7 @@ vi.mock("#/lib/auth-client", () => ({
 	},
 }));
 
-import { AppLayout } from "./__layout";
+import { AppLayout } from "./route";
 
 const session = {
 	session: { id: "session-1", userId: "user-1" },

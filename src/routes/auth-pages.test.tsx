@@ -51,7 +51,7 @@ describe("LoginPage", () => {
 		render(<LoginPage />);
 
 		await waitFor(() =>
-			expect(mocks.navigate).toHaveBeenCalledWith({ to: "/app" }),
+			expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" }),
 		);
 	});
 
@@ -78,7 +78,7 @@ describe("LoginPage", () => {
 		expect(await screen.findByRole("alert")).toHaveTextContent(
 			"Email ou senha inválidos.",
 		);
-		expect(mocks.navigate).not.toHaveBeenCalledWith({ to: "/app" });
+		expect(mocks.navigate).not.toHaveBeenCalledWith({ to: "/" });
 	});
 
 	it("autentica com email e senha e direciona para a área privada", async () => {
@@ -97,10 +97,10 @@ describe("LoginPage", () => {
 			expect(mocks.signInEmail).toHaveBeenCalledWith({
 				email: "operador@escola.test",
 				password: "senha-segura",
-				callbackURL: "/app",
+				callbackURL: "/",
 			}),
 		);
-		expect(mocks.navigate).toHaveBeenCalledWith({ to: "/app" });
+		expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" });
 	});
 
 	it("não navega após desmontar durante a checagem de sessão", async () => {
@@ -126,7 +126,7 @@ describe("RegisterPage", () => {
 		render(<RegisterPage />);
 
 		await waitFor(() =>
-			expect(mocks.navigate).toHaveBeenCalledWith({ to: "/app" }),
+			expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" }),
 		);
 	});
 
@@ -156,7 +156,7 @@ describe("RegisterPage", () => {
 		expect(await screen.findByRole("alert")).toHaveTextContent(
 			"Não foi possível criar a conta.",
 		);
-		expect(mocks.navigate).not.toHaveBeenCalledWith({ to: "/app" });
+		expect(mocks.navigate).not.toHaveBeenCalledWith({ to: "/" });
 	});
 
 	it("cria a conta e direciona para a área privada", async () => {
@@ -179,10 +179,10 @@ describe("RegisterPage", () => {
 				name: "Operador",
 				email: "operador@escola.test",
 				password: "senha-segura",
-				callbackURL: "/app",
+				callbackURL: "/",
 			}),
 		);
-		expect(mocks.navigate).toHaveBeenCalledWith({ to: "/app" });
+		expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" });
 	});
 
 	it("não navega após desmontar durante a checagem de sessão", async () => {

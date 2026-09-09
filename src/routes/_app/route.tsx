@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { authClient } from "#/lib/auth-client";
 
-export const Route = createFileRoute("/app/__layout")({
+export const Route = createFileRoute("/_app")({
 	component: AppLayout,
 });
 
