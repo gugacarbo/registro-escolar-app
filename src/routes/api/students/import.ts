@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
+import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import { parseStudentImportFile } from "#/lib/students/csv-parser";
 import { matchImportRows } from "#/lib/students/matching";
 import { listStudents } from "#/lib/students/repository";
@@ -21,9 +22,10 @@ export async function importPreviewHandler({
 	context,
 }: {
 	request: Request;
-	context: { env: Env };
+	context: { env?: Env };
 }) {
-	const session = await getSession(request, context.env);
+	const env = context.env ?? (await getRuntimeEnv());
+	const session = await getSession(request, env);
 	if (!session) {
 		return new Response(JSON.stringify({ error: "Não autenticado" }), {
 			status: 401,
@@ -54,7 +56,7 @@ export async function importPreviewHandler({
 		);
 	}
 
-	const db = createDb(context.env.DB);
+	const db = createDb(requireD1(env));
 	const existing = await listStudents(db, { limit: 1000 });
 	const matched = matchImportRows(rows, existing);
 

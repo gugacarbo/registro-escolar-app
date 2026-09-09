@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
+import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import { createStudent } from "#/lib/students/repository";
 import { d1Middleware } from "#/middleware/d1";
 
@@ -37,9 +38,10 @@ export async function importResolveHandler({
 	context,
 }: {
 	request: Request;
-	context: { env: Env };
+	context: { env?: Env };
 }) {
-	const session = await getSession(request, context.env);
+	const env = context.env ?? (await getRuntimeEnv());
+	const session = await getSession(request, env);
 	if (!session) {
 		return new Response(JSON.stringify({ error: "Não autenticado" }), {
 			status: 401,
@@ -77,7 +79,7 @@ export async function importResolveHandler({
 		}
 	}
 
-	const db = createDb(context.env.DB);
+	const db = createDb(requireD1(env));
 
 	let created = 0;
 	let linked = 0;

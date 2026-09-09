@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createAuth } from "#/lib/auth";
+import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import { d1Middleware } from "#/middleware/d1";
 
 export const Route = createFileRoute("/api/auth/$")({
@@ -20,12 +21,13 @@ async function authHandler({
 	context,
 }: {
 	request: Request;
-	context: { env: Env };
+	context: { env?: Env };
 }) {
-	const db = context.env.DB;
-	if (!(db instanceof D1Database)) {
+	const env = context.env ?? (await getRuntimeEnv());
+	const db = requireD1(env);
+	if (!env) {
 		throw new Error("D1 binding not available");
 	}
-	const auth = createAuth(db, context.env);
+	const auth = createAuth(db, env);
 	return auth.handler(request);
 }

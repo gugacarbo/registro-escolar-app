@@ -1,18 +1,17 @@
 import { createMiddleware } from "@tanstack/react-start";
 
-type CloudflareEnv = {
-	env: Env;
-	ctx: ExecutionContext;
-};
+import { getRuntimeEnv } from "#/lib/cloudflare-env";
 
 export const d1Middleware = createMiddleware({
 	type: "request",
 }).server(async ({ next, context }) => {
-	const cloudflare = context as unknown as CloudflareEnv;
+	// `context` pode não trazer o env (ex.: dev via vite plugin); o handler
+	// resolve o restante via `cloudflare:workers`. Aqui só carrega o que já
+	// existe para não quebrar o encadeamento do middleware.
+	const env = await getRuntimeEnv(context);
 	return next({
 		context: {
-			env: cloudflare.env,
-			executionContext: cloudflare.ctx,
+			env,
 		},
 	});
 });
