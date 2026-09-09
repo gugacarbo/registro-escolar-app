@@ -2,6 +2,7 @@ import {
 	baseURL,
 	createClass,
 	createEnrollment,
+	createComponent,
 	createGeneralReport,
 	createLinkedRecord,
 	createMeeting,
@@ -89,7 +90,7 @@ test.describe("SPEC-0012 histórico da turma", () => {
 		expect(history.eventos).toHaveLength(0);
 	});
 
-	test("aplica filtros de período, aluno e texto", async ({ apiContext }) => {
+	test("aplica filtros de período, aluno, texto, componente e categoria", async ({ apiContext }) => {
 		const klass = await createClass(apiContext, "Turma Filtros Histórico", "2026");
 		const student = await createStudent(apiContext, "Aluno Filtro Turma");
 		await createEnrollment(apiContext, {
@@ -106,6 +107,14 @@ test.describe("SPEC-0012 histórico da turma", () => {
 		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro filtros turma");
 
+		const component = await createComponent(apiContext, "Componente Histórico Turma");
+		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro componente turma", {
+			componenteId: component.id,
+		});
+		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro categoria turma", {
+			categoriaId: "categoria-turma",
+		});
+
 		const byPeriod = await getClassHistory(apiContext, klass.id, "?periodo=2026");
 		expect(byPeriod.eventos.map((event) => event.texto)).toContain("Registro filtros turma");
 
@@ -117,6 +126,24 @@ test.describe("SPEC-0012 histórico da turma", () => {
 
 		const byText = await getClassHistory(apiContext, klass.id, "?q=FILTROS");
 		expect(byText.eventos.map((event) => event.texto)).toContain("Registro filtros turma");
+
+		const byComponent = await getClassHistory(
+			apiContext,
+			klass.id,
+			`?componenteId=${component.id}`,
+		);
+		expect(byComponent.eventos.map((event) => event.texto)).toContain(
+			"Registro componente turma",
+		);
+
+		const byCategory = await getClassHistory(
+			apiContext,
+			klass.id,
+			"?categoriaId=categoria-turma",
+		);
+		expect(byCategory.eventos.map((event) => event.texto)).toContain(
+			"Registro categoria turma",
+		);
 	});
 
 	test("não mistura registros de turma equivalente de outro período", async ({
