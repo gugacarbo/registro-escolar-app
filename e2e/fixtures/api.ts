@@ -215,7 +215,20 @@ export async function createGeneralReport(
 	return res.json();
 }
 
-export async function createMinuteTemplate(ctx: ApiContext, input: object) {
+export async function createMinuteTemplate(
+	ctx: ApiContext,
+	input: {
+		name: string;
+		headerText?: string;
+		footerText?: string;
+		showMeeting?: boolean;
+		showClasses?: boolean;
+		showParticipants?: boolean;
+		showRecords?: boolean;
+		showGeneralReports?: boolean;
+		showSignatures?: boolean;
+	},
+): Promise<{ id: string; name: string }> {
 	const res = await api("POST", "/api/minute-templates", ctx.cookies, input);
 	if (!res.ok) throw new Error(`createMinuteTemplate failed: ${res.status}`);
 	return res.json();
@@ -250,9 +263,35 @@ export async function reopenMeeting(ctx: ApiContext, meetingId: string) {
 	return res.json();
 }
 
-export async function generateMinute(ctx: ApiContext, meetingId: string, observacao?: string) {
-	const res = await api("POST", `/api/meetings/${meetingId}/minutes/generate`, ctx.cookies, { observacao });
+export async function generateMinute(
+	ctx: ApiContext,
+	meetingId: string,
+	observacao?: string,
+): Promise<{
+	minuteId: string;
+	version: number;
+	isCurrent: boolean;
+	approvalStatus: string;
+	pdfSize: number;
+}> {
+	const res = await api("POST", `/api/meetings/${meetingId}/minutes`, ctx.cookies, { observacao });
 	if (!res.ok) throw new Error(`generateMinute failed: ${res.status}`);
+	return res.json();
+}
+
+export async function previewMinute(
+	ctx: ApiContext,
+	meetingId: string,
+): Promise<{
+	meetingId: string;
+	templateId: string | null;
+	status: string;
+	approvalStatus: string;
+	rendered: { title: string; lines: Array<{ text: string; level: number }> };
+	content: string;
+}> {
+	const res = await api("GET", `/api/meetings/${meetingId}/minutes`, ctx.cookies);
+	if (!res.ok) throw new Error(`previewMinute failed: ${res.status}`);
 	return res.json();
 }
 
