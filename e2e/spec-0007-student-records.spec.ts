@@ -11,9 +11,12 @@ import {
 	startMeeting,
 	transitionMeetingResponse,
 } from "./fixtures/api";
-import { expect, test } from "./fixtures/test";
+import { expect, test, type ApiContext } from "./fixtures/test";
 
-async function setupMeetingWithStudent(apiContext: Parameters<typeof createStudent>[0], title: string) {
+async function setupMeetingWithStudent(
+	apiContext: ApiContext,
+	title: string,
+) {
 	const klass = await createClass(apiContext, `Turma Registros ${title}`, "2026");
 	const student = await createStudent(apiContext, `Aluno ${title}`);
 	await createEnrollment(apiContext, {
@@ -147,6 +150,22 @@ test.describe("SPEC-0007 registros de aluno", () => {
 		const linkedRecord = records.find((item) => item.id === record.id);
 		expect(linkedRecord?.includeInMinutes).toBe(false);
 		expect(linkedRecord?.texto).toBe("Contexto toggle");
+
+		const restored = await setRecordInclusion(
+			apiContext,
+			meeting.id,
+			student.id,
+			record.id,
+			true,
+		);
+		expect(restored).toMatchObject({ include: true });
+		const restoredRecords = await listRecords(apiContext, meeting.id, student.id);
+		expect(
+			restoredRecords.find((item) => item.id === record.id)?.includeInMinutes,
+		).toBe(true);
+		expect(
+			restoredRecords.find((item) => item.id === record.id)?.texto,
+		).toBe("Contexto toggle");
 
 		expect(records.find((item) => item.id === record.id)?.texto).toBe("Contexto toggle");
 	});
