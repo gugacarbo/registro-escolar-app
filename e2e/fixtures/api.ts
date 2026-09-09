@@ -33,19 +33,29 @@ function api(method: string, path: string, cookies: string, body?: unknown) {
 	return fetch(`${baseURL}${path}`, init);
 }
 
-export async function createStudent(ctx: ApiContext, name: string, extra?: object) {
+export async function createStudent(
+	ctx: ApiContext,
+	name: string,
+	extra?: object,
+): Promise<{ id: string; name: string }> {
 	const res = await api("POST", "/api/students", ctx.cookies, { name, ...extra });
 	if (!res.ok) throw new Error(`createStudent failed: ${res.status}`);
 	return res.json();
 }
 
-export async function createClass(ctx: ApiContext, input: object) {
+export async function createClass(
+	ctx: ApiContext,
+	input: object,
+): Promise<{ id: string; name: string }> {
 	const res = await api("POST", "/api/classes", ctx.cookies, input);
 	if (!res.ok) throw new Error(`createClass failed: ${res.status}`);
 	return res.json();
 }
 
-export async function createEnrollment(ctx: ApiContext, input: object) {
+export async function createEnrollment(
+	ctx: ApiContext,
+	input: object,
+): Promise<{ enrollment: unknown; closedEnrollments: unknown[] }> {
 	const res = await api("POST", "/api/enrollments", ctx.cookies, input);
 	if (!res.ok) throw new Error(`createEnrollment failed: ${res.status}`);
 	return res.json();
