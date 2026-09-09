@@ -21,7 +21,7 @@ describe("createAuth", () => {
 			BETTER_AUTH_URL: "https://app.escola.exemplo",
 			BETTER_AUTH_TRUSTED_ORIGINS:
 				"https://preview.escola.exemplo, https://app.escola.exemplo",
-		} as Env;
+		} as unknown as Env;
 
 		const auth = createAuth(d1, env);
 		const options = auth.options as unknown as { trustedOrigins: string[] };
