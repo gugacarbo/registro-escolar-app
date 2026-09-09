@@ -72,10 +72,20 @@ ensure_secret() {
   fi
 }
 
-# 3. Cria .env.local a partir do .env.example se não existir
+# 3. Cria .env.local com valores padrão se não existir
+# (o .env.example foi removido do repo; os defaults vivem aqui)
 if [ ! -f ".env.local" ]; then
-  log_info ".env.local não encontrado. Criando a partir de .env.example..."
-  cp ".env.example" ".env.local"
+  log_info ".env.local não encontrado. Criando com valores padrão..."
+  cat > ".env.local" <<'EOF'
+# Cloudflare credentials (only needed for drizzle-kit against remote D1)
+
+# Better Auth configuration
+BETTER_AUTH_URL=http://localhost:3001
+BETTER_AUTH_SECRET=
+
+# Optional public app title (client-side)
+VITE_APP_TITLE="Registro Escolar"
+EOF
 fi
 ensure_secret ".env.local"
 

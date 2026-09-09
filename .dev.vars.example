@@ -1,3 +1,11 @@
-# Cloudflare local development secrets and variables
-# Copy this file to .dev.vars and fill in the values
-BETTER_AUTH_SECRET= # Generate with `bunx @better-auth/cli secret`
+# Cloudflare credentials (only needed for drizzle-kit against remote D1)
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_DATABASE_ID=
+CLOUDFLARE_API_TOKEN=
+
+# Better Auth configuration
+BETTER_AUTH_URL=http://100.81.99.14:3001
+BETTER_AUTH_SECRET=
+
+# Optional public app title (client-side)
+VITE_APP_TITLE="Registro Escolar"
