@@ -166,7 +166,12 @@ export async function addParticipant(
 	return res.json();
 }
 
-export async function createIndependentRecord(ctx: ApiContext, studentId: string, texto: string, extra?: object) {
+export async function createIndependentRecord(
+	ctx: ApiContext,
+	studentId: string,
+	texto: string,
+	extra?: object,
+): Promise<{ id: string; texto: string }> {
 	const res = await api("POST", `/api/students/${studentId}/records`, ctx.cookies, {
 		texto,
 		...extra,
@@ -175,7 +180,13 @@ export async function createIndependentRecord(ctx: ApiContext, studentId: string
 	return res.json();
 }
 
-export async function createLinkedRecord(ctx: ApiContext, meetingId: string, studentId: string, texto: string, extra?: object) {
+export async function createLinkedRecord(
+	ctx: ApiContext,
+	meetingId: string,
+	studentId: string,
+	texto: string,
+	extra?: object,
+): Promise<{ id: string; texto: string; includeInMinutes: boolean }> {
 	const res = await api("POST", `/api/meetings/${meetingId}/students/${studentId}/records`, ctx.cookies, {
 		texto,
 		...extra,
@@ -199,10 +210,21 @@ export async function createMinuteTemplate(ctx: ApiContext, input: object) {
 	return res.json();
 }
 
-export async function startMeeting(ctx: ApiContext, meetingId: string) {
+export async function startMeeting(
+	ctx: ApiContext,
+	meetingId: string,
+): Promise<{ id: string; status: string }> {
 	const res = await api("PATCH", `/api/meetings/${meetingId}/start`, ctx.cookies);
 	if (!res.ok) throw new Error(`startMeeting failed: ${res.status}`);
 	return res.json();
+}
+
+export async function transitionMeetingResponse(
+	ctx: ApiContext,
+	meetingId: string,
+	action: "start" | "finalize" | "reopen",
+) {
+	return api("PATCH", `/api/meetings/${meetingId}/${action}`, ctx.cookies);
 }
 
 export async function finalizeMeeting(ctx: ApiContext, meetingId: string) {
