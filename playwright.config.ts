@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3001";
+
 export default defineConfig({
 	testDir: "./e2e",
 	fullyParallel: true,
@@ -8,7 +10,7 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 	reporter: "list",
 	use: {
-		baseURL: "http://localhost:3001",
+		baseURL,
 		trace: "on-first-retry",
 	},
 	projects: [
@@ -18,8 +20,12 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: "bun run preview -- --port 3001 --host",
-		url: "http://localhost:3001",
+		command: "bun run build && cp .dev.vars dist/server/.dev.vars && bunx vite preview --port 3001 --host",
+		env: {
+			BETTER_AUTH_URL: baseURL,
+			BETTER_AUTH_TRUSTED_ORIGINS: baseURL,
+		},
+		url: baseURL,
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000,
 	},
