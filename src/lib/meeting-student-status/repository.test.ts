@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -406,5 +407,21 @@ describe("getMeetingProgress", () => {
 		const progress = await getMeetingProgress(setup.db, "meeting-1");
 		expect(progress.total).toBe(2);
 		expect(progress.concluded).toBe(0);
+	});
+
+	it("usa createdAt quando a reunião não tem heldAt e retorna zero sem turmas", async () => {
+		await setup.db
+			.update(schema.meetings)
+			.set({ heldAt: null })
+			.where(eq(schema.meetings.id, "meeting-1"));
+		const progress = await getMeetingProgress(setup.db, "meeting-1");
+		expect(progress.total).toBe(3);
+		const missing = await getMeetingProgress(setup.db, "missing-meeting");
+		expect(missing).toEqual({
+			total: 0,
+			concluded: 0,
+			percentage: 0,
+			completed: false,
+		});
 	});
 });

@@ -276,4 +276,26 @@ describe("general reports repository", () => {
 			}),
 		).rejects.toBeInstanceOf(InvalidOriginError);
 	});
+
+	it("aplica default no create e atualização sem texto", async () => {
+		const { db } = createTestDb();
+		await seedMeeting(db, "meeting-1", "in_progress");
+		const created = await createGeneralReport(db, {
+			meetingId: "meeting-1",
+			texto: "Original",
+			originId: null,
+			categoryId: null,
+			includeInMinutes: true,
+		});
+		expect(created.includeInMinutes).toBe(true);
+		const updated = await updateGeneralReport(db, "meeting-1", created.id, {
+			texto: "Original",
+			originId: null,
+			categoryId: "categoria",
+			includeInMinutes: false,
+		});
+		expect(updated.texto).toBe("Original");
+		expect(updated.categoryId).toBe("categoria");
+		expect(updated.includeInMinutes).toBe(false);
+	});
 });

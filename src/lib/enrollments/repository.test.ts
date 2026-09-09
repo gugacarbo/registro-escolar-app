@@ -108,6 +108,32 @@ describe("enrollments repository", () => {
 		expect(overlap).toBeUndefined();
 	});
 
+	it("detecta sobreposição com intervalo fechado e cria retorna conflito", async () => {
+		const { db } = createTestDb();
+		const { student, classRow } = await seedStudentAndClass(db);
+		await createEnrollmentWithTransfer(db, {
+			studentId: student.id,
+			classId: classRow.id,
+			startDate: ts("2026-02-01"),
+			endDate: ts("2026-06-30"),
+			status: "ativa",
+		});
+		const overlap = await findOverlappingEnrollment(db, {
+			studentId: student.id,
+			classId: classRow.id,
+			start: ts("2026-03-01"),
+			end: ts("2026-04-01"),
+		});
+		expect(overlap).toBeDefined();
+		const conflict = await createEnrollmentWithTransfer(db, {
+			studentId: student.id,
+			classId: classRow.id,
+			startDate: ts("2026-05-01"),
+			status: "ativa",
+		});
+		expect("conflict" in conflict).toBe(true);
+	});
+
 	it("transferência encerra vínculo anterior sem apagar histórico (borda 2)", async () => {
 		const { db } = createTestDb();
 		const { student, classRow } = await seedStudentAndClass(db);

@@ -134,6 +134,25 @@ describe("GET /api/meetings/", () => {
 		);
 	});
 
+	it("normaliza paginação inválida", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			createMockSession(),
+		);
+		(listMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce([]);
+		const response = await listMeetingsHandler({
+			request: new Request(
+				"http://localhost/api/meetings/?limit=999&offset=-2",
+				{ method: "GET" },
+			),
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMeetings).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 200, offset: 0, status: undefined }),
+		);
+	});
+
 	it("ignore status inválido sem quebrar a listagem", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
@@ -274,6 +293,35 @@ describe("POST /api/meetings/", () => {
 				classIds: ["class-1"],
 				participants: [{ staffId: "staff-1", roleId: "role-1" }],
 			}),
+		);
+	});
+
+	it("cria reunião sem template convertendo para null", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			createMockSession(),
+		);
+		mockValidRefs();
+		(
+			createMeetingWithRelations as ReturnType<typeof vi.fn>
+		).mockResolvedValueOnce({
+			id: "meeting-2",
+			status: "draft",
+		});
+		const response = await createMeetingHandler({
+			request: new Request("http://localhost/api/meetings/", {
+				method: "POST",
+				body: JSON.stringify({
+					title: "Reunião sem template",
+					classIds: ["class-1"],
+					participants: [{ staffId: "staff-1", roleId: "role-1" }],
+				}),
+			}),
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(201);
+		expect(createMeetingWithRelations).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ templateId: null }),
 		);
 	});
 });

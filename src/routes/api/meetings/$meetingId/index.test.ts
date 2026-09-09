@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
 import { findMeetingById, updateMeeting } from "#/lib/meetings/repository";
@@ -43,6 +43,13 @@ function createEnv() {
 		BETTER_AUTH_URL: "http://localhost:3000",
 	} as Env;
 }
+
+beforeEach(() => {
+	vi.clearAllMocks();
+	(findMeetingById as ReturnType<typeof vi.fn>).mockReset();
+	(updateMeeting as ReturnType<typeof vi.fn>).mockReset();
+	(getSession as ReturnType<typeof vi.fn>).mockReset();
+});
 
 describe("GET /api/meetings/:id", () => {
 	it("retorna 401 sem autenticação", async () => {
@@ -125,6 +132,41 @@ describe("PATCH /api/meetings/:id", () => {
 			params: { meetingId: "meeting-1" },
 		});
 		expect(response.status).toBe(401);
+	});
+
+	it("retorna 400 com payload inválido no PATCH", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			status: "draft",
+		});
+		const response = await updateMeetingHandler({
+			request: new Request("http://localhost/api/meetings/meeting-1/", {
+				method: "PATCH",
+				body: JSON.stringify({ title: 12 }),
+			}),
+			context: { env: createEnv() },
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(400);
+	});
+
+	it("retorna 404 no PATCH quando a reunião não existe", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			undefined,
+		);
+		const response = await updateMeetingHandler({
+			request: new Request("http://localhost/api/meetings/missing/", {
+				method: "PATCH",
+				body: JSON.stringify({ title: "Novo" }),
+			}),
+			context: { env: createEnv() },
+			params: { meetingId: "missing" },
+		});
+		expect(response.status).toBe(404);
 	});
 
 	it("retorna 409 quando a reunião está em andamento", async () => {

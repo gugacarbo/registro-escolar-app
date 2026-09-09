@@ -308,6 +308,21 @@ describe("updateLinkedRecord", () => {
 		expect(updated.includeInMinutes).toBe(false);
 	});
 
+	it("edita categoria e componente opcionais", async () => {
+		const created = await createLinkedRecord(setup.db, {
+			meetingId: "meeting-1",
+			studentId: "student-1",
+			texto: "Original",
+		});
+		const updated = await updateLinkedRecord(setup.db, {
+			meetingId: "meeting-1",
+			recordId: created.id,
+			categoriaId: "categoria-2",
+		});
+		expect(updated.categoriaId).toBe("categoria-2");
+		expect(updated.componentId).toBeNull();
+	});
+
 	it("rejeita registro de outra reunião", async () => {
 		const created = await createLinkedRecord(setup.db, {
 			meetingId: "meeting-1",
@@ -547,5 +562,22 @@ describe("listIndependentRecordsByStudent", () => {
 		const rows = await listIndependentRecordsByStudent(setup.db, "student-1");
 		expect(rows).toHaveLength(1);
 		expect(rows[0]?.texto).toBe("Independente");
+	});
+});
+
+describe("setIndependentRecordInclusion ausência", () => {
+	it("cria decisão quando ainda não existia", async () => {
+		const setup = createTestDb();
+		await seedBase(setup.db);
+		const created = await createIndependentRecord(setup.db, {
+			studentId: "student-1",
+			texto: "Contexto",
+		});
+		const decision = await setIndependentRecordInclusion(setup.db, {
+			recordId: created.id,
+			meetingId: "meeting-1",
+			include: false,
+		});
+		expect(decision.include).toBe(false);
 	});
 });

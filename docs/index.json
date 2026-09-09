@@ -446,26 +446,38 @@
     "path": "docs/specs/0011-historico-aluno.md",
     "layer": "specs",
     "title": "Histórico do aluno",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0011",
       "ADR-0015",
       "ADR-0013"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/lib/history/schema.ts",
+      "src/lib/history/types.ts",
+      "src/lib/history/repository.ts",
+      "src/routes/api/students/$id/history.ts",
+      "src/hooks/history/use-history.ts"
+    ]
   },
   {
     "id": "SPEC-0012",
     "path": "docs/specs/0012-historico-turma.md",
     "layer": "specs",
     "title": "Histórico da turma",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0011",
       "ADR-0015"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/lib/history/schema.ts",
+      "src/lib/history/types.ts",
+      "src/lib/history/repository.ts",
+      "src/routes/api/classes/$id/history.ts",
+      "src/hooks/history/use-history.ts"
+    ]
   }
 ]

@@ -42,6 +42,7 @@ import { Route as AppMeetingsMeetingIdIndexRouteImport } from './routes/_app/mee
 import { Route as AppMeetingsMeetingIdCouncilRouteImport } from './routes/_app/meetings/$meetingId/council'
 import { Route as AppMeetingsMeetingIdParticipantsRouteImport } from './routes/_app/meetings/$meetingId/participants'
 import { Route as AppMeetingsMeetingIdStudentsRouteImport } from './routes/_app/meetings/$meetingId/students'
+import { Route as ApiClassesIdHistoryRouteImport } from './routes/api/classes/$id/history'
 import { Route as ApiClassesIdOffersRouteImport } from './routes/api/classes/$id/offers'
 import { Route as ApiClassesIdStudentsRouteImport } from './routes/api/classes/$id/students'
 import { Route as ApiMeetingsMeetingIdIndexRouteImport } from './routes/api/meetings/$meetingId/index'
@@ -49,6 +50,7 @@ import { Route as ApiMeetingsMeetingIdFinalizeRouteImport } from './routes/api/m
 import { Route as ApiMeetingsMeetingIdParticipantsRouteImport } from './routes/api/meetings/$meetingId/participants'
 import { Route as ApiMeetingsMeetingIdReopenRouteImport } from './routes/api/meetings/$meetingId/reopen'
 import { Route as ApiMeetingsMeetingIdStartRouteImport } from './routes/api/meetings/$meetingId/start'
+import { Route as ApiStudentsIdHistoryRouteImport } from './routes/api/students/$id/history'
 import { Route as ApiStudentsIdRecordsRouteImport } from './routes/api/students/$id/records'
 import { Route as ApiStudentsImportResolveRouteImport } from './routes/api/students/import.resolve'
 import { Route as ApiMeetingsMeetingIdGeneralReportsIndexRouteImport } from './routes/api/meetings/$meetingId/general-reports/index'
@@ -227,6 +229,11 @@ const AppMeetingsMeetingIdStudentsRoute =
     path: '/meetings/$meetingId/students',
     getParentRoute: () => AppRouteRoute,
   } as any)
+const ApiClassesIdHistoryRoute = ApiClassesIdHistoryRouteImport.update({
+  id: '/api/classes/$id/history',
+  path: '/api/classes/$id/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiClassesIdOffersRoute = ApiClassesIdOffersRouteImport.update({
   id: '/api/classes/$id/offers',
   path: '/api/classes/$id/offers',
@@ -267,6 +274,11 @@ const ApiMeetingsMeetingIdStartRoute =
     path: '/api/meetings/$meetingId/start',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiStudentsIdHistoryRoute = ApiStudentsIdHistoryRouteImport.update({
+  id: '/api/students/$id/history',
+  path: '/api/students/$id/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStudentsIdRecordsRoute = ApiStudentsIdRecordsRouteImport.update({
   id: '/api/students/$id/records',
   path: '/api/students/$id/records',
@@ -355,12 +367,14 @@ export interface FileRoutesByFullPath {
   '/meetings/$meetingId/council': typeof AppMeetingsMeetingIdCouncilRoute
   '/meetings/$meetingId/participants': typeof AppMeetingsMeetingIdParticipantsRoute
   '/meetings/$meetingId/students': typeof AppMeetingsMeetingIdStudentsRoute
+  '/api/classes/$id/history': typeof ApiClassesIdHistoryRoute
   '/api/classes/$id/offers': typeof ApiClassesIdOffersRoute
   '/api/classes/$id/students': typeof ApiClassesIdStudentsRoute
   '/api/meetings/$meetingId/finalize': typeof ApiMeetingsMeetingIdFinalizeRoute
   '/api/meetings/$meetingId/participants': typeof ApiMeetingsMeetingIdParticipantsRoute
   '/api/meetings/$meetingId/reopen': typeof ApiMeetingsMeetingIdReopenRoute
   '/api/meetings/$meetingId/start': typeof ApiMeetingsMeetingIdStartRoute
+  '/api/students/$id/history': typeof ApiStudentsIdHistoryRoute
   '/api/students/$id/records': typeof ApiStudentsIdRecordsRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
   '/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
@@ -405,12 +419,14 @@ export interface FileRoutesByTo {
   '/meetings/$meetingId/council': typeof AppMeetingsMeetingIdCouncilRoute
   '/meetings/$meetingId/participants': typeof AppMeetingsMeetingIdParticipantsRoute
   '/meetings/$meetingId/students': typeof AppMeetingsMeetingIdStudentsRoute
+  '/api/classes/$id/history': typeof ApiClassesIdHistoryRoute
   '/api/classes/$id/offers': typeof ApiClassesIdOffersRoute
   '/api/classes/$id/students': typeof ApiClassesIdStudentsRoute
   '/api/meetings/$meetingId/finalize': typeof ApiMeetingsMeetingIdFinalizeRoute
   '/api/meetings/$meetingId/participants': typeof ApiMeetingsMeetingIdParticipantsRoute
   '/api/meetings/$meetingId/reopen': typeof ApiMeetingsMeetingIdReopenRoute
   '/api/meetings/$meetingId/start': typeof ApiMeetingsMeetingIdStartRoute
+  '/api/students/$id/history': typeof ApiStudentsIdHistoryRoute
   '/api/students/$id/records': typeof ApiStudentsIdRecordsRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
   '/meetings/$meetingId': typeof AppMeetingsMeetingIdIndexRoute
@@ -457,12 +473,14 @@ export interface FileRoutesById {
   '/_app/meetings/$meetingId/council': typeof AppMeetingsMeetingIdCouncilRoute
   '/_app/meetings/$meetingId/participants': typeof AppMeetingsMeetingIdParticipantsRoute
   '/_app/meetings/$meetingId/students': typeof AppMeetingsMeetingIdStudentsRoute
+  '/api/classes/$id/history': typeof ApiClassesIdHistoryRoute
   '/api/classes/$id/offers': typeof ApiClassesIdOffersRoute
   '/api/classes/$id/students': typeof ApiClassesIdStudentsRoute
   '/api/meetings/$meetingId/finalize': typeof ApiMeetingsMeetingIdFinalizeRoute
   '/api/meetings/$meetingId/participants': typeof ApiMeetingsMeetingIdParticipantsRoute
   '/api/meetings/$meetingId/reopen': typeof ApiMeetingsMeetingIdReopenRoute
   '/api/meetings/$meetingId/start': typeof ApiMeetingsMeetingIdStartRoute
+  '/api/students/$id/history': typeof ApiStudentsIdHistoryRoute
   '/api/students/$id/records': typeof ApiStudentsIdRecordsRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
   '/_app/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
@@ -509,12 +527,14 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId/council'
     | '/meetings/$meetingId/participants'
     | '/meetings/$meetingId/students'
+    | '/api/classes/$id/history'
     | '/api/classes/$id/offers'
     | '/api/classes/$id/students'
     | '/api/meetings/$meetingId/finalize'
     | '/api/meetings/$meetingId/participants'
     | '/api/meetings/$meetingId/reopen'
     | '/api/meetings/$meetingId/start'
+    | '/api/students/$id/history'
     | '/api/students/$id/records'
     | '/api/students/import/resolve'
     | '/meetings/$meetingId/'
@@ -559,12 +579,14 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId/council'
     | '/meetings/$meetingId/participants'
     | '/meetings/$meetingId/students'
+    | '/api/classes/$id/history'
     | '/api/classes/$id/offers'
     | '/api/classes/$id/students'
     | '/api/meetings/$meetingId/finalize'
     | '/api/meetings/$meetingId/participants'
     | '/api/meetings/$meetingId/reopen'
     | '/api/meetings/$meetingId/start'
+    | '/api/students/$id/history'
     | '/api/students/$id/records'
     | '/api/students/import/resolve'
     | '/meetings/$meetingId'
@@ -610,12 +632,14 @@ export interface FileRouteTypes {
     | '/_app/meetings/$meetingId/council'
     | '/_app/meetings/$meetingId/participants'
     | '/_app/meetings/$meetingId/students'
+    | '/api/classes/$id/history'
     | '/api/classes/$id/offers'
     | '/api/classes/$id/students'
     | '/api/meetings/$meetingId/finalize'
     | '/api/meetings/$meetingId/participants'
     | '/api/meetings/$meetingId/reopen'
     | '/api/meetings/$meetingId/start'
+    | '/api/students/$id/history'
     | '/api/students/$id/records'
     | '/api/students/import/resolve'
     | '/_app/meetings/$meetingId/'
@@ -642,12 +666,14 @@ export interface RootRouteChildren {
   ApiRolesIndexRoute: typeof ApiRolesIndexRoute
   ApiStaffIndexRoute: typeof ApiStaffIndexRoute
   ApiStudentsIndexRoute: typeof ApiStudentsIndexRoute
+  ApiClassesIdHistoryRoute: typeof ApiClassesIdHistoryRoute
   ApiClassesIdOffersRoute: typeof ApiClassesIdOffersRoute
   ApiClassesIdStudentsRoute: typeof ApiClassesIdStudentsRoute
   ApiMeetingsMeetingIdFinalizeRoute: typeof ApiMeetingsMeetingIdFinalizeRoute
   ApiMeetingsMeetingIdParticipantsRoute: typeof ApiMeetingsMeetingIdParticipantsRoute
   ApiMeetingsMeetingIdReopenRoute: typeof ApiMeetingsMeetingIdReopenRoute
   ApiMeetingsMeetingIdStartRoute: typeof ApiMeetingsMeetingIdStartRoute
+  ApiStudentsIdHistoryRoute: typeof ApiStudentsIdHistoryRoute
   ApiStudentsIdRecordsRoute: typeof ApiStudentsIdRecordsRoute
   ApiMeetingsMeetingIdIndexRoute: typeof ApiMeetingsMeetingIdIndexRoute
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute: typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
@@ -892,6 +918,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingsMeetingIdStudentsRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/api/classes/$id/history': {
+      id: '/api/classes/$id/history'
+      path: '/api/classes/$id/history'
+      fullPath: '/api/classes/$id/history'
+      preLoaderRoute: typeof ApiClassesIdHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/classes/$id/offers': {
       id: '/api/classes/$id/offers'
       path: '/api/classes/$id/offers'
@@ -939,6 +972,13 @@ declare module '@tanstack/react-router' {
       path: '/api/meetings/$meetingId/start'
       fullPath: '/api/meetings/$meetingId/start'
       preLoaderRoute: typeof ApiMeetingsMeetingIdStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/students/$id/history': {
+      id: '/api/students/$id/history'
+      path: '/api/students/$id/history'
+      fullPath: '/api/students/$id/history'
+      preLoaderRoute: typeof ApiStudentsIdHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/students/$id/records': {
@@ -1083,12 +1123,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRolesIndexRoute: ApiRolesIndexRoute,
   ApiStaffIndexRoute: ApiStaffIndexRoute,
   ApiStudentsIndexRoute: ApiStudentsIndexRoute,
+  ApiClassesIdHistoryRoute: ApiClassesIdHistoryRoute,
   ApiClassesIdOffersRoute: ApiClassesIdOffersRoute,
   ApiClassesIdStudentsRoute: ApiClassesIdStudentsRoute,
   ApiMeetingsMeetingIdFinalizeRoute: ApiMeetingsMeetingIdFinalizeRoute,
   ApiMeetingsMeetingIdParticipantsRoute: ApiMeetingsMeetingIdParticipantsRoute,
   ApiMeetingsMeetingIdReopenRoute: ApiMeetingsMeetingIdReopenRoute,
   ApiMeetingsMeetingIdStartRoute: ApiMeetingsMeetingIdStartRoute,
+  ApiStudentsIdHistoryRoute: ApiStudentsIdHistoryRoute,
   ApiStudentsIdRecordsRoute: ApiStudentsIdRecordsRoute,
   ApiMeetingsMeetingIdIndexRoute: ApiMeetingsMeetingIdIndexRoute,
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute:

@@ -1,11 +1,16 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0011
   - ADR-0015
   - ADR-0013
-implemented-by: []
+implemented-by:
+  - src/lib/history/schema.ts
+  - src/lib/history/types.ts
+  - src/lib/history/repository.ts
+  - src/routes/api/students/$id/history.ts
+  - src/hooks/history/use-history.ts
 ---
 
 # Histórico do aluno
@@ -42,21 +47,27 @@ Permitir consultar a linha do tempo completa de um aluno, atravessando turmas, p
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os casos de borda estão cobertos por testes.
 
 ## Definition of Done
 
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run typecheck .................. exit 0
+bun run check ...................... exit 0 (292 arquivos)
+bun run test --run ................. 57 arquivos, 452 testes verdes
+bun run test:coverage .............. 98,48% stmts/linhas, 99,11% funcs, 95,02% branches
+scripts/docs-check ................ exit 0
 ```
 
 ## Revisão humana
 
-- UX da linha do tempo; performance com histórico longo.
+- Resolvido no fechamento: API/hooks prontos; a tela final pode consumir o contrato sem alterações de domínio.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09. A linha do tempo compõe matrículas,
+encerramentos, reuniões, status de acompanhamento, registros vinculados e
+independentes; usa a data da reunião (`heldAt` ou `createdAt`) e a regra temporal
+do ADR-0015. Registros internos permanecem no histórico; filtros e busca textual
+ignoram acentos/caixa. Borda 3 está atendida pelo hook reutilizável
+`useStudentHistory`, pronto para painel lateral da reunião. Gates conforme DoD.

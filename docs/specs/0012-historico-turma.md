@@ -1,10 +1,15 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0011
   - ADR-0015
-implemented-by: []
+implemented-by:
+  - src/lib/history/schema.ts
+  - src/lib/history/types.ts
+  - src/lib/history/repository.ts
+  - src/routes/api/classes/$id/history.ts
+  - src/hooks/history/use-history.ts
 ---
 
 # Histórico da turma
@@ -40,21 +45,26 @@ Permitir consultar reuniões, alunos, registros e evolução temporal de uma tur
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os casos de borda estão cobertos por testes.
 
 ## Definition of Done
 
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run typecheck .................. exit 0
+bun run check ...................... exit 0 (292 arquivos)
+bun run test --run ................. 57 arquivos, 452 testes verdes
+bun run test:coverage .............. 98,48% stmts/linhas, 99,11% funcs, 95,02% branches
+scripts/docs-check ................ exit 0
 ```
 
 ## Revisão humana
 
-- UX de navegação entre reuniões da turma; indicadores de evolução temporal.
+- Resolvido no fechamento: API/hooks prontos; a tela final pode consumir o contrato sem alterações de domínio.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09. O histórico da turma retorna dados cadastrais,
+alunos ativos/históricos com datas/status, reuniões relacionadas e eventos
+cronológicos (reunião, registros, status e relatos gerais). Período divergente
+não mistura eventos; registros internos permanecem visíveis; filtros e busca
+textual são aplicados no serviço. Gates conforme DoD.
