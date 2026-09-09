@@ -1,13 +1,26 @@
 import { and, eq, like, sql } from "drizzle-orm";
 
 import type { DB } from "#/db";
-import { meetingParticipants, meetings } from "#/db/schema";
+import { meetingClasses, meetingParticipants, meetings } from "#/db/schema";
 
+import {
+	ERR_INVALID_TRANSITION,
+	ERR_MEETING_FINISHED,
+	ERR_MEETING_NOT_FOUND,
+	ERR_MEETING_WITHOUT_CLASSES,
+	InvalidTransitionError,
+	MeetingNotEditableError,
+	MeetingNotFoundError,
+	MeetingWithoutClassesError,
+} from "./errors";
 import type {
 	CreateMeetingInput,
 	CreateMeetingParticipantInput,
+	TransitionAction,
 	UpdateMeetingInput,
 } from "./schema";
+import { meetingStatusSchema } from "./schema";
+import { ALLOWED_TRANSITIONS, NEXT_STATUS } from "./transitions";
 import type { ListMeetingsOptions } from "./types";
 
 export async function createMeeting(db: DB, input: CreateMeetingInput) {
@@ -41,10 +54,15 @@ export async function findMeetingById(db: DB, id: string) {
 }
 
 export async function listMeetings(db: DB, options: ListMeetingsOptions = {}) {
-	const { limit = 50, offset = 0, search } = options;
-	const where = search
-		? like(meetings.title, sql`'%' || ${search} || '%'`)
-		: undefined;
+	const { limit = 50, offset = 0, search, status } = options;
+	const conditions = [];
+	if (search) {
+		conditions.push(like(meetings.title, sql`'%' || ${search} || '%'`));
+	}
+	if (status) {
+		conditions.push(eq(meetings.status, status));
+	}
+	const where = conditions.length > 0 ? and(...conditions) : undefined;
 
 	return db.query.meetings.findMany({
 		where,
@@ -52,6 +70,148 @@ export async function listMeetings(db: DB, options: ListMeetingsOptions = {}) {
 		offset,
 		orderBy: (meetings, { desc }) => [desc(meetings.createdAt)],
 	});
+}
+
+export type CreateMeetingWithRelationsInput = {
+	title: string;
+	heldAt?: Date | null;
+	templateId?: string | null;
+	classIds?: string[];
+	participants?: Array<{ staffId: string; roleId: string }>;
+};
+
+export async function createMeetingWithRelations(
+	db: DB,
+	input: CreateMeetingWithRelationsInput,
+) {
+	const meeting = await db
+		.insert(meetings)
+		.values({
+			id: crypto.randomUUID(),
+			title: input.title,
+			heldAt: input.heldAt ?? null,
+			templateId: input.templateId ?? null,
+			status: "draft",
+		})
+		.returning()
+		.get();
+
+	// Nota: db.transaction não é usado porque DB é a união
+	// DrizzleD1Database | BetterSQLite3Database, cujas assinaturas de
+	// transaction divergem; os vínculos são gravados sequencialmente
+	// logo após a reunião (rascunho nunca fica parcial por API).
+	for (const classId of input.classIds ?? []) {
+		await db
+			.insert(meetingClasses)
+			.values({
+				id: crypto.randomUUID(),
+				meetingId: meeting.id,
+				classId,
+			})
+			.returning()
+			.get();
+	}
+	for (const participant of input.participants ?? []) {
+		await db
+			.insert(meetingParticipants)
+			.values({
+				id: crypto.randomUUID(),
+				meetingId: meeting.id,
+				staffId: participant.staffId,
+				roleId: participant.roleId,
+			})
+			.returning()
+			.get();
+	}
+	return meeting;
+}
+
+export async function listMeetingClasses(db: DB, meetingId: string) {
+	return db.query.meetingClasses.findMany({
+		where: eq(meetingClasses.meetingId, meetingId),
+	});
+}
+
+async function findEditableMeeting(db: DB, meetingId: string) {
+	const meeting = await findMeetingById(db, meetingId);
+	if (!meeting) {
+		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
+	}
+	// Turmas só podem ser vinculadas/removidas antes de a reunião
+	// começar ou depois de reaberta (draft | reopened).
+	if (meeting.status !== "draft" && meeting.status !== "reopened") {
+		throw new MeetingNotEditableError(ERR_MEETING_FINISHED);
+	}
+	return meeting;
+}
+
+export async function addMeetingClass(
+	db: DB,
+	meetingId: string,
+	classId: string,
+) {
+	await findEditableMeeting(db, meetingId);
+	return db
+		.insert(meetingClasses)
+		.values({
+			id: crypto.randomUUID(),
+			meetingId,
+			classId,
+		})
+		.returning()
+		.get();
+}
+
+export async function removeMeetingClass(
+	db: DB,
+	meetingId: string,
+	classId: string,
+) {
+	await findEditableMeeting(db, meetingId);
+	await db
+		.delete(meetingClasses)
+		.where(
+			and(
+				eq(meetingClasses.meetingId, meetingId),
+				eq(meetingClasses.classId, classId),
+			),
+		)
+		.run();
+}
+
+export async function transitionMeeting(
+	db: DB,
+	id: string,
+	action: TransitionAction,
+) {
+	const meeting = await findMeetingById(db, id);
+	if (!meeting) {
+		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
+	}
+	const status = meetingStatusSchema.parse(meeting.status);
+	if (!ALLOWED_TRANSITIONS[status].includes(action)) {
+		throw new InvalidTransitionError(ERR_INVALID_TRANSITION);
+	}
+	if (action === "start") {
+		// Borda 3: reunião sem turmas não pode ser iniciada.
+		const linkedClasses = await listMeetingClasses(db, id);
+		if (linkedClasses.length === 0) {
+			throw new MeetingWithoutClassesError(ERR_MEETING_WITHOUT_CLASSES);
+		}
+	}
+	return updateMeeting(db, id, { status: NEXT_STATUS[action] });
+}
+
+export function startMeeting(db: DB, id: string) {
+	return transitionMeeting(db, id, "start");
+}
+
+export function finalizeMeeting(db: DB, id: string) {
+	return transitionMeeting(db, id, "finalize");
+}
+
+export function reopenMeeting(db: DB, id: string) {
+	return transitionMeeting(db, id, "reopen");
 }
 
 export async function createParticipant(

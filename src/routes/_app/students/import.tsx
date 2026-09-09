@@ -160,8 +160,8 @@ function ImportStudentsPage() {
 		<div className="space-y-4">
 			<h1 className="text-2xl font-bold">Importar alunos</h1>
 			<p className="text-sm text-muted-foreground">
-				Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a
-				coluna nome.
+				Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a coluna
+				nome.
 			</p>
 			<input
 				type="file"

@@ -46,7 +46,21 @@ function badRequest(message: string) {
 	});
 }
 
-function normalizeCreateData(data: NonNullable<ResolutionRow["data"]>) {
+type CreateInput = {
+	name: string;
+	document?: string;
+	registrationNumber?: string;
+	email?: string;
+	phone?: string;
+	birthDate?: Date;
+	notes?: string;
+};
+
+type NormalizeResult = { input: CreateInput } | { error: string };
+
+function normalizeCreateData(
+	data: NonNullable<ResolutionRow["data"]>,
+): NormalizeResult {
 	const trimmed: Record<string, unknown> = {};
 	for (const [key, value] of Object.entries(data)) {
 		if (typeof value !== "string") continue;
@@ -55,10 +69,10 @@ function normalizeCreateData(data: NonNullable<ResolutionRow["data"]>) {
 			trimmed[key] = text;
 		}
 	}
-	if (trimmed.birthDate) {
+	if (trimmed.birthDate !== undefined) {
 		const date = new Date(trimmed.birthDate as string);
 		if (Number.isNaN(date.getTime())) {
-			return { error: "Data de nascimento inválida" as const };
+			return { error: "Data de nascimento inválida" };
 		}
 		trimmed.birthDate = date;
 	}
@@ -66,10 +80,10 @@ function normalizeCreateData(data: NonNullable<ResolutionRow["data"]>) {
 	if (!parsed.success) {
 		const first = parsed.error.issues[0];
 		return {
-			error: `Linha inválida: ${first.path.join(".") || "dados"} — ${first.message}` as const,
+			error: `Linha inválida: ${first.path.join(".") || "dados"} — ${first.message}`,
 		};
 	}
-	return { input: parsed.data };
+	return { input: parsed.data as CreateInput };
 }
 
 export async function importResolveHandler({

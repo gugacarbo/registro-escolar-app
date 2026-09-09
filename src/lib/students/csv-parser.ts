@@ -107,14 +107,16 @@ function buildRowsFromRecords(
 	return { rows, errors };
 }
 
-function parseCsv(
-	text: string,
-): { rows: ParsedImportRow[]; errors: string[]; fatal: boolean } {
+function parseCsv(text: string): {
+	rows: ParsedImportRow[];
+	errors: string[];
+	fatal: boolean;
+} {
 	const lines = text.split(/\r?\n/);
 	const headerLine = lines.find((line) => line.trim().length > 0) ?? "";
 	const parsed = parse<Record<string, string>>(text, {
 		header: true,
-		skipEmptyLines: true,
+		skipEmptyLines: false,
 		transformHeader: normalizeColumnName,
 		delimiter: detectDelimiter(headerLine),
 	});
@@ -133,7 +135,7 @@ function parseCsv(
 
 	const { rows } = buildRowsFromRecords(parsed.data);
 	const rowErrors = parsed.errors
-		.filter((e) => typeof e.row === "number")
+		.filter((e): e is typeof e & { row: number } => typeof e.row === "number")
 		.map((e) => `Linha ${e.row + 1}: ${e.message}`);
 	return { rows, errors: rowErrors, fatal: false };
 }

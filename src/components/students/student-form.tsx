@@ -21,7 +21,7 @@ const studentFormSchema = z.object({
 	email: z
 		.string()
 		.optional()
-		.refine((value) => !value || /.+@.+\..+/.test(value), {
+		.refine((value) => !value || z.string().email().safeParse(value).success, {
 			message: "Email inválido",
 		}),
 	phone: z.string().optional(),
@@ -95,7 +95,7 @@ export function StudentForm({
 						<FormItem>
 							<FormLabel>Email</FormLabel>
 							<FormControl>
-								<Input {...field} type="email" />
+								<Input {...field} type="text" inputMode="email" />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

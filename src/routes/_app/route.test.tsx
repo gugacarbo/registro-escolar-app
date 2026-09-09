@@ -1,10 +1,12 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	navigate: vi.fn(),
 	getSession: vi.fn(),
 	signOut: vi.fn(),
+	setTheme: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -23,6 +25,10 @@ vi.mock("#/lib/auth-client", () => ({
 		getSession: mocks.getSession,
 		signOut: mocks.signOut,
 	},
+}));
+
+vi.mock("next-themes", () => ({
+	useTheme: () => ({ setTheme: mocks.setTheme }),
 }));
 
 Object.defineProperty(window, "matchMedia", {
@@ -50,6 +56,7 @@ beforeEach(() => {
 	mocks.navigate.mockReset();
 	mocks.getSession.mockReset();
 	mocks.signOut.mockReset();
+	mocks.setTheme.mockReset();
 });
 
 describe("AppLayout", () => {
@@ -90,6 +97,48 @@ describe("AppLayout", () => {
 		expect(
 			await screen.findByRole("button", { name: /alternar tema/i }),
 		).toBeInTheDocument();
+	});
+
+	it("alterna o tema pelo controle do header", async () => {
+		const user = userEvent.setup();
+		mocks.getSession.mockResolvedValue({ data: session });
+
+		render(<AppLayout />);
+
+		await user.click(
+			await screen.findByRole("button", { name: /alternar tema/i }),
+		);
+		await user.click(await screen.findByRole("menuitem", { name: "Escuro" }));
+
+		expect(mocks.setTheme).toHaveBeenCalledWith("dark");
+	});
+
+	it("alterna para o tema claro pelo controle do header", async () => {
+		const user = userEvent.setup();
+		mocks.getSession.mockResolvedValue({ data: session });
+
+		render(<AppLayout />);
+
+		await user.click(
+			await screen.findByRole("button", { name: /alternar tema/i }),
+		);
+		await user.click(await screen.findByRole("menuitem", { name: "Claro" }));
+
+		expect(mocks.setTheme).toHaveBeenCalledWith("light");
+	});
+
+	it("volta ao tema do sistema pelo controle do header", async () => {
+		const user = userEvent.setup();
+		mocks.getSession.mockResolvedValue({ data: session });
+
+		render(<AppLayout />);
+
+		await user.click(
+			await screen.findByRole("button", { name: /alternar tema/i }),
+		);
+		await user.click(await screen.findByRole("menuitem", { name: "Sistema" }));
+
+		expect(mocks.setTheme).toHaveBeenCalledWith("system");
 	});
 
 	it("direciona para login quando não existe sessão", async () => {

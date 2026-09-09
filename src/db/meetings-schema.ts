@@ -7,6 +7,7 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
+import { classes } from "./classes-schema";
 import { roles } from "./roles-schema";
 import { staff } from "./staff-schema";
 
@@ -17,6 +18,8 @@ export const meetings = sqliteTable(
 		title: text("title").notNull(),
 		status: text("status").notNull().default("draft"),
 		heldAt: integer("held_at", { mode: "timestamp_ms" }),
+		// TODO(0009): FK para templates quando spec 0009 criar a tabela
+		templateId: text("template_id"),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
 			.notNull(),
@@ -57,5 +60,33 @@ export const meetingParticipants = sqliteTable(
 		index("meeting_participants_meeting_idx").on(table.meetingId),
 		index("meeting_participants_staff_idx").on(table.staffId),
 		index("meeting_participants_role_idx").on(table.roleId),
+	],
+);
+
+export const meetingClasses = sqliteTable(
+	"meeting_classes",
+	{
+		id: text("id").primaryKey(),
+		meetingId: text("meeting_id")
+			.notNull()
+			.references(() => meetings.id),
+		classId: text("class_id")
+			.notNull()
+			.references(() => classes.id),
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex("meeting_classes_meeting_class_uidx").on(
+			table.meetingId,
+			table.classId,
+		),
+		index("meeting_classes_meeting_idx").on(table.meetingId),
+		index("meeting_classes_class_idx").on(table.classId),
 	],
 );

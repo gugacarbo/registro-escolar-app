@@ -56,6 +56,17 @@ describe("GET /api/students", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("resolves env via runtime fallback when context env is absent", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/students", {
+			method: "GET",
+		});
+		const response = await listStudentsHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
+	});
+
 	it("returns 200 with the student list", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
@@ -78,6 +89,71 @@ describe("GET /api/students", () => {
 			expect.objectContaining({ search: "João" }),
 		);
 	});
+
+	it("lists without search and applies defaults with invalid params", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStudents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request("http://localhost/api/students?limit=0", {
+			method: "GET",
+		});
+		const response = await listStudentsHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 50, offset: 0, search: undefined }),
+		);
+	});
+
+	it("caps the limit at the maximum allowed", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStudents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students?limit=999&offset=7",
+			{ method: "GET" },
+		);
+		const response = await listStudentsHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 200, offset: 7 }),
+		);
+	});
+
+	it("applies default offset with invalid offset param", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStudents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students?limit=10&offset=-3",
+			{ method: "GET" },
+		);
+		const response = await listStudentsHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 10, offset: 0 }),
+		);
+	});
 });
 
 describe("POST /api/students", () => {
@@ -95,6 +171,18 @@ describe("POST /api/students", () => {
 		});
 		const response = await createStudentHandler({ request, context: { env } });
 		expect(response.status).toBe(401);
+	});
+
+	it("resolves env via runtime fallback when context env is absent", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/students", {
+			method: "POST",
+			body: JSON.stringify({ name: "João" }),
+		});
+		const response = await createStudentHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
 	it("returns 400 when name is empty", async () => {

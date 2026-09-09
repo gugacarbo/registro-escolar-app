@@ -235,14 +235,31 @@
     "path": "docs/specs/0001-cadastro-alunos.md",
     "layer": "specs",
     "title": "Cadastro e importação em lote de alunos",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0011",
       "ADR-0017",
       "ADR-0018"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/routes/api/students/index.ts",
+      "src/routes/api/students/import.ts",
+      "src/routes/api/students/import.resolve.ts",
+      "src/lib/students/csv-parser.ts",
+      "src/lib/students/matching.ts",
+      "src/lib/students/repository.ts",
+      "src/lib/students/schema.ts",
+      "src/lib/students/shared.ts",
+      "src/routes/_app/students/index.tsx",
+      "src/routes/_app/students/new.tsx",
+      "src/routes/_app/students/import.tsx",
+      "src/components/students/student-form.tsx",
+      "src/components/students/import-preview-table.tsx",
+      "src/hooks/students/use-students.ts",
+      "src/hooks/students/use-create-student.ts",
+      "src/hooks/students/use-import-students.ts"
+    ]
   },
   {
     "id": "SPEC-0002",
@@ -262,13 +279,38 @@
     "path": "docs/specs/0003-servidores-papeis.md",
     "layer": "specs",
     "title": "Cadastro de servidores e papéis de reunião",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0011",
       "ADR-0012"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/routes/api/staff/index.ts",
+      "src/routes/api/roles/index.ts",
+      "src/routes/api/meetings/$meetingId/participants.ts",
+      "src/lib/staff/repository.ts",
+      "src/lib/staff/schema.ts",
+      "src/lib/staff/shared.ts",
+      "src/lib/roles/repository.ts",
+      "src/lib/roles/schema.ts",
+      "src/lib/roles/shared.ts",
+      "src/lib/meetings/repository.ts",
+      "src/lib/meetings/schema.ts",
+      "src/routes/_app/staff/index.tsx",
+      "src/routes/_app/staff/new.tsx",
+      "src/routes/_app/roles/index.tsx",
+      "src/routes/_app/roles/new.tsx",
+      "src/routes/_app/meetings/$meetingId/participants.tsx",
+      "src/components/staff/staff-form.tsx",
+      "src/components/roles/role-form.tsx",
+      "src/hooks/staff/use-staff.ts",
+      "src/hooks/staff/use-create-staff.ts",
+      "src/hooks/roles/use-roles.ts",
+      "src/hooks/roles/use-create-role.ts",
+      "src/hooks/meetings/use-participants.ts",
+      "src/hooks/meetings/use-add-participant.ts"
+    ]
   },
   {
     "id": "SPEC-0004",

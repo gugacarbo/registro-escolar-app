@@ -1,10 +1,34 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0011
   - ADR-0012
-implemented-by: []
+implemented-by:
+  - src/routes/api/staff/index.ts
+  - src/routes/api/roles/index.ts
+  - src/routes/api/meetings/$meetingId/participants.ts
+  - src/lib/staff/repository.ts
+  - src/lib/staff/schema.ts
+  - src/lib/staff/shared.ts
+  - src/lib/roles/repository.ts
+  - src/lib/roles/schema.ts
+  - src/lib/roles/shared.ts
+  - src/lib/meetings/repository.ts
+  - src/lib/meetings/schema.ts
+  - src/routes/_app/staff/index.tsx
+  - src/routes/_app/staff/new.tsx
+  - src/routes/_app/roles/index.tsx
+  - src/routes/_app/roles/new.tsx
+  - src/routes/_app/meetings/$meetingId/participants.tsx
+  - src/components/staff/staff-form.tsx
+  - src/components/roles/role-form.tsx
+  - src/hooks/staff/use-staff.ts
+  - src/hooks/staff/use-create-staff.ts
+  - src/hooks/roles/use-roles.ts
+  - src/hooks/roles/use-create-role.ts
+  - src/hooks/meetings/use-participants.ts
+  - src/hooks/meetings/use-add-participant.ts
 ---
 
 # Cadastro de servidores e papéis de reunião
@@ -51,23 +75,43 @@ A entidade `meetings` neste escopo é mínima (`id`, `title`, `status`,
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os quatro casos de borda estão cobertos por testes (ver Verificação).
 
 ## Definition of Done
 
 ```bash
-bun run typecheck        # exit 0
-bun run check            # exit 0
-bun run test             # tudo verde
-bun run test:coverage    # ≥ 95%
+bun run typecheck        # exit 0 — tipos das rotas/validações
+bun run check            # exit 0 — 190 arquivos, sem correções
+bun run test --run       # 200 testes verdes em 30 arquivos
+bun run test:coverage    # 98,48% statements/linhas, 97,58% funções, 95,15% branches
+scripts/docs-check       # exit 0 — spec válida como implemented
 ```
 
 ## Revisão humana
 
-- Lista final de papéis padrão; nomenclatura em português.
+- Resolvido no fechamento: o papel padrão garantido é `Professor`
+  (`DEFAULT_ROLES` + `ensureDefaultRoles` idempotente em
+  `src/lib/roles/repository.ts`); nomenclatura conforme decisão D0.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09 no repo registro-escolar-app: `bun run
+typecheck` exit 0; `bun run check` exit 0 (190 arquivos, sem correções);
+`bun run test --run` com 200 testes verdes em 30 arquivos;
+`bun run test:coverage` com 98,48% em statements e linhas, 97,58% em
+funções e 95,15% em branches; `scripts/docs-check` exit 0 com SPEC-0003
+como implemented. Casos de borda cobertos por testes de repositório e de
+rota — (1) servidor já cadastrado é sinalizado para reuso em vez de
+duplicar (`POST /api/staff` responde 409 "Servidor já cadastrado" com o
+campo `existingStaff`; a detecção normaliza acentos, caixa e espaços
+extras via `normalizeStaffName`), (2) papel duplicado é normalizado ou
+rejeitado (`"  coordenacao PEDAGOGICA "` vira "Coordenação pedagógica";
+`POST /api/roles` responde 409 "Papel já existe" com `existingRole`;
+`GET /api/roles` garante o papel padrão "Professor" de forma
+idempotente), (3) remoção de servidor é soft delete (`softDeleteStaff`
+preenche `deletedAt` sem tocar `meeting_participants`, preservando as
+participações históricas; `GET /api/staff` exclui removidos), (4) papel
+inexistente em participação é rejeitado (`POST
+/api/meetings/:id/participants` responde 404 "Papel não encontrado";
+servidor inexistente responde 404 "Servidor não encontrado"; participante
+duplicado na mesma reunião responde 409).

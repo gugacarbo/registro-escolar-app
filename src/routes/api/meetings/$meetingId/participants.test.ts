@@ -95,6 +95,22 @@ describe("GET /api/meetings/:id/participants", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/participants",
+			{ method: "GET" },
+		);
+		const response = await listParticipantsHandler({
+			request,
+			context: {},
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
+	});
+
 	it("retorna 404 quando a reunião não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
@@ -111,6 +127,30 @@ describe("GET /api/meetings/:id/participants", () => {
 			params: { meetingId: "missing" },
 		});
 		expect(response.status).toBe(404);
+	});
+
+	it("retorna 200 com os participantes da reunião", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			title: "Reunião 1",
+		});
+		(
+			listParticipantsByMeeting as ReturnType<typeof vi.fn>
+		).mockResolvedValueOnce([{ id: "participant-1" }]);
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/participants",
+			{ method: "GET" },
+		);
+		const response = await listParticipantsHandler({
+			request,
+			context: { env: createEnv() },
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as Array<{ id: string }>;
+		expect(body).toHaveLength(1);
 	});
 });
 
@@ -133,6 +173,25 @@ describe("POST /api/meetings/:id/participants", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/participants",
+			{
+				method: "POST",
+				body: JSON.stringify({ staffId: "staff-1", roleId: "role-1" }),
+			},
+		);
+		const response = await createParticipantHandler({
+			request,
+			context: {},
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
+	});
+
 	it("retorna 400 com payload inválido", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
@@ -146,6 +205,45 @@ describe("POST /api/meetings/:id/participants", () => {
 			params: { meetingId: "meeting-1" },
 		});
 		expect(response.status).toBe(400);
+	});
+
+	it("retorna 400 quando staffId ou roleId estão vazios", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/participants",
+			{
+				method: "POST",
+				body: JSON.stringify({ staffId: "", roleId: "" }),
+			},
+		);
+		const response = await createParticipantHandler({
+			request,
+			context: { env: createEnv() },
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(400);
+	});
+
+	it("retorna 404 quando a reunião não existe no POST", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			undefined,
+		);
+		const request = new Request(
+			"http://localhost/api/meetings/missing/participants",
+			{
+				method: "POST",
+				body: JSON.stringify({ staffId: "staff-1", roleId: "role-1" }),
+			},
+		);
+		const response = await createParticipantHandler({
+			request,
+			context: { env: createEnv() },
+			params: { meetingId: "missing" },
+		});
+		expect(response.status).toBe(404);
 	});
 
 	it("retorna 404 quando o papel não existe", async () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import * as XLSX from "xlsx";
 
 import { getSession } from "#/lib/auth/session";
 import {
@@ -58,6 +59,17 @@ describe("POST /api/students/import", () => {
 		});
 		const response = await importPreviewHandler({ request, context: { env } });
 		expect(response.status).toBe(401);
+	});
+
+	it("resolves env via runtime fallback when context env is absent", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/students/import", {
+			method: "POST",
+		});
+		const response = await importPreviewHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
 	it("returns 400 when file is missing", async () => {
@@ -146,7 +158,7 @@ describe("POST /api/students/import", () => {
 		const form = new FormData();
 		form.append(
 			"file",
-			new File(["nome\n\nMaria Souza"], "alunos.csv", { type: "text/csv" }),
+			new File(["nome\n,\nMaria Souza"], "alunos.csv", { type: "text/csv" }),
 		);
 		const request = new Request("http://localhost/api/students/import", {
 			method: "POST",
@@ -265,6 +277,44 @@ describe("POST /api/students/import", () => {
 			notes: "Atendimento",
 		});
 	});
+
+	it("returns 200 with preview rows for an xlsx spreadsheet", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStudents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(
+			workbook,
+			XLSX.utils.aoa_to_sheet([
+				["nome", "documento"],
+				["Maria Souza", "789012"],
+			]),
+			"Alunos",
+		);
+		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
+		const form = new FormData();
+		form.append("file", new File([buffer as ArrayBuffer], "alunos.xlsx"));
+		const request = new Request("http://localhost/api/students/import", {
+			method: "POST",
+			body: form,
+		});
+		const response = await importPreviewHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as {
+			rows: Array<{ name: string; status: string }>;
+		};
+		expect(body.rows).toHaveLength(1);
+		expect(body.rows[0]).toMatchObject({
+			name: "Maria Souza",
+			status: "valid",
+		});
+	});
 });
 
 describe("POST /api/students/import/resolve", () => {
@@ -282,6 +332,18 @@ describe("POST /api/students/import/resolve", () => {
 		);
 		const response = await importResolveHandler({ request, context: { env } });
 		expect(response.status).toBe(401);
+	});
+
+	it("resolves env via runtime fallback when context env is absent", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{ method: "POST" },
+		);
+		const response = await importResolveHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
 	it("returns 400 when resolutions is not an array", async () => {
@@ -472,6 +534,261 @@ describe("POST /api/students/import/resolve", () => {
 			phone: "11999999999",
 			birthDate: new Date("2010-05-20"),
 			notes: "Atendimento",
+		});
+	});
+
+	it("returns 400 when link references an unknown student", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findByIdMock = findStudentById as ReturnType<typeof vi.fn>;
+		findByIdMock.mockResolvedValueOnce(null);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					rows: [
+						{
+							index: 2,
+							action: "link",
+							existingStudentId: "missing-1",
+							data: { name: "João Silva" },
+						},
+					],
+				}),
+			},
+		);
+		const response = await importResolveHandler({ request, context: { env } });
+		expect(response.status).toBe(400);
+	});
+
+	it("returns 400 when a create row duplicates an existing student", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findMock = findStudentsByNameOrDocument as ReturnType<typeof vi.fn>;
+		findMock.mockResolvedValueOnce([
+			{ id: "existing-1", name: "João Silva", document: "123456" },
+		]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					rows: [
+						{
+							index: 1,
+							action: "create",
+							data: { name: "João Silva", document: "123456" },
+						},
+					],
+				}),
+			},
+		);
+		const response = await importResolveHandler({ request, context: { env } });
+		expect(response.status).toBe(400);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toContain("Aluno já existe");
+	});
+
+	it("returns 400 when a create row has an invalid birthDate", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					rows: [
+						{
+							index: 1,
+							action: "create",
+							data: { name: "Maria Souza", birthDate: "não-data" },
+						},
+					],
+				}),
+			},
+		);
+		const response = await importResolveHandler({ request, context: { env } });
+		expect(response.status).toBe(400);
+	});
+
+	it("returns 400 when two create rows duplicate each other in the batch", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findMock = findStudentsByNameOrDocument as ReturnType<typeof vi.fn>;
+		findMock.mockResolvedValue([]);
+		const createMock = createStudent as ReturnType<typeof vi.fn>;
+		createMock.mockResolvedValueOnce({
+			id: "new-1",
+			name: "Maria Souza",
+			document: null,
+			registrationNumber: null,
+			email: null,
+			phone: null,
+			birthDate: null,
+			notes: null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					rows: [
+						{ index: 1, action: "create", data: { name: "Maria Souza" } },
+						{ index: 2, action: "create", data: { name: "maria souza" } },
+					],
+				}),
+			},
+		);
+		const response = await importResolveHandler({ request, context: { env } });
+		expect(response.status).toBe(400);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toContain("Aluno já existe");
+	});
+
+	it("returns 400 when two create rows share the same document", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findMock = findStudentsByNameOrDocument as ReturnType<typeof vi.fn>;
+		findMock.mockResolvedValue([]);
+		const createMock = createStudent as ReturnType<typeof vi.fn>;
+		createMock.mockResolvedValueOnce({
+			id: "new-1",
+			name: "Maria Souza",
+			document: "123456",
+			registrationNumber: null,
+			email: null,
+			phone: null,
+			birthDate: null,
+			notes: null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					rows: [
+						{
+							index: 1,
+							action: "create",
+							data: { name: "Maria Souza", document: "123.456" },
+						},
+						{
+							index: 2,
+							action: "create",
+							data: { name: "Outra Pessoa", document: "123456" },
+						},
+					],
+				}),
+			},
+		);
+		const response = await importResolveHandler({ request, context: { env } });
+		expect(response.status).toBe(400);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toContain("Aluno já existe");
+	});
+
+	it("returns 400 when a create row duplicates by document an existing student", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findMock = findStudentsByNameOrDocument as ReturnType<typeof vi.fn>;
+		findMock.mockResolvedValueOnce([
+			{ id: "existing-1", name: "Outra Pessoa", document: "123.456" },
+		]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					rows: [
+						{
+							index: 1,
+							action: "create",
+							data: { name: "Nome Diferente", document: "123456" },
+						},
+					],
+				}),
+			},
+		);
+		const response = await importResolveHandler({ request, context: { env } });
+		expect(response.status).toBe(400);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toContain("Aluno já existe");
+	});
+
+	it("links using the stored student name even when payload name differs", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findByIdMock = findStudentById as ReturnType<typeof vi.fn>;
+		findByIdMock.mockResolvedValueOnce({
+			id: "existing-1",
+			name: "João Silva Oficial",
+		});
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students/import/resolve",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					rows: [
+						{
+							index: 2,
+							action: "link",
+							existingStudentId: "existing-1",
+							data: { name: "João Silva" },
+						},
+					],
+				}),
+			},
+		);
+		const response = await importResolveHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as {
+			linked: number;
+			students: Array<{ id: string; name: string }>;
+		};
+		expect(body.linked).toBe(1);
+		expect(body.students[0]).toEqual({
+			id: "existing-1",
+			name: "João Silva Oficial",
 		});
 	});
 });

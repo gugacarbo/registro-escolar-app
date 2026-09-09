@@ -65,6 +65,17 @@ describe("GET /api/roles", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/roles", {
+			method: "GET",
+		});
+		const response = await listRolesHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
+	});
+
 	it("retorna 200 com a lista de papéis após garantir o padrão", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
@@ -82,6 +93,46 @@ describe("GET /api/roles", () => {
 		const body = (await response.json()) as Array<{ name: string }>;
 		expect(body).toHaveLength(1);
 	});
+
+	it("limita e pagina com parâmetros inválidos usando padrões", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listRoles as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const request = new Request(
+			"http://localhost/api/roles?limit=abc&offset=-5",
+			{ method: "GET" },
+		);
+		const response = await listRolesHandler({
+			request,
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 50, offset: 0 }),
+		);
+	});
+
+	it("restringe o limite ao máximo permitido", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listRoles as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const request = new Request(
+			"http://localhost/api/roles?limit=500&offset=10",
+			{ method: "GET" },
+		);
+		const response = await listRolesHandler({
+			request,
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 200, offset: 10 }),
+		);
+	});
 });
 
 describe("POST /api/roles", () => {
@@ -97,6 +148,18 @@ describe("POST /api/roles", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(401);
+	});
+
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/roles", {
+			method: "POST",
+			body: JSON.stringify({ name: "Direção" }),
+		});
+		const response = await createRoleHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
 	it("retorna 400 quando o nome é vazio", async () => {

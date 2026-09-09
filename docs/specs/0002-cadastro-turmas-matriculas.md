@@ -59,5 +59,14 @@ bun run check                            # exit 0
 ## Verificação
 
 ```text
-(preencher no fechamento)
+bun run db:local:migrate ............ exit 0 (No migrations to apply)
+bunx tsc --noEmit --skipLibCheck .... exit 0
+bun run check ....................... exit 0 (190 files)
+bun run test ........................ 30 files, 200 tests, tudo verde
+bun run test:coverage ............... All files 98.48% (teto >= 95%)
+bun run e2e ......................... 1 falha pré-existente em e2e/home.spec.ts
+                                      ("Carregando" — espec não tocado pela spec 0002)
+Bordas: 1 duplicatas coexistem; 2 transferência encerra anterior
+  (endDate = novaStart − 1 dia, status transferida); 3 fora de vínculo → 200 [];
+  4 sobreposição mesma turma → 409; 5 endDate null ativo em data futura.
 ```

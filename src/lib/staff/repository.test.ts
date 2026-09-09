@@ -12,6 +12,7 @@ import {
 	findStaffByName,
 	listStaff,
 	softDeleteStaff,
+	updateStaff,
 } from "./repository";
 import { normalizeStaffName } from "./shared";
 
@@ -69,6 +70,18 @@ describe("staff repository", () => {
 		expect(found).toHaveLength(1);
 		expect(normalizeStaffName(found[0].name)).toBe(
 			normalizeStaffName("jose  santos "),
+		);
+	});
+
+	it("atualiza os dados do servidor", async () => {
+		const { db } = createTestDb();
+		const created = await createStaff(db, { name: "João Silva" });
+		const updated = await updateStaff(db, created.id, {
+			email: "joao@escola.test",
+		});
+		expect(updated.email).toBe("joao@escola.test");
+		expect((await findActiveStaffById(db, created.id))?.email).toBe(
+			"joao@escola.test",
 		);
 	});
 

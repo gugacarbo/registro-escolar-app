@@ -26,7 +26,7 @@ describe("StudentForm", () => {
 
 		expect(onSubmit).toHaveBeenCalledWith(
 			expect.objectContaining({ name: "João Silva" }),
-			expect.anything(),
+			undefined,
 		);
 	});
 
@@ -41,5 +41,11 @@ describe("StudentForm", () => {
 
 		expect(await screen.findByText("Email inválido")).toBeVisible();
 		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	it("exibe erro vindo do servidor", async () => {
+		render(<StudentForm onSubmit={vi.fn()} serverError="Falha ao salvar" />);
+
+		expect(await screen.findByText("Falha ao salvar")).toBeVisible();
 	});
 });

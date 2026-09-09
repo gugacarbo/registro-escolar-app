@@ -29,6 +29,20 @@
       "when": 1788923298271,
       "tag": "0003_cria-servidores-papeis-reunioes",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788954885649,
+      "tag": "0004_meetings-template-classes",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788955665202,
+      "tag": "0005_acompanhamento-alunos-reuniao",
+      "breakpoints": true
     }
   ]
 }

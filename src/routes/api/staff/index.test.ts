@@ -63,6 +63,17 @@ describe("GET /api/staff", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/staff", {
+			method: "GET",
+		});
+		const response = await listStaffHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
+	});
+
 	it("retorna 200 com a lista de servidores", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
@@ -83,6 +94,45 @@ describe("GET /api/staff", () => {
 			expect.objectContaining({ search: "João" }),
 		);
 	});
+
+	it("lista sem busca e aplica padrões com parâmetros inválidos", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStaff as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const request = new Request("http://localhost/api/staff?limit=0&offset=x", {
+			method: "GET",
+		});
+		const response = await listStaffHandler({
+			request,
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 50, offset: 0, search: undefined }),
+		);
+	});
+
+	it("restringe o limite ao máximo permitido", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStaff as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const request = new Request(
+			"http://localhost/api/staff?limit=999&offset=5",
+			{ method: "GET" },
+		);
+		const response = await listStaffHandler({
+			request,
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ limit: 200, offset: 5 }),
+		);
+	});
 });
 
 describe("POST /api/staff", () => {
@@ -98,6 +148,18 @@ describe("POST /api/staff", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(401);
+	});
+
+	it("resolve env via fallback quando o contexto não traz env", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/staff", {
+			method: "POST",
+			body: JSON.stringify({ name: "João" }),
+		});
+		const response = await createStaffHandler({ request, context: {} });
+		expect(response.status).toBe(401);
+		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
 	it("retorna 400 quando o nome é vazio", async () => {

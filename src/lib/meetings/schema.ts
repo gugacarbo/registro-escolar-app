@@ -14,6 +14,8 @@ export const meetingStatusSchema = z.enum([
 	"reopened",
 ]);
 
+export const transitionMeetingSchema = z.enum(["start", "finalize", "reopen"]);
+
 export const createMeetingSchema = createInsertSchema(meetings)
 	.omit({
 		id: true,
@@ -27,6 +29,22 @@ export const createMeetingSchema = createInsertSchema(meetings)
 		),
 		status: meetingStatusSchema.optional(),
 	});
+
+// Contrato do POST /api/meetings (spec 0005): dados da reunião +
+// vínculos de turmas e participantes criados junto com o rascunho.
+// Campos extras de API podem usar z.object/z.array; os campos do
+// drizzle continuam vindos de createInsertSchema.
+export const createMeetingApiSchema = createMeetingSchema.extend({
+	classIds: z.array(z.string().min(1)).default([]),
+	participants: z
+		.array(
+			z.object({
+				staffId: z.string().min(1),
+				roleId: z.string().min(1),
+			}),
+		)
+		.default([]),
+});
 
 export const updateMeetingSchema = createUpdateSchema(meetings).omit({
 	id: true,
@@ -52,6 +70,9 @@ export const createMeetingParticipantSchema = createInsertSchema(
 export const selectMeetingParticipantSchema =
 	createSelectSchema(meetingParticipants);
 
+export type MeetingStatus = z.infer<typeof meetingStatusSchema>;
+export type TransitionAction = z.infer<typeof transitionMeetingSchema>;
+export type CreateMeetingApiInput = z.infer<typeof createMeetingApiSchema>;
 export type CreateMeetingInput = z.infer<typeof createMeetingSchema>;
 export type UpdateMeetingInput = z.infer<typeof updateMeetingSchema>;
 export type Meeting = z.infer<typeof selectMeetingSchema>;

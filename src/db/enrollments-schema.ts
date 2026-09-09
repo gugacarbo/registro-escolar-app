@@ -1,11 +1,5 @@
-import { sql } from "drizzle-orm";
-import {
-	index,
-	integer,
-	references,
-	sqliteTable,
-	text,
-} from "drizzle-orm/sqlite-core";
+import { relations, sql } from "drizzle-orm";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 import { classes } from "./classes-schema";
 import { students } from "./students-schema";
@@ -37,3 +31,14 @@ export const enrollments = sqliteTable(
 		index("enrollments_student_start_idx").on(table.studentId, table.startDate),
 	],
 );
+
+export const enrollmentRelations = relations(enrollments, ({ one }) => ({
+	student: one(students, {
+		fields: [enrollments.studentId],
+		references: [students.id],
+	}),
+	class: one(classes, {
+		fields: [enrollments.classId],
+		references: [classes.id],
+	}),
+}));

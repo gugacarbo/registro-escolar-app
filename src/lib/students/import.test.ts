@@ -75,10 +75,11 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("flags rows without name", async () => {
-		const file = new File(["nome\n\nJoão Silva"], "alunos.csv", {
+		const file = new File(["nome\n,\nJoão Silva"], "alunos.csv", {
 			type: "text/csv",
 		});
-		const { rows } = await parseStudentImportFile(file);
+		const { rows, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(false);
 		expect(rows).toHaveLength(2);
 		expect(rows[0].errors).toContain("Nome é obrigatório");
 		expect(rows[1].name).toBe("João Silva");
@@ -126,11 +127,124 @@ describe("parseStudentImportFile", () => {
 		expect(errors[0]).toContain("nome");
 	});
 
+	it("parses xlsx with date cells and empty trailing rows", async () => {
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(
+			workbook,
+			XLSX.utils.aoa_to_sheet([
+				["nome", "data_nascimento", "documento"],
+				["João Silva", new Date("2010-05-20T12:00:00Z"), "123456"],
+				["", "", ""],
+			]),
+			"Alunos",
+		);
+		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
+		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const { rows, errors, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(false);
+		expect(errors.length).toBeGreaterThan(0);
+		expect(rows).toHaveLength(2);
+		expect(rows[0].birthDate).toBe("2010-05-20");
+		expect(rows[1].errors).toContain("Nome é obrigatório");
+	});
+
 	it("requires nome column", async () => {
 		const file = new File(["documento\n123456"], "alunos.csv", {
 			type: "text/csv",
 		});
 		const { rows, errors } = await parseStudentImportFile(file);
+		expect(rows).toHaveLength(0);
+		expect(errors[0]).toContain("nome");
+	});
+
+	it("detects pipe delimiter from a cluttered header line", async () => {
+		const file = new File(
+			["  nome | documento \nJoão Silva|123456"],
+			"alunos.csv",
+			{ type: "text/csv" },
+		);
+		const { rows, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(false);
+		expect(rows[0].name).toBe("João Silva");
+	});
+
+	it("falls back to comma when no delimiter is detected", async () => {
+		const file = new File(["nome\nJoão Silva"], "alunos.csv", {
+			type: "text/csv",
+		});
+		const { rows, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(false);
+		expect(rows).toHaveLength(1);
+		expect(rows[0].name).toBe("João Silva");
+	});
+
+	it("parses csv with pipe delimiter", async () => {
+		const file = new File(["nome|documento\nJoão Silva|123456"], "alunos.csv", {
+			type: "text/csv",
+		});
+		const { rows, errors, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(false);
+		expect(errors).toEqual([]);
+		expect(rows[0].name).toBe("João Silva");
+		expect(rows[0].document).toBe("123456");
+	});
+
+	it("parses csv with tab delimiter", async () => {
+		const file = new File(
+			["nome\tdocumento\nJoão Silva\t123456"],
+			"alunos.csv",
+			{
+				type: "text/csv",
+			},
+		);
+		const { rows, errors, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(false);
+		expect(errors).toEqual([]);
+		expect(rows).toHaveLength(1);
+		expect(rows[0].name).toBe("João Silva");
+		expect(rows[0].document).toBe("123456");
+	});
+
+	it("parses xlsx with numeric birthdate serial and non-string cells", async () => {
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(
+			workbook,
+			XLSX.utils.aoa_to_sheet([
+				["nome", "data_nascimento", "documento", "email"],
+				["Maria Souza", 40544, 123456, true],
+			]),
+			"Alunos",
+		);
+		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
+		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const { rows, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(false);
+		expect(rows).toHaveLength(1);
+		expect(rows[0].birthDate).toBe("2011-01-01");
+		expect(rows[0].document).toBe("123456");
+	});
+
+	it("rejects an unreadable spreadsheet buffer", async () => {
+		const file = new File(["não é planilha"], "alunos.xlsx", {
+			type: "application/octet-stream",
+		});
+		const { rows, errors, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(true);
+		expect(rows).toHaveLength(0);
+		expect(errors[0]).not.toHaveLength(0);
+	});
+
+	it("rejects an empty spreadsheet without data rows", async () => {
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(
+			workbook,
+			XLSX.utils.aoa_to_sheet([]),
+			"Alunos",
+		);
+		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
+		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const { rows, errors, fatal } = await parseStudentImportFile(file);
+		expect(fatal).toBe(true);
 		expect(rows).toHaveLength(0);
 		expect(errors[0]).toContain("nome");
 	});

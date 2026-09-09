@@ -12,6 +12,7 @@ import {
 	findRoleById,
 	findRoleByNormalizedName,
 	listRoles,
+	updateRole,
 } from "./repository";
 
 function createTestDb() {
@@ -70,5 +71,13 @@ describe("roles repository", () => {
 		const results = await listRoles(db, { search: "Dir" });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Direção");
+	});
+
+	it("atualiza o nome do papel", async () => {
+		const { db } = createTestDb();
+		const created = await createRole(db, { name: "Direção" });
+		const updated = await updateRole(db, created.id, { name: "Coordenação" });
+		expect(updated.name).toBe("Coordenação");
+		expect((await findRoleById(db, created.id))?.name).toBe("Coordenação");
 	});
 });
