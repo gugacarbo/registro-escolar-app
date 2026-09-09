@@ -98,19 +98,43 @@ export async function softDeleteStaff(ctx: ApiContext, staffId: string) {
 	return res.json() as Promise<{ id: string; deletedAt: string | null }>;
 }
 
-export async function createComponent(ctx: ApiContext, name: string) {
+export async function createComponent(
+	ctx: ApiContext,
+	name: string,
+): Promise<{ id: string; name: string }> {
 	const res = await api("POST", "/api/components", ctx.cookies, { name });
 	if (!res.ok) throw new Error(`createComponent failed: ${res.status}`);
 	return res.json();
 }
 
-export async function createOffer(ctx: ApiContext, classId: string, componentId: string, professorIds: string[] = []) {
+export async function createComponentResponse(ctx: ApiContext, name: string) {
+	return api("POST", "/api/components", ctx.cookies, { name });
+}
+
+export async function createOffer(
+	ctx: ApiContext,
+	classId: string,
+	componentId: string,
+	professorIds: string[] = [],
+): Promise<{ id: string; componentId: string }> {
 	const res = await api("POST", `/api/classes/${classId}/offers`, ctx.cookies, {
 		componentId,
 		professorIds,
 	});
 	if (!res.ok) throw new Error(`createOffer failed: ${res.status}`);
 	return res.json();
+}
+
+export async function createOfferResponse(
+	ctx: ApiContext,
+	classId: string,
+	componentId: string,
+	professorIds: string[] = [],
+) {
+	return api("POST", `/api/classes/${classId}/offers`, ctx.cookies, {
+		componentId,
+		professorIds,
+	});
 }
 
 export async function createMeeting(

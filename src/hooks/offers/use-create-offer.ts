@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { Offer } from "#/lib/offers/schema";
 
@@ -9,6 +9,8 @@ export type CreateOfferValues = {
 };
 
 export function useCreateOffer() {
+	const queryClient = useQueryClient();
+
 	return useMutation<Offer, Error, CreateOfferValues>({
 		mutationFn: async (data) => {
 			const response = await fetch(`/api/classes/${data.turmaId}/offers`, {
@@ -26,6 +28,11 @@ export function useCreateOffer() {
 				throw new Error(body.error ?? "Falha ao criar oferta");
 			}
 			return response.json() as Promise<Offer>;
+		},
+		onSuccess: (_data, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: ["classes", variables.turmaId, "offers"],
+			});
 		},
 	});
 }

@@ -1,0 +1,115 @@
+import {
+	baseURL,
+	createClass,
+	createComponent,
+	createComponentResponse,
+	createOfferResponse,
+	createStaff,
+} from "./fixtures/api";
+import { expect, test } from "./fixtures/test";
+
+test.describe("SPEC-0004 componentes e ofertas", () => {
+	test("cadastra e lista componente pela UI", async ({
+		authenticatedPage: page,
+	}) => {
+		await page.goto("/components/new");
+		const nameField = page.getByRole("textbox", { name: "Nome" });
+		await nameField.click();
+		await nameField.fill("Matemática E2E");
+		await expect(nameField).toHaveValue("Matemática E2E");
+		await page.getByRole("button", { name: "Salvar" }).click();
+
+		await expect.poll(async () => page.url()).toBe(`${baseURL}/components`);
+		await expect(page.getByText("Matemática E2E")).toBeVisible();
+	});
+
+	test("rejeita componente duplicado normalizado", async ({ apiContext }) => {
+		const component = await createComponent(apiContext, "Programação");
+		const duplicate = await createComponentResponse(apiContext, " PROGRAMAÇÃO ");
+		expect(duplicate.status).toBe(409);
+		const body = (await duplicate.json()) as {
+			existingComponent: { id: string };
+		};
+		expect(body.existingComponent.id).toBe(component.id);
+	});
+
+	test("cria oferta sem professor pela UI", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const klass = await createClass(apiContext, "Turma Oferta", "2026");
+		const component = await createComponent(apiContext, "Biologia E2E");
+
+		await page.goto(`/classes/${klass.id}/offers`);
+		const componentTrigger = page.getByRole("combobox").nth(1);
+		await componentTrigger.click();
+		const option = page
+			.locator('[data-slot="select-item"]')
+			.filter({ hasText: component.name });
+		await expect(option).toBeAttached();
+		await option.click();
+		await expect(page.getByRole("combobox", { name: "Componente *" })).toContainText(component.name);
+		await page.getByRole("button", { name: "Ofertar componente" }).click();
+
+		await expect(
+			page.getByRole("listitem").filter({ hasText: "Biologia E2E" }),
+		).toBeVisible();
+		await expect(page.getByText("Nenhum servidor cadastrado")).toBeVisible();
+	});
+
+	test("rejeita professor inexistente", async ({ apiContext }) => {
+		const klass = await createClass(apiContext, "Turma Professor Inválido", "2026");
+		const component = await createComponent(apiContext, "Física E2E");
+		const response = await createOfferResponse(apiContext, klass.id, component.id, [
+			"staff-inexistente",
+		]);
+		expect(response.status).toBe(400);
+	});
+
+	test("rejeita professor soft-deleted", async ({ apiContext }) => {
+		const klass = await createClass(apiContext, "Turma Professor Removido", "2026");
+		const component = await createComponent(apiContext, "Química E2E");
+		const professor = await createStaff(apiContext, "Professor Removido");
+		await fetch(`${baseURL}/api/staff/${professor.id}`, {
+			method: "DELETE",
+			headers: { Cookie: apiContext.cookies },
+		});
+		const response = await createOfferResponse(apiContext, klass.id, component.id, [
+			professor.id,
+		]);
+		expect(response.status).toBe(400);
+	});
+
+	test("rejeita mesma oferta na mesma turma e aceita em outra turma", async ({
+		apiContext,
+	}) => {
+		const first = await createClass(apiContext, "Turma Mesma Oferta", "2026");
+		const second = await createClass(apiContext, "Turma Outra Oferta", "2026");
+		const component = await createComponent(apiContext, "História E2E");
+		const professor = await createStaff(apiContext, "Professor História");
+
+		const firstOffer = await createOfferResponse(
+			apiContext,
+			first.id,
+			component.id,
+			[professor.id],
+		);
+		expect(firstOffer.status).toBe(201);
+
+		const duplicateOffer = await createOfferResponse(
+			apiContext,
+			first.id,
+			component.id,
+			[professor.id],
+		);
+		expect(duplicateOffer.status).toBe(409);
+
+		const otherOffer = await createOfferResponse(
+			apiContext,
+			second.id,
+			component.id,
+			[professor.id],
+		);
+		expect(otherOffer.status).toBe(201);
+	});
+});
