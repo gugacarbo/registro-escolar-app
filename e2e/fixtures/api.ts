@@ -201,7 +201,12 @@ export async function createLinkedRecord(
 	return res.json();
 }
 
-export async function createGeneralReport(ctx: ApiContext, meetingId: string, texto: string, extra?: object) {
+export async function createGeneralReport(
+	ctx: ApiContext,
+	meetingId: string,
+	texto: string,
+	extra?: { incluirNaAta?: boolean; categoriaId?: string | null; origemId?: string | null },
+): Promise<{ id: string; texto: string; includeInMinutes: boolean }> {
 	const res = await api("POST", `/api/meetings/${meetingId}/general-reports`, ctx.cookies, {
 		texto,
 		...extra,
