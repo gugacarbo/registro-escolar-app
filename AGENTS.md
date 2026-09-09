@@ -34,6 +34,8 @@ casa-standard-ref: 7cdb964 # versão do casa-standard de origem — o casa-init 
 ```bash
 npm run typecheck        # exit 0
 npm test                 # tudo verde
+npm run test:coverage    # ≥ 95%
+npm run e2e              # tudo verde (CI)
 ```
 
 ## Como deployar
@@ -59,6 +61,7 @@ npm test                 # tudo verde
 | Capítulo                      | Quando carregar                                                                          |
 | ----------------------------- | ---------------------------------------------------------------------------------------- |
 | `docs/context/CONVENTIONS.md` | ao alterar contratos de API, estado cliente, formulários, componentes UI ou persistência |
+| `docs/context/TESTS.md` | ao alterar teste, DoD, bugfix ou comportamento crítico |
 
 ## Mapa de docs
 
