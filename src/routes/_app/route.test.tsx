@@ -11,6 +11,11 @@ vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
 	Outlet: () => <div>conteúdo privado</div>,
 	useNavigate: () => mocks.navigate,
+	Link: ({ children }: { children: React.ReactNode }) => (
+		<span>{children}</span>
+	),
+	useLocation: (opts?: { select?: (s: { pathname: string }) => string }) =>
+		opts?.select ? opts.select({ pathname: "/" }) : "/",
 }));
 
 vi.mock("#/lib/auth-client", () => ({
@@ -19,6 +24,20 @@ vi.mock("#/lib/auth-client", () => ({
 		signOut: mocks.signOut,
 	},
 }));
+
+Object.defineProperty(window, "matchMedia", {
+	writable: true,
+	value: vi.fn().mockImplementation((query: string) => ({
+		matches: false,
+		media: query,
+		onchange: null,
+		addListener: vi.fn(),
+		removeListener: vi.fn(),
+		addEventListener: vi.fn(),
+		removeEventListener: vi.fn(),
+		dispatchEvent: vi.fn(),
+	})),
+});
 
 import { AppLayout } from "./route";
 
@@ -41,6 +60,36 @@ describe("AppLayout", () => {
 
 		expect(await screen.findByText("conteúdo privado")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Sair" })).toBeInTheDocument();
+	});
+
+	it("exibe nome e email do usuário no header", async () => {
+		mocks.getSession.mockResolvedValue({ data: session });
+
+		render(<AppLayout />);
+
+		expect(await screen.findByText("Operador")).toBeInTheDocument();
+		expect(screen.getByText("operador@escola.test")).toBeInTheDocument();
+	});
+
+	it("exibe a navegação com seções existentes e futuras", async () => {
+		mocks.getSession.mockResolvedValue({ data: session });
+
+		render(<AppLayout />);
+
+		expect(await screen.findByText("Alunos")).toBeInTheDocument();
+		expect(screen.getByText("Turmas")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /turmas/i })).toBeDisabled();
+		expect(screen.getAllByText("Em breve").length).toBeGreaterThan(0);
+	});
+
+	it("expõe o controle de tema no header", async () => {
+		mocks.getSession.mockResolvedValue({ data: session });
+
+		render(<AppLayout />);
+
+		expect(
+			await screen.findByRole("button", { name: /alternar tema/i }),
+		).toBeInTheDocument();
 	});
 
 	it("direciona para login quando não existe sessão", async () => {

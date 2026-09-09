@@ -3,7 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
-import { createStudent } from "#/lib/students/repository";
+import {
+	createStudent,
+	findStudentById,
+	findStudentsByNameOrDocument,
+} from "#/lib/students/repository";
+import { createStudentSchema } from "#/lib/students/schema";
+import { normalizeDocument, normalizeName } from "#/lib/students/shared";
 import { d1Middleware } from "#/middleware/d1";
 
 const VALID_ACTIONS = ["create", "link", "skip"] as const;
@@ -33,6 +39,39 @@ export const Route = createFileRoute("/api/students/import/resolve")({
 	},
 });
 
+function badRequest(message: string) {
+	return new Response(JSON.stringify({ error: message }), {
+		status: 400,
+		headers: { "Content-Type": "application/json" },
+	});
+}
+
+function normalizeCreateData(data: NonNullable<ResolutionRow["data"]>) {
+	const trimmed: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(data)) {
+		if (typeof value !== "string") continue;
+		const text = value.trim();
+		if (text !== "") {
+			trimmed[key] = text;
+		}
+	}
+	if (trimmed.birthDate) {
+		const date = new Date(trimmed.birthDate as string);
+		if (Number.isNaN(date.getTime())) {
+			return { error: "Data de nascimento inválida" as const };
+		}
+		trimmed.birthDate = date;
+	}
+	const parsed = createStudentSchema.safeParse(trimmed);
+	if (!parsed.success) {
+		const first = parsed.error.issues[0];
+		return {
+			error: `Linha inválida: ${first.path.join(".") || "dados"} — ${first.message}` as const,
+		};
+	}
+	return { input: parsed.data };
+}
+
 export async function importResolveHandler({
 	request,
 	context,
@@ -52,30 +91,24 @@ export async function importResolveHandler({
 	const body = (await request.json()) as { rows: ResolutionRow[] };
 	const resolutions = body.rows;
 	if (!Array.isArray(resolutions)) {
-		return new Response(JSON.stringify({ error: "Resoluções inválidas" }), {
-			status: 400,
-			headers: { "Content-Type": "application/json" },
-		});
+		return badRequest("Resoluções inválidas");
 	}
 
 	for (const resolution of resolutions) {
 		if (!VALID_ACTIONS.includes(resolution.action)) {
-			return new Response(
-				JSON.stringify({ error: `Ação inválida: ${resolution.action}` }),
-				{ status: 400, headers: { "Content-Type": "application/json" } },
-			);
+			return badRequest(`Ação inválida: ${resolution.action}`);
 		}
 		if (resolution.action === "link" && !resolution.existingStudentId) {
-			return new Response(
-				JSON.stringify({ error: "Vínculo requer existingStudentId" }),
-				{ status: 400, headers: { "Content-Type": "application/json" } },
-			);
+			return badRequest("Vínculo requer existingStudentId");
 		}
-		if (resolution.action === "create" && !resolution.data?.name) {
-			return new Response(JSON.stringify({ error: "Criação requer nome" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" },
-			});
+		if (resolution.action === "create") {
+			if (!resolution.data?.name?.trim()) {
+				return badRequest("Criação requer nome");
+			}
+			const normalized = normalizeCreateData(resolution.data);
+			if ("error" in normalized) {
+				return badRequest(normalized.error);
+			}
 		}
 	}
 
@@ -85,6 +118,7 @@ export async function importResolveHandler({
 	let linked = 0;
 	let skipped = 0;
 	const students: Array<{ id: string; name: string }> = [];
+	const createdInBatch: Array<{ name: string; document?: string }> = [];
 
 	for (const resolution of resolutions) {
 		if (resolution.action === "skip") {
@@ -93,24 +127,58 @@ export async function importResolveHandler({
 		}
 
 		if (resolution.action === "link") {
+			const existing = await findStudentById(
+				db,
+				resolution.existingStudentId as string,
+			);
+			if (!existing) {
+				return badRequest(
+					`Aluno existente não encontrado: ${resolution.existingStudentId}`,
+				);
+			}
 			linked++;
-			students.push({
-				id: resolution.existingStudentId as string,
-				name: resolution.data?.name ?? "",
-			});
+			students.push({ id: existing.id, name: existing.name });
 			continue;
 		}
 
-		const input = resolution.data as ResolutionRow["data"];
-		const student = await createStudent(db, {
-			name: input?.name ?? "",
-			document: input?.document,
-			registrationNumber: input?.registrationNumber,
-			email: input?.email,
-			phone: input?.phone,
-			birthDate: input?.birthDate ? new Date(input.birthDate) : undefined,
-			notes: input?.notes,
+		const normalized = normalizeCreateData(
+			resolution.data as NonNullable<ResolutionRow["data"]>,
+		);
+		if ("error" in normalized) {
+			return badRequest(normalized.error);
+		}
+		const input = normalized.input;
+		const normalizedName = normalizeName(input.name);
+		const normalizedDocument = input.document
+			? normalizeDocument(input.document)
+			: undefined;
+
+		const matchesSelfInBatch = createdInBatch.some(
+			(entry) =>
+				entry.name === normalizedName ||
+				(normalizedDocument &&
+					entry.document &&
+					entry.document === normalizedDocument),
+		);
+		const existing = await findStudentsByNameOrDocument(db, {
+			name: input.name,
+			document: input.document,
 		});
+		const duplicate = existing.find(
+			(s) =>
+				normalizeName(s.name) === normalizedName ||
+				(normalizedDocument &&
+					s.document &&
+					normalizeDocument(s.document) === normalizedDocument),
+		);
+		if (matchesSelfInBatch || duplicate) {
+			return badRequest(
+				`Aluno já existe: ${input.name}. Resolva como vínculo ou ignore a linha.`,
+			);
+		}
+
+		const student = await createStudent(db, input);
+		createdInBatch.push({ name: normalizedName, document: normalizedDocument });
 		created++;
 		students.push({ id: student.id, name: student.name });
 	}

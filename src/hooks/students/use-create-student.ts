@@ -10,7 +10,15 @@ export function useCreateStudent() {
 	return useMutation<
 		Student,
 		Error,
-		{ name: string; document?: string; email?: string; phone?: string }
+		{
+			name: string;
+			document?: string;
+			registrationNumber?: string;
+			email?: string;
+			phone?: string;
+			birthDate?: string;
+			notes?: string;
+		}
 	>({
 		mutationFn: async (data) => {
 			const response = await fetch("/api/students", {

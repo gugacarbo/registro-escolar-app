@@ -123,6 +123,13 @@ function ImportStudentsPage() {
 					Conflitos: {preview.summary.conflicts} | Inválidos:{" "}
 					{preview.summary.invalid}
 				</p>
+				{preview.warnings && preview.warnings.length > 0 && (
+					<ul className="text-sm text-amber-600">
+						{preview.warnings.map((warning) => (
+							<li key={warning}>{warning}</li>
+						))}
+					</ul>
+				)}
 				{unresolvedConflicts.length > 0 && (
 					<p className="text-sm text-destructive">
 						{unresolvedConflicts.length} conflito(s) ainda não resolvido(s) por
@@ -152,9 +159,13 @@ function ImportStudentsPage() {
 	return (
 		<div className="space-y-4">
 			<h1 className="text-2xl font-bold">Importar alunos</h1>
+			<p className="text-sm text-muted-foreground">
+				Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a
+				coluna nome.
+			</p>
 			<input
 				type="file"
-				accept=".csv"
+				accept=".csv,.xlsx,.xls,.ods"
 				onChange={(e) => {
 					const file = e.target.files?.[0];
 					if (file) void handleUpload(file);

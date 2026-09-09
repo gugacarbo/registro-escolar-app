@@ -1,7 +1,9 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { Button } from "#/components/ui/button";
+import { AppHeader } from "#/components/app-header";
+import { AppSidebar } from "#/components/app-sidebar";
+import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
 import { authClient } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/_app")({
@@ -60,18 +62,18 @@ export function AppLayout() {
 	}
 
 	return (
-		<div className="min-h-screen bg-background">
-			<header className="border-b">
-				<div className="container mx-auto flex items-center justify-between p-4">
-					<span className="text-lg font-semibold">Registro Escolar</span>
-					<Button type="button" variant="outline" onClick={handleSignOut}>
-						Sair
-					</Button>
-				</div>
-			</header>
-			<main className="container mx-auto p-4">
-				<Outlet />
-			</main>
-		</div>
+		<SidebarProvider>
+			<AppSidebar />
+			<SidebarInset>
+				<AppHeader
+					userName={session.user.name}
+					userEmail={session.user.email}
+					onSignOut={handleSignOut}
+				/>
+				<main className="container mx-auto w-full max-w-5xl flex-1 p-4">
+					<Outlet />
+				</main>
+			</SidebarInset>
+		</SidebarProvider>
 	);
 }

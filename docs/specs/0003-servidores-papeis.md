@@ -24,12 +24,21 @@ Permitir cadastrar servidores reutilizáveis e papéis de reunião, vinculando a
 
 ## Contrato
 
-- `POST /api/servidores` — cria servidor.
-- `GET /api/servidores` — lista servidores.
+> Decisão D0 (nomenclatura): identificadores e endpoints em inglês, consistente
+> com o código existente (`/api/students`, tabelas `students`); rótulos e
+> mensagens da UI em português. Equivalência com os termos da seção Fluxo:
+> servidor → `staff`, papel → `role`, reunião → `meeting`, participação →
+> `meeting_participants`.
+
+- `POST /api/staff` — cria servidor.
+- `GET /api/staff` — lista servidores (exclui soft-deleted).
 - `POST /api/roles` — cria papel.
-- `GET /api/roles` — lista papéis.
+- `GET /api/roles` — lista papéis (garante o papel padrão `Professor`).
 - `POST /api/meetings/:id/participants` — adiciona participante com papel.
-- Payload de participação: `servidorId`, `papelId`, `reuniaoId`.
+- Payload de participação: `{ staffId, roleId }` (`meetingId` vem do path `:id`).
+
+A entidade `meetings` neste escopo é mínima (`id`, `title`, `status`,
+`heldAt`); será estendida pela spec futura do ciclo de vida de reuniões.
 
 ## Casos de borda
 
@@ -47,8 +56,10 @@ Permitir cadastrar servidores reutilizáveis e papéis de reunião, vinculando a
 ## Definition of Done
 
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run typecheck        # exit 0
+bun run check            # exit 0
+bun run test             # tudo verde
+bun run test:coverage    # ≥ 95%
 ```
 
 ## Revisão humana

@@ -1,4 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import {
 	Form,
@@ -12,15 +14,22 @@ import {
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
 
-export type StudentFormValues = {
-	name: string;
-	document?: string;
-	registrationNumber?: string;
-	email?: string;
-	phone?: string;
-	birthDate?: string;
-	notes?: string;
-};
+const studentFormSchema = z.object({
+	name: z.string().trim().min(1, "Nome é obrigatório"),
+	document: z.string().optional(),
+	registrationNumber: z.string().optional(),
+	email: z
+		.string()
+		.optional()
+		.refine((value) => !value || /.+@.+\..+/.test(value), {
+			message: "Email inválido",
+		}),
+	phone: z.string().optional(),
+	birthDate: z.string().optional(),
+	notes: z.string().optional(),
+});
+
+export type StudentFormValues = z.infer<typeof studentFormSchema>;
 
 export function StudentForm({
 	onSubmit,
@@ -34,6 +43,7 @@ export function StudentForm({
 	serverError?: string | null;
 }) {
 	const form = useForm<StudentFormValues>({
+		resolver: zodResolver(studentFormSchema),
 		defaultValues: {
 			name: "",
 			document: "",

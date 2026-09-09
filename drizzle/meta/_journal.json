@@ -22,6 +22,13 @@
       "when": 1788912435787,
       "tag": "0002_teste",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788923298271,
+      "tag": "0003_cria-servidores-papeis-reunioes",
+      "breakpoints": true
     }
   ]
 }

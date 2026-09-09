@@ -42,8 +42,12 @@ export async function importPreviewHandler({
 		});
 	}
 
-	const { rows, errors: parserErrors } = await parseStudentImportFile(file);
-	if (parserErrors.length > 0) {
+	const {
+		rows,
+		errors: parserErrors,
+		fatal,
+	} = await parseStudentImportFile(file);
+	if (fatal) {
 		return new Response(
 			JSON.stringify({
 				error: "Falha ao processar arquivo",
@@ -87,8 +91,11 @@ export async function importPreviewHandler({
 		})),
 	}));
 
-	return new Response(JSON.stringify({ rows: responseRows, summary }), {
-		status: 200,
-		headers: { "Content-Type": "application/json" },
-	});
+	return new Response(
+		JSON.stringify({ rows: responseRows, summary, warnings: parserErrors }),
+		{
+			status: 200,
+			headers: { "Content-Type": "application/json" },
+		},
+	);
 }

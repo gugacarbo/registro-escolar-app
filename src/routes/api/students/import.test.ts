@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
-import { createStudent, listStudents } from "#/lib/students/repository";
+import {
+	createStudent,
+	findStudentById,
+	findStudentsByNameOrDocument,
+	listStudents,
+} from "#/lib/students/repository";
 
 import { importPreviewHandler } from "./import";
 import { importResolveHandler } from "./import.resolve";
@@ -12,6 +17,7 @@ vi.mock("#/lib/auth/session", () => ({
 
 vi.mock("#/lib/students/repository", () => ({
 	createStudent: vi.fn(),
+	findStudentById: vi.fn(),
 	listStudents: vi.fn().mockResolvedValue([]),
 	findStudentsByNameOrDocument: vi.fn().mockResolvedValue([]),
 }));
@@ -125,6 +131,36 @@ describe("POST /api/students/import", () => {
 			birthDate: "",
 			notes: "",
 		});
+	});
+
+	it("returns 200 with row-level errors instead of failing on recoverable rows", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStudents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const form = new FormData();
+		form.append(
+			"file",
+			new File(["nome\n\nMaria Souza"], "alunos.csv", { type: "text/csv" }),
+		);
+		const request = new Request("http://localhost/api/students/import", {
+			method: "POST",
+			body: form,
+		});
+		const response = await importPreviewHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as {
+			rows: Array<{ status: string }>;
+			summary: Record<string, number>;
+		};
+		expect(body.summary.total).toBe(2);
+		expect(body.summary.invalid).toBe(1);
+		expect(body.summary.valid).toBe(1);
 	});
 
 	it("returns preview with conflicts", async () => {
@@ -329,6 +365,11 @@ describe("POST /api/students/import/resolve", () => {
 	it("creates, links and skips rows", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findByIdMock = findStudentById as ReturnType<typeof vi.fn>;
+		findByIdMock.mockResolvedValueOnce({
+			id: "existing-1",
+			name: "João Silva",
+		});
 		const createMock = createStudent as ReturnType<typeof vi.fn>;
 		createMock.mockResolvedValueOnce({
 			id: "new-1",

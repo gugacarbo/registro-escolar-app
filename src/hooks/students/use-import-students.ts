@@ -24,6 +24,7 @@ type ImportPreviewResponse = {
 		conflicts: number;
 		invalid: number;
 	};
+	warnings?: string[];
 };
 
 export function useImportPreview() {

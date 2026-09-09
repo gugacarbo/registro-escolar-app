@@ -7,6 +7,4 @@ const baseURL =
 
 // No SSR não há window.location e o better-auth exige URL absoluta —
 // omitir baseURL faz o cliente deduzir a origem do window.location no browser.
-export const authClient = createAuthClient(
-	baseURL ? { baseURL } : {},
-);
+export const authClient = createAuthClient(baseURL ? { baseURL } : {});

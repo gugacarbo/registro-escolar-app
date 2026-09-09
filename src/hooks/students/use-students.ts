@@ -22,6 +22,7 @@ export function useStudents(search?: string) {
 			return response.json() as Promise<Student[]>;
 		},
 		staleTime: 30_000,
+		gcTime: 5 * 60_000,
 	});
 }
 

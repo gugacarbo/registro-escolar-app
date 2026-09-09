@@ -1,0 +1,87 @@
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import { describe, expect, it } from "vitest";
+
+import type { DB } from "#/db";
+import * as schema from "#/db/schema";
+
+import {
+	createStaff,
+	findActiveStaffById,
+	findStaffById,
+	findStaffByName,
+	listStaff,
+	softDeleteStaff,
+} from "./repository";
+import { normalizeStaffName } from "./shared";
+
+function createTestDb() {
+	const sqlite = new Database(":memory:");
+	sqlite.exec(`
+		CREATE TABLE staff (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			email TEXT,
+			phone TEXT,
+			notes TEXT,
+			deleted_at INTEGER,
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL
+		);
+	`);
+	const db = drizzle(sqlite, { schema }) as unknown as DB;
+	return { db, sqlite };
+}
+
+describe("staff repository", () => {
+	it("cria um servidor", async () => {
+		const { db } = createTestDb();
+		const member = await createStaff(db, { name: "João Silva" });
+		expect(member.name).toBe("João Silva");
+		expect(member.id).toBeTypeOf("string");
+		expect(member.createdAt).toBeInstanceOf(Date);
+	});
+
+	it("encontra servidor por id", async () => {
+		const { db } = createTestDb();
+		const created = await createStaff(db, { name: "Maria Souza" });
+		const found = await findStaffById(db, created.id);
+		expect(found?.name).toBe("Maria Souza");
+	});
+
+	it("exclui servidor com soft delete da listagem mas mantém histórico", async () => {
+		const { db } = createTestDb();
+		const created = await createStaff(db, { name: "Carlos Lima" });
+		await softDeleteStaff(db, created.id);
+		const all = await listStaff(db, {});
+		expect(all).toHaveLength(0);
+		const history = await findStaffById(db, created.id);
+		expect(history?.name).toBe("Carlos Lima");
+		expect(history?.deletedAt).toBeInstanceOf(Date);
+		const active = await findActiveStaffById(db, created.id);
+		expect(active).toBeUndefined();
+	});
+
+	it("normaliza nome para detectar duplicidade", async () => {
+		const { db } = createTestDb();
+		await createStaff(db, { name: "José Santos" });
+		const found = await findStaffByName(db, "José Santos");
+		expect(found).toHaveLength(1);
+		expect(normalizeStaffName(found[0].name)).toBe(
+			normalizeStaffName("jose  santos "),
+		);
+	});
+
+	it("busca servidores por nome ou email", async () => {
+		const { db } = createTestDb();
+		await createStaff(db, {
+			name: "Ana Paula",
+			email: "ana@example.com",
+		});
+		await createStaff(db, { name: "Bruna Lima" });
+		const byName = await listStaff(db, { search: "Ana" });
+		expect(byName).toHaveLength(1);
+		const byEmail = await listStaff(db, { search: "ana@example" });
+		expect(byEmail).toHaveLength(1);
+	});
+});

@@ -1,0 +1,61 @@
+import { sql } from "drizzle-orm";
+import {
+	index,
+	integer,
+	sqliteTable,
+	text,
+	uniqueIndex,
+} from "drizzle-orm/sqlite-core";
+
+import { roles } from "./roles-schema";
+import { staff } from "./staff-schema";
+
+export const meetings = sqliteTable(
+	"meetings",
+	{
+		id: text("id").primaryKey(),
+		title: text("title").notNull(),
+		status: text("status").notNull().default("draft"),
+		heldAt: integer("held_at", { mode: "timestamp_ms" }),
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [index("meetings_status_idx").on(table.status)],
+);
+
+export const meetingParticipants = sqliteTable(
+	"meeting_participants",
+	{
+		id: text("id").primaryKey(),
+		meetingId: text("meeting_id")
+			.notNull()
+			.references(() => meetings.id),
+		staffId: text("staff_id")
+			.notNull()
+			.references(() => staff.id),
+		roleId: text("role_id")
+			.notNull()
+			.references(() => roles.id),
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex("meeting_participants_meeting_staff_uidx").on(
+			table.meetingId,
+			table.staffId,
+		),
+		index("meeting_participants_meeting_idx").on(table.meetingId),
+		index("meeting_participants_staff_idx").on(table.staffId),
+		index("meeting_participants_role_idx").on(table.roleId),
+	],
+);
