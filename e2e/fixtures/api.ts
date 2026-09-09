@@ -64,7 +64,10 @@ export async function createEnrollment(
 	return res.json();
 }
 
-export async function createStaff(ctx: ApiContext, name: string) {
+export async function createStaff(
+	ctx: ApiContext,
+	name: string,
+): Promise<{ id: string; name: string }> {
 	const res = await api("POST", "/api/staff", ctx.cookies, { name });
 	if (!res.ok) throw new Error(`createStaff failed: ${res.status}`);
 	return res.json();
@@ -91,13 +94,27 @@ export async function createOffer(ctx: ApiContext, classId: string, componentId:
 	return res.json();
 }
 
-export async function createMeeting(ctx: ApiContext, input: object) {
+export async function createMeeting(
+	ctx: ApiContext,
+	input: {
+		title: string;
+		heldAt?: string;
+		templateId?: string | null;
+		classIds?: string[];
+		participants?: Array<{ staffId: string; roleId: string }>;
+	},
+): Promise<{ id: string; title: string; status: string }> {
 	const res = await api("POST", "/api/meetings", ctx.cookies, input);
 	if (!res.ok) throw new Error(`createMeeting failed: ${res.status}`);
 	return res.json();
 }
 
-export async function addParticipant(ctx: ApiContext, meetingId: string, staffId: string, roleId: string) {
+export async function addParticipant(
+	ctx: ApiContext,
+	meetingId: string,
+	staffId: string,
+	roleId: string,
+): Promise<{ id: string; staffId: string; roleId: string }> {
 	const res = await api("POST", `/api/meetings/${meetingId}/participants`, ctx.cookies, {
 		staffId,
 		roleId,
