@@ -307,9 +307,39 @@ export async function previewMinute(
 	return res.json();
 }
 
-export async function approveMinute(ctx: ApiContext, meetingId: string, data?: string, observacao?: string) {
+export async function approveMinute(
+	ctx: ApiContext,
+	meetingId: string,
+	data?: string,
+	observacao?: string,
+): Promise<{
+	id: string;
+	meetingId: string;
+	approvalStatus: string;
+	approvedAt: string | null;
+	approvalNotes: string | null;
+}> {
 	const res = await api("PATCH", `/api/meetings/${meetingId}/minutes/approve`, ctx.cookies, { data, observacao });
 	if (!res.ok) throw new Error(`approveMinute failed: ${res.status}`);
+	return res.json();
+}
+
+export async function listMinuteVersions(
+	ctx: ApiContext,
+	meetingId: string,
+): Promise<
+	Array<{
+		id: string;
+		minuteId: string;
+		version: number;
+		isCurrent: boolean;
+		notes: string | null;
+		createdAt: string;
+		hasPdf: boolean;
+	}>
+> {
+	const res = await api("GET", `/api/meetings/${meetingId}/minutes/versions`, ctx.cookies);
+	if (!res.ok) throw new Error(`listMinuteVersions failed: ${res.status}`);
 	return res.json();
 }
 
