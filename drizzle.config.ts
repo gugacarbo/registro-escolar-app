@@ -7,9 +7,10 @@ export default defineConfig({
   out: './drizzle',
   schema: './src/db/schema.ts',
   dialect: 'sqlite',
-  driver: 'd1',
+  driver: 'd1-http',
   dbCredentials: {
-    wranglerConfigPath: './wrangler.jsonc',
-    dbName: 'registro-escolar-db',
+    accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
+    databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
+    token: process.env.CLOUDFLARE_API_TOKEN!,
   },
 })

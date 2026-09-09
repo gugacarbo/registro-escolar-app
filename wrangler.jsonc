@@ -9,7 +9,7 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
-	"main": "@tanstack/react-start/server-entry",
+	"main": "src/default-entry.ts",
 	"observability": {
 		"enabled": true
 	},
@@ -18,7 +18,7 @@
 		{
 			"binding": "DB",
 			"database_name": "registro-escolar-db",
-			"database_id": "",
+			"database_id": "__REPLACE_WITH_REMOTE_DATABASE_ID__",
 			"migrations_dir": "./drizzle"
 		}
 	],

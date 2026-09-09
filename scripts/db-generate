@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  echo "Uso: bun run db:generate -- --name=<nome-descritivo>"
+  echo "Exemplo: bun run db:generate -- --name=cria-tabela-usuarios"
+  exit 1
+}
+
+NAME=""
+for arg in "$@"; do
+  case "$arg" in
+    --name=*)
+      NAME="${arg#*=}"
+      ;;
+    --name)
+      shift
+      NAME="${1:-}"
+      ;;
+  esac
+done
+
+if [[ -z "$NAME" ]]; then
+  echo "Erro: a migration deve ser explicitamente nomeada com --name." >&2
+  usage
+fi
+
+exec drizzle-kit generate "$@"
