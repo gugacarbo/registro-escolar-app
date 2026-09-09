@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CreateClassDialog } from "./create-class-dialog";
+import { CreateComponentDialog } from "./create-component-dialog";
 
 function createWrapper() {
 	const client = new QueryClient({
@@ -19,7 +19,7 @@ function createWrapper() {
 }
 
 function renderDialog(props?: { open?: boolean }) {
-	return render(<CreateClassDialog open {...props} />, {
+	return render(<CreateComponentDialog open {...props} />, {
 		wrapper: createWrapper(),
 	});
 }
@@ -28,42 +28,38 @@ beforeEach(() => {
 	vi.unstubAllGlobals();
 });
 
-describe("CreateClassDialog", () => {
+describe("CreateComponentDialog", () => {
 	it("renderiza o formulário dentro do dialog quando aberto", async () => {
 		renderDialog();
 
 		expect(await screen.findByRole("dialog")).toBeInTheDocument();
-		expect(screen.getByText("Nova turma")).toBeVisible();
+		expect(screen.getByText("Novo componente")).toBeVisible();
 		expect(screen.getByLabelText("Nome *")).toBeVisible();
-		expect(screen.getByLabelText("Período letivo *")).toBeVisible();
 		expect(screen.getByRole("button", { name: "Salvar" })).toBeInTheDocument();
 	});
 
-	it("exibe erro de validação quando os campos obrigatórios estão vazios", async () => {
+	it("exibe erro de validação quando o nome está vazio", async () => {
 		const user = userEvent.setup();
 		renderDialog();
 
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 
 		expect(await screen.findByText("Nome é obrigatório")).toBeVisible();
-		expect(
-			await screen.findByText("Período letivo é obrigatório"),
-		).toBeVisible();
 	});
 
-	it("cria a turma, fecha o dialog e notifica sucesso", async () => {
+	it("cria o componente, fecha o dialog e notifica sucesso", async () => {
 		const user = userEvent.setup();
 		const onSuccess = vi.fn();
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
 			.mockResolvedValueOnce(
-				new Response(JSON.stringify({ id: "class-1" }), { status: 201 }),
+				new Response(JSON.stringify({ id: "component-1" }), { status: 201 }),
 			);
 
 		function Controlled() {
 			const [open, setOpen] = useState(true);
 			return (
-				<CreateClassDialog
+				<CreateComponentDialog
 					open={open}
 					onOpenChange={setOpen}
 					onSuccess={onSuccess}
@@ -73,13 +69,12 @@ describe("CreateClassDialog", () => {
 
 		render(<Controlled />, { wrapper: createWrapper() });
 
-		await user.type(await screen.findByLabelText("Nome *"), "9º Ano A");
-		await user.type(await screen.findByLabelText("Período letivo *"), "2026");
+		await user.type(await screen.findByLabelText("Nome *"), "Matemática");
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 
 		await waitFor(() =>
 			expect(fetchMock).toHaveBeenCalledWith(
-				"/api/classes",
+				"/api/components",
 				expect.objectContaining({ method: "POST" }),
 			),
 		);
@@ -92,17 +87,16 @@ describe("CreateClassDialog", () => {
 	it("exibe erro vindo do servidor sem fechar o dialog", async () => {
 		const user = userEvent.setup();
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify({ error: "Turma já existe" }), {
+			new Response(JSON.stringify({ error: "Componente já existe" }), {
 				status: 409,
 			}),
 		);
 		renderDialog();
 
-		await user.type(await screen.findByLabelText("Nome *"), "9º Ano A");
-		await user.type(await screen.findByLabelText("Período letivo *"), "2026");
+		await user.type(await screen.findByLabelText("Nome *"), "Matemática");
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 
-		expect(await screen.findByText("Turma já existe")).toBeVisible();
+		expect(await screen.findByText("Componente já existe")).toBeVisible();
 		expect(screen.getByRole("dialog")).toBeInTheDocument();
 	});
 });

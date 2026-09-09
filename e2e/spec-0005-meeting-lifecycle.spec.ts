@@ -16,19 +16,21 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 		apiContext,
 	}) => {
 		const klass = await createClass(apiContext, "Turma UI Reunião", "2026");
-		await page.goto("/meetings/new");
-		const nameField = page.getByRole("textbox", { name: "Nome" });
+		await page.goto("/meetings");
+		await page.getByRole("button", { name: "Nova reunião" }).click();
+		const dialog = page.getByRole("dialog");
+		const nameField = dialog.getByRole("textbox", { name: "Nome" });
 		await nameField.click();
 		await nameField.fill("Conselho UI");
 		await expect(nameField).toHaveValue("Conselho UI");
-		await page.locator("input[type=date]").fill("2026-05-10");
-		await page
+		await dialog.locator("input[type=date]").fill("2026-05-10");
+		await dialog
 			.locator("label")
 			.filter({ hasText: `${klass.name} — 2026` })
 			.locator("button")
 			.first()
 			.click();
-		await page.getByRole("button", { name: "Salvar" }).click();
+		await dialog.getByRole("button", { name: "Salvar" }).click();
 		await expect(page.getByRole("heading", { name: "Conselho UI" })).toBeVisible();
 		await expect(page.getByText("Rascunho")).toBeVisible();
 	});

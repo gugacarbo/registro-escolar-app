@@ -13,12 +13,14 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 	test("cadastra e lista componente pela UI", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/components/new");
-		const nameField = page.getByRole("textbox", { name: "Nome" });
+		await page.goto("/components");
+		await page.getByRole("button", { name: "Novo componente" }).click();
+		const dialog = page.getByRole("dialog");
+		const nameField = dialog.getByRole("textbox", { name: "Nome" });
 		await nameField.click();
 		await nameField.fill("Matemática E2E");
 		await expect(nameField).toHaveValue("Matemática E2E");
-		await page.getByRole("button", { name: "Salvar" }).click();
+		await dialog.getByRole("button", { name: "Salvar" }).click();
 
 		await expect.poll(async () => page.url()).toBe(`${baseURL}/components`);
 		await expect(page.getByText("Matemática E2E")).toBeVisible();

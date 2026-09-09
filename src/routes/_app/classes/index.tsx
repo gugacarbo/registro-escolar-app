@@ -54,6 +54,7 @@ function ClassesPage() {
 					))}
 				</ul>
 			)}
+			<CreateClassDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 		</div>
 	);
 }

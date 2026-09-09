@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { CreateMeetingDialog } from "#/components/meetings/create-meeting-dialog";
 import { MeetingStatusBadge } from "#/components/meetings/meeting-status-badge";
 import { TransitionButtons } from "#/components/meetings/transition-buttons";
 import { Button } from "#/components/ui/button";
@@ -29,6 +30,8 @@ const STATUS_OPTIONS: Array<{ value: MeetingStatus; label: string }> = [
 function MeetingsPage() {
 	const [search, setSearch] = useState("");
 	const [status, setStatus] = useState<MeetingStatus | "">("");
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const navigate = useNavigate();
 	const { data: meetings, isLoading } = useMeetings({
 		search: search || undefined,
 		status: status || undefined,
@@ -38,9 +41,7 @@ function MeetingsPage() {
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-bold">Reuniões</h1>
-				<Link to="/meetings/new">
-					<Button>Nova reunião</Button>
-				</Link>
+				<Button onClick={() => setDialogOpen(true)}>Nova reunião</Button>
 			</div>
 			<div className="flex flex-wrap items-center gap-2">
 				<Input
@@ -91,6 +92,13 @@ function MeetingsPage() {
 					))}
 				</ul>
 			)}
+			<CreateMeetingDialog
+				open={dialogOpen}
+				onOpenChange={setDialogOpen}
+				onSuccess={(meetingId) =>
+					void navigate({ to: "/meetings/$meetingId", params: { meetingId } })
+				}
+			/>
 		</div>
 	);
 }

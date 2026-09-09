@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { CreateComponentDialog } from "#/components/components/create-component-dialog";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { useComponents } from "#/hooks/components/use-components";
@@ -11,15 +12,14 @@ export const Route = createFileRoute("/_app/components/")({
 
 function ComponentsPage() {
 	const [search, setSearch] = useState("");
+	const [dialogOpen, setDialogOpen] = useState(false);
 	const { data: components, isLoading } = useComponents(search);
 
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-bold">Componentes</h1>
-				<Link to="/components/new">
-					<Button>Novo componente</Button>
-				</Link>
+				<Button onClick={() => setDialogOpen(true)}>Novo componente</Button>
 			</div>
 			<Input
 				placeholder="Buscar por nome"
@@ -39,6 +39,7 @@ function ComponentsPage() {
 					))}
 				</ul>
 			)}
+			<CreateComponentDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 		</div>
 	);
 }

@@ -8,18 +8,23 @@ export class ClassesPage {
 	}
 
 	async clickNew() {
-		await this.page.getByRole("link", { name: "Nova turma" }).last().click();
+		await this.page.getByRole("button", { name: "Nova turma" }).click();
+		await expect(
+			this.page.getByRole("dialog").getByRole("textbox", { name: "Nome" }),
+		).toBeVisible();
 	}
 
 	async create(name: string, academicPeriod: string) {
 		await this.goto();
 		await this.clickNew();
-		await this.page.waitForURL("/classes/new");
-		const nameField = this.page.getByRole("textbox", { name: "Nome" });
+		const dialog = this.page.getByRole("dialog");
+		const nameField = dialog.getByRole("textbox", { name: "Nome" });
 		await nameField.click();
 		await nameField.fill(name);
 		await expect(nameField).toHaveValue(name);
-		await this.page.getByRole("textbox", { name: "Período letivo" }).fill(academicPeriod);
-		await this.page.getByRole("button", { name: /salvar/i }).click();
+		await dialog
+			.getByRole("textbox", { name: "Período letivo" })
+			.fill(academicPeriod);
+		await dialog.getByRole("button", { name: /salvar/i }).click();
 	}
 }

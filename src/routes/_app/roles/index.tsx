@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { CreateRoleDialog } from "#/components/roles/create-role-dialog";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { useRoles } from "#/hooks/roles/use-roles";
@@ -11,15 +12,14 @@ export const Route = createFileRoute("/_app/roles/")({
 
 function RolesPage() {
 	const [search, setSearch] = useState("");
+	const [dialogOpen, setDialogOpen] = useState(false);
 	const { data: roles, isLoading } = useRoles(search);
 
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-bold">Papéis</h1>
-				<Link to="/roles/new">
-					<Button>Novo papel</Button>
-				</Link>
+				<Button onClick={() => setDialogOpen(true)}>Novo papel</Button>
 			</div>
 			<Input
 				placeholder="Buscar por nome"
@@ -36,6 +36,7 @@ function RolesPage() {
 					))}
 				</ul>
 			)}
+			<CreateRoleDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 		</div>
 	);
 }

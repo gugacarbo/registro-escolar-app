@@ -15,15 +15,11 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppClassesIndexRouteImport } from './routes/_app/classes/index'
 import { Route as AppClassesEnrollRouteImport } from './routes/_app/classes/enroll'
-import { Route as AppClassesNewRouteImport } from './routes/_app/classes/new'
 import { Route as AppComponentsIndexRouteImport } from './routes/_app/components/index'
-import { Route as AppComponentsNewRouteImport } from './routes/_app/components/new'
 import { Route as AppMeetingsIndexRouteImport } from './routes/_app/meetings/index'
-import { Route as AppMeetingsNewRouteImport } from './routes/_app/meetings/new'
 import { Route as AppMinutesIndexRouteImport } from './routes/_app/minutes/index'
 import { Route as AppMinutesTemplatesRouteImport } from './routes/_app/minutes/templates'
 import { Route as AppRolesIndexRouteImport } from './routes/_app/roles/index'
-import { Route as AppRolesNewRouteImport } from './routes/_app/roles/new'
 import { Route as AppStaffIndexRouteImport } from './routes/_app/staff/index'
 import { Route as AppStaffNewRouteImport } from './routes/_app/staff/new'
 import { Route as AppStudentsIndexRouteImport } from './routes/_app/students/index'
@@ -54,6 +50,7 @@ import { Route as ApiMeetingsMeetingIdParticipantsRouteImport } from './routes/a
 import { Route as ApiMeetingsMeetingIdReopenRouteImport } from './routes/api/meetings/$meetingId/reopen'
 import { Route as ApiMeetingsMeetingIdStartRouteImport } from './routes/api/meetings/$meetingId/start'
 import { Route as ApiStaffIdIndexRouteImport } from './routes/api/staff/$id/index'
+import { Route as ApiStudentsIdIndexRouteImport } from './routes/api/students/$id/index'
 import { Route as ApiStudentsIdHistoryRouteImport } from './routes/api/students/$id/history'
 import { Route as ApiStudentsIdRecordsRouteImport } from './routes/api/students/$id/records'
 import { Route as ApiStudentsImportResolveRouteImport } from './routes/api/students/import.resolve'
@@ -98,29 +95,14 @@ const AppClassesEnrollRoute = AppClassesEnrollRouteImport.update({
   path: '/classes/enroll',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppClassesNewRoute = AppClassesNewRouteImport.update({
-  id: '/classes/new',
-  path: '/classes/new',
-  getParentRoute: () => AppRouteRoute,
-} as any)
 const AppComponentsIndexRoute = AppComponentsIndexRouteImport.update({
   id: '/components/',
   path: '/components/',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppComponentsNewRoute = AppComponentsNewRouteImport.update({
-  id: '/components/new',
-  path: '/components/new',
-  getParentRoute: () => AppRouteRoute,
-} as any)
 const AppMeetingsIndexRoute = AppMeetingsIndexRouteImport.update({
   id: '/meetings/',
   path: '/meetings/',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppMeetingsNewRoute = AppMeetingsNewRouteImport.update({
-  id: '/meetings/new',
-  path: '/meetings/new',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppMinutesIndexRoute = AppMinutesIndexRouteImport.update({
@@ -136,11 +118,6 @@ const AppMinutesTemplatesRoute = AppMinutesTemplatesRouteImport.update({
 const AppRolesIndexRoute = AppRolesIndexRouteImport.update({
   id: '/roles/',
   path: '/roles/',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppRolesNewRoute = AppRolesNewRouteImport.update({
-  id: '/roles/new',
-  path: '/roles/new',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppStaffIndexRoute = AppStaffIndexRouteImport.update({
@@ -302,6 +279,11 @@ const ApiStaffIdIndexRoute = ApiStaffIdIndexRouteImport.update({
   path: '/api/staff/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStudentsIdIndexRoute = ApiStudentsIdIndexRouteImport.update({
+  id: '/api/students/$id/',
+  path: '/api/students/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStudentsIdHistoryRoute = ApiStudentsIdHistoryRouteImport.update({
   id: '/api/students/$id/history',
   path: '/api/students/$id/history',
@@ -392,11 +374,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/classes/enroll': typeof AppClassesEnrollRoute
-  '/classes/new': typeof AppClassesNewRoute
-  '/components/new': typeof AppComponentsNewRoute
-  '/meetings/new': typeof AppMeetingsNewRoute
   '/minutes/templates': typeof AppMinutesTemplatesRoute
-  '/roles/new': typeof AppRolesNewRoute
   '/staff/new': typeof AppStaffNewRoute
   '/students/$id': typeof AppStudentsIdRoute
   '/students/import': typeof AppStudentsImportRoute
@@ -435,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
   '/api/staff/$id/': typeof ApiStaffIdIndexRoute
+  '/api/students/$id/': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
@@ -452,11 +431,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/': typeof AppIndexRoute
   '/classes/enroll': typeof AppClassesEnrollRoute
-  '/classes/new': typeof AppClassesNewRoute
-  '/components/new': typeof AppComponentsNewRoute
-  '/meetings/new': typeof AppMeetingsNewRoute
   '/minutes/templates': typeof AppMinutesTemplatesRoute
-  '/roles/new': typeof AppRolesNewRoute
   '/staff/new': typeof AppStaffNewRoute
   '/students/$id': typeof AppStudentsIdRoute
   '/students/import': typeof AppStudentsImportRoute
@@ -495,6 +470,7 @@ export interface FileRoutesByTo {
   '/meetings/$meetingId': typeof AppMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId': typeof ApiMeetingsMeetingIdIndexRoute
   '/api/staff/$id': typeof ApiStaffIdIndexRoute
+  '/api/students/$id': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
@@ -514,11 +490,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/': typeof AppIndexRoute
   '/_app/classes/enroll': typeof AppClassesEnrollRoute
-  '/_app/classes/new': typeof AppClassesNewRoute
-  '/_app/components/new': typeof AppComponentsNewRoute
-  '/_app/meetings/new': typeof AppMeetingsNewRoute
   '/_app/minutes/templates': typeof AppMinutesTemplatesRoute
-  '/_app/roles/new': typeof AppRolesNewRoute
   '/_app/staff/new': typeof AppStaffNewRoute
   '/_app/students/$id': typeof AppStudentsIdRoute
   '/_app/students/import': typeof AppStudentsImportRoute
@@ -557,6 +529,7 @@ export interface FileRoutesById {
   '/_app/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
   '/api/staff/$id/': typeof ApiStaffIdIndexRoute
+  '/api/students/$id/': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
@@ -576,11 +549,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/classes/enroll'
-    | '/classes/new'
-    | '/components/new'
-    | '/meetings/new'
     | '/minutes/templates'
-    | '/roles/new'
     | '/staff/new'
     | '/students/$id'
     | '/students/import'
@@ -619,6 +588,7 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId/'
     | '/api/meetings/$meetingId/'
     | '/api/staff/$id/'
+    | '/api/students/$id/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
@@ -636,11 +606,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/'
     | '/classes/enroll'
-    | '/classes/new'
-    | '/components/new'
-    | '/meetings/new'
     | '/minutes/templates'
-    | '/roles/new'
     | '/staff/new'
     | '/students/$id'
     | '/students/import'
@@ -679,6 +645,7 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId'
     | '/api/meetings/$meetingId'
     | '/api/staff/$id'
+    | '/api/students/$id'
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
@@ -697,11 +664,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_app/'
     | '/_app/classes/enroll'
-    | '/_app/classes/new'
-    | '/_app/components/new'
-    | '/_app/meetings/new'
     | '/_app/minutes/templates'
-    | '/_app/roles/new'
     | '/_app/staff/new'
     | '/_app/students/$id'
     | '/_app/students/import'
@@ -740,6 +703,7 @@ export interface FileRouteTypes {
     | '/_app/meetings/$meetingId/'
     | '/api/meetings/$meetingId/'
     | '/api/staff/$id/'
+    | '/api/students/$id/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
@@ -778,6 +742,7 @@ export interface RootRouteChildren {
   ApiStudentsIdRecordsRoute: typeof ApiStudentsIdRecordsRoute
   ApiMeetingsMeetingIdIndexRoute: typeof ApiMeetingsMeetingIdIndexRoute
   ApiStaffIdIndexRoute: typeof ApiStaffIdIndexRoute
+  ApiStudentsIdIndexRoute: typeof ApiStudentsIdIndexRoute
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute: typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   ApiMeetingsMeetingIdMinutesApproveRoute: typeof ApiMeetingsMeetingIdMinutesApproveRoute
   ApiMeetingsMeetingIdRecordsRecordIdRoute: typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
@@ -835,13 +800,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClassesEnrollRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/classes/new': {
-      id: '/_app/classes/new'
-      path: '/classes/new'
-      fullPath: '/classes/new'
-      preLoaderRoute: typeof AppClassesNewRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
     '/_app/components/': {
       id: '/_app/components/'
       path: '/components'
@@ -849,25 +807,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppComponentsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/components/new': {
-      id: '/_app/components/new'
-      path: '/components/new'
-      fullPath: '/components/new'
-      preLoaderRoute: typeof AppComponentsNewRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
     '/_app/meetings/': {
       id: '/_app/meetings/'
       path: '/meetings'
       fullPath: '/meetings/'
       preLoaderRoute: typeof AppMeetingsIndexRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/meetings/new': {
-      id: '/_app/meetings/new'
-      path: '/meetings/new'
-      fullPath: '/meetings/new'
-      preLoaderRoute: typeof AppMeetingsNewRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/minutes/': {
@@ -889,13 +833,6 @@ declare module '@tanstack/react-router' {
       path: '/roles'
       fullPath: '/roles/'
       preLoaderRoute: typeof AppRolesIndexRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/roles/new': {
-      id: '/_app/roles/new'
-      path: '/roles/new'
-      fullPath: '/roles/new'
-      preLoaderRoute: typeof AppRolesNewRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/staff/': {
@@ -1108,6 +1045,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStaffIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/students/$id/': {
+      id: '/api/students/$id/'
+      path: '/api/students/$id'
+      fullPath: '/api/students/$id/'
+      preLoaderRoute: typeof ApiStudentsIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/students/$id/history': {
       id: '/api/students/$id/history'
       path: '/api/students/$id/history'
@@ -1212,11 +1156,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppClassesEnrollRoute: typeof AppClassesEnrollRoute
-  AppClassesNewRoute: typeof AppClassesNewRoute
-  AppComponentsNewRoute: typeof AppComponentsNewRoute
-  AppMeetingsNewRoute: typeof AppMeetingsNewRoute
   AppMinutesTemplatesRoute: typeof AppMinutesTemplatesRoute
-  AppRolesNewRoute: typeof AppRolesNewRoute
   AppStaffNewRoute: typeof AppStaffNewRoute
   AppStudentsIdRoute: typeof AppStudentsIdRoute
   AppStudentsImportRoute: typeof AppStudentsImportRoute
@@ -1238,11 +1178,7 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppClassesEnrollRoute: AppClassesEnrollRoute,
-  AppClassesNewRoute: AppClassesNewRoute,
-  AppComponentsNewRoute: AppComponentsNewRoute,
-  AppMeetingsNewRoute: AppMeetingsNewRoute,
   AppMinutesTemplatesRoute: AppMinutesTemplatesRoute,
-  AppRolesNewRoute: AppRolesNewRoute,
   AppStaffNewRoute: AppStaffNewRoute,
   AppStudentsIdRoute: AppStudentsIdRoute,
   AppStudentsImportRoute: AppStudentsImportRoute,
@@ -1301,6 +1237,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiStudentsIdRecordsRoute: ApiStudentsIdRecordsRoute,
   ApiMeetingsMeetingIdIndexRoute: ApiMeetingsMeetingIdIndexRoute,
   ApiStaffIdIndexRoute: ApiStaffIdIndexRoute,
+  ApiStudentsIdIndexRoute: ApiStudentsIdIndexRoute,
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute:
     ApiMeetingsMeetingIdGeneralReportsReportIdRoute,
   ApiMeetingsMeetingIdMinutesApproveRoute:

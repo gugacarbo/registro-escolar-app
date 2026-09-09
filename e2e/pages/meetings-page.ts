@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 export class MeetingsPage {
 	constructor(private page: Page) {}
@@ -8,15 +8,18 @@ export class MeetingsPage {
 	}
 
 	async clickNew() {
-		await this.page.getByRole("link", { name: /nova reunião/i }).click();
+		await this.page.getByRole("button", { name: /nova reunião/i }).click();
+		await expect(
+			this.page.getByRole("dialog").getByRole("textbox", { name: "Nome" }),
+		).toBeVisible();
 	}
 
 	async createDraft(title: string, heldAt: string) {
 		await this.goto();
 		await this.clickNew();
-		await this.page.waitForURL("/meetings/new");
-		await this.page.getByRole("textbox", { name: "Título" }).fill(title);
-		await this.page.getByLabel("Data").fill(heldAt);
-		await this.page.getByRole("button", { name: /salvar/i }).click();
+		const dialog = this.page.getByRole("dialog");
+		await dialog.getByRole("textbox", { name: "Nome" }).fill(title);
+		await dialog.getByLabel("Data").fill(heldAt);
+		await dialog.getByRole("button", { name: /salvar/i }).click();
 	}
 }

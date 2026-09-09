@@ -1,0 +1,138 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
+import { useState } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { CreateMeetingDialog } from "./create-meeting-dialog";
+
+function createWrapper() {
+	const client = new QueryClient({
+		defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+	});
+	return function Wrapper({ children }: { children: ReactNode }) {
+		return (
+			<QueryClientProvider client={client}>{children}</QueryClientProvider>
+		);
+	};
+}
+
+function renderDialog(props?: { open?: boolean }) {
+	return render(<CreateMeetingDialog open {...props} />, {
+		wrapper: createWrapper(),
+	});
+}
+
+beforeEach(() => {
+	vi.unstubAllGlobals();
+	vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+		const url = typeof input === "string" ? input : String(input);
+		if (url === "/api/classes") {
+			return new Response(JSON.stringify([]), { status: 200 });
+		}
+		if (url === "/api/staff") {
+			return new Response(JSON.stringify([]), { status: 200 });
+		}
+		if (url === "/api/roles") {
+			return new Response(JSON.stringify([]), { status: 200 });
+		}
+		return new Response(JSON.stringify([]), { status: 200 });
+	});
+});
+
+describe("CreateMeetingDialog", () => {
+	it("renderiza o formulário dentro do dialog quando aberto", async () => {
+		renderDialog();
+
+		expect(await screen.findByRole("dialog")).toBeInTheDocument();
+		expect(screen.getByText("Nova reunião")).toBeVisible();
+		expect(screen.getByLabelText("Nome *")).toBeVisible();
+		expect(screen.getByRole("button", { name: "Salvar" })).toBeInTheDocument();
+	});
+
+	it("exibe erro de validação quando os campos obrigatórios estão vazios", async () => {
+		const user = userEvent.setup();
+		renderDialog();
+
+		await user.click(screen.getByRole("button", { name: "Salvar" }));
+
+		expect(await screen.findByText("Nome é obrigatório")).toBeVisible();
+		expect(
+			await screen.findByText("Selecione ao menos uma turma"),
+		).toBeVisible();
+	});
+
+	it("cria a reunião, fecha o dialog e notifica sucesso com o id", async () => {
+		const user = userEvent.setup();
+		const onSuccess = vi.fn();
+		vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+			const url = typeof input === "string" ? input : String(input);
+			if (url === "/api/meetings" && init?.method === "POST") {
+				return new Response(JSON.stringify({ id: "meeting-1" }), {
+					status: 201,
+				});
+			}
+			if (url === "/api/classes") {
+				return new Response(
+					JSON.stringify([
+						{ id: "class-1", name: "9º Ano", academicPeriod: "2026" },
+					]),
+					{ status: 200 },
+				);
+			}
+			return new Response(JSON.stringify([]), { status: 200 });
+		});
+
+		function Controlled() {
+			const [open, setOpen] = useState(true);
+			return (
+				<CreateMeetingDialog
+					open={open}
+					onOpenChange={setOpen}
+					onSuccess={onSuccess}
+				/>
+			);
+		}
+
+		render(<Controlled />, { wrapper: createWrapper() });
+
+		await user.type(await screen.findByLabelText("Nome *"), "Conselho UI");
+		await user.click(screen.getByText("9º Ano — 2026"));
+		await user.click(screen.getByRole("button", { name: "Salvar" }));
+
+		await waitFor(() => expect(onSuccess).toHaveBeenCalledWith("meeting-1"));
+		await waitFor(() =>
+			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+		);
+	});
+
+	it("exibe erro vindo do servidor sem fechar o dialog", async () => {
+		const user = userEvent.setup();
+		vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+			const url = typeof input === "string" ? input : String(input);
+			if (url === "/api/meetings" && init?.method === "POST") {
+				return new Response(JSON.stringify({ error: "Reunião já existe" }), {
+					status: 409,
+				});
+			}
+			if (url === "/api/classes") {
+				return new Response(
+					JSON.stringify([
+						{ id: "class-1", name: "9º Ano", academicPeriod: "2026" },
+					]),
+					{ status: 200 },
+				);
+			}
+			return new Response(JSON.stringify([]), { status: 200 });
+		});
+		renderDialog();
+
+		await user.type(await screen.findByLabelText("Nome *"), "Conselho UI");
+		await user.click(await screen.findByText("9º Ano — 2026"));
+		await user.click(screen.getByRole("button", { name: "Salvar" }));
+
+		expect(await screen.findByText("Reunião já existe")).toBeVisible();
+		expect(screen.getByRole("dialog")).toBeInTheDocument();
+	});
+});
