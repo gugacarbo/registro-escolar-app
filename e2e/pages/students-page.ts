@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 export class StudentsPage {
 	constructor(private page: Page) {}
@@ -8,11 +8,14 @@ export class StudentsPage {
 	}
 
 	async clickNew() {
-		await this.page.getByRole("link", { name: /novo aluno/i }).click();
+		await this.page.getByRole("link", { name: "Novo aluno" }).last().click();
 	}
 
 	async fillName(name: string) {
-		await this.page.getByRole("textbox", { name: "Nome" }).fill(name);
+		const nameField = this.page.getByRole("textbox", { name: "Nome" });
+		await nameField.click();
+		await nameField.fill(name);
+		await expect(nameField).toHaveValue(name);
 	}
 
 	async submit() {
