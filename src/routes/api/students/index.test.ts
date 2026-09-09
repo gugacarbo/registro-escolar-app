@@ -132,4 +132,78 @@ describe("POST /api/students", () => {
 		const response = await createStudentHandler({ request, context: { env } });
 		expect(response.status).toBe(409);
 	});
+
+	it("returns 409 when an existing student has no document", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findMock = findStudentsByNameOrDocument as ReturnType<typeof vi.fn>;
+		findMock.mockResolvedValueOnce([
+			{
+				id: "existing-1",
+				name: "João Silva",
+				document: null,
+				registrationNumber: null,
+				email: null,
+				phone: null,
+				birthDate: null,
+				notes: null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request("http://localhost/api/students", {
+			method: "POST",
+			body: JSON.stringify({ name: "João Silva", document: "123456" }),
+		});
+		const response = await createStudentHandler({ request, context: { env } });
+		expect(response.status).toBe(409);
+	});
+	it("creates a student when neither name nor document matches", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const findMock = findStudentsByNameOrDocument as ReturnType<typeof vi.fn>;
+		findMock.mockResolvedValueOnce([
+			{
+				id: "existing-1",
+				name: "Maria Souza",
+				document: "999999",
+				registrationNumber: null,
+				email: null,
+				phone: null,
+				birthDate: null,
+				notes: null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		]);
+		const createMock = createStudent as ReturnType<typeof vi.fn>;
+		createMock.mockResolvedValueOnce({
+			id: "new-1",
+			name: "João Silva",
+			document: "123456",
+			registrationNumber: null,
+			email: null,
+			phone: null,
+			birthDate: null,
+			notes: null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request("http://localhost/api/students", {
+			method: "POST",
+			body: JSON.stringify({ name: "João Silva", document: "123456" }),
+		});
+		const response = await createStudentHandler({ request, context: { env } });
+		expect(response.status).toBe(201);
+	});
 });

@@ -1,14 +1,36 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
-export const Route = createFileRoute("/")({ component: Home });
+import { authClient } from "#/lib/auth-client";
 
-function Home() {
+export const Route = createFileRoute("/")({
+	component: HomePage,
+});
+
+export function HomePage() {
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		let active = true;
+
+		authClient
+			.getSession()
+			.then(({ data }) => {
+				if (!active) return;
+				void navigate({ to: data ? "/app" : "/login" });
+			})
+			.catch(() => {
+				if (active) void navigate({ to: "/login" });
+			});
+
+		return () => {
+			active = false;
+		};
+	}, [navigate]);
+
 	return (
-		<div className="p-8">
-			<h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
-			<p className="mt-4 text-lg">
-				Edit <code>src/routes/index.tsx</code> to get started.
-			</p>
+		<div className="flex h-screen items-center justify-center">
+			Carregando...
 		</div>
 	);
 }

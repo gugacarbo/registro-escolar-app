@@ -10,6 +10,7 @@ import {
 	findStudentById,
 	findStudentsByNameOrDocument,
 	listStudents,
+	updateStudent,
 } from "./repository";
 
 function createTestDb() {
@@ -74,6 +75,25 @@ describe("students repository", () => {
 		expect(all).toHaveLength(2);
 		expect(all[0].name).toBe("Segundo");
 		expect(all[1].name).toBe("Primeiro");
+	});
+
+	it("updates a student", async () => {
+		const { db } = createTestDb();
+		const created = await createStudent(db, { name: "João Silva" });
+		const updated = await updateStudent(db, created.id, {
+			name: "João Souza",
+			document: "123456",
+			notes: "Atualizado",
+		});
+		expect(updated.id).toBe(created.id);
+		expect(updated.name).toBe("João Souza");
+		expect(updated.document).toBe("123456");
+	});
+
+	it("returns an empty list when no duplicate filter is provided", async () => {
+		const { db } = createTestDb();
+		const found = await findStudentsByNameOrDocument(db, {});
+		expect(found).toEqual([]);
 	});
 
 	it("searches students by name", async () => {

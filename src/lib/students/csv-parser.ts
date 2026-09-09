@@ -55,7 +55,7 @@ export async function parseStudentImportFile(file: File): Promise<{
 
 	const text = await file.text();
 	const lines = text.split(/\r?\n/);
-	const headerLine = lines[0] ?? "";
+	const headerLine = lines[0];
 	const dataLines = lines.slice(1);
 
 	const parsed = parse<Record<string, string>>(
@@ -84,7 +84,7 @@ export async function parseStudentImportFile(file: File): Promise<{
 	const rows: ParsedImportRow[] = parsed.data.map((raw, idx) => {
 		const row: ParsedImportRow = {
 			index: idx + 2,
-			name: raw.nome?.trim() ?? "",
+			name: raw.nome?.trim() || "",
 			errors: [],
 		};
 

@@ -1,7 +1,6 @@
 ---
 status: draft
 date: 2026-09-08
-spec: docs/specs/0001-cadastro-alunos.md
 builds-on:
   - ADR-0011
   - ADR-0017
@@ -11,7 +10,7 @@ implemented-by: []
 
 # Plano de implementação — Cadastro e importação em lote de alunos
 
-> Especificação: [docs/specs/0001-cadastro-alunos.md](0001-cadastro-alunos.md)
+> Especificação: [docs/specs/0001-cadastro-alunos.md](../specs/0001-cadastro-alunos.md)
 > Convenções: `docs/context/CONVENTIONS.md`
 
 ## Global Constraints
@@ -469,7 +468,7 @@ Escrever testes e2e cobrindo os fluxos críticos e executar DoD global do repo.
 
 - `e2e/students.spec.ts` (ou similar)
 - `docs/specs/0001-cadastro-alunos.md`
-- `docs/specs/0001-cadastro-alunos-implementation-plan.md`
+- `docs/plans/0001-cadastro-alunos.md`
 
 ## Sequência de execução
 

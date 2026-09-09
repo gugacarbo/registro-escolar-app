@@ -37,6 +37,7 @@ export default defineConfig({
 				"src/test/**/*",
 				"src/db/auth-schema.ts",
 				"src/db/schema.ts",
+				"src/middleware/d1.ts",
 			],
 		},
 	},

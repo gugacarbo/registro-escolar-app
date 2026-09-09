@@ -37,6 +37,45 @@ describe("parseStudentImportFile", () => {
 		expect(rows[1].errors).toHaveLength(0);
 	});
 
+	it("collects parser errors without discarding recoverable rows", async () => {
+		const file = new File(
+			['"nome","documento"\n"João Silva","unclosed'],
+			"alunos.csv",
+			{
+				type: "text/csv",
+			},
+		);
+		const { rows, errors } = await parseStudentImportFile(file);
+		expect(rows.length).toBeGreaterThanOrEqual(1);
+		expect(errors.length).toBeGreaterThan(0);
+	});
+
+	it("maps optional columns from a complete CSV", async () => {
+		const csv = [
+			"Nome,Documento,Matricula,Email,Telefone,Data_Nascimento,Observacoes",
+			"João Silva,123.456,2026001,joao@escola.test,11999999999,2010-05-20,Atendimento",
+		].join("\n");
+		const file = new File([csv], "alunos.csv", { type: "text/csv" });
+		const { rows, errors } = await parseStudentImportFile(file);
+		expect(errors).toEqual([]);
+		expect(rows[0]).toMatchObject({
+			name: "João Silva",
+			document: "123.456",
+			registrationNumber: "2026001",
+			email: "joao@escola.test",
+			phone: "11999999999",
+			birthDate: "2010-05-20",
+			notes: "Atendimento",
+		});
+	});
+
+	it("reports missing columns for an empty CSV", async () => {
+		const file = new File([""], "alunos.csv", { type: "text/csv" });
+		const { rows, errors } = await parseStudentImportFile(file);
+		expect(rows).toEqual([]);
+		expect(errors[0]).toContain("nome");
+	});
+
 	it("requires nome column", async () => {
 		const file = new File(["documento\n123456"], "alunos.csv", {
 			type: "text/csv",
@@ -76,7 +115,19 @@ describe("matchImportRows", () => {
 		const rows = [{ index: 2, name: "João Silva", errors: [] }];
 		const matched = matchImportRows(rows, existing);
 		expect(matched[0].status).toBe("conflict");
-		expect(matched[0].candidates?.[0].reason).toBe("name");
+		expect(matched[0].candidates?.at(-1)?.reason).toBe("name");
+	});
+
+	it("does not compare documents when only one side has one", () => {
+		const rows = [
+			{ index: 2, name: "Carlos Andrade", document: "123456", errors: [] },
+		];
+		const matched = matchImportRows(rows, [
+			...existing,
+			{ ...existing[0], id: "s2", name: "Carlos Andrade", document: null },
+		]);
+		expect(matched[0].status).toBe("conflict");
+		expect(matched[0].candidates?.at(-1)?.reason).toBe("name");
 	});
 
 	it("marks unique rows as valid", () => {
