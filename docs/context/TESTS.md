@@ -14,9 +14,7 @@ bun run test:coverage   # mesma suíte com relatório de cobertura (mínimo 95%)
 bun run test:watch      # Vitest em modo watch
 bun run e2e             # testes end-to-end com Playwright (headless, CI)
 bun run e2e:ui          # Playwright com UI mode (debug local)
-bun run storybook       # catálogo local de estados visuais em http://localhost:6006
-bun run build-storybook # build estático do Storybook
-bun run chromatic       # publica as histórias para comparação visual (requer CHROMATIC_PROJECT_TOKEN)
+bun run test:visual     # snapshots visuais do Playwright
 ```
 
 ## Tipos de teste
@@ -26,15 +24,15 @@ bun run chromatic       # publica as histórias para comparação visual (requer
 | **Unitário**         | Vitest + happy-dom                | Funções puras, utilitários, schemas, hooks isolados.                                         |
 | **Integração**       | Vitest + `@testing-library/react` | Componentes próprios, formulários com react-hook-form, provedores (TanStack Query, Tooltip). |
 | **End-to-end (e2e)** | Playwright                        | Fluxos reais no navegador: autenticação, cadastros, geração de ata, PDF, etc.                |
-| **Visual**           | Storybook + Chromatic             | Estados visuais estáveis dos componentes e detecção de regressões de interface.              |
+| **Visual**           | Playwright                        | Comparação de screenshots versionadas e detecção de regressões de interface.                 |
 
 ## Testes visuais
 
-- Crie histórias colocalizadas com o componente, usando o sufixo `*.stories.tsx`.
-- Cubra variantes, estados de erro, desabilitado e demais estados visualmente relevantes.
-- Use `bun run storybook` para desenvolver e revisar histórias localmente.
-- Execute `bun run chromatic` com `CHROMATIC_PROJECT_TOKEN` configurado como segredo do ambiente ou da CI.
-- A primeira execução no Chromatic estabelece a baseline; as seguintes apontam diferenças visuais para revisão.
+- Crie specs em `e2e/visual/` e marque cada teste visual com `@visual`.
+- Espere a tela atingir um estado estável antes de chamar `expect(page).toHaveScreenshot()`.
+- Versione as baselines em `*.spec.ts-snapshots/`; a CI Linux compara as execuções seguintes contra essas imagens.
+- Execute `bun run test:visual` localmente e na CI.
+- Para aceitar uma alteração visual intencional, execute `bunx playwright test --grep @visual --update-snapshots` e revise as imagens alteradas.
 
 ## Onde criar testes
 

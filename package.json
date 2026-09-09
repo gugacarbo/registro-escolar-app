@@ -15,8 +15,9 @@
 		"test": "bun x vitest run",
 		"test:watch": "bun x vitest",
 		"test:coverage": "bun x vitest run --coverage",
-		"e2e": "playwright test",
+		"e2e": "playwright test --grep-invert @visual",
 		"e2e:ui": "playwright test --ui",
+		"test:visual": "playwright test --grep @visual",
 		"format": "biome format",
 		"lint": "biome lint",
 		"check": "biome check",
@@ -36,10 +37,7 @@
 		"db:remote:migrate": "wrangler d1 migrations apply registro-escolar-db --remote",
 		"db:create": "wrangler d1 create registro-escolar-db",
 		"pre-push": "bun run secrets:check && bun run check && bun run typecheck && bun run test && bun run build && bun run spellcheck && scripts/docs-check",
-		"e2e:setup": "scripts/e2e-setup",
-		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build",
-		"chromatic": "chromatic --exit-zero-on-changes"
+		"e2e:setup": "scripts/e2e-setup"
 	},
 	"dependencies": {
 		"@t3-oss/env-core": "^0.13.10",
@@ -104,11 +102,7 @@
 		"typescript": "^6.0.2",
 		"vite": "^8.0.0",
 		"vitest": "^3.2.4",
-		"wrangler": "^4.129.1",
-		"storybook": "^10.6.0",
-		"@storybook/react-vite": "^10.6.0",
-		"@chromatic-com/storybook": "^5.3.1",
-		"chromatic": "^18.7.4"
+		"wrangler": "^4.129.1"
 	},
 	"packageManager": "bun@1.3.14",
 	"trustedDependencies": [

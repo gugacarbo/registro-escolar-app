@@ -18,5 +18,3 @@ dist/server/.dev.vars
 .env.local
 coverage
 test-results
-*storybook.log
-storybook-static
