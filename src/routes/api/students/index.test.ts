@@ -74,7 +74,7 @@ describe("POST /api/students", () => {
 	it("returns 201 and creates student", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
-		const createMock = vi.mocked(createStudent);
+		const createMock = createStudent as ReturnType<typeof vi.fn>;
 		createMock.mockResolvedValueOnce({
 			id: "uuid-1",
 			name: "João Silva",
@@ -105,7 +105,7 @@ describe("POST /api/students", () => {
 	it("returns 409 when student already exists", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
-		const findMock = vi.mocked(findStudentsByNameOrDocument);
+		const findMock = findStudentsByNameOrDocument as ReturnType<typeof vi.fn>;
 		findMock.mockResolvedValueOnce([
 			{
 				id: "existing-1",
