@@ -6,6 +6,8 @@ CLOUDFLARE_API_TOKEN=
 # Better Auth configuration
 BETTER_AUTH_URL=http://localhost:3001
 BETTER_AUTH_SECRET=
+# Origens extras confiáveis separadas por vírgula (além de BETTER_AUTH_URL e localhost/127.0.0.1:3001, sempre incluídos)
+BETTER_AUTH_TRUSTED_ORIGINS=
 
 # Optional public app title (client-side)
 VITE_APP_TITLE="Registro Escolar"

@@ -5,6 +5,8 @@ interface __BaseEnv_Env {
 	DB: D1Database;
 	BETTER_AUTH_URL: "http://localhost:3000";
 	BETTER_AUTH_SECRET: string;
+	/** Origens extras confiáveis do better-auth, separadas por vírgula. */
+	BETTER_AUTH_TRUSTED_ORIGINS?: string;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {

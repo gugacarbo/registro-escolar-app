@@ -289,7 +289,7 @@
       "src/hooks/enrollments/use-class-students.ts",
       "src/hooks/enrollments/use-create-enrollment.ts",
       "src/routes/_app/classes/index.tsx",
-      "src/routes/_app/classes/new.tsx",
+      "src/components/classes/create-class-dialog.tsx",
       "src/routes/_app/classes/enroll.tsx",
       "src/routes/_app/classes/$id/students.tsx"
     ]
@@ -320,7 +320,7 @@
       "src/routes/_app/staff/index.tsx",
       "src/routes/_app/staff/new.tsx",
       "src/routes/_app/roles/index.tsx",
-      "src/routes/_app/roles/new.tsx",
+      "src/components/roles/create-role-dialog.tsx",
       "src/routes/_app/meetings/$meetingId/participants.tsx",
       "src/components/staff/staff-form.tsx",
       "src/components/roles/role-form.tsx",
@@ -357,7 +357,7 @@
       "src/hooks/offers/use-offers.ts",
       "src/hooks/offers/use-create-offer.ts",
       "src/routes/_app/components/index.tsx",
-      "src/routes/_app/components/new.tsx",
+      "src/components/components/create-component-dialog.tsx",
       "src/routes/_app/classes/$id/offers.tsx"
     ]
   },
@@ -393,7 +393,7 @@
       "src/hooks/meetings/use-update-meeting.ts",
       "src/hooks/meetings/use-transition-meeting.ts",
       "src/routes/_app/meetings/index.tsx",
-      "src/routes/_app/meetings/new.tsx",
+      "src/components/meetings/create-meeting-dialog.tsx",
       "src/routes/_app/meetings/$meetingId/index.tsx"
     ]
   },

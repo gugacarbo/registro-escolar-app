@@ -25,13 +25,11 @@ describe("useUpdateStudent", () => {
 	it("atualiza o estudante e invalida lista e detalhe", async () => {
 		const { client, Wrapper } = createWrapper();
 		const invalidateSpy = vi.spyOn(client, "invalidateQueries");
-		const fetchMock = vi
-			.spyOn(globalThis, "fetch")
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({ id: "student-1", name: "João Souza" }), {
-					status: 200,
-				}),
-			);
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+			new Response(JSON.stringify({ id: "student-1", name: "João Souza" }), {
+				status: 200,
+			}),
+		);
 
 		const { result } = renderHook(() => useUpdateStudent("student-1"), {
 			wrapper: Wrapper,

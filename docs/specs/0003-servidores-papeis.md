@@ -19,7 +19,7 @@ implemented-by:
   - src/routes/_app/staff/index.tsx
   - src/routes/_app/staff/new.tsx
   - src/routes/_app/roles/index.tsx
-  - src/routes/_app/roles/new.tsx
+  - src/components/roles/create-role-dialog.tsx
   - src/routes/_app/meetings/$meetingId/participants.tsx
   - src/components/staff/staff-form.tsx
   - src/components/roles/role-form.tsx

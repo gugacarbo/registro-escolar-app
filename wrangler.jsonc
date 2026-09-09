@@ -29,6 +29,7 @@
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
 	"vars": {
-		"BETTER_AUTH_URL": "http://localhost:3001"
+		"BETTER_AUTH_URL": "http://localhost:3001",
+		"BETTER_AUTH_TRUSTED_ORIGINS": ""
 	}
 }

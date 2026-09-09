@@ -84,7 +84,9 @@ export function StudentDetailPage() {
 			{isLoading && <p>Carregando...</p>}
 			{isError && (
 				<p className="text-sm text-destructive">
-					{error instanceof Error ? error.message : "Falha ao carregar estudante"}
+					{error instanceof Error
+						? error.message
+						: "Falha ao carregar estudante"}
 				</p>
 			)}
 			{student && (

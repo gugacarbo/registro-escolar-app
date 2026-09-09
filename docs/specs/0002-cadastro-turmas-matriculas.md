@@ -21,7 +21,7 @@ implemented-by:
   - src/hooks/enrollments/use-class-students.ts
   - src/hooks/enrollments/use-create-enrollment.ts
   - src/routes/_app/classes/index.tsx
-  - src/routes/_app/classes/new.tsx
+  - src/components/classes/create-class-dialog.tsx
   - src/routes/_app/classes/enroll.tsx
   - src/routes/_app/classes/$id/students.tsx
 ---

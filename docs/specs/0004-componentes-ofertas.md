@@ -18,7 +18,7 @@ implemented-by:
   - src/hooks/offers/use-offers.ts
   - src/hooks/offers/use-create-offer.ts
   - src/routes/_app/components/index.tsx
-  - src/routes/_app/components/new.tsx
+  - src/components/components/create-component-dialog.tsx
   - src/routes/_app/classes/$id/offers.tsx
 ---
 

@@ -32,6 +32,7 @@
 		"secrets:check": "gitleaks detect --source . --verbose --config .gitleaks.toml",
 		"cf-typegen": "wrangler types",
 		"db:local:migrate": "wrangler d1 migrations apply registro-escolar-db --local",
+		"db:seed": "bun scripts/db-seed.ts",
 		"db:remote:migrate": "wrangler d1 migrations apply registro-escolar-db --remote",
 		"db:create": "wrangler d1 create registro-escolar-db",
 		"pre-push": "bun run secrets:check && bun run check && bun run typecheck && bun run test && bun run build && bun run spellcheck && scripts/docs-check",
