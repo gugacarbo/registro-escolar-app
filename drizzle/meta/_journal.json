@@ -43,6 +43,20 @@
       "when": 1788955665202,
       "tag": "0005_acompanhamento-alunos-reuniao",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788960488561,
+      "tag": "0006_cria-registros-aluno",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1788960695793,
+      "tag": "0007_cria-relatos-gerais-reuniao",
+      "breakpoints": true
     }
   ]
 }

@@ -1,12 +1,22 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0013
   - ADR-0016
   - ADR-0012
   - ADR-0011
-implemented-by: []
+implemented-by:
+  - src/db/records-schema.ts
+  - src/lib/records/schema.ts
+  - src/lib/records/repository.ts
+  - src/lib/records/errors.ts
+  - src/lib/records/types.ts
+  - src/routes/api/students/$id/records.ts
+  - src/routes/api/meetings/$meetingId/students/$studentId/records/index.ts
+  - src/routes/api/meetings/$meetingId/records/$recordId.ts
+  - src/routes/api/meetings/$meetingId/students/$studentId/records/$recordId/include.ts
+  - src/hooks/records/use-records.ts
 ---
 
 # Registros de aluno
@@ -61,21 +71,29 @@ Permitir criar múltiplos registros independentes sobre um aluno, com ou sem reu
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os casos de borda estão cobertos por testes.
 
 ## Definition of Done
 
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run db:local:migrate ............ exit 0
+bun run typecheck .................. exit 0
+bun run check ...................... exit 0 (276 arquivos)
+bun run test --run ................. 53 arquivos, 408 testes verdes
+bun run test:coverage .............. 98,24% stmts/linhas, 99,02% funcs, 95,05% branches
+scripts/docs-check ................ exit 0
 ```
 
 ## Revisão humana
 
-- Rótulos e ordem dos campos opcionais; fluidez da adição de múltiplos registros; UX de registros independentes durante o conselho.
+- Resolvido no fechamento: API e hooks prontos; a tela council continuará a consumir esses hooks na integração final de UX sem alterar o contrato.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09. Modelos `student_records` e
+`record_meeting_inclusions` criam as migrations 0006 (nomeada) e estão aplicadas
+localmente. Bordas: texto vazio → 400; origem não participante → 422; componente
+fora da oferta é permitido; incluirNaAta=false é persistido; reunião finalizada
+→ 409 pedindo reabertura; múltiplos registros coexistem; contexto independente é
+filtrado pelas turmas da reunião; toggle de inclusão grava somente a decisão por
+reunião, preservando o registro original. Gates conforme DoD acima.

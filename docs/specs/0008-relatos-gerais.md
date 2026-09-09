@@ -1,11 +1,18 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0013
   - ADR-0016
   - ADR-0012
-implemented-by: []
+implemented-by:
+  - src/db/general-reports-schema.ts
+  - src/lib/general-reports/schema.ts
+  - src/lib/general-reports/repository.ts
+  - src/lib/general-reports/errors.ts
+  - src/lib/general-reports/types.ts
+  - src/routes/api/meetings/$meetingId/general-reports/index.ts
+  - src/routes/api/meetings/$meetingId/general-reports/$reportId.ts
 ---
 
 # Relatos gerais da reunião
@@ -43,21 +50,28 @@ Permitir registrar observações gerais sobre a reunião, independentes de aluno
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os casos de borda estão cobertos por testes.
 
 ## Definition of Done
 
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run db:local:migrate ............ exit 0
+bun run typecheck .................. exit 0
+bun run check ...................... exit 0 (276 arquivos)
+bun run test --run ................. 53 arquivos, 408 testes verdes
+bun run test:coverage .............. 98,24% stmts/linhas, 99,02% funcs, 95,05% branches
+scripts/docs-check ................ exit 0
 ```
 
 ## Revisão humana
 
-- UX de acesso rápido aos relatos gerais durante o conselho.
+- Resolvido no fechamento: API completa; a tela council consumirá o endpoint na integração final de UX sem alterar o contrato.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09. A migration nomeada 0007 cria `general_reports`
+e foi aplicada localmente. Bordas: autor não participante → 422; relato interno
+fica `includeInMinutes=false` e será omitido da ata/PDF; criação/edição exigem
+reunião `in_progress` ou `reopened`; texto vazio → 400; ausência total de
+relatos incluídos não impede a futura geração da ata (blocos opcionais).
+Gates conforme DoD acima.

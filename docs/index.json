@@ -373,7 +373,7 @@
     "path": "docs/specs/0007-registros-aluno.md",
     "layer": "specs",
     "title": "Registros de aluno",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0013",
       "ADR-0016",
@@ -381,21 +381,40 @@
       "ADR-0011"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/records-schema.ts",
+      "src/lib/records/schema.ts",
+      "src/lib/records/repository.ts",
+      "src/lib/records/errors.ts",
+      "src/lib/records/types.ts",
+      "src/routes/api/students/$id/records.ts",
+      "src/routes/api/meetings/$meetingId/students/$studentId/records/index.ts",
+      "src/routes/api/meetings/$meetingId/records/$recordId.ts",
+      "src/routes/api/meetings/$meetingId/students/$studentId/records/$recordId/include.ts",
+      "src/hooks/records/use-records.ts"
+    ]
   },
   {
     "id": "SPEC-0008",
     "path": "docs/specs/0008-relatos-gerais.md",
     "layer": "specs",
     "title": "Relatos gerais da reunião",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0013",
       "ADR-0016",
       "ADR-0012"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/general-reports-schema.ts",
+      "src/lib/general-reports/schema.ts",
+      "src/lib/general-reports/repository.ts",
+      "src/lib/general-reports/errors.ts",
+      "src/lib/general-reports/types.ts",
+      "src/routes/api/meetings/$meetingId/general-reports/index.ts",
+      "src/routes/api/meetings/$meetingId/general-reports/$reportId.ts"
+    ]
   },
   {
     "id": "SPEC-0009",
