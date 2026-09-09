@@ -84,21 +84,38 @@ describe("AppLayout", () => {
 		expect(screen.getByText("operador@escola.test")).toBeInTheDocument();
 	});
 
-	it("exibe somente o botão Alunos na navegação", async () => {
+	it("exibe os botões de navegação na sidebar", async () => {
 		mocks.getSession.mockResolvedValue({ data: session });
 
 		render(<AppLayout />);
 
 		const alunos = await screen.findByRole("link", { name: "Alunos" });
 		expect(alunos).toHaveAttribute("href", "/students");
-		expect(screen.getAllByRole("link")).toHaveLength(1);
-		expect(screen.queryByText("Início")).not.toBeInTheDocument();
-		expect(screen.queryByText("Turmas")).not.toBeInTheDocument();
-		expect(screen.queryByText("Servidores")).not.toBeInTheDocument();
-		expect(screen.queryByText("Papéis")).not.toBeInTheDocument();
-		expect(screen.queryByText("Componentes")).not.toBeInTheDocument();
-		expect(screen.queryByText("Reuniões")).not.toBeInTheDocument();
-		expect(screen.queryByText("Atas")).not.toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Turmas" })).toHaveAttribute(
+			"href",
+			"/classes",
+		);
+		expect(screen.getByRole("link", { name: "Servidores" })).toHaveAttribute(
+			"href",
+			"/staff",
+		);
+		expect(screen.getByRole("link", { name: "Papéis" })).toHaveAttribute(
+			"href",
+			"/roles",
+		);
+		expect(screen.getByRole("link", { name: "Componentes" })).toHaveAttribute(
+			"href",
+			"/components",
+		);
+		expect(screen.getByRole("link", { name: "Reuniões" })).toHaveAttribute(
+			"href",
+			"/meetings",
+		);
+		expect(screen.getByRole("link", { name: "Atas" })).toHaveAttribute(
+			"href",
+			"/minutes",
+		);
+		expect(screen.getAllByRole("link")).toHaveLength(7);
 	});
 
 	it("expõe o controle de tema no header", async () => {

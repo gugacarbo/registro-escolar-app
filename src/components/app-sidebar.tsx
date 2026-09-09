@@ -1,5 +1,14 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { GraduationCap, type LucideIcon } from "lucide-react";
+import {
+	BookOpenText,
+	Briefcase,
+	CalendarDays,
+	FileText,
+	GraduationCap,
+	LayoutGrid,
+	type LucideIcon,
+	Shield,
+} from "lucide-react";
 
 import {
 	Sidebar,
@@ -12,7 +21,14 @@ import {
 	SidebarMenuItem,
 } from "#/components/ui/sidebar";
 
-type AppRoute = "/students";
+type AppRoute =
+	| "/students"
+	| "/classes"
+	| "/staff"
+	| "/roles"
+	| "/components"
+	| "/meetings"
+	| "/minutes";
 
 interface NavItem {
 	title: string;
@@ -22,6 +38,12 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
 	{ title: "Alunos", to: "/students", icon: GraduationCap },
+	{ title: "Turmas", to: "/classes", icon: LayoutGrid },
+	{ title: "Servidores", to: "/staff", icon: Briefcase },
+	{ title: "Papéis", to: "/roles", icon: Shield },
+	{ title: "Componentes", to: "/components", icon: BookOpenText },
+	{ title: "Reuniões", to: "/meetings", icon: CalendarDays },
+	{ title: "Atas", to: "/minutes", icon: FileText },
 ];
 
 function normalize(path: string): string {
