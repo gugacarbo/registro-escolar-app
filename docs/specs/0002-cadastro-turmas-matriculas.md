@@ -1,10 +1,29 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0011
   - ADR-0015
-implemented-by: []
+implemented-by:
+  - src/db/classes-schema.ts
+  - src/db/enrollments-schema.ts
+  - src/lib/classes/schema.ts
+  - src/lib/classes/repository.ts
+  - src/lib/enrollments/schema.ts
+  - src/lib/enrollments/repository.ts
+  - src/routes/api/classes/index.ts
+  - src/routes/api/enrollments/index.ts
+  - src/routes/api/classes/$id/students.ts
+  - src/components/classes/class-form.tsx
+  - src/components/enrollments/enrollment-form.tsx
+  - src/hooks/classes/use-classes.ts
+  - src/hooks/classes/use-create-class.ts
+  - src/hooks/enrollments/use-class-students.ts
+  - src/hooks/enrollments/use-create-enrollment.ts
+  - src/routes/_app/classes/index.tsx
+  - src/routes/_app/classes/new.tsx
+  - src/routes/_app/classes/enroll.tsx
+  - src/routes/_app/classes/$id/students.tsx
 ---
 
 # Cadastro de turmas e vínculos de matrícula
@@ -43,10 +62,10 @@ Permitir criar turmas vinculadas a períodos letivos e registrar o vínculo hist
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os cinco casos de borda estão cobertos por testes.
+
 
 ## Definition of Done
-
 ```bash
 bunx tsc --noEmit --skipLibCheck        # exit 0
 bun run check                            # exit 0

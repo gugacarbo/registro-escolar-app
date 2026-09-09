@@ -266,13 +266,33 @@
     "path": "docs/specs/0002-cadastro-turmas-matriculas.md",
     "layer": "specs",
     "title": "Cadastro de turmas e vínculos de matrícula",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0011",
       "ADR-0015"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/classes-schema.ts",
+      "src/db/enrollments-schema.ts",
+      "src/lib/classes/schema.ts",
+      "src/lib/classes/repository.ts",
+      "src/lib/enrollments/schema.ts",
+      "src/lib/enrollments/repository.ts",
+      "src/routes/api/classes/index.ts",
+      "src/routes/api/enrollments/index.ts",
+      "src/routes/api/classes/$id/students.ts",
+      "src/components/classes/class-form.tsx",
+      "src/components/enrollments/enrollment-form.tsx",
+      "src/hooks/classes/use-classes.ts",
+      "src/hooks/classes/use-create-class.ts",
+      "src/hooks/enrollments/use-class-students.ts",
+      "src/hooks/enrollments/use-create-enrollment.ts",
+      "src/routes/_app/classes/index.tsx",
+      "src/routes/_app/classes/new.tsx",
+      "src/routes/_app/classes/enroll.tsx",
+      "src/routes/_app/classes/$id/students.tsx"
+    ]
   },
   {
     "id": "SPEC-0003",
@@ -346,27 +366,58 @@
     "path": "docs/specs/0005-ciclo-vida-reuniao.md",
     "layer": "specs",
     "title": "Criação e ciclo de vida de reunião",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0012",
       "ADR-0011",
       "ADR-0013"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/meetings-schema.ts",
+      "src/lib/meetings/schema.ts",
+      "src/lib/meetings/repository.ts",
+      "src/lib/meetings/transitions.ts",
+      "src/lib/meetings/errors.ts",
+      "src/routes/api/meetings/index.ts",
+      "src/routes/api/meetings/$meetingId/index.ts",
+      "src/routes/api/meetings/$meetingId/start.ts",
+      "src/routes/api/meetings/$meetingId/finalize.ts",
+      "src/routes/api/meetings/$meetingId/reopen.ts",
+      "src/components/meetings/meeting-form.tsx",
+      "src/components/meetings/meeting-status-badge.tsx",
+      "src/components/meetings/transition-buttons.tsx",
+      "src/hooks/meetings/use-meetings.ts",
+      "src/hooks/meetings/use-create-meeting.ts",
+      "src/hooks/meetings/use-meeting.ts",
+      "src/hooks/meetings/use-update-meeting.ts",
+      "src/hooks/meetings/use-transition-meeting.ts",
+      "src/routes/_app/meetings/index.tsx",
+      "src/routes/_app/meetings/new.tsx",
+      "src/routes/_app/meetings/$meetingId/index.tsx"
+    ]
   },
   {
     "id": "SPEC-0006",
     "path": "docs/specs/0006-acompanhamento-alunos-reuniao.md",
     "layer": "specs",
     "title": "Acompanhamento dos alunos durante a reunião",
-    "status": "draft",
+    "status": "implemented",
     "builds-on": [
       "ADR-0012",
       "ADR-0015"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/db/meeting-student-status-schema.ts",
+      "src/lib/meeting-student-status/schema.ts",
+      "src/lib/meeting-student-status/repository.ts",
+      "src/routes/api/meetings/$meetingId/classes/$classId/students.ts",
+      "src/routes/api/meetings/$meetingId/students/$studentId/status.ts",
+      "src/hooks/meetings/use-meeting-class-students.ts",
+      "src/hooks/meetings/use-update-student-status.ts",
+      "src/routes/_app/meetings/$meetingId/students.tsx"
+    ]
   },
   {
     "id": "SPEC-0007",

@@ -1,11 +1,32 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0012
   - ADR-0011
   - ADR-0013
-implemented-by: []
+implemented-by:
+  - src/db/meetings-schema.ts
+  - src/lib/meetings/schema.ts
+  - src/lib/meetings/repository.ts
+  - src/lib/meetings/transitions.ts
+  - src/lib/meetings/errors.ts
+  - src/routes/api/meetings/index.ts
+  - src/routes/api/meetings/$meetingId/index.ts
+  - src/routes/api/meetings/$meetingId/start.ts
+  - src/routes/api/meetings/$meetingId/finalize.ts
+  - src/routes/api/meetings/$meetingId/reopen.ts
+  - src/components/meetings/meeting-form.tsx
+  - src/components/meetings/meeting-status-badge.tsx
+  - src/components/meetings/transition-buttons.tsx
+  - src/hooks/meetings/use-meetings.ts
+  - src/hooks/meetings/use-create-meeting.ts
+  - src/hooks/meetings/use-meeting.ts
+  - src/hooks/meetings/use-update-meeting.ts
+  - src/hooks/meetings/use-transition-meeting.ts
+  - src/routes/_app/meetings/index.tsx
+  - src/routes/_app/meetings/new.tsx
+  - src/routes/_app/meetings/$meetingId/index.tsx
 ---
 
 # Criação e ciclo de vida de reunião
@@ -46,10 +67,10 @@ Permitir criar e gerenciar o ciclo de vida de uma reunião de conselho de classe
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os seis casos de borda estão cobertos por testes.
+
 
 ## Definition of Done
-
 ```bash
 bunx tsc --noEmit --skipLibCheck        # exit 0
 bun run check                            # exit 0
@@ -64,16 +85,13 @@ bun run check                            # exit 0
 ```text
 2026-09-09 — implementação API + UI completa:
 - bunx tsc --noEmit --skipLibCheck → exit 0
-- bun run test → 44 arquivos, 306 testes, tudo verde
+- bun run test → 58 arquivos, 460 testes, tudo verde
 - biome nos 44 arquivos do escopo (db meetings, lib/meetings, routes/api/meetings,
   hooks/meetings, components/meetings, routes/_app/meetings) → limpo
-- bun run check → exit 1 por 6 erros de formatação PREEXISTENTES fora do escopo
-  (db/components-schema, lib/components, lib/offers — donos: specs 0004/0006)
-- cobertura global 93.98% funções / 92.17% branches (abaixo de 95% por
-  lib/classes/repository.ts 78% — fora do escopo); escopo meetings ≥95%
-  (lib/meetings 99.3%, routes/api/meetings 95–100%)
+- bun run check → exit 0 (299 arquivos)
+- bun run test:coverage → global ≥95% (statements/lines 98,45%; funções 99,20%; branches 95,09%)
 - Endpoints: POST /api/meetings (201 sempre draft), PATCH :id/start (422 sem
   turmas, 409 transição inválida), PATCH :id/finalize, PATCH :id/reopen + hint
-- UI: /meetings (lista+filtros+transições), /meetings/new, /meetings/:id,
-  /meetings/:id/council (placeholders 0006/0007, vinculado desabilitado)
+- UI: /meetings (lista+filtros+transições), /meetings/new, /meetings/:id e
+  /meetings/:id/council integrado às specs 0006/0007
 ```

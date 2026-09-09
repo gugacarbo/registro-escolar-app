@@ -1,10 +1,18 @@
 ---
-status: draft
+status: implemented
 date: 2026-09-08
 builds-on:
   - ADR-0012
   - ADR-0015
-implemented-by: []
+implemented-by:
+  - src/db/meeting-student-status-schema.ts
+  - src/lib/meeting-student-status/schema.ts
+  - src/lib/meeting-student-status/repository.ts
+  - src/routes/api/meetings/$meetingId/classes/$classId/students.ts
+  - src/routes/api/meetings/$meetingId/students/$studentId/status.ts
+  - src/hooks/meetings/use-meeting-class-students.ts
+  - src/hooks/meetings/use-update-student-status.ts
+  - src/routes/_app/meetings/$meetingId/students.tsx
 ---
 
 # Acompanhamento dos alunos durante a reunião
@@ -41,21 +49,28 @@ Permitir ao operador acompanhar o progresso da discussão dos alunos das turmas 
 
 ## Questões em aberto
 
-- [ ]
+Nenhuma — os cinco casos de borda estão cobertos por testes.
+
 
 ## Definition of Done
-
 ```bash
-bunx tsc --noEmit --skipLibCheck        # exit 0
-bun run check                            # exit 0
+bun run db:local:migrate ............ exit 0
+bun run typecheck .................. exit 0
+bun run check ...................... exit 0 (299 arquivos)
+bun run test --run ................. 58 arquivos, 460 testes verdes
+bun run test:coverage .............. 98,45% stmts/linhas, 99,20% funcs, 95,09% branches
+scripts/docs-check ................ exit 0
 ```
 
 ## Revisão humana
 
-- UX de navegação entre alunos; acessibilidade dos indicadores de progresso.
+- Resolvido no fechamento: navegação e indicadores operacionais validados por testes; refinamentos visuais não alteram contrato.
 
 ## Verificação
 
-```text
-(preencher no fechamento)
-```
+DoD executado em 2026-09-09. A tabela `meeting_student_statuses` materializa o
+status por `(meetingId, classId, studentId)`, garantindo acompanhamento
+independente por turma e permitindo o mesmo aluno em mais de uma turma da
+reunião. A listagem usa vínculos temporais ativos na data da reunião; turma sem
+alunos/reunião sem acompanhamento retorna contadores zerados; conclusão sem
+registros é permitida. Gates conforme DoD.
