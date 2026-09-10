@@ -66,6 +66,7 @@ function PaginationLink({
 
 function PaginationPrevious({
 	className,
+	children,
 	...props
 }: React.ComponentProps<typeof PaginationLink>) {
 	return (
@@ -76,13 +77,14 @@ function PaginationPrevious({
 			{...props}
 		>
 			<ChevronLeftIcon />
-			<span className="hidden sm:block">Previous</span>
+			{children ?? <span className="hidden sm:block">Previous</span>}
 		</PaginationLink>
 	);
 }
 
 function PaginationNext({
 	className,
+	children,
 	...props
 }: React.ComponentProps<typeof PaginationLink>) {
 	return (
@@ -92,7 +94,7 @@ function PaginationNext({
 			className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
 			{...props}
 		>
-			<span className="hidden sm:block">Next</span>
+			{children ?? <span className="hidden sm:block">Next</span>}
 			<ChevronRightIcon />
 		</PaginationLink>
 	);

@@ -5,7 +5,7 @@ import { components } from "#/db/schema";
 
 import { normalizeName } from "#/lib/students/shared";
 
-import type { CreateComponentInput } from "./schema";
+import type { CreateComponentInput, UpdateComponentInput } from "./schema";
 import type { ListComponentsOptions } from "./types";
 
 export async function createComponent(db: DB, input: CreateComponentInput) {
@@ -15,6 +15,19 @@ export async function createComponent(db: DB, input: CreateComponentInput) {
 			...input,
 			id: crypto.randomUUID(),
 		})
+		.returning()
+		.get();
+}
+
+export async function updateComponent(
+	db: DB,
+	id: string,
+	input: UpdateComponentInput,
+) {
+	return db
+		.update(components)
+		.set(input)
+		.where(eq(components.id, id))
 		.returning()
 		.get();
 }

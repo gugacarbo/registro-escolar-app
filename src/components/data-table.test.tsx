@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DataTable } from "./data-table";
+import { DataTable, type DataTableColumn } from "./data-table";
 
 type Row = { id: string; name: string };
 
@@ -10,11 +10,25 @@ const rows: Row[] = Array.from({ length: 10 }, (_, i) => ({
 	name: `Linha ${i + 1}`,
 }));
 
+const columnsWithActions: DataTableColumn<Row>[] = [
+	{ header: "Nome", cell: (row) => row.name },
+	{
+		header: "Ações",
+		cell: (row) => (
+			<>
+				<button type="button">Editar {row.name}</button>
+				<a href={`#${row.id}`}>Abrir {row.name}</a>
+			</>
+		),
+	},
+];
+
 function renderTable(
 	props: Partial<Parameters<typeof DataTable<Row>>[0]> = {},
 ) {
 	const onPageChange = vi.fn();
 	const onPageSizeChange = vi.fn();
+	const onRowClick = vi.fn();
 	render(
 		<DataTable<Row>
 			columns={[{ header: "Nome", cell: (row) => row.name }]}
@@ -29,7 +43,7 @@ function renderTable(
 			{...props}
 		/>,
 	);
-	return { onPageChange, onPageSizeChange };
+	return { onPageChange, onPageSizeChange, onRowClick };
 }
 
 describe("DataTable", () => {
@@ -132,5 +146,92 @@ describe("DataTable", () => {
 		expect(screen.getByRole("alert")).toHaveTextContent(
 			"Falha ao carregar os dados",
 		);
+	});
+});
+
+describe("DataTable com onRowClick", () => {
+	it("sem a prop, linhas não são focáveis nem clicáveis", () => {
+		renderTable();
+
+		const linhas = screen.getAllByRole("row");
+		const linhasDoCorpo = linhas.filter(
+			(linha) => within(linha).queryAllByRole("cell").length > 0,
+		);
+		for (const linha of linhasDoCorpo) {
+			expect(linha).not.toHaveAttribute("tabindex");
+			expect(linha).toHaveStyle({ cursor: "" });
+		}
+	});
+
+	it("clicar em uma célula chama onRowClick uma vez com a linha correta", () => {
+		const onRowClick = vi.fn();
+		renderTable({ onRowClick });
+
+		fireEvent.click(screen.getByRole("cell", { name: "Linha 1" }));
+
+		expect(onRowClick).toHaveBeenCalledTimes(1);
+		expect(onRowClick).toHaveBeenCalledWith(rows[0]);
+
+		const linha = screen.getByRole("cell", { name: "Linha 1" }).closest("tr")!;
+		expect(linha).toHaveAttribute("tabindex", "0");
+		expect(linha).toHaveClass("cursor-pointer");
+		expect(linha.className).toContain("focus-visible");
+	});
+
+	it("Enter e Espaço com foco na linha chamam onRowClick", () => {
+		const onRowClick = vi.fn();
+		renderTable({ onRowClick });
+
+		const linha = screen.getByRole("cell", { name: "Linha 2" }).closest("tr")!;
+		linha.focus();
+		expect(linha).toHaveFocus();
+
+		fireEvent.keyDown(linha, { key: "Enter" });
+		expect(onRowClick).toHaveBeenCalledTimes(1);
+		expect(onRowClick).toHaveBeenCalledWith(rows[1]);
+
+		fireEvent.keyDown(linha, { key: " " });
+		expect(onRowClick).toHaveBeenCalledTimes(2);
+		expect(onRowClick).toHaveBeenCalledWith(rows[1]);
+
+		fireEvent.keyDown(linha, { key: "Tab" });
+		expect(onRowClick).toHaveBeenCalledTimes(2);
+
+		fireEvent.keyDown(within(linha).getByText("Linha 2"), { key: "Enter" });
+		expect(onRowClick).toHaveBeenCalledTimes(3);
+		expect(onRowClick).toHaveBeenLastCalledWith(rows[1]);
+	});
+
+	it("clique em botão ou link dentro da linha não chama onRowClick", () => {
+		const onRowClick = vi.fn();
+		renderTable({ onRowClick, columns: columnsWithActions });
+
+		const linha = screen.getByRole("cell", { name: "Linha 1" }).closest("tr")!;
+		fireEvent.click(
+			within(linha).getByRole("button", { name: "Editar Linha 1" }),
+		);
+		expect(onRowClick).not.toHaveBeenCalled();
+
+		fireEvent.click(within(linha).getByRole("link", { name: "Abrir Linha 1" }));
+		expect(onRowClick).not.toHaveBeenCalled();
+
+		fireEvent.click(within(linha).getByText("Linha 1"));
+		expect(onRowClick).toHaveBeenCalledTimes(1);
+		expect(onRowClick).toHaveBeenCalledWith(rows[0]);
+	});
+
+	it("paginação continua funcionando com linhas clicáveis", () => {
+		const onRowClick = vi.fn();
+		const { onPageChange } = renderTable({ onRowClick });
+
+		fireEvent.click(screen.getByRole("link", { name: "3" }));
+		expect(onPageChange).toHaveBeenCalledWith(3);
+
+		fireEvent.click(screen.getByRole("cell", { name: "Linha 1" }));
+		expect(onRowClick).toHaveBeenCalledTimes(1);
+
+		expect(
+			screen.getByRole("link", { name: "Próxima página" }),
+		).toBeInTheDocument();
 	});
 });

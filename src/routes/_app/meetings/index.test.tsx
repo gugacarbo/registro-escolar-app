@@ -7,11 +7,13 @@ import type { MeetingsPageResult } from "#/lib/meetings/types";
 
 const mocks = vi.hoisted(() => ({
 	useMeetings: vi.fn(),
+	useNavigate: vi.fn(),
+	navigate: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
-	useNavigate: () => () => {},
+	useNavigate: mocks.useNavigate,
 	Link: ({
 		children,
 		to,
@@ -83,6 +85,7 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 	});
+	mocks.useNavigate.mockReturnValue(mocks.navigate);
 });
 
 afterEach(() => {
@@ -183,5 +186,37 @@ describe("MeetingsPage", () => {
 			page: 1,
 			pageSize: 10,
 		});
+	});
+
+	it("navega para o detalhe ao clicar em célula de texto da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de reuniões" });
+		fireEvent.click(within(table).getByText("Rascunho"));
+
+		expect(mocks.navigate).toHaveBeenCalledTimes(1);
+		expect(mocks.navigate).toHaveBeenCalledWith({
+			to: "/meetings/$meetingId",
+			params: { meetingId: "meeting-1" },
+		});
+	});
+
+	it("clicar no link do título não dispara a navegação da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de reuniões" });
+		fireEvent.click(
+			within(table).getByRole("link", { name: "Conselho de classe" }),
+		);
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
+	});
+
+	it("clicar nos botões de transição não dispara a navegação da linha", () => {
+		renderPage();
+
+		fireEvent.click(screen.getByTestId("transitions-meeting-1"));
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });

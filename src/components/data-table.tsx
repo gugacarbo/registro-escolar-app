@@ -1,9 +1,14 @@
-import type { ReactNode } from "react";
+import { SearchX, TriangleAlert } from "lucide-react";
+import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
+import { Button } from "#/components/ui/button";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
+	EmptyMedia,
 	EmptyTitle,
 } from "#/components/ui/empty";
 import {
@@ -33,8 +38,11 @@ import {
 } from "#/components/ui/table";
 
 export type DataTableColumn<TData> = {
-	header: string;
+	header: ReactNode;
 	cell: (row: TData) => ReactNode;
+	align?: "left" | "center" | "right";
+	key?: string;
+	skeletonClassName?: string;
 };
 
 export type DataTableProps<TData> = {
@@ -52,8 +60,50 @@ export type DataTableProps<TData> = {
 	errorMessage?: string;
 	emptyTitle: string;
 	emptyDescription?: string;
+	emptyAction?: ReactNode;
+	onRetry?: () => void;
+	retryLabel?: string;
 	ariaLabel?: string;
+	onRowClick?: (row: TData) => void;
 };
+
+const INTERACTIVE_ROW_SELECTOR =
+	'a,button,input,select,textarea,[role="button"],[data-no-row-click]';
+
+const CLICKABLE_ROW_CLASS_NAME =
+	"cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
+
+function isRowEventIgnored(
+	event: MouseEvent<HTMLTableRowElement> | KeyboardEvent<HTMLTableRowElement>,
+): boolean {
+	return (event.target as Element).closest(INTERACTIVE_ROW_SELECTOR) !== null;
+}
+
+function handleRowClick<TData>(
+	event: MouseEvent<HTMLTableRowElement>,
+	row: TData,
+	onRowClick: (row: TData) => void,
+): void {
+	if (isRowEventIgnored(event)) {
+		return;
+	}
+	onRowClick(row);
+}
+
+function handleRowKeyDown<TData>(
+	event: KeyboardEvent<HTMLTableRowElement>,
+	row: TData,
+	onRowClick: (row: TData) => void,
+): void {
+	if (event.key !== "Enter" && event.key !== " ") {
+		return;
+	}
+	if (isRowEventIgnored(event)) {
+		return;
+	}
+	event.preventDefault();
+	onRowClick(row);
+}
 
 function getVisiblePages(
 	page: number,
@@ -66,19 +116,27 @@ function getVisiblePages(
 		(p) => p > 1 && p < totalPages,
 	);
 	const pages: (number | "ellipsis")[] = [1];
-	if (window[0] !== undefined && window[0] > 2) {
+	const first = window[0];
+	if (first !== undefined && first > 2) {
 		pages.push("ellipsis");
 	}
 	pages.push(...window);
-	if (
-		window[window.length - 1] !== undefined &&
-		window[window.length - 1]! < totalPages - 1
-	) {
+	const last = window[window.length - 1];
+	if (last !== undefined && last < totalPages - 1) {
 		pages.push("ellipsis");
 	}
 	pages.push(totalPages);
 	return pages;
 }
+
+const alignClassName: Record<
+	NonNullable<DataTableColumn<unknown>["align"]>,
+	string
+> = {
+	left: "text-left",
+	center: "text-center",
+	right: "text-right",
+};
 
 export function DataTable<TData>({
 	columns,
@@ -95,68 +153,169 @@ export function DataTable<TData>({
 	errorMessage = "Falha ao carregar os dados",
 	emptyTitle,
 	emptyDescription,
+	emptyAction,
+	onRetry,
+	retryLabel = "Tentar novamente",
 	ariaLabel = "Tabela de resultados",
+	onRowClick,
 }: DataTableProps<TData>) {
 	const totalPages = Math.max(1, Math.ceil(total / pageSize));
 	const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
 	const to = Math.min(page * pageSize, total);
 
 	return (
-		<div className="space-y-4">
-			<Table aria-label={ariaLabel}>
-				<TableHeader>
-					<TableRow>
-						{columns.map((column) => (
-							<TableHead key={column.header}>{column.header}</TableHead>
-						))}
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{isLoading &&
-						Array.from({ length: pageSize }, (_, i) => (
-							<TableRow key={`skeleton-${i}`}>
-								{columns.map((column) => (
-									<TableCell key={column.header}>
-										<Skeleton className="h-4 w-full" />
-									</TableCell>
-								))}
-							</TableRow>
-						))}
-					{!isLoading &&
-						rows.map((row) => (
-							<TableRow key={getRowKey(row)}>
-								{columns.map((column) => (
-									<TableCell key={column.header}>{column.cell(row)}</TableCell>
-								))}
-							</TableRow>
-						))}
-				</TableBody>
-			</Table>
+		<div className="overflow-hidden rounded-xl border bg-card shadow-xs">
+			<div className="overflow-x-auto">
+				<Table aria-label={ariaLabel}>
+					<TableHeader>
+						<TableRow className="bg-muted/60 hover:bg-muted/60">
+							{columns.map((column, index) => (
+								<TableHead
+									key={
+										column.key ??
+										(typeof column.header === "string"
+											? column.header
+											: `col-${index}`)
+									}
+									className={
+										column.align
+											? alignClassName[column.align]
+											: index === 0
+												? "pl-4 text-left sm:pl-5"
+												: index === columns.length - 1
+													? "pr-4 text-right sm:pr-5"
+													: "text-left"
+									}
+								>
+									{column.header}
+								</TableHead>
+							))}
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{isLoading &&
+							Array.from({ length: pageSize }, (_, i) => (
+								<TableRow
+									key={`skeleton-${i}`}
+									className="hover:bg-transparent"
+								>
+									{columns.map((column, index) => (
+										<TableCell
+											key={
+												column.key ??
+												(typeof column.header === "string"
+													? column.header
+													: `col-${index}`)
+											}
+											className={
+												column.align
+													? alignClassName[column.align]
+													: index === 0
+														? "pl-4 sm:pl-5"
+														: index === columns.length - 1
+															? "pr-4 sm:pr-5"
+															: undefined
+											}
+										>
+											<Skeleton
+												className={
+													column.skeletonClassName ?? "h-4 w-full max-w-56"
+												}
+											/>
+										</TableCell>
+									))}
+								</TableRow>
+							))}
+						{!isLoading &&
+							rows.map((row) => (
+								<TableRow
+									key={getRowKey(row)}
+									tabIndex={onRowClick ? 0 : undefined}
+									className={onRowClick ? CLICKABLE_ROW_CLASS_NAME : undefined}
+									onClick={
+										onRowClick
+											? (event) => handleRowClick(event, row, onRowClick)
+											: undefined
+									}
+									onKeyDown={
+										onRowClick
+											? (event) => handleRowKeyDown(event, row, onRowClick)
+											: undefined
+									}
+								>
+									{columns.map((column, index) => (
+										<TableCell
+											key={
+												column.key ??
+												(typeof column.header === "string"
+													? column.header
+													: `col-${index}`)
+											}
+											className={
+												column.align
+													? alignClassName[column.align]
+													: index === 0
+														? "pl-4 font-normal sm:pl-5"
+														: index === columns.length - 1
+															? "pr-4 sm:pr-5"
+															: undefined
+											}
+										>
+											{column.cell(row)}
+										</TableCell>
+									))}
+								</TableRow>
+							))}
+					</TableBody>
+				</Table>
+			</div>
 
 			{!isLoading && isError && (
-				<p className="text-sm text-destructive" role="alert">
-					{errorMessage}
-				</p>
+				<div className="border-t p-4 sm:p-5">
+					<Alert variant="destructive">
+						<TriangleAlert />
+						<AlertTitle>Falha ao carregar os dados</AlertTitle>
+						<AlertDescription className="w-full">
+							<p>{errorMessage}</p>
+							{onRetry && (
+								<Button
+									variant="outline"
+									size="sm"
+									className="mt-2 w-fit"
+									onClick={onRetry}
+								>
+									{retryLabel}
+								</Button>
+							)}
+						</AlertDescription>
+					</Alert>
+				</div>
 			)}
 
 			{!isLoading && !isError && rows.length === 0 && (
-				<Empty>
-					<EmptyHeader>
-						<EmptyTitle>{emptyTitle}</EmptyTitle>
-						{emptyDescription && (
-							<EmptyDescription>{emptyDescription}</EmptyDescription>
-						)}
-					</EmptyHeader>
-				</Empty>
+				<div className="border-t p-4 sm:p-5">
+					<Empty className="border-none p-6 md:p-10">
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<SearchX />
+							</EmptyMedia>
+							<EmptyTitle>{emptyTitle}</EmptyTitle>
+							{emptyDescription && (
+								<EmptyDescription>{emptyDescription}</EmptyDescription>
+							)}
+						</EmptyHeader>
+						{emptyAction && <EmptyContent>{emptyAction}</EmptyContent>}
+					</Empty>
+				</div>
 			)}
 
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-3 border-t bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
 				<p className="text-sm text-muted-foreground" role="status">
 					{total === 0
 						? "Nenhum registro encontrado"
 						: `Mostrando ${from}–${to} de ${total}`}
 				</p>
-				<div className="flex items-center gap-3">
+				<div className="flex flex-wrap items-center gap-3">
 					<Select
 						value={String(pageSize)}
 						onValueChange={(value) => onPageSizeChange(Number(value))}
@@ -190,7 +349,7 @@ export function DataTable<TData>({
 										}
 									}}
 								>
-									Anterior
+									<span className="hidden sm:block">Anterior</span>
 								</PaginationPrevious>
 							</PaginationItem>
 							{getVisiblePages(page, totalPages).map((visible, index) =>
@@ -230,7 +389,7 @@ export function DataTable<TData>({
 										}
 									}}
 								>
-									Próxima
+									<span className="hidden sm:block">Próxima</span>
 								</PaginationNext>
 							</PaginationItem>
 						</PaginationContent>

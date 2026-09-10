@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { CreateClassDialog } from "#/components/classes/create-class-dialog";
@@ -42,6 +42,7 @@ export function ClassesPage() {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const navigate = useNavigate();
 	const debouncedSearch = useDebouncedValue(search, 300);
 	const [activeSearch, setActiveSearch] = useState(debouncedSearch);
 
@@ -87,6 +88,9 @@ export function ClassesPage() {
 					setPageSize(size);
 					setPage(1);
 				}}
+				onRowClick={(classRow) =>
+					navigate({ to: "/classes/$id/students", params: { id: classRow.id } })
+				}
 				isLoading={isLoading}
 				isError={isError}
 				ariaLabel="Tabela de turmas"

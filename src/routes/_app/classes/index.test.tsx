@@ -7,10 +7,13 @@ import type { ClassesPageResult } from "#/lib/classes/types";
 
 const mocks = vi.hoisted(() => ({
 	useClasses: vi.fn(),
+	useNavigate: vi.fn(),
+	navigate: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
+	useNavigate: mocks.useNavigate,
 	Link: ({
 		children,
 		to,
@@ -77,6 +80,7 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 	});
+	mocks.useNavigate.mockReturnValue(mocks.navigate);
 });
 
 afterEach(() => {
@@ -174,5 +178,27 @@ describe("ClassesPage", () => {
 			page: 1,
 			pageSize: 10,
 		});
+	});
+
+	it("navega para os alunos da turma ao clicar em célula de texto da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de turmas" });
+		fireEvent.click(within(table).getByRole("cell", { name: "7º A" }));
+
+		expect(mocks.navigate).toHaveBeenCalledTimes(1);
+		expect(mocks.navigate).toHaveBeenCalledWith({
+			to: "/classes/$id/students",
+			params: { id: "class-1" },
+		});
+	});
+
+	it("clicar no link Ver alunos não dispara a navegação da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de turmas" });
+		fireEvent.click(within(table).getByRole("link", { name: "Ver alunos" }));
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });

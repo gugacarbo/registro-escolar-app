@@ -49,7 +49,9 @@ const columns = [
 	{
 		header: "Ações",
 		cell: (meeting: Meeting) => (
-			<TransitionButtons meetingId={meeting.id} status={meeting.status} />
+			<div data-no-row-click>
+				<TransitionButtons meetingId={meeting.id} status={meeting.status} />
+			</div>
 		),
 	},
 ];
@@ -127,6 +129,12 @@ export function MeetingsPage() {
 					setPageSize(size);
 					setPage(1);
 				}}
+				onRowClick={(meeting) =>
+					navigate({
+						to: "/meetings/$meetingId",
+						params: { meetingId: meeting.id },
+					})
+				}
 				isLoading={isLoading}
 				isError={isError}
 				ariaLabel="Tabela de reuniões"

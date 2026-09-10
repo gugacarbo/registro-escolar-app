@@ -44,11 +44,13 @@ import { Route as AppMeetingsMeetingIdStudentsRouteImport } from './routes/_app/
 import { Route as ApiClassesIdHistoryRouteImport } from './routes/api/classes/$id/history'
 import { Route as ApiClassesIdOffersRouteImport } from './routes/api/classes/$id/offers'
 import { Route as ApiClassesIdStudentsRouteImport } from './routes/api/classes/$id/students'
+import { Route as ApiComponentsIdIndexRouteImport } from './routes/api/components/$id/index'
 import { Route as ApiMeetingsMeetingIdIndexRouteImport } from './routes/api/meetings/$meetingId/index'
 import { Route as ApiMeetingsMeetingIdFinalizeRouteImport } from './routes/api/meetings/$meetingId/finalize'
 import { Route as ApiMeetingsMeetingIdParticipantsRouteImport } from './routes/api/meetings/$meetingId/participants'
 import { Route as ApiMeetingsMeetingIdReopenRouteImport } from './routes/api/meetings/$meetingId/reopen'
 import { Route as ApiMeetingsMeetingIdStartRouteImport } from './routes/api/meetings/$meetingId/start'
+import { Route as ApiRolesIdIndexRouteImport } from './routes/api/roles/$id/index'
 import { Route as ApiStaffIdIndexRouteImport } from './routes/api/staff/$id/index'
 import { Route as ApiStudentsIdIndexRouteImport } from './routes/api/students/$id/index'
 import { Route as ApiStudentsIdHistoryRouteImport } from './routes/api/students/$id/history'
@@ -244,6 +246,11 @@ const ApiClassesIdStudentsRoute = ApiClassesIdStudentsRouteImport.update({
   path: '/api/classes/$id/students',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiComponentsIdIndexRoute = ApiComponentsIdIndexRouteImport.update({
+  id: '/api/components/$id/',
+  path: '/api/components/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMeetingsMeetingIdIndexRoute =
   ApiMeetingsMeetingIdIndexRouteImport.update({
     id: '/api/meetings/$meetingId/',
@@ -274,6 +281,11 @@ const ApiMeetingsMeetingIdStartRoute =
     path: '/api/meetings/$meetingId/start',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiRolesIdIndexRoute = ApiRolesIdIndexRouteImport.update({
+  id: '/api/roles/$id/',
+  path: '/api/roles/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStaffIdIndexRoute = ApiStaffIdIndexRouteImport.update({
   id: '/api/staff/$id/',
   path: '/api/staff/$id/',
@@ -411,7 +423,9 @@ export interface FileRoutesByFullPath {
   '/api/students/$id/records': typeof ApiStudentsIdRecordsRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
   '/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
+  '/api/components/$id/': typeof ApiComponentsIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
+  '/api/roles/$id/': typeof ApiRolesIdIndexRoute
   '/api/staff/$id/': typeof ApiStaffIdIndexRoute
   '/api/students/$id/': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
@@ -468,7 +482,9 @@ export interface FileRoutesByTo {
   '/api/students/$id/records': typeof ApiStudentsIdRecordsRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
   '/meetings/$meetingId': typeof AppMeetingsMeetingIdIndexRoute
+  '/api/components/$id': typeof ApiComponentsIdIndexRoute
   '/api/meetings/$meetingId': typeof ApiMeetingsMeetingIdIndexRoute
+  '/api/roles/$id': typeof ApiRolesIdIndexRoute
   '/api/staff/$id': typeof ApiStaffIdIndexRoute
   '/api/students/$id': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
@@ -527,7 +543,9 @@ export interface FileRoutesById {
   '/api/students/$id/records': typeof ApiStudentsIdRecordsRoute
   '/api/students/import/resolve': typeof ApiStudentsImportResolveRoute
   '/_app/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
+  '/api/components/$id/': typeof ApiComponentsIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
+  '/api/roles/$id/': typeof ApiRolesIdIndexRoute
   '/api/staff/$id/': typeof ApiStaffIdIndexRoute
   '/api/students/$id/': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
@@ -586,7 +604,9 @@ export interface FileRouteTypes {
     | '/api/students/$id/records'
     | '/api/students/import/resolve'
     | '/meetings/$meetingId/'
+    | '/api/components/$id/'
     | '/api/meetings/$meetingId/'
+    | '/api/roles/$id/'
     | '/api/staff/$id/'
     | '/api/students/$id/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
@@ -643,7 +663,9 @@ export interface FileRouteTypes {
     | '/api/students/$id/records'
     | '/api/students/import/resolve'
     | '/meetings/$meetingId'
+    | '/api/components/$id'
     | '/api/meetings/$meetingId'
+    | '/api/roles/$id'
     | '/api/staff/$id'
     | '/api/students/$id'
     | '/api/meetings/$meetingId/general-reports/$reportId'
@@ -701,7 +723,9 @@ export interface FileRouteTypes {
     | '/api/students/$id/records'
     | '/api/students/import/resolve'
     | '/_app/meetings/$meetingId/'
+    | '/api/components/$id/'
     | '/api/meetings/$meetingId/'
+    | '/api/roles/$id/'
     | '/api/staff/$id/'
     | '/api/students/$id/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
@@ -740,7 +764,9 @@ export interface RootRouteChildren {
   ApiMeetingsMeetingIdStartRoute: typeof ApiMeetingsMeetingIdStartRoute
   ApiStudentsIdHistoryRoute: typeof ApiStudentsIdHistoryRoute
   ApiStudentsIdRecordsRoute: typeof ApiStudentsIdRecordsRoute
+  ApiComponentsIdIndexRoute: typeof ApiComponentsIdIndexRoute
   ApiMeetingsMeetingIdIndexRoute: typeof ApiMeetingsMeetingIdIndexRoute
+  ApiRolesIdIndexRoute: typeof ApiRolesIdIndexRoute
   ApiStaffIdIndexRoute: typeof ApiStaffIdIndexRoute
   ApiStudentsIdIndexRoute: typeof ApiStudentsIdIndexRoute
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute: typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
@@ -1003,6 +1029,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiClassesIdStudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/components/$id/': {
+      id: '/api/components/$id/'
+      path: '/api/components/$id'
+      fullPath: '/api/components/$id/'
+      preLoaderRoute: typeof ApiComponentsIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/meetings/$meetingId/': {
       id: '/api/meetings/$meetingId/'
       path: '/api/meetings/$meetingId'
@@ -1036,6 +1069,13 @@ declare module '@tanstack/react-router' {
       path: '/api/meetings/$meetingId/start'
       fullPath: '/api/meetings/$meetingId/start'
       preLoaderRoute: typeof ApiMeetingsMeetingIdStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/roles/$id/': {
+      id: '/api/roles/$id/'
+      path: '/api/roles/$id'
+      fullPath: '/api/roles/$id/'
+      preLoaderRoute: typeof ApiRolesIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/staff/$id/': {
@@ -1235,7 +1275,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMeetingsMeetingIdStartRoute: ApiMeetingsMeetingIdStartRoute,
   ApiStudentsIdHistoryRoute: ApiStudentsIdHistoryRoute,
   ApiStudentsIdRecordsRoute: ApiStudentsIdRecordsRoute,
+  ApiComponentsIdIndexRoute: ApiComponentsIdIndexRoute,
   ApiMeetingsMeetingIdIndexRoute: ApiMeetingsMeetingIdIndexRoute,
+  ApiRolesIdIndexRoute: ApiRolesIdIndexRoute,
   ApiStaffIdIndexRoute: ApiStaffIdIndexRoute,
   ApiStudentsIdIndexRoute: ApiStudentsIdIndexRoute,
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute:

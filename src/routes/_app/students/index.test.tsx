@@ -7,10 +7,13 @@ import type { StudentsPageResult } from "#/lib/students/types";
 
 const mocks = vi.hoisted(() => ({
 	useStudents: vi.fn(),
+	useNavigate: vi.fn(),
+	navigate: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
+	useNavigate: mocks.useNavigate,
 	Link: ({
 		children,
 		to,
@@ -79,6 +82,7 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 	});
+	mocks.useNavigate.mockReturnValue(mocks.navigate);
 });
 
 afterEach(() => {
@@ -161,6 +165,25 @@ describe("StudentsPage", () => {
 		});
 	});
 
+	it("mostra botão para limpar a busca", () => {
+		mocks.useStudents.mockReturnValue({
+			data: makePage({ data: [], total: 0 }),
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+		const search = screen.getByLabelText("Buscar por nome ou documento");
+		fireEvent.change(search, { target: { value: "Zé Ninguém" } });
+		act(() => {
+			vi.advanceTimersByTime(300);
+		});
+		expect(
+			screen.getByText("Nenhum aluno corresponde à busca"),
+		).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: "Limpar busca" }));
+		expect(search).toHaveValue("");
+	});
+
 	it("debounceia a busca e volta para a página 1", () => {
 		mocks.useStudents.mockReturnValue({
 			data: makePage({ total: 25 }),
@@ -188,5 +211,40 @@ describe("StudentsPage", () => {
 			page: 1,
 			pageSize: 10,
 		});
+	});
+
+	it("navega para o detalhe ao clicar em célula de texto da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de alunos" });
+		fireEvent.click(within(table).getByRole("cell", { name: "123" }));
+
+		expect(mocks.navigate).toHaveBeenCalledTimes(1);
+		expect(mocks.navigate).toHaveBeenCalledWith({
+			to: "/students/$id",
+			params: { id: "student-1" },
+		});
+	});
+
+	it("clicar no link do nome não dispara a navegação da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de alunos" });
+		fireEvent.click(within(table).getByRole("link", { name: "João Silva" }));
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
+	});
+
+	it("clicar no botão de ações não dispara a navegação da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de alunos" });
+		fireEvent.click(
+			within(table).getByRole("link", {
+				name: "Ver detalhes de João Silva",
+			}),
+		);
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });
