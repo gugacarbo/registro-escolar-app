@@ -49,11 +49,13 @@ export function MeetingForm({
 	submitLabel = "Salvar",
 	defaultValues,
 	serverError,
+	mode = "create",
 }: {
 	onSubmit: (values: MeetingFormValues) => void | Promise<void>;
 	submitLabel?: string;
 	defaultValues?: Partial<MeetingFormValues>;
 	serverError?: string | null;
+	mode?: "create" | "edit";
 }) {
 	const { data: classesPage } = useClasses({ pageSize: 500 });
 	const classes = classesPage?.data ?? [];
@@ -64,7 +66,11 @@ export function MeetingForm({
 	const { data: templates = [] } = useMinuteTemplates();
 
 	const form = useForm<MeetingFormValues>({
-		resolver: zodResolver(meetingFormSchema),
+		resolver: zodResolver(
+			mode === "edit"
+				? meetingFormSchema.extend({ turmaIds: z.array(z.string()) })
+				: meetingFormSchema,
+		),
 		defaultValues: {
 			nome: "",
 			data: "",
@@ -112,98 +118,110 @@ export function MeetingForm({
 						</FormItem>
 					)}
 				/>
-				<FormField
-					control={form.control}
-					name="turmaIds"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Turmas *</FormLabel>
-							<div className="grid gap-2">
-								{classes.map((classRow) => (
-									<label
-										key={classRow.id}
-										className="flex items-center gap-2 text-sm"
-									>
-										<Checkbox
-											checked={field.value.includes(classRow.id)}
-											onCheckedChange={(checked) =>
-												field.onChange(
-													checked
-														? [...field.value, classRow.id]
-														: field.value.filter((id) => id !== classRow.id),
-												)
-											}
-										/>
-										{classRow.name} — {classRow.academicPeriod}
-									</label>
-								))}
-							</div>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<div className="grid gap-2">
-					<Label htmlFor={undefined}>Participantes</Label>
-					<div className="space-y-2">
-						{fields.map((participantField, index) => (
-							<div
-								key={participantField.id}
-								className="flex flex-wrap items-center gap-2"
-							>
-								<FormField
-									control={form.control}
-									name={`participantes.${index}.servidorId`}
-									render={({ field }) => (
-										<Select value={field.value} onValueChange={field.onChange}>
-											<SelectTrigger aria-label="Servidor">
-												<SelectValue placeholder="Servidor" />
-											</SelectTrigger>
-											<SelectContent>
-												{staff.map((member) => (
-													<SelectItem key={member.id} value={member.id}>
-														{member.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									)}
-								/>
-								<FormField
-									control={form.control}
-									name={`participantes.${index}.papelId`}
-									render={({ field }) => (
-										<Select value={field.value} onValueChange={field.onChange}>
-											<SelectTrigger aria-label="Papel">
-												<SelectValue placeholder="Papel" />
-											</SelectTrigger>
-											<SelectContent>
-												{roles.map((role) => (
-													<SelectItem key={role.id} value={role.id}>
-														{role.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									)}
-								/>
-								<Button
-									type="button"
-									variant="outline"
-									onClick={() => remove(index)}
+				{mode === "create" && (
+					<FormField
+						control={form.control}
+						name="turmaIds"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Turmas *</FormLabel>
+								<div className="grid gap-2">
+									{classes.map((classRow) => (
+										<label
+											key={classRow.id}
+											className="flex items-center gap-2 text-sm"
+										>
+											<Checkbox
+												checked={field.value.includes(classRow.id)}
+												onCheckedChange={(checked) =>
+													field.onChange(
+														checked
+															? [...field.value, classRow.id]
+															: field.value.filter((id) => id !== classRow.id),
+													)
+												}
+											/>
+											{classRow.name} — {classRow.academicPeriod}
+										</label>
+									))}
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				)}
+
+				{mode === "create" && (
+					<div className="grid gap-2">
+						<Label htmlFor={undefined}>Participantes</Label>
+						<div className="space-y-2">
+							{fields.map((participantField, index) => (
+								<div
+									key={participantField.id}
+									className="flex flex-wrap items-center gap-2"
 								>
-									Remover
-								</Button>
-							</div>
-						))}
-						<Button
-							type="button"
-							variant="secondary"
-							onClick={() => append({ servidorId: "", papelId: "" })}
-						>
-							Adicionar participante
-						</Button>
+									<FormField
+										control={form.control}
+										name={`participantes.${index}.servidorId`}
+										render={({ field }) => (
+											<Select
+												value={field.value}
+												onValueChange={field.onChange}
+											>
+												<SelectTrigger aria-label="Servidor">
+													<SelectValue placeholder="Servidor" />
+												</SelectTrigger>
+												<SelectContent>
+													{staff.map((member) => (
+														<SelectItem key={member.id} value={member.id}>
+															{member.name}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name={`participantes.${index}.papelId`}
+										render={({ field }) => (
+											<Select
+												value={field.value}
+												onValueChange={field.onChange}
+											>
+												<SelectTrigger aria-label="Papel">
+													<SelectValue placeholder="Papel" />
+												</SelectTrigger>
+												<SelectContent>
+													{roles.map((role) => (
+														<SelectItem key={role.id} value={role.id}>
+															{role.name}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										)}
+									/>
+									<Button
+										type="button"
+										variant="outline"
+										onClick={() => remove(index)}
+									>
+										Remover
+									</Button>
+								</div>
+							))}
+							<Button
+								type="button"
+								variant="secondary"
+								onClick={() => append({ servidorId: "", papelId: "" })}
+							>
+								Adicionar participante
+							</Button>
+						</div>
 					</div>
-				</div>
+				)}
+
 				<FormField
 					control={form.control}
 					name="templateId"

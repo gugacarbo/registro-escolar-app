@@ -89,6 +89,7 @@ export function CouncilPage() {
 			await createRecord.mutateAsync({
 				studentId: selectedStudent.studentId,
 				texto: values.texto,
+				categoriaId: values.categoriaId,
 				componenteId: values.componenteId,
 				origemId: values.origemId,
 				incluirNaAta: values.incluirNaAta,
@@ -106,6 +107,7 @@ export function CouncilPage() {
 				studentId: selectedStudent.studentId,
 				recordId: editingRecord,
 				texto: values.texto,
+				categoriaId: values.categoriaId,
 				componenteId: values.componenteId,
 				origemId: values.origemId,
 				incluirNaAta: values.incluirNaAta,
@@ -256,7 +258,9 @@ export function CouncilPage() {
 						</div>
 						{!canEdit && (
 							<p className="text-sm text-muted-foreground" role="status">
-								Reunião finalizada — reabra para editar registros vinculados.
+								{meeting?.status === "draft"
+									? "Inicie a reunião para criar registros vinculados."
+									: "Reunião finalizada — reabra para editar registros vinculados."}
 							</p>
 						)}
 					</div>
@@ -339,6 +343,7 @@ export function CouncilPage() {
 												meetingId={meetingId}
 												defaultValues={{
 													texto: record.texto,
+													categoriaId: record.categoriaId ?? "",
 													componenteId: record.componentId ?? "",
 													origemId: record.originId ?? "",
 													incluirNaAta: record.includeInMinutes,

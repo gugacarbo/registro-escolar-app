@@ -15,6 +15,7 @@ vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({
 		useParams: () => ({ id: "staff-1" }),
 	}),
+	useNavigate: () => ({ navigate: vi.fn() }),
 	Link: ({
 		children,
 		to,

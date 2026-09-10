@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { useParticipantName } from "#/components/meetings/participant-name";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
 import {
@@ -14,6 +14,7 @@ import {
 	FormNative,
 	FormSubmit,
 } from "#/components/ui/form";
+import { Input } from "#/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -27,6 +28,7 @@ import { useParticipants } from "#/hooks/meetings/use-participants";
 
 const recordFormSchema = z.object({
 	texto: z.string().trim().min(1, "Texto é obrigatório"),
+	categoriaId: z.string(),
 	componenteId: z.string(),
 	origemId: z.string(),
 	incluirNaAta: z.boolean(),
@@ -36,6 +38,7 @@ export type RecordFormValues = z.infer<typeof recordFormSchema>;
 
 export type RecordFormSubmitValues = {
 	texto: string;
+	categoriaId: string | null;
 	componenteId: string | null;
 	origemId: string | null;
 	incluirNaAta: boolean;
@@ -59,11 +62,13 @@ export function RecordForm({
 	const { data: componentsPage } = useComponents({ pageSize: 100 });
 	const components = componentsPage?.data ?? [];
 	const { data: participants = [] } = useParticipants(meetingId);
+	const { getParticipantName } = useParticipantName();
 
 	const form = useForm<RecordFormValues>({
 		resolver: zodResolver(recordFormSchema),
 		defaultValues: {
 			texto: "",
+			categoriaId: "",
 			componenteId: "",
 			origemId: "",
 			incluirNaAta: true,
@@ -85,6 +90,19 @@ export function RecordForm({
 							<FormLabel>Texto *</FormLabel>
 							<FormControl>
 								<Textarea {...field} disabled={disabled} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
+					name="categoriaId"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Categoria</FormLabel>
+							<FormControl>
+								<Input {...field} disabled={disabled} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -137,9 +155,9 @@ export function RecordForm({
 										{participants.map((participant) => (
 											<SelectItem
 												key={participant.id}
-												value={participant.staffId}
+												value={getParticipantName(participant.staffId)}
 											>
-												{participant.staffId}
+												{getParticipantName(participant.staffId)}
 											</SelectItem>
 										))}
 									</SelectContent>
