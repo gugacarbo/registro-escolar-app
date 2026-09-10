@@ -1,17 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Plus, Search, Upload, X } from "lucide-react";
+import { ChevronRight, Plus, Upload } from "lucide-react";
 import { useState } from "react";
 import { DataTable } from "#/components/data-table";
 import { CreateStudentDialog } from "#/components/students/create-student-dialog";
 import { Avatar, AvatarFallback } from "#/components/ui/avatar";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-} from "#/components/ui/input-group";
+import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
+import { SearchInput } from "#/components/ui/search-input";
 import { useStudents } from "#/hooks/students/use-students";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import type { Student } from "#/lib/students/schema";
@@ -87,7 +83,7 @@ const columns = [
 	},
 ];
 
-export function StudentsPage() {
+export default function StudentsPage() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
@@ -117,53 +113,35 @@ export function StudentsPage() {
 	const hasSearch = debouncedSearch.trim().length > 0;
 
 	return (
-		<div className="space-y-4 sm:space-y-5">
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-				<div className="space-y-1">
-					<h1 className="text-2xl font-bold tracking-tight">Estudantes</h1>
-					<p className="text-sm text-muted-foreground" role="status">
-						{total === 0
-							? "Nenhum estudante cadastrado"
-							: total === 1
-								? "1 estudante cadastrado"
-								: `${total} estudantes cadastrados`}
-					</p>
-				</div>
-				<div className="flex flex-wrap items-center gap-2">
-					<Button asChild variant="secondary">
-						<Link to="/students/import">
-							<Upload />
-							Importar estudantes
-						</Link>
-					</Button>
-					<Button onClick={() => setDialogOpen(true)}>
-						<Plus />
-						Novo estudante
-					</Button>
-				</div>
-			</div>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<Search aria-hidden="true" />
-				</InputGroupAddon>
-				<InputGroupInput
-					placeholder="Buscar por nome ou documento"
+		<PageShell>
+			<PageHeader
+				eyebrow="Cadastro"
+				title="Estudantes"
+				description="Busque, cadastre e importe alunos. Cada linha leva ao histórico completo e aos registros do conselho."
+				actions={
+					<>
+						<Button asChild variant="secondary">
+							<Link to="/students/import">
+								<Upload aria-hidden="true" />
+								Importar
+							</Link>
+						</Button>
+						<Button onClick={() => setDialogOpen(true)}>
+							<Plus aria-hidden="true" />
+							Novo estudante
+						</Button>
+					</>
+				}
+			/>
+			<PageToolbar>
+				<SearchInput
+					className="sm:max-w-md"
 					value={search}
-					onChange={(event) => setSearch(event.target.value)}
-					aria-label="Buscar por nome ou documento"
+					onChange={setSearch}
+					placeholder="Buscar por nome ou documento"
+					ariaLabel="Buscar por nome ou documento"
 				/>
-				{search.length > 0 && (
-					<InputGroupAddon align="inline-end">
-						<InputGroupButton
-							size="icon-xs"
-							aria-label="Limpar campo de busca"
-							onClick={() => setSearch("")}
-						>
-							<X />
-						</InputGroupButton>
-					</InputGroupAddon>
-				)}
-			</InputGroup>
+			</PageToolbar>
 			<DataTable
 				columns={columns}
 				rows={studentsPage?.data ?? []}
@@ -209,6 +187,6 @@ export function StudentsPage() {
 				}
 			/>
 			<CreateStudentDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-		</div>
+		</PageShell>
 	);
 }

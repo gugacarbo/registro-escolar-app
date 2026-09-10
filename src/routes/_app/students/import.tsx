@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ImportPreviewTable } from "#/components/students/import-preview-table";
 import { Button } from "#/components/ui/button";
+import { PageHeader, PageShell } from "#/components/ui/page";
 import {
 	useImportPreview,
 	useResolveImport,
@@ -97,8 +98,10 @@ function ImportStudentsPage() {
 
 	if (step === STEP_RESULT && result) {
 		return (
-			<div className="space-y-4">
-				<h1 className="text-2xl font-bold">Importação concluída</h1>
+			<PageShell>
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+					Importação concluída
+				</h1>
 				<p>
 					Criados: {result.created} | Vinculados: {result.linked} | Ignorados:{" "}
 					{result.skipped}
@@ -106,7 +109,7 @@ function ImportStudentsPage() {
 				<Button onClick={() => navigate({ to: "/students" })}>
 					Ver estudantes
 				</Button>
-			</div>
+			</PageShell>
 		);
 	}
 
@@ -116,8 +119,10 @@ function ImportStudentsPage() {
 				row.status === "conflict" && resolutions[row.index]?.action !== "link",
 		);
 		return (
-			<div className="space-y-4">
-				<h1 className="text-2xl font-bold">Revisar importação</h1>
+			<PageShell>
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+					Revisar importação
+				</h1>
 				<p>
 					Total: {preview.summary.total} | Válidos: {preview.summary.valid} |
 					Conflitos: {preview.summary.conflicts} | Inválidos:{" "}
@@ -152,26 +157,27 @@ function ImportStudentsPage() {
 						Confirmar importação
 					</Button>
 				</div>
-			</div>
+			</PageShell>
 		);
 	}
 
 	return (
-		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Importar estudantes</h1>
-			<p className="text-sm text-muted-foreground">
-				Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a coluna
-				nome.
-			</p>
+		<PageShell>
+			<PageHeader
+				eyebrow="Importação"
+				title="Importar estudantes"
+				description="Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a coluna nome, revise conflitos e confirme os vínculos."
+			/>
 			<input
 				type="file"
 				accept=".csv,.xlsx,.xls,.ods"
+				className="file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-semibold file:text-secondary-foreground hover:file:bg-accent"
 				onChange={(e) => {
 					const file = e.target.files?.[0];
 					if (file) void handleUpload(file);
 				}}
 			/>
 			{error && <p className="text-destructive">{error}</p>}
-		</div>
+		</PageShell>
 	);
 }

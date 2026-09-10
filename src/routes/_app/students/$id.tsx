@@ -6,6 +6,7 @@ import {
 	type StudentFormValues,
 } from "#/components/students/student-form";
 import { Button } from "#/components/ui/button";
+import { PageShell } from "#/components/ui/page";
 import { useStudent } from "#/hooks/students/use-student";
 import { useUpdateStudent } from "#/hooks/students/use-update-student";
 import type { Student } from "#/lib/students/schema";
@@ -31,7 +32,7 @@ function formatBirthDate(value: Date | string | null | undefined): string {
 	return `${year}-${month}-${day}`;
 }
 
-export function toStudentFormValues(student: Student): StudentFormValues {
+function toStudentFormValues(student: Student): StudentFormValues {
 	return {
 		name: student.name,
 		document: student.document ?? "",
@@ -43,7 +44,7 @@ export function toStudentFormValues(student: Student): StudentFormValues {
 	};
 }
 
-export function StudentDetailPage() {
+export default function StudentDetailPage() {
 	const { id } = Route.useParams();
 	const { data: student, isLoading, isError, error } = useStudent(id);
 	const updateStudent = useUpdateStudent(id);
@@ -72,9 +73,9 @@ export function StudentDetailPage() {
 	}
 
 	return (
-		<div className="space-y-4">
+		<PageShell>
 			<div className="flex items-center justify-between gap-2">
-				<h1 className="text-2xl font-bold">
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
 					{student?.name ?? "Dados do estudante"}
 				</h1>
 				<Link to="/students">
@@ -106,6 +107,6 @@ export function StudentDetailPage() {
 					<StudentHistoryPanel studentId={student.id} />
 				</>
 			)}
-		</div>
+		</PageShell>
 	);
 }
