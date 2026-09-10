@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
 	useComponents: vi.fn(),
 	useParticipants: vi.fn(),
+	useParticipantName: vi.fn(),
 }));
 
 vi.mock("#/hooks/components/use-components", () => ({
@@ -12,6 +13,9 @@ vi.mock("#/hooks/components/use-components", () => ({
 }));
 vi.mock("#/hooks/meetings/use-participants", () => ({
 	useParticipants: mocks.useParticipants,
+}));
+vi.mock("#/components/meetings/participant-name", () => ({
+	useParticipantName: mocks.useParticipantName,
 }));
 
 import { RecordForm } from "./record-form";
@@ -32,6 +36,9 @@ function renderForm(disabled = false) {
 beforeEach(() => {
 	mocks.useComponents.mockReturnValue({ data: { data: [] } });
 	mocks.useParticipants.mockReturnValue({ data: [] });
+	mocks.useParticipantName.mockReturnValue({
+		getParticipantName: (id: string) => id,
+	});
 });
 
 describe("RecordForm", () => {
@@ -56,5 +63,28 @@ describe("RecordForm", () => {
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Limpar" }));
 		expect(screen.getByLabelText("Texto *")).toHaveValue("");
+	});
+
+	it("rendera opções de componente e participante com nomes legíveis", () => {
+		mocks.useComponents.mockReturnValue({
+			data: { data: [{ id: "component-1", name: "Matemática" }] },
+		});
+		mocks.useParticipants.mockReturnValue({
+			data: [{ id: "p-1", staffId: "staff-1" }],
+		});
+		mocks.useParticipantName.mockReturnValue({
+			getParticipantName: (id: string) => (id === "staff-1" ? "Maria" : id),
+		});
+		render(
+			<RecordForm
+				meetingId="meeting-1"
+				submitLabel="Salvar"
+				serverError="Erro de servidor"
+				onSubmit={vi.fn()}
+			/>,
+		);
+		expect(screen.getByText("Matemática")).toBeInTheDocument();
+		expect(screen.getByText("Maria")).toBeInTheDocument();
+		expect(screen.getByText("Erro de servidor")).toBeInTheDocument();
 	});
 });

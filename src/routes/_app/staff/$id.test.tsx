@@ -157,3 +157,30 @@ it("remove o servidor com confirmação", async () => {
 
 	expect(mocks.deleteAsync).toHaveBeenCalledTimes(1);
 });
+
+it("exibe erro de carregamento genérico e falha na remoção", async () => {
+	const user = userEvent.setup();
+	mocks.useStaffMember.mockReturnValue({
+		data: undefined,
+		isLoading: false,
+		isError: true,
+		error: "erro" as never,
+	});
+	const first = renderPage();
+	expect(screen.getByText("Falha ao carregar servidor")).toBeInTheDocument();
+	first.unmount();
+
+	mocks.useStaffMember.mockReturnValue({
+		data: makeMember(),
+		isLoading: false,
+		isError: false,
+		error: null,
+	});
+	mocks.deleteAsync.mockRejectedValue(new Error("Servidor possui vínculos"));
+	renderPage();
+	await user.click(screen.getByRole("button", { name: "Remover servidor" }));
+	await user.click(screen.getByRole("button", { name: "Remover" }));
+	expect(
+		await screen.findByText("Servidor possui vínculos"),
+	).toBeInTheDocument();
+});

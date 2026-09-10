@@ -213,4 +213,19 @@ describe("POST /api/meetings/:id/general-reports", () => {
 		expect(response.status).toBe(401);
 		expect(getSession).toHaveBeenCalledWith(request, undefined);
 	});
+
+	it("retorna 400 quando o corpo do POST não é JSON", async () => {
+		session();
+		meeting();
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/general-reports",
+			{ method: "POST", body: "not-json" },
+		);
+		const response = await createGeneralReportHandler({
+			request,
+			context: { env: env() },
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(400);
+	});
 });

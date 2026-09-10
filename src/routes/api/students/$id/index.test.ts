@@ -246,4 +246,22 @@ describe("PATCH /api/students/:id", () => {
 			expect.not.objectContaining({ birthDate: expect.anything() }),
 		);
 	});
+
+	it("retorna 400 quando o corpo não é JSON", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "student-1",
+			name: "João Silva",
+		});
+		const response = await updateStudentHandler({
+			request: new Request("http://localhost/api/students/student-1/", {
+				method: "PATCH",
+				body: "not-json",
+			}),
+			context: { env: createEnv() },
+			params: { id: "student-1" },
+		});
+		expect(response.status).toBe(400);
+	});
 });

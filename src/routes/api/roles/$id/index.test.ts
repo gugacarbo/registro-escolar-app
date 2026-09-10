@@ -188,4 +188,22 @@ describe("PATCH /api/roles/:id", () => {
 			expect.objectContaining({ name: "Direção" }),
 		);
 	});
+
+	it("retorna 400 quando o corpo não é JSON", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findRoleById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "papel-1",
+			name: "Registro",
+		} as never);
+		const response = await updateRoleHandler({
+			request: new Request("http://localhost/api/papels/papel-1", {
+				method: "PATCH",
+				body: "not-json",
+			}),
+			context: { env: createEnv() },
+			params: { id: "papel-1" },
+		});
+		expect(response.status).toBe(400);
+	});
 });

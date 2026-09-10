@@ -247,4 +247,23 @@ describe("StudentsPage", () => {
 
 		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
+
+	it("gera iniciais para nomes com um ou nenhum token", () => {
+		mocks.useStudents.mockReturnValue({
+			data: makePage({
+				data: [
+					makeStudent({ id: "student-empty", name: "   " }),
+					makeStudent({ id: "student-one", name: "Ana" }),
+					makeStudent({ id: "student-multi", name: "Maria da Silva" }),
+				],
+				total: 3,
+			}),
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+		expect(screen.getByText("MS")).toBeInTheDocument();
+		expect(screen.getByText("A")).toBeInTheDocument();
+		expect(screen.getByText("?")).toBeInTheDocument();
+	});
 });

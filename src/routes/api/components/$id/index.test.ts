@@ -195,4 +195,22 @@ describe("PATCH /api/components/:id", () => {
 			expect.objectContaining({ name: "Matemática Aplicada" }),
 		);
 	});
+
+	it("retorna 400 quando o corpo não é JSON", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findComponentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "c1",
+			name: "Matemática",
+		});
+		const response = await updateComponentHandler({
+			request: new Request("http://localhost/api/components/c1/", {
+				method: "PATCH",
+				body: "not-json",
+			}),
+			context: { env: createEnv() },
+			params: { id: "c1" },
+		});
+		expect(response.status).toBe(400);
+	});
 });

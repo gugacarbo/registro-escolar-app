@@ -65,7 +65,10 @@ export async function updateComponentHandler({
 		return json({ error: "Não autenticado" }, 401);
 	}
 
-	const body = await request.json();
+	const body = await request.json().catch(() => null);
+	if (!body) {
+		return json({ error: "Dados inválidos" }, 400);
+	}
 	const parsed = updateComponentSchema.safeParse(body);
 	if (!parsed.success) {
 		return json({ error: "Dados inválidos", issues: parsed.error.issues }, 400);

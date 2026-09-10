@@ -152,4 +152,35 @@ describe("hooks de registros do estudante", () => {
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(result.current.error?.message).toBe("Texto obrigatório");
 	});
+
+	it("usa mensagens padrão quando o corpo não traz error", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response("{}", { status: 500 }),
+		);
+		const load = renderHook(
+			() => useMeetingStudentRecords("meeting-1", "student-1"),
+			{
+				wrapper,
+			},
+		);
+		await waitFor(() => expect(load.result.current.isError).toBe(true));
+		expect(load.result.current.error?.message).toBe(
+			"Falha ao carregar registros do estudante",
+		);
+
+		const create = renderHook(() => useCreateLinkedRecord("meeting-1"), {
+			wrapper,
+		});
+		create.result.current.mutate({
+			studentId: "student-1",
+			texto: "Registro",
+			categoriaId: null,
+			componenteId: null,
+			origemId: null,
+		});
+		await waitFor(() => expect(create.result.current.isError).toBe(true));
+		expect(create.result.current.error?.message).toBe(
+			"Falha ao criar registro",
+		);
+	});
 });

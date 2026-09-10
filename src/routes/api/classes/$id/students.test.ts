@@ -17,6 +17,10 @@ vi.mock("#/lib/classes/repository", () => ({
 vi.mock("#/lib/enrollments/repository", () => ({
 	listStudentsByClassAtDate: vi.fn().mockResolvedValue([]),
 }));
+vi.mock("#/lib/cloudflare-env", () => ({
+	getRuntimeEnv: vi.fn(async () => createEnv()),
+	requireD1: vi.fn(() => ({}) as D1Database),
+}));
 
 function createMockSession() {
 	const now = new Date();
@@ -154,5 +158,36 @@ describe("GET /api/classes/:id/students", () => {
 				},
 			},
 		]);
+	});
+	it("resolve env via fallback e serializa endDate", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			createMockSession(),
+		);
+		(findClassById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "t1",
+		});
+		(
+			listStudentsByClassAtDate as ReturnType<typeof vi.fn>
+		).mockResolvedValueOnce([
+			{
+				student: { id: "a1", name: "João Silva" },
+				enrollment: {
+					id: "e1",
+					startDate: new Date(Date.UTC(2026, 1, 1)),
+					endDate: new Date(Date.UTC(2026, 11, 1)),
+					status: "encerrada",
+				},
+			},
+		]);
+		const response = await listClassStudentsHandler({
+			request: getRequest("2026-03-01"),
+			context: {},
+			params: { id: "t1" },
+		});
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as Array<{
+			enrollment: { endDate: string };
+		}>;
+		expect(body[0]?.enrollment.endDate).toBeTypeOf("string");
 	});
 });

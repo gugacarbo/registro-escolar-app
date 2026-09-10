@@ -401,3 +401,142 @@ async function dbInsertEnrollment(db: DB) {
 		startDate: start,
 	});
 }
+
+describe("histórico variações de dados", () => {
+	let setup: ReturnType<typeof createTestDb>;
+
+	beforeEach(async () => {
+		setup = createTestDb();
+		await seedBase(setup.db);
+	});
+
+	it("cobre status sem reunião, sem vínculo e vínculo inativo", async () => {
+		const june2024 = new Date("2024-06-10T12:00:00.000Z");
+		await setup.db.insert(schema.meetingStudentStatus).values([
+			{
+				id: "status-missing-meeting",
+				meetingId: "missing-meeting",
+				classId: "class-1",
+				studentId: "student-1",
+				status: "concluido",
+				createdAt: june,
+				updatedAt: june,
+			},
+			{
+				id: "status-missing-enrollment",
+				meetingId: "meeting-1",
+				classId: "missing-class",
+				studentId: "student-1",
+				status: "concluido",
+				createdAt: june,
+				updatedAt: june,
+			},
+			{
+				id: "status-inactive",
+				meetingId: "meeting-2",
+				classId: "class-2",
+				studentId: "student-1",
+				status: "concluido",
+				createdAt: june,
+				updatedAt: june2024,
+			},
+		]);
+		const result = await getStudentHistory(setup.db, "student-1", {});
+		for (const id of [
+			"status:status-missing-meeting",
+			"status:status-missing-enrollment",
+			"status:status-inactive",
+		]) {
+			expect(result?.eventos.find((event) => event.id === id)).toBeUndefined();
+		}
+	});
+
+	it("lida com registro de turma inexistente e encerramento de turma inexistente", async () => {
+		await setup.db.insert(schema.studentRecords).values({
+			id: "rec-missing-class",
+			studentId: "student-1",
+			classId: "missing-class",
+			texto: "Registro sem turma",
+			createdAt: june,
+			updatedAt: june,
+		});
+		const student = await getStudentHistory(setup.db, "student-1", {});
+		const missing = student?.eventos.find(
+			(event) => event.id === "record:rec-missing-class",
+		);
+		expect(missing?.turmaId).toBe("missing-class");
+		expect(missing?.turmaNome).toBeNull();
+	});
+
+	it("usa data de criação da reunião para relato quando heldAt ausente", async () => {
+		const createdOnly = new Date("2025-03-01T00:00:00.000Z");
+		await setup.db
+			.update(schema.meetings)
+			.set({ heldAt: null, createdAt: createdOnly })
+			.where(eq(schema.meetings.id, "meeting-1"));
+		const result = await getClassHistory(setup.db, "class-1", {});
+		const relato = result?.eventos.find(
+			(event) => event.id === "relato:report-1",
+		);
+		expect(relato?.data).toBe(createdOnly.toISOString());
+	});
+
+	it("lida com vínculos e status de turmas inexistentes", async () => {
+		await setup.db.insert(schema.enrollments).values({
+			id: "enr-missing",
+			studentId: "student-1",
+			classId: "missing-class",
+			startDate: start,
+			endDate: end,
+		});
+		await setup.db.insert(schema.meetingStudentStatus).values({
+			id: "status-missing-class",
+			meetingId: "meeting-1",
+			classId: "missing-class",
+			studentId: "student-1",
+			status: "concluido",
+			createdAt: june,
+			updatedAt: june,
+		});
+		const student = await getStudentHistory(setup.db, "student-1", {});
+		const enrollment = student?.eventos.find(
+			(event) => event.id === "matricula:enr-missing",
+		);
+		expect(enrollment?.turmaNome).toBeNull();
+		const closure = student?.eventos.find(
+			(event) => event.id === "encerramento:enr-missing",
+		);
+		expect(closure?.turmaNome).toBeNull();
+		const status = student?.eventos.find(
+			(event) => event.id === "status:status-missing-class",
+		);
+		expect(status?.turmaNome).toBeNull();
+	});
+
+	it("cobre caminhos de reuniões ausentes e vínculos repetidos", async () => {
+		await setup.db.insert(schema.enrollments).values({
+			id: "enr-repeat",
+			studentId: "student-1",
+			classId: "class-1",
+			startDate: new Date("2025-03-01T00:00:00.000Z"),
+		});
+		await setup.db.insert(schema.studentRecords).values({
+			id: "rec-missing-context",
+			studentId: "student-1",
+			meetingId: "meeting-2",
+			texto: "Sem contexto",
+			createdAt: august,
+			updatedAt: august,
+		});
+		const result = await getStudentHistory(setup.db, "student-1", {});
+		const context = result?.eventos.find(
+			(event) => event.id === "record:rec-missing-context",
+		);
+		expect(context?.turmaId).toBe("class-1");
+
+		const meetingLess = await getStudentHistory(setup.db, "student-1", {
+			reuniaoId: "missing",
+		});
+		expect(meetingLess?.eventos).toEqual([]);
+	});
+});

@@ -21,6 +21,26 @@ vi.mock("#/hooks/meetings/use-participants", () => ({
 vi.mock("#/hooks/meetings/use-add-participant", () => ({
 	useAddParticipant: () => ({ mutateAsync: mocks.addAsync, isPending: false }),
 }));
+vi.mock("#/components/ui/select", () => ({
+	Select: ({ children }: { children: React.ReactNode }) => (
+		<select>{children}</select>
+	),
+	SelectContent: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+	SelectItem: ({
+		value,
+		children,
+	}: {
+		value: string;
+		children: React.ReactNode;
+	}) => <option value={value}>{children}</option>,
+	SelectTrigger: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+	SelectValue: () => null,
+}));
+
 vi.mock("#/hooks/staff/use-staff", () => ({ useStaff: mocks.useStaff }));
 vi.mock("#/hooks/roles/use-roles", () => ({ useRoles: mocks.useRoles }));
 
@@ -52,19 +72,34 @@ describe("ParticipantsPage", () => {
 		renderPage();
 		expect(screen.getByText(/Maria Silva — Coordenador/)).toBeInTheDocument();
 	});
-});
 
-it("exibe erro de validação e estado de carregamento", async () => {
-	mocks.useParticipants.mockReturnValue({ data: undefined, isLoading: true });
-	renderPage();
-	expect(screen.getByText("Carregando...")).toBeInTheDocument();
-});
+	it("exibe estado de carregamento", () => {
+		mocks.useParticipants.mockReturnValue({ data: undefined, isLoading: true });
+		renderPage();
+		expect(screen.getByText("Carregando...")).toBeInTheDocument();
+	});
 
-it("exige servidor e papel antes de adicionar", async () => {
-	const user = userEvent.setup();
-	renderPage();
-	await user.click(screen.getByRole("button", { name: "Adicionar" }));
-	expect(
-		screen.getByText("Selecione o servidor e o papel"),
-	).toBeInTheDocument();
+	it("exige servidor e papel antes de adicionar", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await user.click(screen.getByRole("button", { name: "Adicionar" }));
+		expect(
+			screen.getByText("Selecione o servidor e o papel"),
+		).toBeInTheDocument();
+	});
+
+	it("mostra IDs quando nomes não estão carregados", () => {
+		mocks.useParticipants.mockReturnValue({
+			data: [
+				{ id: "p-unknown", staffId: "unknown-staff", roleId: "unknown-role" },
+			],
+			isLoading: false,
+		});
+		mocks.useStaff.mockReturnValue({ data: { data: [] } });
+		mocks.useRoles.mockReturnValue({ data: { data: [] } });
+		renderPage();
+		expect(
+			screen.getByText(/unknown-staff — unknown-role/),
+		).toBeInTheDocument();
+	});
 });

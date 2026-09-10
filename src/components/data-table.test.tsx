@@ -235,3 +235,174 @@ describe("DataTable com onRowClick", () => {
 		).toBeInTheDocument();
 	});
 });
+
+describe("DataTable variações de colunas e skeleton", () => {
+	it("renderiza headers como nó, chaves explícitas e alinhamentos", () => {
+		render(
+			<DataTable<Row>
+				columns={[
+					{
+						key: "left",
+						header: <span>Nome header</span>,
+						cell: (row) => row.name,
+					},
+					{
+						key: "center",
+						header: "Centro",
+						align: "center",
+						cell: () => "Centro",
+					},
+					{
+						key: "right",
+						header: "Direita",
+						align: "right",
+						cell: () => "Direita",
+					},
+					{
+						key: "actions",
+						header: <span>Ações header</span>,
+						align: "left",
+						skeletonClassName: "h-5",
+						cell: () => "Ações",
+					},
+				]}
+				rows={[]}
+				getRowKey={(row) => row.id}
+				total={0}
+				page={1}
+				pageSize={10}
+				onPageChange={() => {}}
+				onPageSizeChange={() => {}}
+				emptyTitle="Vazio"
+			/>,
+		);
+		expect(screen.getByText("Nome header")).toBeInTheDocument();
+		expect(
+			screen.getByRole("columnheader", { name: "Centro" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("columnheader", { name: "Direita" }),
+		).toBeInTheDocument();
+		expect(screen.getByText("Ações header")).toBeInTheDocument();
+	});
+
+	it("usa skeleton customizado durante loading", () => {
+		render(
+			<DataTable<Row>
+				columns={[
+					{
+						key: "name",
+						header: "Nome",
+						skeletonClassName: "skeleton-name",
+						cell: (row) => row.name,
+					},
+				]}
+				rows={[]}
+				getRowKey={(row) => row.id}
+				total={10}
+				page={1}
+				pageSize={10}
+				onPageChange={() => {}}
+				onPageSizeChange={() => {}}
+				isLoading
+				emptyTitle="Vazio"
+			/>,
+		);
+		expect(document.querySelector(".skeleton-name")).toBeInTheDocument();
+	});
+
+	it("rendera skeleton com alinhamentos em todas as posições", () => {
+		render(
+			<DataTable<Row>
+				columns={[
+					{ header: "Primeira", cell: (row) => row.name },
+					{ header: "Meio", cell: (row) => row.name },
+					{ header: "Última", align: "right", cell: (row) => row.name },
+				]}
+				rows={[]}
+				getRowKey={(row) => row.id}
+				total={10}
+				page={1}
+				pageSize={10}
+				onPageChange={() => {}}
+				onPageSizeChange={() => {}}
+				isLoading
+				emptyTitle="Vazio"
+			/>,
+		);
+		expect(screen.getAllByRole("cell").length).toBeGreaterThan(0);
+	});
+
+	it("rendera células com alinhamento variado fora do loading", () => {
+		render(
+			<DataTable<Row>
+				columns={[
+					{ header: "Primeira", cell: (row) => row.name },
+					{ header: "Meio", align: "center", cell: () => "Centro" },
+					{ header: "Última", align: "right", cell: () => "Direita" },
+				]}
+				rows={rows}
+				getRowKey={(row) => row.id}
+				total={10}
+				page={1}
+				pageSize={10}
+				onPageChange={() => {}}
+				onPageSizeChange={() => {}}
+				emptyTitle="Vazio"
+			/>,
+		);
+		expect(
+			screen.getAllByRole("cell", { name: "Centro" })[0],
+		).toBeInTheDocument();
+		expect(
+			screen.getAllByRole("cell", { name: "Direita" })[0],
+		).toBeInTheDocument();
+	});
+
+	it("Enter em elemento interno da linha não chama onRowClick", () => {
+		const onRowClick = vi.fn();
+		render(
+			<DataTable<Row>
+				columns={[
+					{
+						key: "actions",
+						header: <span>Ações node</span>,
+						cell: (row) => <button type="button">{row.name}</button>,
+					},
+				]}
+				rows={rows}
+				getRowKey={(row) => row.id}
+				total={10}
+				page={1}
+				pageSize={10}
+				onPageChange={() => {}}
+				onPageSizeChange={() => {}}
+				onRowClick={onRowClick}
+				emptyTitle="Vazio"
+			/>,
+		);
+		fireEvent.keyDown(screen.getByRole("button", { name: "Linha 1" }), {
+			key: "Enter",
+		});
+		expect(onRowClick).not.toHaveBeenCalled();
+	});
+
+	it("rendera ellipsis inicial e final em páginas centrais", () => {
+		render(
+			<DataTable<Row>
+				columns={[{ header: "Nome", cell: (row) => row.name }]}
+				rows={rows}
+				getRowKey={(row) => row.id}
+				total={80}
+				page={4}
+				pageSize={10}
+				onPageChange={() => {}}
+				onPageSizeChange={() => {}}
+				emptyTitle="Vazio"
+			/>,
+		);
+		expect(
+			document.querySelectorAll("\[data-slot=pagination-ellipsis\]").length,
+		).toBeGreaterThanOrEqual(2);
+	});
+});

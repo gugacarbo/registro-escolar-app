@@ -366,4 +366,30 @@ describe("POST /api/meetings/", () => {
 			expect.objectContaining({ templateId: null }),
 		);
 	});
+	it("retorna 400 quando o corpo não é JSON", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			createMockSession(),
+		);
+		const response = await createMeetingHandler({
+			request: new Request("http://localhost/api/meetings/", {
+				method: "POST",
+				body: "not-json",
+			}),
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(400);
+	});
+	it("resolve env via fallback no POST", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+		const request = new Request("http://localhost/api/meetings/", {
+			method: "POST",
+			body: "{}",
+		});
+		const response = await createMeetingHandler({
+			request,
+			context: {},
+		});
+		expect(response.status).toBe(401);
+		expect(getSession).toHaveBeenLastCalledWith(request, undefined);
+	});
 });

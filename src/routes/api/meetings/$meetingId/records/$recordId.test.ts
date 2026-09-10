@@ -174,4 +174,22 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		const body = (await response.json()) as { texto: string };
 		expect(body.texto).toBe("Editado");
 	});
+
+	it("retorna 400 quando o corpo não é JSON", async () => {
+		session();
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			status: "in_progress",
+		});
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/records/rec-1",
+			{ method: "PATCH", body: "not-json" },
+		);
+		const response = await updateLinkedRecordHandler({
+			request,
+			context: { env: env() },
+			params: { meetingId: "meeting-1", recordId: "rec-1" },
+		});
+		expect(response.status).toBe(400);
+	});
 });

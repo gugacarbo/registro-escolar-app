@@ -151,4 +151,20 @@ describe("CreateMeetingDialog", () => {
 		expect(await screen.findByText("Reunião já existe")).toBeVisible();
 		expect(screen.getByRole("dialog")).toBeInTheDocument();
 	});
+
+	it("usa trigger não controlado e limpa erro ao fechar", async () => {
+		const user = userEvent.setup();
+		render(
+			<CreateMeetingDialog
+				trigger={<button type="button">Abrir reunião</button>}
+			/>,
+			{ wrapper: createWrapper() },
+		);
+		await user.click(screen.getByRole("button", { name: "Abrir reunião" }));
+		expect(await screen.findByRole("dialog")).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: "Close" }));
+		await waitFor(() =>
+			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+		);
+	});
 });

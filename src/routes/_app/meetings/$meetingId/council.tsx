@@ -83,11 +83,10 @@ export function CouncilPage() {
 		!!meeting && canEditLinkedRecord(meeting.status as MeetingStatus);
 
 	async function handleCreate(values: RecordFormSubmitValues) {
-		if (!selectedStudent) return;
 		setServerError(null);
 		try {
 			await createRecord.mutateAsync({
-				studentId: selectedStudent.studentId,
+				studentId: selectedStudent!.studentId,
 				texto: values.texto,
 				categoriaId: values.categoriaId,
 				componenteId: values.componenteId,
@@ -100,12 +99,11 @@ export function CouncilPage() {
 	}
 
 	async function handleUpdate(values: RecordFormSubmitValues) {
-		if (!selectedStudent || !editingRecord) return;
 		setServerError(null);
 		try {
 			await updateRecord.mutateAsync({
-				studentId: selectedStudent.studentId,
-				recordId: editingRecord,
+				studentId: selectedStudent!.studentId,
+				recordId: editingRecord!,
 				texto: values.texto,
 				categoriaId: values.categoriaId,
 				componenteId: values.componenteId,
@@ -136,11 +134,10 @@ export function CouncilPage() {
 		origemId: string | null;
 		incluirNaAta: boolean;
 	}) {
-		if (!editingReport) return;
 		setServerError(null);
 		try {
 			await updateGeneralReport.mutateAsync({
-				reportId: editingReport,
+				reportId: editingReport!,
 				...values,
 			});
 			setEditingReport(null);
@@ -153,11 +150,10 @@ export function CouncilPage() {
 		record: MeetingStudentRecord,
 		include: boolean,
 	) {
-		if (!selectedStudent) return;
 		setServerError(null);
 		try {
 			await setInclusion.mutateAsync({
-				studentId: selectedStudent.studentId,
+				studentId: selectedStudent!.studentId,
 				record,
 				incluir: include,
 			});

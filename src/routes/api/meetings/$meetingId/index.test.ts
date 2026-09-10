@@ -273,4 +273,22 @@ describe("PATCH /api/meetings/:id", () => {
 			}),
 		);
 	});
+	it("retorna 400 quando o corpo não é JSON", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			createMockSession(),
+		);
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			status: "draft",
+		});
+		const response = await updateMeetingHandler({
+			request: new Request("http://localhost/api/meetings/meeting-1/", {
+				method: "PATCH",
+				body: "not-json",
+			}),
+			context: { env: createEnv() },
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(400);
+	});
 });

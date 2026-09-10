@@ -100,3 +100,20 @@ describe("CreateComponentDialog", () => {
 		expect(screen.getByRole("dialog")).toBeInTheDocument();
 	});
 });
+
+it("renderiza trigger e controla abertura não controlada", async () => {
+	const user = userEvent.setup();
+	render(
+		<CreateComponentDialog
+			trigger={<button type="button">Abrir dialog</button>}
+		/>,
+		{ wrapper: createWrapper() },
+	);
+	await user.click(screen.getByRole("button", { name: "Abrir dialog" }));
+	expect(await screen.findByRole("dialog")).toBeInTheDocument();
+	expect(screen.getByText("Novo componente")).toBeVisible();
+	await user.click(screen.getByRole("button", { name: "Close" }));
+	await waitFor(() =>
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+	);
+});

@@ -23,6 +23,11 @@ vi.mock("#/lib/staff/repository", () => ({
 	softDeleteStaff: vi.fn(),
 }));
 
+vi.mock("#/lib/cloudflare-env", () => ({
+	getRuntimeEnv: vi.fn(async () => createEnv()),
+	requireD1: vi.fn(() => ({}) as D1Database),
+}));
+
 function createMockSession() {
 	const now = new Date();
 	return {
@@ -86,7 +91,7 @@ describe("GET /api/staff/:id", () => {
 			params: { id: "staff-1" },
 		});
 		expect(response.status).toBe(401);
-		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
+		expect(sessionMock).toHaveBeenCalledWith(request, expect.anything());
 	});
 
 	it("retorna 404 quando o servidor não existe ou está deletado", async () => {
@@ -243,5 +248,64 @@ describe("DELETE /api/staff/:id", () => {
 			context: { env: createEnv() },
 		});
 		expect(response.status).toBe(404);
+	});
+
+	it("retorna 400 quando o corpo do PATCH não é JSON", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		vi.mocked(findStaffById).mockResolvedValueOnce({
+			id: "staff-1",
+			name: "Servidor",
+		} as never);
+		const request = new Request("http://localhost/api/staff/staff-1", {
+			method: "PATCH",
+			body: "not-json",
+		});
+		const response = await updateStaffHandler({
+			request,
+			params: { id: "staff-1" },
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(400);
+	});
+
+	it("resolve env via fallback no PATCH e no DELETE", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		vi.mocked(findStaffById).mockResolvedValueOnce({
+			id: "staff-1",
+			name: "Servidor",
+		} as never);
+		vi.mocked(updateStaff).mockResolvedValueOnce({
+			id: "staff-1",
+			name: "Servidor",
+		} as never);
+		const patchResponse = await updateStaffHandler({
+			request: new Request("http://localhost/api/staff/staff-1", {
+				method: "PATCH",
+				body: JSON.stringify({ name: "Servidor" }),
+			}),
+			context: {},
+			params: { id: "staff-1" },
+		});
+		expect(patchResponse.status).toBe(200);
+
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		vi.mocked(findStaffById).mockResolvedValueOnce({
+			id: "staff-1",
+			name: "Servidor",
+		} as never);
+		vi.mocked(softDeleteStaff).mockResolvedValueOnce({
+			id: "staff-1",
+			name: "Servidor",
+		} as never);
+		const deleteResponse = await deleteStaffHandler({
+			request: new Request("http://localhost/api/staff/staff-1", {
+				method: "DELETE",
+			}),
+			context: {},
+			params: { id: "staff-1" },
+		});
+		expect(deleteResponse.status).toBe(200);
 	});
 });

@@ -156,4 +156,19 @@ describe("PATCH /api/meetings/:id/general-reports/:reportId", () => {
 		expect(response.status).toBe(401);
 		expect(getSession).toHaveBeenCalledWith(request, undefined);
 	});
+
+	it("retorna 400 quando o corpo não é JSON", async () => {
+		session();
+		meeting();
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/general-reports/rep-1",
+			{ method: "PATCH", body: "not-json" },
+		);
+		const response = await updateGeneralReportHandler({
+			request,
+			context: { env: env() },
+			params: { meetingId: "meeting-1", reportId: "rep-1" },
+		});
+		expect(response.status).toBe(400);
+	});
 });

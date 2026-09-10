@@ -80,7 +80,13 @@ export async function createMeetingHandler({
 		return json({ error: "Não autenticado" }, 401);
 	}
 
-	const body = (await request.json()) as Record<string, unknown>;
+	const body = (await request.json().catch(() => null)) as Record<
+		string,
+		unknown
+	> | null;
+	if (!body) {
+		return json({ error: "Dados inválidos" }, 400);
+	}
 	const parsed = createMeetingApiSchema.safeParse(body);
 	if (!parsed.success) {
 		return json({ error: "Dados inválidos", issues: parsed.error.issues }, 400);

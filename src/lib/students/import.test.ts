@@ -258,6 +258,27 @@ describe("parseStudentImportFile", () => {
 		expect(rows).toHaveLength(0);
 		expect(errors[0]).toContain("nome");
 	});
+
+	it("detecta o delimitador com maior contagem e cobre fallbacks do parser", async () => {
+		const result = await parseStudentImportFile(
+			new File(["nome;documento;email\nJoão;123;joao@example.com\n"], "a.csv", {
+				type: "text/csv",
+			}),
+		);
+		expect(result.rows[0]).toMatchObject({
+			name: "João",
+			document: "123",
+			email: "joao@example.com",
+		});
+	});
+
+	it("normaliza valores nulos e vazios de CSV", async () => {
+		const result = await parseStudentImportFile(
+			new File(["nome,documento\n ,\nMaria,\n"], "a.csv", { type: "text/csv" }),
+		);
+		expect(result.rows[0]?.errors).toContain("Nome é obrigatório");
+		expect(result.rows[1]?.document).toBeUndefined();
+	});
 });
 
 describe("matchImportRows", () => {
@@ -314,5 +335,21 @@ describe("matchImportRows", () => {
 		const rows = [{ index: 2, name: "", errors: ["Nome é obrigatório"] }];
 		const matched = matchImportRows(rows, existing);
 		expect(matched[0].status).toBe("invalid");
+	});
+
+	it("trata datas numéricas inválidas e fallbacks de cabeçalho", async () => {
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(
+			workbook,
+			XLSX.utils.aoa_to_sheet([
+				["nome", "data_nascimento"],
+				["João", Number.MAX_SAFE_INTEGER],
+			]),
+			"Estudantes",
+		);
+		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
+		const file = new File([buffer as ArrayBuffer], "estudantes.xlsx");
+		const { rows } = await parseStudentImportFile(file);
+		expect(rows[0]?.birthDate).toBe(String(Number.MAX_SAFE_INTEGER));
 	});
 });

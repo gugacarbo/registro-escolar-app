@@ -50,9 +50,26 @@ vi.mock("#/hooks/general-reports/use-general-reports", () => ({
 	useUpdateGeneralReport: mocks.useUpdateGeneralReport,
 }));
 vi.mock("#/components/meetings/general-report-form", () => ({
-	GeneralReportForm: ({ submitLabel }: { submitLabel: string }) => (
+	GeneralReportForm: ({
+		submitLabel,
+		onSubmit,
+	}: {
+		submitLabel: string;
+		onSubmit: (values: {
+			texto: string;
+			origemId: string | null;
+			incluirNaAta: boolean;
+		}) => void | Promise<void>;
+	}) => (
 		<form aria-label="Formulário de relato geral">
-			<button type="button">{submitLabel}</button>
+			<button
+				type="button"
+				onClick={() =>
+					onSubmit({ texto: "Relato", origemId: null, incluirNaAta: true })
+				}
+			>
+				{submitLabel}
+			</button>
 		</form>
 	),
 }));
@@ -112,6 +129,7 @@ beforeEach(() => {
 					texto: "Registro vinculado",
 					scope: "vinculado",
 					includeInMinutes: true,
+					categoriaId: null,
 					componentId: null,
 					originId: null,
 					createdAt: "2026-01-01T00:00:00Z",
@@ -122,6 +140,7 @@ beforeEach(() => {
 					texto: "Contexto",
 					scope: "contexto",
 					includeInMinutes: true,
+					categoriaId: null,
 					componentId: null,
 					originId: null,
 					createdAt: "2026-01-01T00:00:00Z",
@@ -294,6 +313,272 @@ describe("CouncilPage", () => {
 		renderPage();
 		expect(
 			screen.getByText("Não foi possível carregar os estudantes desta turma."),
+		).toBeInTheDocument();
+	});
+});
+
+describe("CouncilPage estados adicionais", () => {
+	it("exibe loading da reunião e das turmas", () => {
+		mocks.useMeeting.mockReturnValue({ data: undefined, isLoading: true });
+		mocks.useMeetingClasses.mockReturnValue({
+			data: undefined,
+			isLoading: true,
+		});
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: undefined,
+			isLoading: true,
+			isError: false,
+		});
+		renderPage();
+		expect(screen.getByText("Carregando...")).toBeInTheDocument();
+	});
+
+	it("usa nome da turma quando ausente e ID quando fallback", () => {
+		mocks.useMeetingClasses.mockReturnValue({
+			data: [
+				{
+					id: "link-2",
+					classId: "class-2",
+					class: { id: "class-2", name: "Turma B" },
+				},
+				{ id: "link-3", classId: "class-3" },
+			],
+			isLoading: false,
+		});
+		renderPage();
+		expect(screen.getByRole("button", { name: "Turma B" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "class-3" })).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: "Turma B" }));
+		expect(mocks.useMeetingClassStudents).toHaveBeenLastCalledWith(
+			"meeting-1",
+			"class-2",
+		);
+	});
+
+	it("exibe matrícula, estados de registro e troca de estudante", () => {
+		renderPage();
+		expect(screen.getByText("Matrícula 123")).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: "João" }));
+		expect(mocks.useMeetingStudentRecords).toHaveBeenLastCalledWith(
+			"meeting-1",
+			"student-1",
+		);
+	});
+
+	it("exibe loading/erro/vazio de registros e erro de servidor", () => {
+		mocks.useMeetingStudentRecords.mockReturnValue({
+			data: undefined,
+			isLoading: true,
+			isError: false,
+		});
+		const { rerender } = renderPage();
+		expect(
+			screen.queryByText(/Nenhum registro para este estudante/),
+		).not.toBeInTheDocument();
+		mocks.useMeetingStudentRecords.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		});
+		rerender(
+			<QueryClientProvider client={new QueryClient()}>
+				<CouncilPage />
+			</QueryClientProvider>,
+		);
+		expect(
+			screen.getByText("Não foi possível carregar os registros."),
+		).toBeInTheDocument();
+		mocks.useMeetingStudentRecords.mockReturnValue({
+			data: { records: [] },
+			isLoading: false,
+			isError: false,
+		});
+		rerender(
+			<QueryClientProvider client={new QueryClient()}>
+				<CouncilPage />
+			</QueryClientProvider>,
+		);
+		expect(
+			screen.getByText(/Nenhum registro para este estudante/),
+		).toBeInTheDocument();
+	});
+
+	it("mostra mensagem específica para rascunho", () => {
+		mocks.useMeeting.mockReturnValue({
+			data: { id: "meeting-1", title: "Conselho", status: "draft" },
+			isLoading: false,
+		});
+		renderPage();
+		expect(
+			screen.getByText("Inicie a reunião para criar registros vinculados."),
+		).toBeInTheDocument();
+	});
+});
+
+describe("CouncilPage erros de mutação", () => {
+	it("exibe erro ao editar relato", async () => {
+		const updateReport = vi.fn(() =>
+			Promise.reject(new Error("Erro ao editar relato")),
+		);
+		mocks.useUpdateGeneralReport.mockReturnValue({
+			mutateAsync: updateReport,
+			isPending: false,
+		});
+		renderPage();
+		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[1]);
+		fireEvent.click(screen.getByRole("button", { name: "Salvar relato" }));
+		await waitFor(() => expect(updateReport).toHaveBeenCalled());
+		expect(
+			await screen.findByText("Erro ao editar relato"),
+		).toBeInTheDocument();
+	});
+
+	it("exibe erro ao criar relato", async () => {
+		const createReport = vi.fn(() =>
+			Promise.reject(new Error("Erro ao criar relato")),
+		);
+		mocks.useCreateGeneralReport.mockReturnValue({
+			mutateAsync: createReport,
+			isPending: false,
+		});
+		renderPage();
+		fireEvent.click(screen.getByRole("button", { name: "Adicionar relato" }));
+		await waitFor(() => expect(createReport).toHaveBeenCalled());
+		expect(await screen.findByText("Erro ao criar relato")).toBeInTheDocument();
+	});
+
+	it("exibe erro ao criar registro", async () => {
+		const createRecord = vi.fn(() =>
+			Promise.reject(new Error("Erro ao criar registro")),
+		);
+		mocks.useCreateLinkedRecord.mockReturnValue({
+			mutateAsync: createRecord,
+			isPending: false,
+		});
+		renderPage();
+		fireEvent.change(screen.getAllByLabelText("Texto *")[0], {
+			target: { value: "Novo registro" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Adicionar registro" }));
+		await waitFor(() => expect(createRecord).toHaveBeenCalled());
+		expect(
+			await screen.findByText("Erro ao criar registro"),
+		).toBeInTheDocument();
+	});
+});
+
+describe("CouncilPage mutações de relato bem-sucedidas", () => {
+	it("cria relato geral", async () => {
+		const createReport = vi.fn(() => Promise.resolve({}));
+		mocks.useCreateGeneralReport.mockReturnValue({
+			mutateAsync: createReport,
+			isPending: false,
+		});
+		renderPage();
+		fireEvent.click(screen.getByRole("button", { name: "Adicionar relato" }));
+		await waitFor(() => expect(createReport).toHaveBeenCalled());
+	});
+
+	it("edita relato geral e fecha o formulário", async () => {
+		const updateReport = vi.fn(() => Promise.resolve({}));
+		mocks.useUpdateGeneralReport.mockReturnValue({
+			mutateAsync: updateReport,
+			isPending: false,
+		});
+		renderPage();
+		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[1]);
+		fireEvent.click(screen.getByRole("button", { name: "Salvar relato" }));
+		await waitFor(() => expect(updateReport).toHaveBeenCalled());
+		await waitFor(() =>
+			expect(
+				screen.queryByRole("button", { name: "Salvar relato" }),
+			).not.toBeInTheDocument(),
+		);
+	});
+});
+
+describe("CouncilPage erros de registros", () => {
+	it("exibe erro ao editar registro vinculado", async () => {
+		const updateRecord = vi.fn(() =>
+			Promise.reject(new Error("Erro ao editar registro")),
+		);
+		mocks.useUpdateLinkedRecord.mockReturnValue({
+			mutateAsync: updateRecord,
+			isPending: false,
+		});
+		renderPage();
+		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[0]);
+		fireEvent.click(screen.getByRole("button", { name: "Salvar registro" }));
+		await waitFor(() => expect(updateRecord).toHaveBeenCalled());
+		expect(
+			await screen.findByText("Erro ao editar registro"),
+		).toBeInTheDocument();
+	});
+
+	it("exibe erro ao alterar inclusão", async () => {
+		const inclusion = vi.fn(() =>
+			Promise.reject(new Error("Erro ao alterar inclusão")),
+		);
+		mocks.useSetRecordInclusion.mockReturnValue({
+			mutateAsync: inclusion,
+			isPending: false,
+		});
+		renderPage();
+		fireEvent.click(screen.getByRole("button", { name: "Remover da ata" }));
+		await waitFor(() => expect(inclusion).toHaveBeenCalled());
+		expect(
+			await screen.findByText("Erro ao alterar inclusão"),
+		).toBeInTheDocument();
+	});
+});
+
+describe("CouncilPage variações de registro", () => {
+	it("rendera registro interno, sem matrícula e estados de turma", () => {
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: {
+				students: [
+					{ studentId: "student-1", name: "João", registrationNumber: null },
+				],
+				counters: {},
+			},
+			isLoading: false,
+			isError: false,
+		});
+		mocks.useMeetingStudentRecords.mockReturnValue({
+			data: {
+				records: [
+					{
+						id: "record-1",
+						studentId: "student-1",
+						texto: "Registro interno",
+						scope: "vinculado",
+						includeInMinutes: false,
+						categoriaId: null,
+						componentId: null,
+						originId: null,
+						createdAt: "2026-01-01T00:00:00Z",
+					},
+					{
+						id: "record-2",
+						studentId: "student-1",
+						texto: "Contexto interno",
+						scope: "contexto",
+						includeInMinutes: false,
+						categoriaId: null,
+						componentId: null,
+						originId: null,
+						createdAt: "2026-01-01T00:00:00Z",
+					},
+				],
+			},
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+		expect(screen.getAllByText("Interno").length).toBeGreaterThan(1);
+		expect(screen.queryByText(/Matrícula/)).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Incluir na ata" }),
 		).toBeInTheDocument();
 	});
 });
