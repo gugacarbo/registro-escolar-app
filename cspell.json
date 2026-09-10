@@ -38,7 +38,8 @@
 		"src/db/auth-schema.ts",
 		"coverage/**",
 		"test-results/**",
-		"storybook-static"
+		"storybook-static",
+		"results.sarif"
 	],
 	"words": [
 		"Aproveie",
@@ -100,6 +101,7 @@
 		"Avenir",
 		"defval",
 		"indep",
-		"Progr"
+		"Progr",
+		"sarif"
 	]
 }
