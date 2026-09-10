@@ -33,7 +33,7 @@ vi.mock("#/components/classes/create-class-dialog", () => ({
 	CreateClassDialog: () => null,
 }));
 
-import { ClassesPage } from "./index";
+import ClassesPage from "./index";
 
 function makeClass(overrides: Partial<Class> = {}): Class {
 	const now = new Date("2026-01-01T00:00:00Z");

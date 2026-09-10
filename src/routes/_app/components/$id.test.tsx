@@ -33,7 +33,7 @@ vi.mock("#/hooks/components/use-update-component", () => ({
 	useUpdateComponent: () => ({ mutateAsync: mocks.mutateAsync }),
 }));
 
-import { ComponentDetailPage } from "./$id";
+import ComponentDetailPage from "./$id";
 
 function makeComponent(overrides: Partial<Component> = {}): Component {
 	const now = new Date("2026-01-01T00:00:00Z");

@@ -33,7 +33,7 @@ vi.mock("#/components/students/create-student-dialog", () => ({
 	CreateStudentDialog: () => null,
 }));
 
-import { StudentsPage } from "./index";
+import StudentsPage from "./index";
 
 function makeStudent(overrides: Partial<Student> = {}): Student {
 	const now = new Date("2026-01-01T00:00:00Z");

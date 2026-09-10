@@ -41,7 +41,7 @@ vi.mock("#/hooks/staff/use-delete-staff-member", () => ({
 	}),
 }));
 
-import { StaffDetailPage } from "./$id";
+import StaffDetailPage from "./$id";
 
 function makeMember(overrides: Partial<StaffMember> = {}): StaffMember {
 	const now = new Date("2026-01-01T00:00:00Z");

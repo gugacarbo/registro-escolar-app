@@ -26,8 +26,8 @@ vi.mock("#/lib/auth-client", () => ({
 	},
 }));
 
-import { LoginPage } from "./login";
-import { RegisterPage } from "./register";
+import LoginPage from "./login";
+import RegisterPage from "./register";
 
 const session = {
 	session: { id: "session-1" },

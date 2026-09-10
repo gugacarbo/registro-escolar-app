@@ -33,7 +33,7 @@ vi.mock("#/hooks/roles/use-update-role", () => ({
 	useUpdateRole: () => ({ mutateAsync: mocks.mutateAsync }),
 }));
 
-import { RoleDetailPage } from "./$id";
+import RoleDetailPage from "./$id";
 
 function makeRole(overrides: Partial<Role> = {}): Role {
 	const now = new Date("2026-01-01T00:00:00Z");

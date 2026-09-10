@@ -20,7 +20,7 @@ vi.mock("#/hooks/meetings/use-add-participant", () => ({
 	useAddParticipant: () => ({ mutateAsync: mocks.addAsync, isPending: false }),
 }));
 
-import { ParticipantsPage } from "./participants";
+import ParticipantsPage from "./participants";
 
 function fetchJson(data: unknown, total: number) {
 	return new Response(JSON.stringify({ data, total, page: 1, pageSize: 100 }), {

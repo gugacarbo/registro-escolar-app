@@ -51,7 +51,7 @@ Object.defineProperty(window, "matchMedia", {
 	})),
 });
 
-import { AppLayout } from "./route";
+import AppLayout from "./route";
 
 const session = {
 	session: { id: "session-1", userId: "user-1" },
@@ -115,7 +115,7 @@ describe("AppLayout", () => {
 			"href",
 			"/minutes",
 		);
-		expect(screen.getAllByRole("link")).toHaveLength(7);
+		expect(screen.getAllByRole("link")).toHaveLength(8);
 	});
 
 	it("expõe o controle de tema no header", async () => {

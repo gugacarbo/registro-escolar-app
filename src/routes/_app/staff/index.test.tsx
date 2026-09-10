@@ -29,7 +29,7 @@ vi.mock("#/hooks/staff/use-staff", () => ({
 	useStaff: mocks.useStaff,
 }));
 
-import { StaffPage } from "./index";
+import StaffPage from "./index";
 
 function makeMember(overrides: Partial<StaffMember> = {}): StaffMember {
 	const now = new Date("2026-01-01T00:00:00Z");

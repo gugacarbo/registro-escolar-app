@@ -24,7 +24,7 @@ vi.mock("#/components/roles/create-role-dialog", () => ({
 	CreateRoleDialog: () => null,
 }));
 
-import { RolesPage } from "./index";
+import RolesPage from "./index";
 
 function makeRole(overrides: Partial<Role> = {}): Role {
 	const now = new Date("2026-01-01T00:00:00Z");
