@@ -89,7 +89,11 @@ export function ClassesPage() {
 					setPage(1);
 				}}
 				onRowClick={(classRow) =>
-					navigate({ to: "/classes/$id/students", params: { id: classRow.id } })
+					navigate({
+						to: "/classes/$id/students",
+						params: { id: classRow.id },
+						search: { date: undefined },
+					})
 				}
 				isLoading={isLoading}
 				isError={isError}

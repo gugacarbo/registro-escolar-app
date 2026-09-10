@@ -15,5 +15,5 @@ fi
 
 E2E_DB_COUNT="$(find "$STATE_DIR/v3/d1/miniflare-D1DatabaseObject" -maxdepth 1 -type f -name '*.sqlite' ! -name 'metadata.sqlite' 2>/dev/null | wc -l || true)"
 if [ "$E2E_DB_COUNT" -eq 0 ]; then
-  bunx wrangler d1 migrations apply registro-escolar-db --local --persist-to "$STATE_DIR"
+  bunx wrangler d1 migrations apply registro-escolar-app-db --local --persist-to "$STATE_DIR"
 fi

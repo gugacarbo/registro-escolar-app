@@ -125,7 +125,7 @@ sync_secret
 log_info "Verificando banco D1 local..."
 
 MIGRATIONS_DIR="./drizzle"
-DB_NAME="registro-escolar-db"
+DB_NAME="registro-escolar-app-db"
 
 if [ ! -d "$MIGRATIONS_DIR" ] || [ -z "$(ls -A "$MIGRATIONS_DIR" 2>/dev/null)" ]; then
   log_warn "Diretório de migrations '$MIGRATIONS_DIR' vazio ou inexistente."

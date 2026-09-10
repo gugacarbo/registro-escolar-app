@@ -190,6 +190,7 @@ describe("ClassesPage", () => {
 		expect(mocks.navigate).toHaveBeenCalledWith({
 			to: "/classes/$id/students",
 			params: { id: "class-1" },
+			search: { date: undefined },
 		});
 	});
 

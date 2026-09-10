@@ -1,4 +1,4 @@
-# Infraestrutura & ambientes
+# Infraestrutura &amp; ambientes
 
 ## Stack
 
@@ -16,55 +16,47 @@
 
 A aplicação é **serverless no Cloudflare Workers** com banco D1. Não há Docker, docker-compose, servidor próprio ou banco self-hosted.
 
+
 | Componente | Serviço                |
 | ---------- | ---------------------- |
 | Aplicação  | Cloudflare Workers     |
 | Banco      | Cloudflare D1 (SQLite) |
 | Deploy     | Wrangler CLI           |
 
+
 ## Como rodar localmente
 
 1. Instale as dependências:
-
-   ```bash
+  ```bash
    bun install
-   ```
-
+  ```
 2. Copie e ajuste os secrets/variáveis:
-
-   ```bash
+  ```bash
    cp .env.example .env.local
    cp .dev.vars.example .dev.vars
-   ```
-
+  ```
 3. Gere o secret do Better Auth:
-
-   ```bash
+  ```bash
    bunx @better-auth/cli secret
    # copie o valor para BETTER_AUTH_SECRET em .env.local e .dev.vars
-   ```
-
+  ```
 4. Crie o banco D1 localmente (apenas uma vez):
-
-   ```bash
+  ```bash
    bun run db:create
-   ```
-
+  ```
 5. Aplique as migrations locais:
-
-   ```bash
+  ```bash
    bun run db:local:migrate
-   ```
-
+  ```
 6. Inicie o servidor de desenvolvimento:
-
-   ```bash
+  ```bash
    bun run dev
-   ```
+  ```
 
-   Abra http://localhost:3000.
+   Abra [http://localhost:3000](http://localhost:3000).
 
 ### Comandos úteis
+
 
 | Ação                     | Comando                                 |
 | ------------------------ | --------------------------------------- |
@@ -82,38 +74,30 @@ A aplicação é **serverless no Cloudflare Workers** com banco D1. Não há Doc
 | Drizzle Studio           | `bun run db:studio`                     |
 | Gerar tipos do Wrangler  | `bun run cf-typegen`                    |
 
+
 ## Como deployar
 
 1. Autentique o Wrangler (apenas uma vez):
-
-   ```bash
+  ```bash
    wrangler login
-   ```
-
+  ```
 2. Crie o banco D1 remoto (apenas uma vez):
-
-   ```bash
-   wrangler d1 create registro-escolar-db
+  ```bash
+   wrangler d1 create registro-escolar-app-db
    # copie o `database_id` retornado para `wrangler.jsonc`
-   ```
-
+  ```
 3. Aplique as migrations no D1 remoto:
-
-   ```bash
+  ```bash
    bun run db:remote:migrate
-   ```
-
+  ```
 4. Configure o secret `BETTER_AUTH_SECRET` no Workers:
-
-   ```bash
+  ```bash
    wrangler secret put BETTER_AUTH_SECRET
-   ```
-
+  ```
 5. Faça o deploy:
-
-   ```bash
+  ```bash
    bun run deploy
-   ```
+  ```
 
    Equivalente a `bun run build && wrangler deploy`.
 
@@ -176,3 +160,4 @@ Para produção, defina `BETTER_AUTH_URL` e `BETTER_AUTH_SECRET` via `wrangler s
 - O Better Auth precisa de `BETTER_AUTH_SECRET` tanto em `.env.local` (dev) quanto em `.dev.vars` (Wrangler local).
 - O T3Env lê `process.env` no SSR e `import.meta.env` no cliente; todas as variáveis cliente devem ter prefixo `VITE_`.
 - Para adicionar componentes shadcn: `bunx shadcn@latest add <componente>`.
+

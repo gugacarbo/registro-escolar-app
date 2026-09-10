@@ -17,8 +17,8 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "registro-escolar-db",
-			"database_id": "__REPLACE_WITH_REMOTE_DATABASE_ID__",
+			"database_name": "registro-escolar-app-db",
+			"database_id": "bf289dfc-d273-4456-b664-7c5ce7ed6d9c",
 			"migrations_dir": "./drizzle"
 		}
 	],
@@ -29,7 +29,7 @@
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
 	"vars": {
-		"BETTER_AUTH_URL": "http://localhost:3001",
-		"BETTER_AUTH_TRUSTED_ORIGINS": ""
+		"BETTER_AUTH_URL": "https://registro-escolar-app.gugacarbo.workers.dev",
+		"BETTER_AUTH_TRUSTED_ORIGINS": "https://registro-escolar-app.gugacarbo.workers.dev"
 	}
 }
