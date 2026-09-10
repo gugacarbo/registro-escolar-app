@@ -40,6 +40,7 @@ const pwaPlugins = VitePWA({
 		"icons/pwa.svg",
 		"icons/apple-touch-icon-180x180.png",
 	],
+	integration: { closeBundleOrder: "post" },
 	workbox: {
 		globPatterns: [],
 		maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
@@ -67,7 +68,9 @@ const pwaPlugins = VitePWA({
 	...plugin,
 	// O contexto global do plugin resolve manifest e módulo virtual; aqui o
 	// Vite aplica os hooks apenas no environment client.
-	applyToEnvironment: (environment) => environment.name === "client",
+	applyToEnvironment: (
+		environment: Parameters<NonNullable<Plugin["applyToEnvironment"]>>[0],
+	) => environment.name === "client",
 }));
 
 const config = defineConfig({
