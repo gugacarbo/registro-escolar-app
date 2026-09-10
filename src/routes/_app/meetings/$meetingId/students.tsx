@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { EntitySelect } from "#/components/ui/entity-select";
+import { PageShell } from "#/components/ui/page";
 import { Skeleton } from "#/components/ui/skeleton";
 import { fetchClassesPage } from "#/hooks/entity-fetchers";
 import { useMeetingClassStudents } from "#/hooks/meetings/use-meeting-class-students";
@@ -67,8 +68,10 @@ function MeetingStudentsPage() {
 		!!counters && counters.total > 0 && counters.concluido === counters.total;
 
 	return (
-		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Acompanhamento de estudantes</h1>
+		<PageShell>
+			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+				Acompanhamento de estudantes
+			</h1>
 
 			<EntitySelect
 				label="Turma"
@@ -192,6 +195,6 @@ function MeetingStudentsPage() {
 					</ul>
 				</>
 			)}
-		</div>
+		</PageShell>
 	);
 }

@@ -39,7 +39,7 @@ vi.mock("#/components/meetings/transition-buttons", () => ({
 	),
 }));
 
-import { MeetingsPage } from "./index";
+import MeetingsPage from "./index";
 
 function makeMeeting(overrides: Partial<Meeting> = {}): Meeting {
 	const now = new Date("2026-01-01T00:00:00Z");
@@ -167,7 +167,7 @@ describe("MeetingsPage", () => {
 		mocks.useMeetings.mockClear();
 
 		fireEvent.click(screen.getByRole("link", { name: "2" }));
-		const search = screen.getByLabelText("Buscar por nome");
+		const search = screen.getByLabelText("Buscar por título");
 		fireEvent.change(search, { target: { value: "Conselho" } });
 
 		expect(mocks.useMeetings).toHaveBeenLastCalledWith({

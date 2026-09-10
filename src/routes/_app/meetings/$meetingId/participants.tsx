@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "#/components/ui/button";
 import { EntitySelect } from "#/components/ui/entity-select";
+import { PageShell } from "#/components/ui/page";
 import { fetchRolesPage, fetchStaffPage } from "#/hooks/entity-fetchers";
 import { useAddParticipant } from "#/hooks/meetings/use-add-participant";
 import { useParticipants } from "#/hooks/meetings/use-participants";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/_app/meetings/$meetingId/participants")({
 	component: ParticipantsPage,
 });
 
-export function ParticipantsPage() {
+export default function ParticipantsPage() {
 	const { meetingId } = Route.useParams();
 	const { data: participants, isLoading } = useParticipants(meetingId);
 	const [staffSearch, setStaffSearch] = useState("");
@@ -55,8 +56,10 @@ export function ParticipantsPage() {
 	}
 
 	return (
-		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Participantes</h1>
+		<PageShell>
+			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+				Participantes
+			</h1>
 			<div className="flex flex-wrap items-end gap-2">
 				<EntitySelect
 					label="Servidor"
@@ -101,6 +104,6 @@ export function ParticipantsPage() {
 					))}
 				</ul>
 			)}
-		</div>
+		</PageShell>
 	);
 }

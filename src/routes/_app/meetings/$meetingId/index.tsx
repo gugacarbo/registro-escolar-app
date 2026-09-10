@@ -3,6 +3,7 @@ import { EditMeetingDialog } from "#/components/meetings/edit-meeting-dialog";
 import { MeetingStatusBadge } from "#/components/meetings/meeting-status-badge";
 import { TransitionButtons } from "#/components/meetings/transition-buttons";
 import { Button } from "#/components/ui/button";
+import { PageShell } from "#/components/ui/page";
 import { useMeeting } from "#/hooks/meetings/use-meeting";
 
 export const Route = createFileRoute("/_app/meetings/$meetingId/")({
@@ -14,14 +15,16 @@ function MeetingDetailPage() {
 	const { data: meeting, isLoading } = useMeeting(meetingId);
 
 	return (
-		<div className="space-y-4">
+		<PageShell>
 			{isLoading && <p>Carregando...</p>}
 			{meeting && (
 				<>
 					<div className="flex flex-wrap items-center justify-between gap-2">
 						<div className="flex items-center gap-2">
 							<MeetingStatusBadge status={meeting.status} />
-							<h1 className="text-2xl font-bold">{meeting.title}</h1>
+							<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+								{meeting.title}
+							</h1>
 						</div>
 						<TransitionButtons meetingId={meeting.id} status={meeting.status} />
 					</div>
@@ -57,6 +60,6 @@ function MeetingDetailPage() {
 					</div>
 				</>
 			)}
-		</div>
+		</PageShell>
 	);
 }

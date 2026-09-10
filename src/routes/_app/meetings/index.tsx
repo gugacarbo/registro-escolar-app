@@ -6,7 +6,8 @@ import { CreateMeetingDialog } from "#/components/meetings/create-meeting-dialog
 import { MeetingStatusBadge } from "#/components/meetings/meeting-status-badge";
 import { TransitionButtons } from "#/components/meetings/transition-buttons";
 import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
+import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
+import { SearchInput } from "#/components/ui/search-input";
 import {
 	Select,
 	SelectContent,
@@ -56,7 +57,7 @@ const columns = [
 	},
 ];
 
-export function MeetingsPage() {
+export default function MeetingsPage() {
 	const [search, setSearch] = useState("");
 	const [status, setStatus] = useState<MeetingStatus | "">("");
 	const [page, setPage] = useState(1);
@@ -85,18 +86,22 @@ export function MeetingsPage() {
 	});
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Reuniões</h1>
-				<Button onClick={() => setDialogOpen(true)}>Nova reunião</Button>
-			</div>
-			<div className="flex flex-wrap items-center gap-2">
-				<Input
-					className="max-w-xs"
-					placeholder="Buscar por nome"
+		<PageShell>
+			<PageHeader
+				eyebrow="Conselho de classe"
+				title="Reuniões"
+				description="Acompanhe cada reunião do rascunho à finalização e entre diretamente na sala do conselho."
+				actions={
+					<Button onClick={() => setDialogOpen(true)}>Nova reunião</Button>
+				}
+			/>
+			<PageToolbar className="sm:justify-between">
+				<SearchInput
+					className="sm:max-w-sm"
 					value={search}
-					onChange={(event) => setSearch(event.target.value)}
-					aria-label="Buscar por nome"
+					onChange={setSearch}
+					placeholder="Buscar por título"
+					ariaLabel="Buscar por título"
 				/>
 				<Select
 					value={status}
@@ -116,7 +121,7 @@ export function MeetingsPage() {
 						))}
 					</SelectContent>
 				</Select>
-			</div>
+			</PageToolbar>
 			<DataTable
 				columns={columns}
 				rows={meetingsPage?.data ?? []}
@@ -148,6 +153,6 @@ export function MeetingsPage() {
 					void navigate({ to: "/meetings/$meetingId", params: { meetingId } })
 				}
 			/>
-		</div>
+		</PageShell>
 	);
 }
