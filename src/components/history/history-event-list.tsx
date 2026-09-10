@@ -50,7 +50,7 @@ export function HistoryEventList({
 	return (
 		<ol className="space-y-2">
 			{events.map((event) => (
-				<li key={event.id} className="rounded border p-3">
+				<li key={`${event.id}-${event.data}`} className="rounded border p-3">
 					<div className="flex flex-wrap items-center justify-between gap-2">
 						<Badge variant="outline">
 							{EVENT_LABELS[event.tipo] ?? event.tipo}

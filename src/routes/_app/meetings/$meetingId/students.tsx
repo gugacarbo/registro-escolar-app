@@ -37,7 +37,7 @@ const STATUS_ACTIONS: TrackingStatus[] = [
 function MeetingStudentsPage() {
 	const { meetingId } = Route.useParams();
 	const { data: classesPage, isLoading: isLoadingClasses } = useClasses({
-		pageSize: 100,
+		pageSize: 500,
 	});
 	const classes = classesPage?.data ?? [];
 	const [classId, setClassId] = useState("");

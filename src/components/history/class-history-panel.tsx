@@ -32,11 +32,44 @@ export function ClassHistoryPanel({ classId }: { classId: string }) {
 			</h2>
 			<HistorySearchForm onSubmit={handleSearch} hideStudentFilters />
 			{data && (
-				<div className="flex flex-wrap gap-2">
-					<Badge variant="secondary">{data.estudantes.length} estudantes</Badge>
-					<Badge variant="secondary">{data.reunioes.length} reuniões</Badge>
-					<Badge variant="secondary">{data.eventos.length} eventos</Badge>
-				</div>
+				<>
+					<div className="flex flex-wrap gap-2">
+						<Badge key="students" variant="secondary">
+							{data.estudantes.length} estudantes
+						</Badge>
+						<Badge key="meetings" variant="secondary">
+							{data.reunioes.length} reuniões
+						</Badge>
+						<Badge key="events" variant="secondary">
+							{data.eventos.length} eventos
+						</Badge>
+					</div>
+					<section className="space-y-2">
+						<h3 className="text-base font-semibold">Vínculos</h3>
+						<ul className="space-y-2">
+							{data.estudantes.map((student) => (
+								<li
+									key={`${student.studentId}-${student.startDate}`}
+									className="rounded border p-2"
+								>
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<span>{student.name}</span>
+										<Badge variant={student.endDate ? "outline" : "secondary"}>
+											{student.endDate ? "Histórico" : "Ativo"}
+										</Badge>
+									</div>
+									<p className="text-xs text-muted-foreground">
+										Início{" "}
+										{new Date(student.startDate).toLocaleDateString("pt-BR")}
+										{student.endDate
+											? ` — fim ${new Date(student.endDate).toLocaleDateString("pt-BR")}`
+											: ""}
+									</p>
+								</li>
+							))}
+						</ul>
+					</section>
+				</>
 			)}
 			<HistoryEventList
 				events={data?.eventos ?? []}

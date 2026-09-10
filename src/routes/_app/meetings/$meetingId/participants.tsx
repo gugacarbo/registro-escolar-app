@@ -21,10 +21,10 @@ export const Route = createFileRoute("/_app/meetings/$meetingId/participants")({
 export function ParticipantsPage() {
 	const { meetingId } = Route.useParams();
 	const { data: participants, isLoading } = useParticipants(meetingId);
-	const { data: staffPage } = useStaff({ pageSize: 100 });
+	const { data: staffPage } = useStaff({ pageSize: 500 });
 	const staff = staffPage?.data ?? [];
 	const staffById = new Map(staff.map((member) => [member.id, member.name]));
-	const { data: rolesPage } = useRoles({ pageSize: 100 });
+	const { data: rolesPage } = useRoles({ pageSize: 500 });
 	const roles = rolesPage?.data ?? [];
 	const roleById = new Map(roles.map((role) => [role.id, role.name]));
 	const addParticipant = useAddParticipant(meetingId);

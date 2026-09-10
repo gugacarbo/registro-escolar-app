@@ -42,11 +42,11 @@ export function OfferForm({
 	defaultValues?: Partial<OfferFormValues>;
 	serverError?: string | null;
 }) {
-	const { data: classesPage } = useClasses({ pageSize: 100 });
+	const { data: classesPage } = useClasses({ pageSize: 500 });
 	const classes = classesPage?.data ?? [];
-	const { data: componentsPage } = useComponents({ pageSize: 100 });
+	const { data: componentsPage } = useComponents({ pageSize: 500 });
 	const components = componentsPage?.data ?? [];
-	const { data: staffPage } = useStaff({ pageSize: 100 });
+	const { data: staffPage } = useStaff({ pageSize: 500 });
 	const staff = staffPage?.data ?? [];
 
 	const form = useForm<OfferFormValues>({

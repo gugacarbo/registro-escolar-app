@@ -2,7 +2,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { StaffForm, type StaffFormValues } from "#/components/staff/staff-form";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "#/components/ui/alert-dialog";
 import { Button } from "#/components/ui/button";
+import { useDeleteStaffMember } from "#/hooks/staff/use-delete-staff-member";
 import { useStaffMember } from "#/hooks/staff/use-staff-member";
 import { useUpdateStaffMember } from "#/hooks/staff/use-update-staff-member";
 
@@ -14,6 +26,7 @@ export function StaffDetailPage() {
 	const { id } = Route.useParams();
 	const { data: member, isLoading, isError, error } = useStaffMember(id);
 	const updateMember = useUpdateStaffMember(id);
+	const deleteMember = useDeleteStaffMember(id);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [saved, setSaved] = useState(false);
 
@@ -32,6 +45,15 @@ export function StaffDetailPage() {
 			if (submitError instanceof Error) {
 				setServerError(submitError.message);
 			}
+		}
+	}
+
+	async function handleDelete() {
+		setServerError(null);
+		try {
+			await deleteMember.mutateAsync();
+		} catch (error) {
+			if (error instanceof Error) setServerError(error.message);
 		}
 	}
 
@@ -72,6 +94,28 @@ export function StaffDetailPage() {
 						submitLabel="Salvar alterações"
 						serverError={serverError}
 					/>
+					<AlertDialog>
+						<AlertDialogTrigger asChild>
+							<Button variant="destructive" disabled={deleteMember.isPending}>
+								Remover servidor
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>Remover servidor?</AlertDialogTitle>
+								<AlertDialogDescription>
+									O servidor será ocultado das listagens ativas. Esta operação
+									não exclui o histórico.
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<AlertDialogCancel>Cancelar</AlertDialogCancel>
+								<AlertDialogAction onClick={() => void handleDelete()}>
+									Remover
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
 				</>
 			)}
 		</div>

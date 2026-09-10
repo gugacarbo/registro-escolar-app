@@ -55,11 +55,11 @@ export function MeetingForm({
 	defaultValues?: Partial<MeetingFormValues>;
 	serverError?: string | null;
 }) {
-	const { data: classesPage } = useClasses({ pageSize: 100 });
+	const { data: classesPage } = useClasses({ pageSize: 500 });
 	const classes = classesPage?.data ?? [];
-	const { data: staffPage } = useStaff({ pageSize: 100 });
+	const { data: staffPage } = useStaff({ pageSize: 500 });
 	const staff = staffPage?.data ?? [];
-	const { data: rolesPage } = useRoles({ pageSize: 100 });
+	const { data: rolesPage } = useRoles({ pageSize: 500 });
 	const roles = rolesPage?.data ?? [];
 	const { data: templates = [] } = useMinuteTemplates();
 

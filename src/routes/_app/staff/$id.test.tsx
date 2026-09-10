@@ -8,6 +8,7 @@ import type { StaffMember } from "#/lib/staff/schema";
 const mocks = vi.hoisted(() => ({
 	useStaffMember: vi.fn(),
 	mutateAsync: vi.fn(),
+	deleteAsync: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -31,6 +32,12 @@ vi.mock("#/hooks/staff/use-staff-member", () => ({
 
 vi.mock("#/hooks/staff/use-update-staff-member", () => ({
 	useUpdateStaffMember: () => ({ mutateAsync: mocks.mutateAsync }),
+}));
+vi.mock("#/hooks/staff/use-delete-staff-member", () => ({
+	useDeleteStaffMember: () => ({
+		mutateAsync: mocks.deleteAsync,
+		isPending: false,
+	}),
 }));
 
 import { StaffDetailPage } from "./$id";
@@ -64,6 +71,8 @@ function renderPage() {
 beforeEach(() => {
 	mocks.mutateAsync.mockReset();
 	mocks.mutateAsync.mockResolvedValue(makeMember());
+	mocks.deleteAsync.mockReset();
+	mocks.deleteAsync.mockResolvedValue(makeMember());
 	mocks.useStaffMember.mockReturnValue({
 		data: makeMember(),
 		isLoading: false,
@@ -136,4 +145,14 @@ describe("StaffDetailPage", () => {
 		).toBeInTheDocument();
 		expect(screen.queryByText("Servidor atualizado")).not.toBeInTheDocument();
 	});
+});
+
+it("remove o servidor com confirmação", async () => {
+	const user = userEvent.setup();
+	renderPage();
+
+	await user.click(screen.getByRole("button", { name: "Remover servidor" }));
+	await user.click(screen.getByRole("button", { name: "Remover" }));
+
+	expect(mocks.deleteAsync).toHaveBeenCalledTimes(1);
 });
