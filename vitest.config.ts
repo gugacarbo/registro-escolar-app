@@ -15,6 +15,16 @@ export default defineConfig({
 		projects: [
 			{
 				extends: true,
+				test: {
+					name: "unit",
+					environment: "happy-dom",
+					setupFiles: ["./src/test/setup.ts"],
+					globals: true,
+					include: ["src/**/*.test.{ts,tsx}"],
+				},
+			},
+			{
+				extends: true,
 				plugins: [storybookTest({ configDir: ".storybook" })],
 				test: {
 					name: "storybook",

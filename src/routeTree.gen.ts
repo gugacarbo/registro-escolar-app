@@ -59,6 +59,7 @@ import { Route as ApiStudentsIdIndexRouteImport } from './routes/api/students/$i
 import { Route as ApiStudentsIdHistoryRouteImport } from './routes/api/students/$id/history'
 import { Route as ApiStudentsIdRecordsRouteImport } from './routes/api/students/$id/records'
 import { Route as ApiStudentsImportResolveRouteImport } from './routes/api/students/import.resolve'
+import { Route as ApiMeetingsMeetingIdClassesIndexRouteImport } from './routes/api/meetings/$meetingId/classes/index'
 import { Route as ApiMeetingsMeetingIdGeneralReportsIndexRouteImport } from './routes/api/meetings/$meetingId/general-reports/index'
 import { Route as ApiMeetingsMeetingIdGeneralReportsReportIdRouteImport } from './routes/api/meetings/$meetingId/general-reports/$reportId'
 import { Route as ApiMeetingsMeetingIdMinutesIndexRouteImport } from './routes/api/meetings/$meetingId/minutes/index'
@@ -330,6 +331,12 @@ const ApiStudentsImportResolveRoute =
     path: '/resolve',
     getParentRoute: () => ApiStudentsImportRoute,
   } as any)
+const ApiMeetingsMeetingIdClassesIndexRoute =
+  ApiMeetingsMeetingIdClassesIndexRouteImport.update({
+    id: '/api/meetings/$meetingId/classes/',
+    path: '/api/meetings/$meetingId/classes/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiMeetingsMeetingIdGeneralReportsIndexRoute =
   ApiMeetingsMeetingIdGeneralReportsIndexRouteImport.update({
     id: '/api/meetings/$meetingId/general-reports/',
@@ -452,6 +459,7 @@ export interface FileRoutesByFullPath {
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
+  '/api/meetings/$meetingId/classes/': typeof ApiMeetingsMeetingIdClassesIndexRoute
   '/api/meetings/$meetingId/general-reports/': typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
   '/api/meetings/$meetingId/minutes/': typeof ApiMeetingsMeetingIdMinutesIndexRoute
   '/api/meetings/$meetingId/classes/$classId/students': typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
@@ -514,6 +522,7 @@ export interface FileRoutesByTo {
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
+  '/api/meetings/$meetingId/classes': typeof ApiMeetingsMeetingIdClassesIndexRoute
   '/api/meetings/$meetingId/general-reports': typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
   '/api/meetings/$meetingId/minutes': typeof ApiMeetingsMeetingIdMinutesIndexRoute
   '/api/meetings/$meetingId/classes/$classId/students': typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
@@ -578,6 +587,7 @@ export interface FileRoutesById {
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
+  '/api/meetings/$meetingId/classes/': typeof ApiMeetingsMeetingIdClassesIndexRoute
   '/api/meetings/$meetingId/general-reports/': typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
   '/api/meetings/$meetingId/minutes/': typeof ApiMeetingsMeetingIdMinutesIndexRoute
   '/api/meetings/$meetingId/classes/$classId/students': typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
@@ -642,6 +652,7 @@ export interface FileRouteTypes {
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
+    | '/api/meetings/$meetingId/classes/'
     | '/api/meetings/$meetingId/general-reports/'
     | '/api/meetings/$meetingId/minutes/'
     | '/api/meetings/$meetingId/classes/$classId/students'
@@ -704,6 +715,7 @@ export interface FileRouteTypes {
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
+    | '/api/meetings/$meetingId/classes'
     | '/api/meetings/$meetingId/general-reports'
     | '/api/meetings/$meetingId/minutes'
     | '/api/meetings/$meetingId/classes/$classId/students'
@@ -767,6 +779,7 @@ export interface FileRouteTypes {
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
     | '/api/meetings/$meetingId/records/$recordId'
+    | '/api/meetings/$meetingId/classes/'
     | '/api/meetings/$meetingId/general-reports/'
     | '/api/meetings/$meetingId/minutes/'
     | '/api/meetings/$meetingId/classes/$classId/students'
@@ -808,6 +821,7 @@ export interface RootRouteChildren {
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute: typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   ApiMeetingsMeetingIdMinutesApproveRoute: typeof ApiMeetingsMeetingIdMinutesApproveRoute
   ApiMeetingsMeetingIdRecordsRecordIdRoute: typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
+  ApiMeetingsMeetingIdClassesIndexRoute: typeof ApiMeetingsMeetingIdClassesIndexRoute
   ApiMeetingsMeetingIdGeneralReportsIndexRoute: typeof ApiMeetingsMeetingIdGeneralReportsIndexRoute
   ApiMeetingsMeetingIdMinutesIndexRoute: typeof ApiMeetingsMeetingIdMinutesIndexRoute
   ApiMeetingsMeetingIdClassesClassIdStudentsRoute: typeof ApiMeetingsMeetingIdClassesClassIdStudentsRoute
@@ -1170,6 +1184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStudentsImportResolveRouteImport
       parentRoute: typeof ApiStudentsImportRoute
     }
+    '/api/meetings/$meetingId/classes/': {
+      id: '/api/meetings/$meetingId/classes/'
+      path: '/api/meetings/$meetingId/classes'
+      fullPath: '/api/meetings/$meetingId/classes/'
+      preLoaderRoute: typeof ApiMeetingsMeetingIdClassesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/meetings/$meetingId/general-reports/': {
       id: '/api/meetings/$meetingId/general-reports/'
       path: '/api/meetings/$meetingId/general-reports'
@@ -1349,6 +1370,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiMeetingsMeetingIdMinutesApproveRoute,
   ApiMeetingsMeetingIdRecordsRecordIdRoute:
     ApiMeetingsMeetingIdRecordsRecordIdRoute,
+  ApiMeetingsMeetingIdClassesIndexRoute: ApiMeetingsMeetingIdClassesIndexRoute,
   ApiMeetingsMeetingIdGeneralReportsIndexRoute:
     ApiMeetingsMeetingIdGeneralReportsIndexRoute,
   ApiMeetingsMeetingIdMinutesIndexRoute: ApiMeetingsMeetingIdMinutesIndexRoute,
@@ -1368,12 +1390,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
