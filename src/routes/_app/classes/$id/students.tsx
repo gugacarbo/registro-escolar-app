@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { ClassHistoryPanel } from "#/components/history/class-history-panel";
 import { Input } from "#/components/ui/input";
+import { PageShell } from "#/components/ui/page";
 import { useClassStudents } from "#/hooks/enrollments/use-class-students";
 
 export const Route = createFileRoute("/_app/classes/$id/students")({
@@ -23,8 +24,10 @@ function ClassStudentsPage() {
 	const { data: rows, isLoading } = useClassStudents(id, date);
 
 	return (
-		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Estudantes da turma</h1>
+		<PageShell>
+			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+				Estudantes da turma
+			</h1>
 			<Input
 				type="date"
 				value={date}
@@ -42,6 +45,6 @@ function ClassStudentsPage() {
 				</ul>
 			)}
 			<ClassHistoryPanel classId={id} />
-		</div>
+		</PageShell>
 	);
 }

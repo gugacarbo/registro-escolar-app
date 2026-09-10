@@ -4,7 +4,8 @@ import { useState } from "react";
 import { CreateClassDialog } from "#/components/classes/create-class-dialog";
 import { DataTable } from "#/components/data-table";
 import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
+import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
+import { SearchInput } from "#/components/ui/search-input";
 import { useClasses } from "#/hooks/classes/use-classes";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import type { Class } from "#/lib/classes/schema";
@@ -46,7 +47,7 @@ const columns = [
 	},
 ];
 
-export function ClassesPage() {
+export default function ClassesPage() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
@@ -69,22 +70,29 @@ export function ClassesPage() {
 	} = useClasses({ search: debouncedSearch || undefined, page, pageSize });
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Turmas</h1>
-				<div className="flex gap-2">
-					<Button onClick={() => setDialogOpen(true)}>Nova turma</Button>
-					<Link to="/classes/enroll">
-						<Button variant="secondary">Matricular estudante</Button>
-					</Link>
-				</div>
-			</div>
-			<Input
-				placeholder="Buscar por nome"
-				value={search}
-				onChange={(event) => setSearch(event.target.value)}
-				aria-label="Buscar por nome"
+		<PageShell>
+			<PageHeader
+				eyebrow="Estrutura escolar"
+				title="Turmas"
+				description="Organize turmas por período letivo, curso e turno antes de gerar matrículas e ofertas."
+				actions={
+					<>
+						<Button asChild variant="secondary">
+							<Link to="/classes/enroll">Matricular estudante</Link>
+						</Button>
+						<Button onClick={() => setDialogOpen(true)}>Nova turma</Button>
+					</>
+				}
 			/>
+			<PageToolbar>
+				<SearchInput
+					className="sm:max-w-md"
+					value={search}
+					onChange={setSearch}
+					placeholder="Buscar por nome"
+					ariaLabel="Buscar por nome"
+				/>
+			</PageToolbar>
 			<DataTable
 				columns={columns}
 				rows={classesPage?.data ?? []}
@@ -111,6 +119,6 @@ export function ClassesPage() {
 				emptyDescription="Ajuste a busca ou cadastre uma nova turma."
 			/>
 			<CreateClassDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-		</div>
+		</PageShell>
 	);
 }

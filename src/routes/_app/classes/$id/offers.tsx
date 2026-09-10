@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import type { OfferFormValues } from "#/components/offers/offer-form";
 import { OfferForm } from "#/components/offers/offer-form";
+import { PageShell } from "#/components/ui/page";
 import { useCreateOffer } from "#/hooks/offers/use-create-offer";
 import { useOffers } from "#/hooks/offers/use-offers";
 
@@ -32,14 +33,18 @@ function ClassOffersPage() {
 	}
 
 	return (
-		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Ofertas da turma</h1>
+		<PageShell>
+			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+				Ofertas da turma
+			</h1>
 			<OfferForm
 				onSubmit={handleSubmit}
 				serverError={serverError}
 				defaultValues={{ turmaId: id }}
 			/>
-			<h2 className="text-xl font-semibold">Componentes ofertados</h2>
+			<h2 className="font-display text-xl font-semibold tracking-tight">
+				Componentes ofertados
+			</h2>
 			{isLoading && <p>Carregando...</p>}
 			{offers && offers.length === 0 && (
 				<p>Nenhum componente ofertado nesta turma.</p>
@@ -63,6 +68,6 @@ function ClassOffersPage() {
 					))}
 				</ul>
 			)}
-		</div>
+		</PageShell>
 	);
 }

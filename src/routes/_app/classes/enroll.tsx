@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import type { EnrollmentFormValues } from "#/components/enrollments/enrollment-form";
 import { EnrollmentForm } from "#/components/enrollments/enrollment-form";
+import { PageShell } from "#/components/ui/page";
 import { useCreateEnrollment } from "#/hooks/enrollments/use-create-enrollment";
 
 export const Route = createFileRoute("/_app/classes/enroll")({
@@ -36,9 +37,11 @@ function EnrollPage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-md space-y-4">
-			<h1 className="text-2xl font-bold">Matricular estudante</h1>
+		<PageShell className="mx-auto max-w-2xl">
+			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+				Matricular estudante
+			</h1>
 			<EnrollmentForm onSubmit={handleSubmit} serverError={serverError} />
-		</div>
+		</PageShell>
 	);
 }
