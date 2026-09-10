@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	useParticipants: vi.fn(),
-	useAddParticipant: vi.fn(),
+	addAsync: vi.fn(),
 	useStaff: vi.fn(),
 	useRoles: vi.fn(),
 }));
@@ -18,7 +19,7 @@ vi.mock("#/hooks/meetings/use-participants", () => ({
 	useParticipants: mocks.useParticipants,
 }));
 vi.mock("#/hooks/meetings/use-add-participant", () => ({
-	useAddParticipant: mocks.useAddParticipant,
+	useAddParticipant: () => ({ mutateAsync: mocks.addAsync, isPending: false }),
 }));
 vi.mock("#/hooks/staff/use-staff", () => ({ useStaff: mocks.useStaff }));
 vi.mock("#/hooks/roles/use-roles", () => ({ useRoles: mocks.useRoles }));
@@ -44,10 +45,6 @@ beforeEach(() => {
 	mocks.useRoles.mockReturnValue({
 		data: { data: [{ id: "role-1", name: "Coordenador" }] },
 	});
-	mocks.useAddParticipant.mockReturnValue({
-		mutateAsync: vi.fn(),
-		isPending: false,
-	});
 });
 
 describe("ParticipantsPage", () => {
@@ -55,4 +52,19 @@ describe("ParticipantsPage", () => {
 		renderPage();
 		expect(screen.getByText(/Maria Silva — Coordenador/)).toBeInTheDocument();
 	});
+});
+
+it("exibe erro de validação e estado de carregamento", async () => {
+	mocks.useParticipants.mockReturnValue({ data: undefined, isLoading: true });
+	renderPage();
+	expect(screen.getByText("Carregando...")).toBeInTheDocument();
+});
+
+it("exige servidor e papel antes de adicionar", async () => {
+	const user = userEvent.setup();
+	renderPage();
+	await user.click(screen.getByRole("button", { name: "Adicionar" }));
+	expect(
+		screen.getByText("Selecione o servidor e o papel"),
+	).toBeInTheDocument();
 });

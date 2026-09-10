@@ -13,6 +13,8 @@ implemented-by:
   - src/lib/general-reports/types.ts
   - src/routes/api/meetings/$meetingId/general-reports/index.ts
   - src/routes/api/meetings/$meetingId/general-reports/$reportId.ts
+  - src/hooks/general-reports/use-general-reports.ts
+  - src/components/meetings/general-report-form.tsx
 ---
 
 # Relatos gerais da reunião

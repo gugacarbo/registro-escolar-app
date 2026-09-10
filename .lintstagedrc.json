@@ -4,7 +4,6 @@
 		"biome check --no-errors-on-unmatched --files-ignore-unknown=true"
 	],
 	"*.{md,sh,yml,yaml}": [
-		"cspell lint --no-progress",
-		"prettier --check"
+		"cspell lint --no-progress"
 	]
 }

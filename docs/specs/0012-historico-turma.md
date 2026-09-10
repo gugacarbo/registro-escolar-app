@@ -10,6 +10,7 @@ implemented-by:
   - src/lib/history/repository.ts
   - src/routes/api/classes/$id/history.ts
   - src/hooks/history/use-history.ts
+  - src/components/history/class-history-panel.tsx
 ---
 
 # Histórico da turma

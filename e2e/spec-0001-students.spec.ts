@@ -56,9 +56,9 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 
 		await expect(page.getByText("Mostrando 1–10 de 11")).toBeVisible();
 		await expect(
-			page.getByRole("cell", { name: `${seed} 1` }),
+			page.getByRole("link", { name: `${seed} 11`, exact: true }),
 		).toBeVisible();
-		await page.getByRole("link", { name: "2" }).click();
+		await page.getByRole("navigation", { name: "pagination" }).getByRole("link", { name: "2" }).click();
 		await expect(page.getByText("Mostrando 11–11 de 11")).toBeVisible();
 	});
 
@@ -74,7 +74,7 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 			.getByLabel("Buscar por nome ou documento")
 			.fill("Estudante Linha Clicável");
 
-		const cell = page.getByRole("cell", { name: "Estudante Linha Clicável" });
+		const cell = page.getByRole("row", { name: /Estudante Linha Clicável/ });
 		await expect(cell).toBeVisible();
 		await cell.click();
 		await expect(page).toHaveURL(new RegExp(`/students/${student.id}`));

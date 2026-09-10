@@ -15,7 +15,7 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		await classesPage.create("Turma E2E", "2026");
 
 		await expect.poll(async () => page.url()).toBe(`${baseURL}/classes`);
-		await expect(page.getByText("Turma E2E — 2026")).toBeVisible();
+		await expect(page.getByRole("row", { name: /Turma E2E/ })).toBeVisible();
 	});
 
 	test("abre os estudantes da turma ao clicar na linha", async ({
@@ -47,8 +47,12 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		const response = await fetch(`${baseURL}/api/classes`, {
 			headers: { Cookie: apiContext.cookies },
 		});
-		const classes = (await response.json()) as Array<{ id: string }>;
-		expect(classes.filter((c) => c.id === first.id || c.id === second.id)).toHaveLength(2);
+		const classes = (await response.json()) as {
+			data: Array<{ id: string }>;
+		};
+		expect(
+			classes.data.filter((c) => c.id === first.id || c.id === second.id),
+		).toHaveLength(2);
 	});
 
 	test("matricula estudante pela UI e lista vínculo na data", async ({

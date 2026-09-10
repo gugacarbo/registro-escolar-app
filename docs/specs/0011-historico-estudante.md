@@ -11,6 +11,7 @@ implemented-by:
   - src/lib/history/repository.ts
   - src/routes/api/students/$id/history.ts
   - src/hooks/history/use-history.ts
+  - src/components/history/student-history-panel.tsx
 ---
 
 # Histórico do estudante

@@ -25,6 +25,7 @@ implemented-by:
   - src/hooks/meetings/use-update-meeting.ts
   - src/hooks/meetings/use-transition-meeting.ts
   - src/routes/_app/meetings/index.tsx
+  - src/components/meetings/edit-meeting-dialog.tsx
   - src/components/meetings/create-meeting-dialog.tsx
   - src/routes/_app/meetings/$meetingId/index.tsx
 ---

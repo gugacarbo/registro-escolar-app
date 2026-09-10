@@ -107,3 +107,49 @@ describe("StudentHistoryPanel", () => {
 		);
 	});
 });
+
+it("aplica todos os filtros opcionais", async () => {
+	mocks.useClasses.mockReturnValue({ data: { data: [] } });
+	mocks.useComponents.mockReturnValue({ data: { data: [] } });
+	mocks.useStudentHistory.mockReturnValue({
+		data: { estudante: { id: "student-1" }, eventos: [] },
+		isLoading: false,
+		isError: false,
+	});
+	renderPanel();
+	fireEvent.change(screen.getByLabelText("Busca"), {
+		target: { value: "desempenho" },
+	});
+	fireEvent.change(screen.getByLabelText("Turma"), {
+		target: { value: "class-1" },
+	});
+	fireEvent.change(screen.getByLabelText("Componente"), {
+		target: { value: "component-1" },
+	});
+	fireEvent.change(screen.getByLabelText("Período"), {
+		target: { value: "2026" },
+	});
+	fireEvent.click(screen.getByRole("button", { name: "Filtrar" }));
+	await waitFor(() =>
+		expect(mocks.useStudentHistory).toHaveBeenLastCalledWith("student-1", {
+			q: "desempenho",
+			turmaId: "class-1",
+			componenteId: "component-1",
+			periodo: "2026",
+		}),
+	);
+});
+
+it("exibe estado vazio", () => {
+	mocks.useClasses.mockReturnValue({ data: { data: [] } });
+	mocks.useComponents.mockReturnValue({ data: { data: [] } });
+	mocks.useStudentHistory.mockReturnValue({
+		data: { estudante: { id: "student-1" }, eventos: [] },
+		isLoading: false,
+		isError: false,
+	});
+	renderPanel();
+	expect(
+		screen.getByText("Nenhum evento no histórico do estudante."),
+	).toBeInTheDocument();
+});

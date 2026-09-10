@@ -393,6 +393,7 @@
       "src/hooks/meetings/use-update-meeting.ts",
       "src/hooks/meetings/use-transition-meeting.ts",
       "src/routes/_app/meetings/index.tsx",
+      "src/components/meetings/edit-meeting-dialog.tsx",
       "src/components/meetings/create-meeting-dialog.tsx",
       "src/routes/_app/meetings/$meetingId/index.tsx"
     ]
@@ -442,7 +443,10 @@
       "src/routes/api/meetings/$meetingId/students/$studentId/records/index.ts",
       "src/routes/api/meetings/$meetingId/records/$recordId.ts",
       "src/routes/api/meetings/$meetingId/students/$studentId/records/$recordId/include.ts",
-      "src/hooks/records/use-records.ts"
+      "src/hooks/records/use-records.ts",
+      "src/routes/_app/meetings/$meetingId/council.tsx",
+      "src/components/meetings/record-form.tsx",
+      "src/routes/api/meetings/$meetingId/classes/index.ts"
     ]
   },
   {
@@ -464,7 +468,9 @@
       "src/lib/general-reports/errors.ts",
       "src/lib/general-reports/types.ts",
       "src/routes/api/meetings/$meetingId/general-reports/index.ts",
-      "src/routes/api/meetings/$meetingId/general-reports/$reportId.ts"
+      "src/routes/api/meetings/$meetingId/general-reports/$reportId.ts",
+      "src/hooks/general-reports/use-general-reports.ts",
+      "src/components/meetings/general-report-form.tsx"
     ]
   },
   {
@@ -523,7 +529,8 @@
       "src/lib/history/types.ts",
       "src/lib/history/repository.ts",
       "src/routes/api/students/$id/history.ts",
-      "src/hooks/history/use-history.ts"
+      "src/hooks/history/use-history.ts",
+      "src/components/history/student-history-panel.tsx"
     ]
   },
   {
@@ -542,7 +549,8 @@
       "src/lib/history/types.ts",
       "src/lib/history/repository.ts",
       "src/routes/api/classes/$id/history.ts",
-      "src/hooks/history/use-history.ts"
+      "src/hooks/history/use-history.ts",
+      "src/components/history/class-history-panel.tsx"
     ]
   }
 ]

@@ -50,7 +50,11 @@ vi.mock("#/hooks/general-reports/use-general-reports", () => ({
 	useUpdateGeneralReport: mocks.useUpdateGeneralReport,
 }));
 vi.mock("#/components/meetings/general-report-form", () => ({
-	GeneralReportForm: () => <form aria-label="Formulário de relato geral" />,
+	GeneralReportForm: ({ submitLabel }: { submitLabel: string }) => (
+		<form aria-label="Formulário de relato geral">
+			<button type="button">{submitLabel}</button>
+		</form>
+	),
 }));
 vi.mock("#/components/meetings/transition-buttons", () => ({
 	TransitionButtons: () => <div />,
@@ -237,5 +241,59 @@ describe("CouncilPage", () => {
 		expect(
 			screen.getByRole("button", { name: "Remover da ata" }),
 		).toBeDisabled();
+	});
+
+	it("abre edição de relato geral e exibe estados de carregamento/erro", () => {
+		renderPage();
+		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[1]);
+		expect(
+			screen.getByRole("button", { name: "Salvar relato" }),
+		).toBeInTheDocument();
+		mocks.useGeneralReports.mockReturnValue({
+			data: [],
+			isLoading: true,
+			isError: false,
+		});
+		renderPage();
+		expect(screen.getByText("Carregando relatos...")).toBeInTheDocument();
+		mocks.useGeneralReports.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		});
+		renderPage();
+		expect(
+			screen.getByText("Não foi possível carregar os relatos gerais."),
+		).toBeInTheDocument();
+		mocks.useGeneralReports.mockReturnValue({
+			data: [],
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+		expect(screen.getAllByText("Nenhum relato geral.")[0]).toBeInTheDocument();
+	});
+
+	it("exibe estados vazios e de erro das turmas e estudantes", () => {
+		mocks.useMeetingClasses.mockReturnValue({ data: [], isLoading: false });
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		});
+		mocks.useMeetingClasses.mockReturnValue({
+			data: [
+				{
+					id: "link-1",
+					classId: "class-1",
+					class: { id: "class-1", name: "Turma A" },
+				},
+			],
+			isLoading: false,
+		});
+		renderPage();
+		expect(
+			screen.getByText("Não foi possível carregar os estudantes desta turma."),
+		).toBeInTheDocument();
 	});
 });

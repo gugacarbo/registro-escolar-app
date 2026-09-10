@@ -4,6 +4,41 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 
 const ROOT = path.resolve(__dirname, ".");
 
+const projects = [
+	{
+		extends: true as true,
+		resolve: {
+			alias: [
+				{
+					find: /^virtual:pwa-register\/react$/,
+					replacement: path.resolve(ROOT, "./src/test/pwa-register-react.ts"),
+				},
+			],
+		},
+		test: {
+			name: "unit",
+			environment: "happy-dom",
+			setupFiles: ["./src/test/setup.ts"],
+			globals: true,
+			include: ["src/**/*.test.{ts,tsx}"],
+		},
+	},
+]
+
+const storybookProject = {
+	extends: true as true,
+	plugins: [storybookTest({ configDir: ".storybook" })],
+	test: {
+		name: "storybook",
+		browser: {
+			enabled: true,
+			headless: true,
+			provider: "playwright",
+			instances: [{ browser: "chromium" }],
+		},
+	},
+};
+
 export default defineConfig({
 	resolve: {
 		alias: [
@@ -13,29 +48,8 @@ export default defineConfig({
 	},
 	test: {
 		projects: [
-			{
-				extends: true,
-				test: {
-					name: "unit",
-					environment: "happy-dom",
-					setupFiles: ["./src/test/setup.ts"],
-					globals: true,
-					include: ["src/**/*.test.{ts,tsx}"],
-				},
-			},
-			{
-				extends: true,
-				plugins: [storybookTest({ configDir: ".storybook" })],
-				test: {
-					name: "storybook",
-					browser: {
-						enabled: true,
-						headless: true,
-						provider: "playwright",
-						instances: [{ browser: "chromium" }],
-					},
-				},
-			},
+			...projects,
+			...(process.env.STORYBOOK_TEST ? [storybookProject] : []),
 		],
 		environment: "happy-dom",
 		setupFiles: ["./src/test/setup.ts"],

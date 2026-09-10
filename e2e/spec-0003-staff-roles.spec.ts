@@ -118,7 +118,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		expect(participant).toMatchObject({ staffId: staff.id, roleId: role.id });
 
 		await page.goto(`/meetings/${meeting.id}/participants`);
-		await expect(page.getByText(`${staff.id} — ${role.id}`)).toBeVisible();
+		await expect(page.getByText(`${staff.name} — Professor`)).toBeVisible();
 	});
 
 	test("rejeita papel inexistente em participação", async ({
@@ -164,8 +164,10 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		const activeListResponse = await fetch(`${baseURL}/api/staff`, {
 			headers: { Cookie: apiContext.cookies },
 		});
-		const activeStaff = (await activeListResponse.json()) as Array<{ id: string }>;
-		expect(activeStaff.map((member) => member.id)).not.toContain(staff.id);
+		const activeStaff = (await activeListResponse.json()) as {
+			data: Array<{ id: string }>;
+		};
+		expect(activeStaff.data.map((member) => member.id)).not.toContain(staff.id);
 
 		const response = await fetch(
 			`${baseURL}/api/meetings/${meeting.id}/participants`,

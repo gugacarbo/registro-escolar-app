@@ -17,6 +17,9 @@ implemented-by:
   - src/routes/api/meetings/$meetingId/records/$recordId.ts
   - src/routes/api/meetings/$meetingId/students/$studentId/records/$recordId/include.ts
   - src/hooks/records/use-records.ts
+  - src/routes/_app/meetings/$meetingId/council.tsx
+  - src/components/meetings/record-form.tsx
+  - src/routes/api/meetings/$meetingId/classes/index.ts
 ---
 
 # Registros de estudante
