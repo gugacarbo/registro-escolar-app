@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -12,6 +13,7 @@ const mocks = vi.hoisted(() => ({
 	useSetRecordInclusion: vi.fn(),
 	useComponents: vi.fn(),
 	useParticipants: vi.fn(),
+	useParticipantName: vi.fn(),
 	useGeneralReports: vi.fn(),
 	useCreateGeneralReport: vi.fn(),
 	useUpdateGeneralReport: vi.fn(),
@@ -44,40 +46,19 @@ vi.mock("#/hooks/components/use-components", () => ({
 vi.mock("#/hooks/meetings/use-participants", () => ({
 	useParticipants: mocks.useParticipants,
 }));
+vi.mock("#/components/meetings/participant-name", () => ({
+	useParticipantName: mocks.useParticipantName,
+}));
 vi.mock("#/hooks/general-reports/use-general-reports", () => ({
 	useGeneralReports: mocks.useGeneralReports,
 	useCreateGeneralReport: mocks.useCreateGeneralReport,
 	useUpdateGeneralReport: mocks.useUpdateGeneralReport,
 }));
-vi.mock("#/components/meetings/general-report-form", () => ({
-	GeneralReportForm: ({
-		submitLabel,
-		onSubmit,
-	}: {
-		submitLabel: string;
-		onSubmit: (values: {
-			texto: string;
-			origemId: string | null;
-			incluirNaAta: boolean;
-		}) => void | Promise<void>;
-	}) => (
-		<form aria-label="Formulário de relato geral">
-			<button
-				type="button"
-				onClick={() =>
-					onSubmit({ texto: "Relato", origemId: null, incluirNaAta: true })
-				}
-			>
-				{submitLabel}
-			</button>
-		</form>
-	),
-}));
 vi.mock("#/components/meetings/transition-buttons", () => ({
 	TransitionButtons: () => <div />,
 }));
 
-import { CouncilPage } from "./council";
+import CouncilPage from "./council";
 
 const mutation = (implementation?: (values: unknown) => unknown) => ({
 	mutateAsync: vi.fn(implementation ?? (() => Promise.resolve({}))),
@@ -95,7 +76,17 @@ function renderPage() {
 	);
 }
 
+function mockFetchComponents() {
+	vi.spyOn(globalThis, "fetch").mockResolvedValue(
+		new Response(
+			JSON.stringify({ data: [], total: 0, page: 1, pageSize: 100 }),
+		),
+	);
+}
+
 beforeEach(() => {
+	localStorage.clear();
+	mockFetchComponents();
 	mocks.useMeeting.mockReturnValue({
 		data: { id: "meeting-1", title: "Conselho", status: "in_progress" },
 		isLoading: false,
@@ -113,9 +104,23 @@ beforeEach(() => {
 	mocks.useMeetingClassStudents.mockReturnValue({
 		data: {
 			students: [
-				{ studentId: "student-1", name: "João", registrationNumber: "123" },
+				{
+					studentId: "student-1",
+					name: "João",
+					document: null,
+					registrationNumber: "123",
+					status: "pendente",
+					statusUpdatedAt: null,
+				},
 			],
-			counters: {},
+			counters: {
+				total: 1,
+				pendente: 1,
+				em_discussao: 0,
+				concluido: 0,
+				nao_discutido: 0,
+			},
+			nextPendingStudentId: "student-1",
 		},
 		isLoading: false,
 		isError: false,
@@ -155,6 +160,9 @@ beforeEach(() => {
 	mocks.useSetRecordInclusion.mockReturnValue(mutation());
 	mocks.useComponents.mockReturnValue({ data: { data: [] } });
 	mocks.useParticipants.mockReturnValue({ data: [] });
+	mocks.useParticipantName.mockReturnValue({
+		getParticipantName: (id: string) => id,
+	});
 	mocks.useGeneralReports.mockReturnValue({
 		data: [
 			{
@@ -173,33 +181,87 @@ beforeEach(() => {
 });
 
 describe("CouncilPage", () => {
-	it("renderiza turmas, estudantes e registros sem placeholders", () => {
+	it("renderiza turmas, estudantes e registros com nova hierarquia", () => {
 		renderPage();
 		expect(
 			screen.getByRole("heading", { name: "Conselho de classe" }),
 		).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Turma A" })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "João" })).toBeInTheDocument();
-		expect(screen.getByText("Registro vinculado")).toBeInTheDocument();
-		expect(screen.getAllByText("Contexto").length).toBeGreaterThan(0);
-		expect(screen.getByText("Relato geral")).toBeInTheDocument();
 		expect(
-			screen.getByRole("form", { name: "Formulário de relato geral" }),
+			screen.getByRole("heading", { name: /Estudantes da turma/ }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Selecionar João" }),
+		).toBeInTheDocument();
+		expect(screen.getByText("Registro vinculado")).toBeInTheDocument();
+		expect(
+			screen.getByRole("tab", { name: /Registros de João/ }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("tab", { name: /Relatos gerais/ }),
 		).toBeInTheDocument();
 		expect(screen.queryByText(/spec 0007/i)).not.toBeInTheDocument();
 	});
 
-	it("permite criar registro vinculado com texto obrigatório", async () => {
+	it("exibe progresso da turma e próximo pendente", () => {
+		renderPage();
+		expect(screen.getByText("Próximo pendente")).toBeInTheDocument();
+		expect(
+			screen.getByRole("progressbar", { name: /Progresso da turma/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText(/0 de 1 concluídos/)).toBeInTheDocument();
+	});
+
+	it("filtra estudantes pela busca quando há mais de 5", () => {
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: {
+				students: Array.from({ length: 6 }, (_, i) => ({
+					studentId: `student-${i}`,
+					name: `Aluno ${i}`,
+					document: null,
+					registrationNumber: `${100 + i}`,
+					status: "pendente",
+					statusUpdatedAt: null,
+				})),
+				counters: {
+					total: 6,
+					pendente: 6,
+					em_discussao: 0,
+					concluido: 0,
+					nao_discutido: 0,
+				},
+				nextPendingStudentId: "student-0",
+			},
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+		const search = screen.getByLabelText("Buscar estudante");
+		fireEvent.change(search, { target: { value: "Aluno 5" } });
+		expect(
+			screen.getByRole("button", { name: "Selecionar Aluno 5" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Selecionar Aluno 0" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("permite criar registro vinculado via Dialog", async () => {
+		const user = userEvent.setup();
 		const mutateAsync = vi.fn(() => Promise.resolve({}));
 		mocks.useCreateLinkedRecord.mockReturnValue({
 			mutateAsync,
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.change(screen.getAllByLabelText("Texto *")[0], {
-			target: { value: "Novo registro" },
-		});
-		fireEvent.click(screen.getByRole("button", { name: "Adicionar registro" }));
+		await user.click(screen.getByRole("button", { name: "Novo registro" }));
+		expect(
+			screen.getByRole("dialog", { name: /Novo registro de João/ }),
+		).toBeInTheDocument();
+		await user.type(screen.getByLabelText("Texto *"), "Novo registro");
+		await user.click(
+			screen.getByRole("button", { name: "Adicionar registro" }),
+		);
 		await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
 		expect(mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -210,14 +272,33 @@ describe("CouncilPage", () => {
 		);
 	});
 
-	it("alterna inclusão de registro independente", async () => {
+	it("exibe empty state com CTA quando sem registros", () => {
+		mocks.useMeetingStudentRecords.mockReturnValue({
+			data: { records: [] },
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+		expect(
+			screen.getByText("Nenhum registro para este estudante"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Adicionar o primeiro registro" }),
+		).toBeInTheDocument();
+	});
+
+	it("alterna inclusão de registro de histórico via Switch", async () => {
+		const user = userEvent.setup();
 		const mutateAsync = vi.fn(() => Promise.resolve({}));
 		mocks.useSetRecordInclusion.mockReturnValue({
 			mutateAsync,
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getByRole("button", { name: "Remover da ata" }));
+		const toggle = screen.getByRole("switch", {
+			name: 'Remover registro "Contexto" na ata',
+		});
+		await user.click(toggle);
 		await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
 		expect(mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({ incluir: false }),
@@ -225,20 +306,25 @@ describe("CouncilPage", () => {
 	});
 
 	it("edita registro vinculado em reunião em andamento", async () => {
+		const user = userEvent.setup();
 		const mutateAsync = vi.fn(() => Promise.resolve({}));
 		mocks.useUpdateLinkedRecord.mockReturnValue({
 			mutateAsync,
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[0]);
+		const editButtons = screen.getAllByRole("button", { name: "Editar" });
+		await user.click(editButtons[0]);
 		await waitFor(() =>
-			expect(screen.getAllByLabelText("Texto *").length).toBeGreaterThan(1),
+			expect(
+				screen.getByRole("button", { name: "Salvar registro" }),
+			).toBeInTheDocument(),
 		);
-		fireEvent.change(screen.getAllByLabelText("Texto *")[1], {
+		const textInputs = screen.getAllByLabelText("Texto *");
+		fireEvent.change(textInputs[textInputs.length - 1], {
 			target: { value: "Registro editado" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Salvar registro" }));
+		await user.click(screen.getByRole("button", { name: "Salvar registro" }));
 		await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
 		expect(mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({ recordId: "record-1" }),
@@ -255,16 +341,35 @@ describe("CouncilPage", () => {
 			screen.getByText(/Reunião finalizada — reabra para editar registros/i),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: "Adicionar registro" }),
-		).toBeDisabled();
+			screen.queryByRole("button", { name: "Novo registro" }),
+		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: "Remover da ata" }),
+			screen.getByRole("switch", {
+				name: 'Remover registro "Contexto" na ata',
+			}),
 		).toBeDisabled();
 	});
 
-	it("abre edição de relato geral e exibe estados de carregamento/erro", () => {
+	it("navega para a aba de relatos e cria relato geral", async () => {
+		const user = userEvent.setup();
+		const createReport = vi.fn(() => Promise.resolve({}));
+		mocks.useCreateGeneralReport.mockReturnValue({
+			mutateAsync: createReport,
+			isPending: false,
+		});
 		renderPage();
-		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[1]);
+		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		expect(screen.getByText("Relato geral")).toBeInTheDocument();
+		await user.type(screen.getAllByLabelText("Texto *")[0], "Novo relato");
+		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
+		await waitFor(() => expect(createReport).toHaveBeenCalled());
+	});
+
+	it("abre edição de relato geral e exibe estados de carregamento/erro", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		await user.click(screen.getByRole("button", { name: "Editar" }));
 		expect(
 			screen.getByRole("button", { name: "Salvar relato" }),
 		).toBeInTheDocument();
@@ -273,24 +378,129 @@ describe("CouncilPage", () => {
 			isLoading: true,
 			isError: false,
 		});
-		renderPage();
-		expect(screen.getByText("Carregando relatos...")).toBeInTheDocument();
+		const { rerender } = renderPage();
+		rerender(
+			<QueryClientProvider client={new QueryClient()}>
+				<CouncilPage />
+			</QueryClientProvider>,
+		);
+		const tabs = screen.getAllByRole("tab", { name: /Relatos gerais/ });
+		await user.click(tabs[tabs.length - 1]);
+		expect(screen.getAllByText("Carregando relatos...").length).toBeGreaterThan(
+			0,
+		);
 		mocks.useGeneralReports.mockReturnValue({
 			data: undefined,
 			isLoading: false,
 			isError: true,
 		});
-		renderPage();
-		expect(
-			screen.getByText("Não foi possível carregar os relatos gerais."),
-		).toBeInTheDocument();
+		{
+			const { unmount } = renderPage();
+			const errorTabs = screen.getAllByRole("tab", {
+				name: /Relatos gerais/,
+			});
+			await user.click(errorTabs[errorTabs.length - 1]);
+			expect(
+				screen.getByText("Não foi possível carregar os relatos gerais."),
+			).toBeInTheDocument();
+			unmount();
+		}
 		mocks.useGeneralReports.mockReturnValue({
 			data: [],
 			isLoading: false,
 			isError: false,
 		});
+		{
+			const { unmount } = renderPage();
+			const emptyTabs = screen.getAllByRole("tab", {
+				name: /Relatos gerais/,
+			});
+			await user.click(emptyTabs[emptyTabs.length - 1]);
+			expect(screen.getByText("Nenhum relato geral")).toBeInTheDocument();
+			unmount();
+		}
+	});
+
+	it("exibe vazio de turmas, loading e vazio de busca de estudantes", () => {
+		mocks.useMeetingClasses.mockReturnValue({ data: [], isLoading: false });
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: false,
+		});
+		const { unmount } = renderPage();
+		expect(
+			screen.getByText("Nenhuma turma vinculada a esta reunião."),
+		).toBeInTheDocument();
+		unmount();
+		mocks.useMeetingClasses.mockReturnValue({
+			data: [
+				{
+					id: "link-1",
+					classId: "class-1",
+					class: { id: "class-1", name: "Turma A" },
+				},
+			],
+			isLoading: false,
+		});
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: {
+				students: [
+					{
+						studentId: "student-1",
+						name: "João",
+						document: null,
+						registrationNumber: "123",
+						status: "pendente",
+						statusUpdatedAt: null,
+					},
+				],
+				counters: {
+					total: 1,
+					pendente: 1,
+					em_discussao: 0,
+					concluido: 0,
+					nao_discutido: 0,
+				},
+				nextPendingStudentId: "student-1",
+			},
+			isLoading: true,
+			isError: false,
+		});
+		{
+			const { unmount: unmountLoading } = renderPage();
+			expect(screen.getByText("Carregando estudantes...")).toBeInTheDocument();
+			unmountLoading();
+		}
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: {
+				students: Array.from({ length: 6 }, (_, i) => ({
+					studentId: `student-${i}`,
+					name: `Aluno ${i}`,
+					document: null,
+					registrationNumber: `${300 + i}`,
+					status: "pendente",
+					statusUpdatedAt: null,
+				})),
+				counters: {
+					total: 6,
+					pendente: 6,
+					em_discussao: 0,
+					concluido: 0,
+					nao_discutido: 0,
+				},
+				nextPendingStudentId: "student-0",
+			},
+			isLoading: false,
+			isError: false,
+		});
 		renderPage();
-		expect(screen.getAllByText("Nenhum relato geral.")[0]).toBeInTheDocument();
+		fireEvent.change(screen.getByLabelText("Buscar estudante"), {
+			target: { value: "zzz-sem-match" },
+		});
+		expect(
+			screen.getByText("Nenhum estudante encontrado para “zzz-sem-match”."),
+		).toBeInTheDocument();
 	});
 
 	it("exibe estados vazios e de erro das turmas e estudantes", () => {
@@ -355,10 +565,94 @@ describe("CouncilPage estados adicionais", () => {
 		);
 	});
 
-	it("exibe matrícula, estados de registro e troca de estudante", () => {
+	it("filtra por matrícula e usa fallback do primeiro pendente ao trocar de turma", () => {
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: {
+				students: [
+					{
+						studentId: "student-1",
+						name: "João",
+						document: null,
+						registrationNumber: "123",
+						status: "pendente",
+						statusUpdatedAt: null,
+					},
+					{
+						studentId: "student-2",
+						name: "Ana",
+						document: null,
+						registrationNumber: null,
+						status: "pendente",
+						statusUpdatedAt: null,
+					},
+				],
+				counters: {
+					total: 2,
+					pendente: 2,
+					em_discussao: 0,
+					concluido: 0,
+					nao_discutido: 0,
+				},
+				nextPendingStudentId: null,
+			},
+			isLoading: false,
+			isError: false,
+		});
+		mocks.useMeetingClasses.mockReturnValue({
+			data: [
+				{
+					id: "link-1",
+					classId: "class-1",
+					class: { id: "class-1", name: "Turma A", academicPeriod: "2026" },
+				},
+				{
+					id: "link-2",
+					classId: "class-2",
+					class: { id: "class-2", name: "Turma B", academicPeriod: "2026" },
+				},
+			],
+			isLoading: false,
+		});
+		renderPage();
+		const turmas = Array.from({ length: 6 }, (_, i) => ({
+			studentId: `s-${i}`,
+			name: `Aluno ${i}`,
+			document: null,
+			registrationNumber: `${200 + i}`,
+			status: "pendente",
+			statusUpdatedAt: null,
+		}));
+		mocks.useMeetingClassStudents.mockReturnValue({
+			data: {
+				students: turmas,
+				counters: {
+					total: 6,
+					pendente: 6,
+					em_discussao: 0,
+					concluido: 0,
+					nao_discutido: 0,
+				},
+				nextPendingStudentId: null,
+			},
+			isLoading: false,
+			isError: false,
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Turma A" }));
+		fireEvent.change(screen.getByLabelText("Buscar estudante"), {
+			target: { value: "205" },
+		});
+		expect(
+			screen.getByRole("button", { name: "Selecionar Aluno 5" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Selecionar Aluno 0" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("exibe matrícula e troca de estudante", () => {
 		renderPage();
 		expect(screen.getByText("Matrícula 123")).toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: "João" }));
+		fireEvent.click(screen.getByRole("button", { name: "Selecionar João" }));
 		expect(mocks.useMeetingStudentRecords).toHaveBeenLastCalledWith(
 			"meeting-1",
 			"student-1",
@@ -417,6 +711,7 @@ describe("CouncilPage estados adicionais", () => {
 
 describe("CouncilPage erros de mutação", () => {
 	it("exibe erro ao editar relato", async () => {
+		const user = userEvent.setup();
 		const updateReport = vi.fn(() =>
 			Promise.reject(new Error("Erro ao editar relato")),
 		);
@@ -425,8 +720,9 @@ describe("CouncilPage erros de mutação", () => {
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[1]);
-		fireEvent.click(screen.getByRole("button", { name: "Salvar relato" }));
+		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		await user.click(screen.getByRole("button", { name: "Editar" }));
+		await user.click(screen.getByRole("button", { name: "Salvar relato" }));
 		await waitFor(() => expect(updateReport).toHaveBeenCalled());
 		expect(
 			await screen.findByText("Erro ao editar relato"),
@@ -434,6 +730,7 @@ describe("CouncilPage erros de mutação", () => {
 	});
 
 	it("exibe erro ao criar relato", async () => {
+		const user = userEvent.setup();
 		const createReport = vi.fn(() =>
 			Promise.reject(new Error("Erro ao criar relato")),
 		);
@@ -442,12 +739,15 @@ describe("CouncilPage erros de mutação", () => {
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getByRole("button", { name: "Adicionar relato" }));
+		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		await user.type(screen.getAllByLabelText("Texto *")[0], "Relato com erro");
+		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
 		await waitFor(() => expect(createReport).toHaveBeenCalled());
 		expect(await screen.findByText("Erro ao criar relato")).toBeInTheDocument();
 	});
 
 	it("exibe erro ao criar registro", async () => {
+		const user = userEvent.setup();
 		const createRecord = vi.fn(() =>
 			Promise.reject(new Error("Erro ao criar registro")),
 		);
@@ -456,10 +756,11 @@ describe("CouncilPage erros de mutação", () => {
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.change(screen.getAllByLabelText("Texto *")[0], {
-			target: { value: "Novo registro" },
-		});
-		fireEvent.click(screen.getByRole("button", { name: "Adicionar registro" }));
+		await user.click(screen.getByRole("button", { name: "Novo registro" }));
+		await user.type(screen.getByLabelText("Texto *"), "Novo registro");
+		await user.click(
+			screen.getByRole("button", { name: "Adicionar registro" }),
+		);
 		await waitFor(() => expect(createRecord).toHaveBeenCalled());
 		expect(
 			await screen.findByText("Erro ao criar registro"),
@@ -469,25 +770,30 @@ describe("CouncilPage erros de mutação", () => {
 
 describe("CouncilPage mutações de relato bem-sucedidas", () => {
 	it("cria relato geral", async () => {
+		const user = userEvent.setup();
 		const createReport = vi.fn(() => Promise.resolve({}));
 		mocks.useCreateGeneralReport.mockReturnValue({
 			mutateAsync: createReport,
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getByRole("button", { name: "Adicionar relato" }));
+		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		await user.type(screen.getAllByLabelText("Texto *")[0], "Relato novo");
+		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
 		await waitFor(() => expect(createReport).toHaveBeenCalled());
 	});
 
 	it("edita relato geral e fecha o formulário", async () => {
+		const user = userEvent.setup();
 		const updateReport = vi.fn(() => Promise.resolve({}));
 		mocks.useUpdateGeneralReport.mockReturnValue({
 			mutateAsync: updateReport,
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[1]);
-		fireEvent.click(screen.getByRole("button", { name: "Salvar relato" }));
+		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		await user.click(screen.getByRole("button", { name: "Editar" }));
+		await user.click(screen.getByRole("button", { name: "Salvar relato" }));
 		await waitFor(() => expect(updateReport).toHaveBeenCalled());
 		await waitFor(() =>
 			expect(
@@ -499,6 +805,7 @@ describe("CouncilPage mutações de relato bem-sucedidas", () => {
 
 describe("CouncilPage erros de registros", () => {
 	it("exibe erro ao editar registro vinculado", async () => {
+		const user = userEvent.setup();
 		const updateRecord = vi.fn(() =>
 			Promise.reject(new Error("Erro ao editar registro")),
 		);
@@ -507,8 +814,8 @@ describe("CouncilPage erros de registros", () => {
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[0]);
-		fireEvent.click(screen.getByRole("button", { name: "Salvar registro" }));
+		await user.click(screen.getByRole("button", { name: "Editar" }));
+		await user.click(screen.getByRole("button", { name: "Salvar registro" }));
 		await waitFor(() => expect(updateRecord).toHaveBeenCalled());
 		expect(
 			await screen.findByText("Erro ao editar registro"),
@@ -516,6 +823,7 @@ describe("CouncilPage erros de registros", () => {
 	});
 
 	it("exibe erro ao alterar inclusão", async () => {
+		const user = userEvent.setup();
 		const inclusion = vi.fn(() =>
 			Promise.reject(new Error("Erro ao alterar inclusão")),
 		);
@@ -524,7 +832,10 @@ describe("CouncilPage erros de registros", () => {
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getByRole("button", { name: "Remover da ata" }));
+		const toggle = screen.getByRole("switch", {
+			name: 'Remover registro "Contexto" na ata',
+		});
+		await user.click(toggle);
 		await waitFor(() => expect(inclusion).toHaveBeenCalled());
 		expect(
 			await screen.findByText("Erro ao alterar inclusão"),
@@ -537,9 +848,23 @@ describe("CouncilPage variações de registro", () => {
 		mocks.useMeetingClassStudents.mockReturnValue({
 			data: {
 				students: [
-					{ studentId: "student-1", name: "João", registrationNumber: null },
+					{
+						studentId: "student-1",
+						name: "João",
+						document: null,
+						registrationNumber: null,
+						status: "pendente",
+						statusUpdatedAt: null,
+					},
 				],
-				counters: {},
+				counters: {
+					total: 1,
+					pendente: 1,
+					em_discussao: 0,
+					concluido: 0,
+					nao_discutido: 0,
+				},
+				nextPendingStudentId: "student-1",
 			},
 			isLoading: false,
 			isError: false,
@@ -578,7 +903,9 @@ describe("CouncilPage variações de registro", () => {
 		expect(screen.getAllByText("Interno").length).toBeGreaterThan(1);
 		expect(screen.queryByText(/Matrícula/)).not.toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: "Incluir na ata" }),
+			screen.getByRole("switch", {
+				name: 'Incluir registro "Contexto interno" na ata',
+			}),
 		).toBeInTheDocument();
 	});
 });
