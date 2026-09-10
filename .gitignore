@@ -21,3 +21,4 @@ test-results
 *storybook.log
 storybook-static
 .wrangler/state/e2e
+.worktrees
