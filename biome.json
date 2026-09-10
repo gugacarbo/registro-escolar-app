@@ -15,7 +15,8 @@
 			"!**/src/routeTree.gen.ts",
 			"!**/src/styles.css",
 			"!**/coverage",
-			"!**/test-results"
+			"!**/test-results",
+			"!**/storybook-static"
 		]
 	},
 	"formatter": {
