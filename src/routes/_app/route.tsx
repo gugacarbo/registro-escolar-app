@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AppHeader } from "#/components/app-header";
 import { AppSidebar } from "#/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
+import { Spinner } from "#/components/ui/spinner";
 import { authClient } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/_app")({
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/_app")({
 
 type SessionData = Awaited<ReturnType<typeof authClient.getSession>>["data"];
 
-export function AppLayout() {
+export default function AppLayout() {
 	const navigate = useNavigate();
 	const [session, setSession] = useState<SessionData | null | undefined>(
 		undefined,
@@ -55,7 +56,8 @@ export function AppLayout() {
 
 	if (!session) {
 		return (
-			<div className="flex h-screen items-center justify-center">
+			<div className="flex min-h-svh items-center justify-center gap-3 bg-background/80 text-sm text-muted-foreground backdrop-blur-sm">
+				<Spinner className="size-4" aria-hidden="true" />
 				Carregando...
 			</div>
 		);
@@ -70,7 +72,7 @@ export function AppLayout() {
 					userEmail={session.user.email}
 					onSignOut={handleSignOut}
 				/>
-				<main className="container mx-auto w-full max-w-5xl flex-1 p-4">
+				<main className="mx-auto w-full max-w-6xl flex-1 p-4 pb-10 sm:p-6 sm:pb-14 lg:p-8">
 					<Outlet />
 				</main>
 			</SidebarInset>

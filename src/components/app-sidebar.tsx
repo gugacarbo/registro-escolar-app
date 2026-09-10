@@ -1,5 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
+	BookOpen,
 	BookOpenText,
 	Briefcase,
 	CalendarDays,
@@ -22,6 +23,7 @@ import {
 } from "#/components/ui/sidebar";
 
 type AppRoute =
+	| "/"
 	| "/students"
 	| "/classes"
 	| "/staff"
@@ -37,6 +39,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+	{ title: "Painel", to: "/", icon: BookOpen },
 	{ title: "Estudantes", to: "/students", icon: GraduationCap },
 	{ title: "Turmas", to: "/classes", icon: LayoutGrid },
 	{ title: "Servidores", to: "/staff", icon: Briefcase },
@@ -60,14 +63,19 @@ export function AppSidebar() {
 	const pathname = useLocation({ select: (s) => s.pathname });
 
 	return (
-		<Sidebar collapsible="icon">
+		<Sidebar collapsible="icon" variant="floating">
 			<SidebarHeader>
-				<div className="flex items-center gap-2 px-2 py-1">
-					<span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-						<GraduationCap className="size-4" />
+				<div className="flex items-center gap-3 px-2 py-2">
+					<span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-primary/15 bg-primary text-primary-foreground shadow-[3px_3px_0_0_color-mix(in_oklab,var(--highlight)_75%,transparent)]">
+						<GraduationCap className="size-4" aria-hidden="true" />
 					</span>
-					<span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
-						Registro Escolar
+					<span className="min-w-0 group-data-[collapsible=icon]:hidden">
+						<span className="block truncate font-display text-base leading-tight font-semibold">
+							Registro Escolar
+						</span>
+						<span className="block truncate text-[0.6875rem] tracking-[0.14em] text-muted-foreground uppercase group-data-[collapsible=icon]:hidden">
+							Conselho de classe
+						</span>
 					</span>
 				</div>
 			</SidebarHeader>

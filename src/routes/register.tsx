@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/register")({
 	component: RegisterPage,
 });
 
-export function RegisterPage() {
+export default function RegisterPage() {
 	const navigate = useNavigate();
 	const [isCheckingSession, setIsCheckingSession] = useState(true);
 	const [serverError, setServerError] = useState<string | null>(null);
@@ -87,10 +88,18 @@ export function RegisterPage() {
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center p-4">
+		<div className="auth-stage flex min-h-screen items-center justify-center p-4">
 			<Card className="w-full max-w-sm">
 				<CardHeader>
-					<CardTitle>Criar conta</CardTitle>
+					<span
+						className="mb-3 flex size-11 items-center justify-center rounded-md border border-primary/15 bg-primary text-primary-foreground shadow-[4px_4px_0_0_color-mix(in_oklab,var(--highlight)_75%,transparent)]"
+						aria-hidden="true"
+					>
+						<GraduationCap className="size-5" />
+					</span>
+					<CardTitle className="font-display text-2xl tracking-tight">
+						Criar conta
+					</CardTitle>
 					<CardDescription>
 						Cadastre-se para usar o Registro Escolar.
 					</CardDescription>
@@ -166,7 +175,7 @@ export function RegisterPage() {
 
 function LoadingScreen() {
 	return (
-		<div className="flex h-screen items-center justify-center">
+		<div className="auth-stage flex h-screen items-center justify-center text-sm text-muted-foreground">
 			Carregando...
 		</div>
 	);

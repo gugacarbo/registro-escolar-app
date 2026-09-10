@@ -82,7 +82,7 @@ describe("AppSidebar", () => {
 			"href",
 			"/minutes",
 		);
-		expect(screen.getAllByRole("link")).toHaveLength(7);
+		expect(screen.getAllByRole("link")).toHaveLength(8);
 	});
 
 	it("marca Estudantes como ativo na lista e nas subrotas", () => {
