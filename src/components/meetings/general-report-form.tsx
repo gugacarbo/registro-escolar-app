@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { useParticipantName } from "#/components/meetings/participant-name";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
 import {
@@ -52,6 +52,7 @@ export function GeneralReportForm({
 	serverError?: string | null;
 }) {
 	const { data: participants = [] } = useParticipants(meetingId);
+	const { getParticipantName } = useParticipantName();
 	const form = useForm<GeneralReportFormValues>({
 		resolver: zodResolver(generalReportSchema),
 		defaultValues: {
@@ -102,7 +103,7 @@ export function GeneralReportForm({
 												key={participant.id}
 												value={participant.staffId}
 											>
-												{participant.staffId}
+												{getParticipantName(participant.staffId)}
 											</SelectItem>
 										))}
 									</SelectContent>

@@ -1,16 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	useComponents: vi.fn(),
 	useParticipants: vi.fn(),
 	useParticipantName: vi.fn(),
 }));
 
-vi.mock("#/hooks/components/use-components", () => ({
-	useComponents: mocks.useComponents,
-}));
 vi.mock("#/hooks/meetings/use-participants", () => ({
 	useParticipants: mocks.useParticipants,
 }));
@@ -34,7 +31,11 @@ function renderForm(disabled = false) {
 }
 
 beforeEach(() => {
-	mocks.useComponents.mockReturnValue({ data: { data: [] } });
+	vi.spyOn(globalThis, "fetch").mockResolvedValue(
+		new Response(
+			JSON.stringify({ data: [], total: 0, page: 1, pageSize: 100 }),
+		),
+	);
 	mocks.useParticipants.mockReturnValue({ data: [] });
 	mocks.useParticipantName.mockReturnValue({
 		getParticipantName: (id: string) => id,
@@ -65,10 +66,17 @@ describe("RecordForm", () => {
 		expect(screen.getByLabelText("Texto *")).toHaveValue("");
 	});
 
-	it("rendera opções de componente e participante com nomes legíveis", () => {
-		mocks.useComponents.mockReturnValue({
-			data: { data: [{ id: "component-1", name: "Matemática" }] },
-		});
+	it("rendera opções de componente e participante com nomes legíveis", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					data: [{ id: "component-1", name: "Matemática" }],
+					total: 1,
+					page: 1,
+					pageSize: 100,
+				}),
+			),
+		);
 		mocks.useParticipants.mockReturnValue({
 			data: [{ id: "p-1", staffId: "staff-1" }],
 		});
@@ -76,15 +84,64 @@ describe("RecordForm", () => {
 			getParticipantName: (id: string) => (id === "staff-1" ? "Maria" : id),
 		});
 		render(
-			<RecordForm
-				meetingId="meeting-1"
-				submitLabel="Salvar"
-				serverError="Erro de servidor"
-				onSubmit={vi.fn()}
-			/>,
+			<QueryClientProvider client={new QueryClient()}>
+				<RecordForm
+					meetingId="meeting-1"
+					submitLabel="Salvar"
+					serverError="Erro de servidor"
+					onSubmit={vi.fn()}
+				/>
+			</QueryClientProvider>,
 		);
-		expect(screen.getByText("Matemática")).toBeInTheDocument();
+		expect(await screen.findByText("Matemática")).toBeInTheDocument();
 		expect(screen.getByText("Maria")).toBeInTheDocument();
 		expect(screen.getByText("Erro de servidor")).toBeInTheDocument();
+	});
+
+	it("envia IDs de componente e autor, mas apresenta o nome legível", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					data: [{ id: "component-1", name: "Matemática" }],
+					total: 1,
+					page: 1,
+					pageSize: 100,
+				}),
+			),
+		);
+		mocks.useParticipants.mockReturnValue({
+			data: [{ id: "p-1", staffId: "staff-1" }],
+		});
+		mocks.useParticipantName.mockReturnValue({
+			getParticipantName: () => "Maria",
+		});
+		render(
+			<QueryClientProvider client={new QueryClient()}>
+				<RecordForm
+					meetingId="meeting-1"
+					submitLabel="Salvar"
+					onSubmit={onSubmit}
+				/>
+			</QueryClientProvider>,
+		);
+		await user.type(screen.getByLabelText("Texto *"), "Registro válido");
+		await user.click(screen.getByLabelText("Componente curricular"));
+		await user.click(await screen.findByRole("option", { name: "Matemática" }));
+		await user.click(screen.getByLabelText("Origem do registro"));
+		await user.click(await screen.findByRole("option", { name: "Maria" }));
+		await user.click(screen.getByLabelText("Incluir na ata"));
+		await user.click(screen.getByRole("button", { name: "Salvar" }));
+		expect(onSubmit).toHaveBeenCalledWith(
+			expect.objectContaining({
+				texto: "Registro válido",
+				categoriaId: "",
+				componenteId: "component-1",
+				origemId: "staff-1",
+				incluirNaAta: false,
+			}),
+			undefined,
+		);
 	});
 });

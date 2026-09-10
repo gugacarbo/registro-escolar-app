@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
+import { EntitySelect } from "#/components/ui/entity-select";
 import {
 	Form,
 	FormControl,
@@ -24,10 +25,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select";
-import { useClasses } from "#/hooks/classes/use-classes";
+import {
+	fetchClassesPage,
+	fetchRolesPage,
+	fetchStaffPage,
+} from "#/hooks/entity-fetchers";
 import { useMinuteTemplates } from "#/hooks/minutes/use-minute-templates";
-import { useRoles } from "#/hooks/roles/use-roles";
-import { useStaff } from "#/hooks/staff/use-staff";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 
 const meetingFormSchema = z.object({
 	nome: z.string().trim().min(1, "Nome é obrigatório"),
@@ -57,12 +61,40 @@ export function MeetingForm({
 	serverError?: string | null;
 	mode?: "create" | "edit";
 }) {
-	const { data: classesPage } = useClasses({ pageSize: 500 });
-	const classes = classesPage?.data ?? [];
-	const { data: staffPage } = useStaff({ pageSize: 500 });
-	const staff = staffPage?.data ?? [];
-	const { data: rolesPage } = useRoles({ pageSize: 500 });
-	const roles = rolesPage?.data ?? [];
+	const [classSearch, setClassSearch] = useState("");
+	const [staffSearch, setStaffSearch] = useState("");
+	const [roleSearch, setRoleSearch] = useState("");
+	const { data: classesResult, isLoading: isLoadingClasses } = useAsyncOptions({
+		queryKey: ["meeting-form", "classes"],
+		search: classSearch,
+		fetchPage: fetchClassesPage,
+		select: (classRow) => ({
+			id: classRow.id,
+			name: `${classRow.name} — ${classRow.academicPeriod}`,
+		}),
+	});
+	const classes = classesResult?.options ?? [];
+	const classById = new Map(
+		classes.map((classRow) => [classRow.id, classRow.name]),
+	);
+	const { data: staffResult, isLoading: isLoadingStaff } = useAsyncOptions({
+		queryKey: ["meeting-form", "staff"],
+		search: staffSearch,
+		fetchPage: fetchStaffPage,
+		select: (member) => ({ id: member.id, name: member.name }),
+	});
+	const staffOptions = staffResult?.options ?? [];
+	const staffById = new Map(
+		staffOptions.map((member) => [member.id, member.name]),
+	);
+	const { data: rolesResult, isLoading: isLoadingRoles } = useAsyncOptions({
+		queryKey: ["meeting-form", "roles"],
+		search: roleSearch,
+		fetchPage: fetchRolesPage,
+		select: (role) => ({ id: role.id, name: role.name }),
+	});
+	const roleOptions = rolesResult?.options ?? [];
+	const roleById = new Map(roleOptions.map((role) => [role.id, role.name]));
 	const { data: templates = [] } = useMinuteTemplates();
 
 	const form = useForm<MeetingFormValues>({
@@ -125,6 +157,12 @@ export function MeetingForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Turmas *</FormLabel>
+								<Input
+									value={classSearch}
+									onChange={(event) => setClassSearch(event.target.value)}
+									placeholder="Buscar turma"
+									aria-label="Buscar turma"
+								/>
 								<div className="grid gap-2">
 									{classes.map((classRow) => (
 										<label
@@ -141,10 +179,46 @@ export function MeetingForm({
 													)
 												}
 											/>
-											{classRow.name} — {classRow.academicPeriod}
+											{classRow.name}
 										</label>
 									))}
 								</div>
+								{isLoadingClasses && (
+									<p className="text-xs text-muted-foreground">
+										Carregando turmas...
+									</p>
+								)}
+								{!isLoadingClasses && classes.length === 0 && (
+									<p className="text-xs text-muted-foreground">
+										Nenhuma turma encontrada para a busca.
+									</p>
+								)}
+								{!isLoadingClasses &&
+									classesResult &&
+									!classesResult.loadedAll && (
+										<p className="text-xs text-muted-foreground">
+											Mostrando {classes.length} de {classesResult.total}.
+											Refine a busca para ver mais.
+										</p>
+									)}
+								{field.value.map((id) => {
+									if (classById.has(id)) return null;
+									return (
+										<label key={id} className="flex items-center gap-2 text-sm">
+											<Checkbox
+												checked
+												onCheckedChange={(checked) => {
+													if (!checked) {
+														field.onChange(
+															field.value.filter((current) => current !== id),
+														);
+													}
+												}}
+											/>
+											{id}
+										</label>
+									);
+								})}
 								<FormMessage />
 							</FormItem>
 						)}
@@ -154,6 +228,32 @@ export function MeetingForm({
 				{mode === "create" && (
 					<div className="grid gap-2">
 						<Label htmlFor={undefined}>Participantes</Label>
+						<div className="grid gap-2">
+							<Input
+								value={staffSearch}
+								onChange={(event) => setStaffSearch(event.target.value)}
+								placeholder="Buscar servidor"
+								aria-label="Buscar servidor"
+							/>
+							<Input
+								value={roleSearch}
+								onChange={(event) => setRoleSearch(event.target.value)}
+								placeholder="Buscar papel"
+								aria-label="Buscar papel"
+							/>
+							{!isLoadingStaff && staffResult && !staffResult.loadedAll && (
+								<p className="text-xs text-muted-foreground">
+									Mostrando {staffOptions.length} de {staffResult.total}{" "}
+									servidores. Refine a busca para ver mais.
+								</p>
+							)}
+							{!isLoadingRoles && rolesResult && !rolesResult.loadedAll && (
+								<p className="text-xs text-muted-foreground">
+									Mostrando {roleOptions.length} de {rolesResult.total} papéis.
+									Refine a busca para ver mais.
+								</p>
+							)}
+						</div>
 						<div className="space-y-2">
 							{fields.map((participantField, index) => (
 								<div
@@ -164,42 +264,46 @@ export function MeetingForm({
 										control={form.control}
 										name={`participantes.${index}.servidorId`}
 										render={({ field }) => (
-											<Select
+											<EntitySelect
+												label="Servidor"
+												placeholder="Servidor"
 												value={field.value}
-												onValueChange={field.onChange}
-											>
-												<SelectTrigger aria-label="Servidor">
-													<SelectValue placeholder="Servidor" />
-												</SelectTrigger>
-												<SelectContent>
-													{staff.map((member) => (
-														<SelectItem key={member.id} value={member.id}>
-															{member.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
+												onChange={field.onChange}
+												options={[
+													...staffOptions,
+													...(field.value && !staffById.has(field.value)
+														? [{ id: field.value, name: field.value }]
+														: []),
+												]}
+												isLoading={isLoadingStaff}
+												total={staffResult?.total ?? 0}
+												loadedAll={staffResult?.loadedAll ?? true}
+												search={staffSearch}
+												onSearchChange={setStaffSearch}
+											/>
 										)}
 									/>
 									<FormField
 										control={form.control}
 										name={`participantes.${index}.papelId`}
 										render={({ field }) => (
-											<Select
+											<EntitySelect
+												label="Papel"
+												placeholder="Papel"
 												value={field.value}
-												onValueChange={field.onChange}
-											>
-												<SelectTrigger aria-label="Papel">
-													<SelectValue placeholder="Papel" />
-												</SelectTrigger>
-												<SelectContent>
-													{roles.map((role) => (
-														<SelectItem key={role.id} value={role.id}>
-															{role.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
+												onChange={field.onChange}
+												options={[
+													...roleOptions,
+													...(field.value && !roleById.has(field.value)
+														? [{ id: field.value, name: field.value }]
+														: []),
+												]}
+												isLoading={isLoadingRoles}
+												total={rolesResult?.total ?? 0}
+												loadedAll={rolesResult?.loadedAll ?? true}
+												search={roleSearch}
+												onSearchChange={setRoleSearch}
+											/>
 										)}
 									/>
 									<Button

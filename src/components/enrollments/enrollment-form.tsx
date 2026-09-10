@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { EntitySelect } from "#/components/ui/entity-select";
 import {
 	Form,
 	FormControl,
@@ -20,8 +21,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select";
-import { useClasses } from "#/hooks/classes/use-classes";
-import { useStudents } from "#/hooks/students/use-students";
+import { fetchClassesPage, fetchStudentsPage } from "#/hooks/entity-fetchers";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 import { enrollmentStatusValues } from "#/lib/enrollments/schema";
 
 const enrollmentFormSchema = z.object({
@@ -45,10 +46,26 @@ export function EnrollmentForm({
 	serverError?: string | null;
 	defaultTurmaId?: string;
 }) {
-	const { data: studentsPage } = useStudents({ pageSize: 500 });
-	const students = studentsPage?.data ?? [];
-	const { data: classesPage } = useClasses({ pageSize: 500 });
-	const classes = classesPage?.data ?? [];
+	const [studentSearch, setStudentSearch] = useState("");
+	const [classSearch, setClassSearch] = useState("");
+	const { data: studentsResult, isLoading: isLoadingStudents } =
+		useAsyncOptions({
+			queryKey: ["enrollment-form", "students"],
+			search: studentSearch,
+			fetchPage: fetchStudentsPage,
+			select: (student) => ({ id: student.id, name: student.name }),
+		});
+	const students = studentsResult?.options ?? [];
+	const { data: classesResult, isLoading: isLoadingClasses } = useAsyncOptions({
+		queryKey: ["enrollment-form", "classes"],
+		search: classSearch,
+		fetchPage: fetchClassesPage,
+		select: (classRow) => ({
+			id: classRow.id,
+			name: `${classRow.name} — ${classRow.academicPeriod}`,
+		}),
+	});
+	const classes = classesResult?.options ?? [];
 
 	const form = useForm<EnrollmentFormValues>({
 		resolver: zodResolver(enrollmentFormSchema),
@@ -73,20 +90,20 @@ export function EnrollmentForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Estudante *</FormLabel>
-							<Select value={field.value} onValueChange={field.onChange}>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecione o estudante" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{students.map((student) => (
-										<SelectItem key={student.id} value={student.id}>
-											{student.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<FormControl>
+								<EntitySelect
+									label="Estudante"
+									placeholder="Selecione o estudante"
+									value={field.value}
+									onChange={field.onChange}
+									options={students}
+									isLoading={isLoadingStudents}
+									total={studentsResult?.total ?? 0}
+									loadedAll={studentsResult?.loadedAll ?? true}
+									search={studentSearch}
+									onSearchChange={setStudentSearch}
+								/>
+							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -97,20 +114,20 @@ export function EnrollmentForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Turma *</FormLabel>
-							<Select value={field.value} onValueChange={field.onChange}>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecione a turma" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{classes.map((classRow) => (
-										<SelectItem key={classRow.id} value={classRow.id}>
-											{classRow.name} — {classRow.academicPeriod}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<FormControl>
+								<EntitySelect
+									label="Turma"
+									placeholder="Selecione a turma"
+									value={field.value}
+									onChange={field.onChange}
+									options={classes}
+									isLoading={isLoadingClasses}
+									total={classesResult?.total ?? 0}
+									loadedAll={classesResult?.loadedAll ?? true}
+									search={classSearch}
+									onSearchChange={setClassSearch}
+								/>
+							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}

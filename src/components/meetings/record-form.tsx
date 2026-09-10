@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useParticipantName } from "#/components/meetings/participant-name";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
+import { EntitySelect } from "#/components/ui/entity-select";
 import {
 	Form,
 	FormControl,
@@ -23,8 +25,9 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
-import { useComponents } from "#/hooks/components/use-components";
+import { fetchComponentsPage } from "#/hooks/entity-fetchers";
 import { useParticipants } from "#/hooks/meetings/use-participants";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 
 const recordFormSchema = z.object({
 	texto: z.string().trim().min(1, "Texto é obrigatório"),
@@ -59,8 +62,18 @@ export function RecordForm({
 	serverError?: string | null;
 	meetingId: string;
 }) {
-	const { data: componentsPage } = useComponents({ pageSize: 100 });
-	const components = componentsPage?.data ?? [];
+	const [componentSearch, setComponentSearch] = useState("");
+	const { data: componentsResult, isLoading: isLoadingComponents } =
+		useAsyncOptions({
+			queryKey: ["record-form", "components"],
+			search: componentSearch,
+			fetchPage: fetchComponentsPage,
+			select: (component) => ({ id: component.id, name: component.name }),
+		});
+	const componentOptions = componentsResult?.options ?? [];
+	const componentById = new Map(
+		componentOptions.map((component) => [component.id, component.name]),
+	);
 	const { data: participants = [] } = useParticipants(meetingId);
 	const { getParticipantName } = useParticipantName();
 
@@ -115,22 +128,24 @@ export function RecordForm({
 						<FormItem>
 							<FormLabel>Componente curricular</FormLabel>
 							<FormControl>
-								<Select
+								<EntitySelect
+									label="Componente curricular"
+									placeholder="Selecione o componente"
 									value={field.value}
-									onValueChange={field.onChange}
+									onChange={field.onChange}
+									options={[
+										...componentOptions,
+										...(field.value && !componentById.has(field.value)
+											? [{ id: field.value, name: field.value }]
+											: []),
+									]}
+									isLoading={isLoadingComponents}
+									total={componentsResult?.total ?? 0}
+									loadedAll={componentsResult?.loadedAll ?? true}
+									search={componentSearch}
+									onSearchChange={setComponentSearch}
 									disabled={disabled}
-								>
-									<SelectTrigger aria-label="Componente curricular">
-										<SelectValue placeholder="Selecione o componente" />
-									</SelectTrigger>
-									<SelectContent>
-										{components.map((component) => (
-											<SelectItem key={component.id} value={component.id}>
-												{component.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -155,7 +170,7 @@ export function RecordForm({
 										{participants.map((participant) => (
 											<SelectItem
 												key={participant.id}
-												value={getParticipantName(participant.staffId)}
+												value={participant.staffId}
 											>
 												{getParticipantName(participant.staffId)}
 											</SelectItem>

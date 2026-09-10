@@ -1,18 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-
 import { Button } from "#/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
+import { EntitySelect } from "#/components/ui/entity-select";
+import { fetchRolesPage, fetchStaffPage } from "#/hooks/entity-fetchers";
 import { useAddParticipant } from "#/hooks/meetings/use-add-participant";
 import { useParticipants } from "#/hooks/meetings/use-participants";
-import { useRoles } from "#/hooks/roles/use-roles";
-import { useStaff } from "#/hooks/staff/use-staff";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 
 export const Route = createFileRoute("/_app/meetings/$meetingId/participants")({
 	component: ParticipantsPage,
@@ -21,11 +14,23 @@ export const Route = createFileRoute("/_app/meetings/$meetingId/participants")({
 export function ParticipantsPage() {
 	const { meetingId } = Route.useParams();
 	const { data: participants, isLoading } = useParticipants(meetingId);
-	const { data: staffPage } = useStaff({ pageSize: 500 });
-	const staff = staffPage?.data ?? [];
+	const [staffSearch, setStaffSearch] = useState("");
+	const [roleSearch, setRoleSearch] = useState("");
+	const { data: staffResult, isLoading: isLoadingStaff } = useAsyncOptions({
+		queryKey: ["meeting-participants", "staff"],
+		search: staffSearch,
+		fetchPage: fetchStaffPage,
+		select: (member) => ({ id: member.id, name: member.name }),
+	});
+	const staff = staffResult?.options ?? [];
 	const staffById = new Map(staff.map((member) => [member.id, member.name]));
-	const { data: rolesPage } = useRoles({ pageSize: 500 });
-	const roles = rolesPage?.data ?? [];
+	const { data: rolesResult, isLoading: isLoadingRoles } = useAsyncOptions({
+		queryKey: ["meeting-participants", "roles"],
+		search: roleSearch,
+		fetchPage: fetchRolesPage,
+		select: (role) => ({ id: role.id, name: role.name }),
+	});
+	const roles = rolesResult?.options ?? [];
 	const roleById = new Map(roles.map((role) => [role.id, role.name]));
 	const addParticipant = useAddParticipant(meetingId);
 	const [staffId, setStaffId] = useState("");
@@ -53,30 +58,30 @@ export function ParticipantsPage() {
 		<div className="space-y-4">
 			<h1 className="text-2xl font-bold">Participantes</h1>
 			<div className="flex flex-wrap items-end gap-2">
-				<Select value={staffId} onValueChange={setStaffId}>
-					<SelectTrigger aria-label="Servidor">
-						<SelectValue placeholder="Servidor" />
-					</SelectTrigger>
-					<SelectContent>
-						{staff.map((member) => (
-							<SelectItem key={member.id} value={member.id}>
-								{member.name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-				<Select value={roleId} onValueChange={setRoleId}>
-					<SelectTrigger aria-label="Papel">
-						<SelectValue placeholder="Papel" />
-					</SelectTrigger>
-					<SelectContent>
-						{roles.map((role) => (
-							<SelectItem key={role.id} value={role.id}>
-								{role.name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<EntitySelect
+					label="Servidor"
+					placeholder="Servidor"
+					value={staffId}
+					onChange={setStaffId}
+					options={staff}
+					isLoading={isLoadingStaff}
+					total={staffResult?.total ?? 0}
+					loadedAll={staffResult?.loadedAll ?? true}
+					search={staffSearch}
+					onSearchChange={setStaffSearch}
+				/>
+				<EntitySelect
+					label="Papel"
+					placeholder="Papel"
+					value={roleId}
+					onChange={setRoleId}
+					options={roles}
+					isLoading={isLoadingRoles}
+					total={rolesResult?.total ?? 0}
+					loadedAll={rolesResult?.loadedAll ?? true}
+					search={roleSearch}
+					onSearchChange={setRoleSearch}
+				/>
 				<Button
 					onClick={() => void handleAdd()}
 					disabled={addParticipant.isPending}

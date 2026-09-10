@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ useClassHistory: vi.fn() }));
@@ -45,6 +46,30 @@ describe("ClassHistoryPanel", () => {
 		expect(screen.getByText("1 estudantes")).toBeInTheDocument();
 		expect(screen.getByText("1 reuniões")).toBeInTheDocument();
 		expect(screen.getByText("Matrícula")).toBeInTheDocument();
+	});
+
+	it("aplica filtros de histórico da turma", async () => {
+		const user = userEvent.setup();
+		mocks.useClassHistory.mockReturnValue({
+			data: {
+				turma: { id: "class-1", name: "Turma A" },
+				estudantes: [],
+				reunioes: [],
+				eventos: [],
+			},
+			isLoading: false,
+			isError: false,
+		});
+		renderPanel();
+		await user.type(screen.getByLabelText("Busca"), "conselho");
+		await user.type(screen.getByLabelText("Componente"), "component-1");
+		await user.type(screen.getByLabelText("Período"), "2026");
+		await user.click(screen.getByRole("button", { name: "Filtrar" }));
+		expect(mocks.useClassHistory).toHaveBeenLastCalledWith("class-1", {
+			q: "conselho",
+			componenteId: "component-1",
+			periodo: "2026",
+		});
 	});
 
 	it("exibe erro", () => {

@@ -89,6 +89,64 @@ describe("CreateClassDialog", () => {
 		expect(onSuccess).toHaveBeenCalled();
 	});
 
+	it("envia campos opcionais preenchidos", async () => {
+		const user = userEvent.setup();
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ id: "class-1" }), { status: 201 }),
+			);
+		renderDialog();
+		await user.type(await screen.findByLabelText("Nome *"), "9º Ano A");
+		await user.type(await screen.findByLabelText("Período letivo *"), "2026");
+		await user.type(
+			await screen.findByLabelText("Curso"),
+			"Ensino Fundamental",
+		);
+		await user.type(await screen.findByLabelText("Série"), "9º");
+		await user.type(await screen.findByLabelText("Turno"), "Manhã");
+		await user.click(screen.getByRole("button", { name: "Salvar" }));
+		await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+		expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+			nome: "9º Ano A",
+			periodoLetivo: "2026",
+			curso: "Ensino Fundamental",
+			serie: "9º",
+			turno: "Manhã",
+		});
+	});
+
+	it("limpa erro do servidor ao reabrir dialog", async () => {
+		const user = userEvent.setup();
+		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+			new Response(JSON.stringify({ error: "Turma já existe" }), {
+				status: 409,
+			}),
+		);
+		function Controlled() {
+			const [open, setOpen] = useState(true);
+			return (
+				<CreateClassDialog
+					open={open}
+					onOpenChange={setOpen}
+					trigger={<button type="button">Reabrir turma</button>}
+				/>
+			);
+		}
+		render(<Controlled />, { wrapper: createWrapper() });
+		await user.type(await screen.findByLabelText("Nome *"), "9º Ano A");
+		await user.type(await screen.findByLabelText("Período letivo *"), "2026");
+		await user.click(screen.getByRole("button", { name: "Salvar" }));
+		expect(await screen.findByText("Turma já existe")).toBeVisible();
+		await user.click(screen.getByRole("button", { name: "Close" }));
+		await waitFor(() =>
+			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+		);
+		await user.click(screen.getByRole("button", { name: "Reabrir turma" }));
+		expect(await screen.findByRole("dialog")).toBeInTheDocument();
+		expect(screen.queryByText("Turma já existe")).not.toBeInTheDocument();
+	});
+
 	it("exibe erro vindo do servidor sem fechar o dialog", async () => {
 		const user = userEvent.setup();
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(

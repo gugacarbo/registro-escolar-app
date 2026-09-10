@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
+import { EntitySelect } from "#/components/ui/entity-select";
 import {
 	Form,
 	FormControl,
@@ -15,20 +16,15 @@ import {
 	useForm,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
-import { useMeetings } from "#/hooks/meetings/use-meetings";
+import { fetchMeetingsPage } from "#/hooks/entity-fetchers";
+import { useMeeting } from "#/hooks/meetings/use-meeting";
 import { useApproveMinute } from "#/hooks/minutes/use-approve-minute";
 import { useGenerateMinute } from "#/hooks/minutes/use-generate-minute";
 import { useMinutePreview } from "#/hooks/minutes/use-minute-preview";
 import { useMinuteTemplates } from "#/hooks/minutes/use-minute-templates";
 import { useMinuteVersions } from "#/hooks/minutes/use-minute-versions";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 
 export const Route = createFileRoute("/_app/minutes/")({
 	component: MinutesPage,
@@ -41,18 +37,23 @@ type ApproveFormValues = {
 
 function MinutesPage() {
 	const [meetingId, setMeetingId] = useState<string>("");
-	const { data: meetingsPage, isLoading: isLoadingMeetings } = useMeetings({
-		pageSize: 100,
-	});
-	const meetings = meetingsPage?.data;
+	const [meetingSearch, setMeetingSearch] = useState("");
+	const { data: meetingsResult, isLoading: isLoadingMeetings } =
+		useAsyncOptions({
+			queryKey: ["minutes-page", "meetings"],
+			search: meetingSearch,
+			fetchPage: fetchMeetingsPage,
+			select: (meeting) => ({ id: meeting.id, name: meeting.title }),
+		});
+	const meetings = meetingsResult?.options;
 	const { data: templates } = useMinuteTemplates();
 	const preview = useMinutePreview(meetingId || undefined);
 	const versions = useMinuteVersions(meetingId || undefined);
 	const generate = useGenerateMinute(meetingId);
 	const approve = useApproveMinute(meetingId);
 
-	const meeting = meetings?.find((m) => m.id === meetingId);
-	const isDraft = meeting?.status === "draft";
+	const { data: selectedMeeting } = useMeeting(meetingId || "");
+	const isDraft = selectedMeeting?.status === "draft";
 
 	const form = useForm<ApproveFormValues>({
 		defaultValues: { data: "", observacao: "" },
@@ -75,18 +76,23 @@ function MinutesPage() {
 			</div>
 
 			<div className="max-w-xs">
-				<Select value={meetingId} onValueChange={setMeetingId}>
-					<SelectTrigger aria-label="Reunião">
-						<SelectValue placeholder="Selecione uma reunião" />
-					</SelectTrigger>
-					<SelectContent>
-						{(meetings ?? []).map((m) => (
-							<SelectItem key={m.id} value={m.id}>
-								{m.title}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<EntitySelect
+					label="Reunião"
+					placeholder="Selecione uma reunião"
+					value={meetingId}
+					onChange={setMeetingId}
+					options={[
+						...(meetings ?? []),
+						...(meetingId && !(meetings ?? []).some((m) => m.id === meetingId)
+							? [{ id: meetingId, name: selectedMeeting?.title ?? meetingId }]
+							: []),
+					]}
+					isLoading={isLoadingMeetings}
+					total={meetingsResult?.total ?? 0}
+					loadedAll={meetingsResult?.loadedAll ?? true}
+					search={meetingSearch}
+					onSearchChange={setMeetingSearch}
+				/>
 			</div>
 
 			{isLoadingMeetings && <p>Carregando reuniões...</p>}
@@ -112,11 +118,14 @@ function MinutesPage() {
 								</Badge>
 							</>
 						)}
-						{meeting?.templateId &&
-							templates?.find((t) => t.id === meeting.templateId) && (
+						{selectedMeeting?.templateId &&
+							templates?.find((t) => t.id === selectedMeeting.templateId) && (
 								<span className="text-sm text-muted-foreground">
 									Modelo:{" "}
-									{templates.find((t) => t.id === meeting.templateId)?.name}
+									{
+										templates.find((t) => t.id === selectedMeeting?.templateId)
+											?.name
+									}
 								</span>
 							)}
 					</div>

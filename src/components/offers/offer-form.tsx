@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { EntitySelect } from "#/components/ui/entity-select";
 import {
 	Form,
 	FormControl,
@@ -12,16 +14,13 @@ import {
 	FormNative,
 	FormSubmit,
 } from "#/components/ui/form";
+import { Input } from "#/components/ui/input";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
-import { useClasses } from "#/hooks/classes/use-classes";
-import { useComponents } from "#/hooks/components/use-components";
-import { useStaff } from "#/hooks/staff/use-staff";
+	fetchClassesPage,
+	fetchComponentsPage,
+	fetchStaffPage,
+} from "#/hooks/entity-fetchers";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 
 const offerFormSchema = z.object({
 	turmaId: z.string().min(1, "Turma é obrigatória"),
@@ -42,12 +41,37 @@ export function OfferForm({
 	defaultValues?: Partial<OfferFormValues>;
 	serverError?: string | null;
 }) {
-	const { data: classesPage } = useClasses({ pageSize: 500 });
-	const classes = classesPage?.data ?? [];
-	const { data: componentsPage } = useComponents({ pageSize: 500 });
-	const components = componentsPage?.data ?? [];
-	const { data: staffPage } = useStaff({ pageSize: 500 });
-	const staff = staffPage?.data ?? [];
+	const [classSearch, setClassSearch] = useState("");
+	const [componentSearch, setComponentSearch] = useState("");
+	const [staffSearch, setStaffSearch] = useState("");
+	const { data: classesResult, isLoading: isLoadingClasses } = useAsyncOptions({
+		queryKey: ["offer-form", "classes"],
+		search: classSearch,
+		fetchPage: fetchClassesPage,
+		select: (classRow) => ({
+			id: classRow.id,
+			name: `${classRow.name} — ${classRow.academicPeriod}`,
+		}),
+	});
+	const classes = classesResult?.options ?? [];
+	const { data: componentsResult, isLoading: isLoadingComponents } =
+		useAsyncOptions({
+			queryKey: ["offer-form", "components"],
+			search: componentSearch,
+			fetchPage: fetchComponentsPage,
+			select: (component) => ({ id: component.id, name: component.name }),
+		});
+	const components = componentsResult?.options ?? [];
+	const { data: staffResult, isLoading: isLoadingStaff } = useAsyncOptions({
+		queryKey: ["offer-form", "staff"],
+		search: staffSearch,
+		fetchPage: fetchStaffPage,
+		select: (member) => ({ id: member.id, name: member.name }),
+	});
+	const staffOptions = staffResult?.options ?? [];
+	const staffById = new Map(
+		staffOptions.map((member) => [member.id, member.name]),
+	);
 
 	const form = useForm<OfferFormValues>({
 		resolver: zodResolver(offerFormSchema),
@@ -71,20 +95,20 @@ export function OfferForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Turma *</FormLabel>
-							<Select value={field.value} onValueChange={field.onChange}>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecione a turma" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{classes.map((classRow) => (
-										<SelectItem key={classRow.id} value={classRow.id}>
-											{classRow.name} — {classRow.academicPeriod}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<FormControl>
+								<EntitySelect
+									label="Turma"
+									placeholder="Selecione a turma"
+									value={field.value}
+									onChange={field.onChange}
+									options={classes}
+									isLoading={isLoadingClasses}
+									total={classesResult?.total ?? 0}
+									loadedAll={classesResult?.loadedAll ?? true}
+									search={classSearch}
+									onSearchChange={setClassSearch}
+								/>
+							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -95,20 +119,20 @@ export function OfferForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Componente *</FormLabel>
-							<Select value={field.value} onValueChange={field.onChange}>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecione o componente" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{components.map((component) => (
-										<SelectItem key={component.id} value={component.id}>
-											{component.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<FormControl>
+								<EntitySelect
+									label="Componente"
+									placeholder="Selecione o componente"
+									value={field.value}
+									onChange={field.onChange}
+									options={components}
+									isLoading={isLoadingComponents}
+									total={componentsResult?.total ?? 0}
+									loadedAll={componentsResult?.loadedAll ?? true}
+									search={componentSearch}
+									onSearchChange={setComponentSearch}
+								/>
+							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -119,13 +143,19 @@ export function OfferForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Professores</FormLabel>
-							{staff.length === 0 && (
+							<Input
+								value={staffSearch}
+								onChange={(event) => setStaffSearch(event.target.value)}
+								placeholder="Buscar servidor"
+								aria-label="Buscar servidor"
+							/>
+							{staffOptions.length === 0 && !isLoadingStaff && (
 								<p className="text-sm text-muted-foreground">
-									Nenhum servidor cadastrado — a oferta pode ficar sem
-									professor.
+									Nenhum servidor encontrado para a busca — a oferta pode ficar
+									sem professor.
 								</p>
 							)}
-							{staff.map((member) => {
+							{staffOptions.map((member) => {
 								const checked = field.value.includes(member.id);
 								return (
 									<label
@@ -144,6 +174,32 @@ export function OfferForm({
 											}}
 										/>
 										{member.name}
+									</label>
+								);
+							})}
+							{!isLoadingStaff && staffResult && !staffResult.loadedAll && (
+								<p className="text-xs text-muted-foreground">
+									Mostrando {staffOptions.length} de {staffResult.total}. Refine
+									a busca para ver mais.
+								</p>
+							)}
+							{field.value.map((id) => {
+								if (staffById.has(id)) return null;
+								return (
+									<label key={id} className="flex items-center gap-2 text-sm">
+										<input
+											type="checkbox"
+											value={id}
+											checked
+											onChange={(event) => {
+												if (!event.target.checked) {
+													field.onChange(
+														field.value.filter((current) => current !== id),
+													);
+												}
+											}}
+										/>
+										{id}
 									</label>
 								);
 							})}

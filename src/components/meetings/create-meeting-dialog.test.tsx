@@ -120,6 +120,87 @@ describe("CreateMeetingDialog", () => {
 		);
 	});
 
+	it("envia data, modelo e participantes preenchidos", async () => {
+		const user = userEvent.setup();
+		const onSuccess = vi.fn();
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockImplementation(async (input, init) => {
+				const url = typeof input === "string" ? input : String(input);
+				if (url === "/api/meetings" && init?.method === "POST") {
+					return new Response(JSON.stringify({ id: "meeting-1" }), {
+						status: 201,
+					});
+				}
+				if (url.startsWith("/api/classes")) {
+					return new Response(
+						JSON.stringify({
+							data: [{ id: "class-1", name: "9º Ano", academicPeriod: "2026" }],
+							total: 1,
+							page: 1,
+							pageSize: 100,
+						}),
+					);
+				}
+				if (url.startsWith("/api/staff")) {
+					return new Response(
+						JSON.stringify({
+							data: [{ id: "staff-1", name: "Maria" }],
+							total: 1,
+							page: 1,
+							pageSize: 100,
+						}),
+					);
+				}
+				if (url.startsWith("/api/roles")) {
+					return new Response(
+						JSON.stringify({
+							data: [{ id: "role-1", name: "Coordenador" }],
+							total: 1,
+							page: 1,
+							pageSize: 100,
+						}),
+					);
+				}
+				return new Response(JSON.stringify([]), { status: 200 });
+			});
+		function Controlled() {
+			const [open, setOpen] = useState(true);
+			return (
+				<CreateMeetingDialog
+					open={open}
+					onOpenChange={setOpen}
+					onSuccess={onSuccess}
+				/>
+			);
+		}
+		render(<Controlled />, { wrapper: createWrapper() });
+		await user.type(await screen.findByLabelText("Nome *"), "Conselho UI");
+		await user.type(screen.getByLabelText("Data"), "2026-03-01");
+		await user.click(await screen.findByText("9º Ano — 2026"));
+		await user.click(
+			screen.getByRole("button", { name: "Adicionar participante" }),
+		);
+		await user.click(screen.getByLabelText("Servidor"));
+		await user.click(await screen.findByRole("option", { name: "Maria" }));
+		await user.click(screen.getByLabelText("Papel"));
+		await user.click(
+			await screen.findByRole("option", { name: "Coordenador" }),
+		);
+		await user.click(screen.getByRole("button", { name: "Salvar" }));
+		await waitFor(() => expect(onSuccess).toHaveBeenCalledWith("meeting-1"));
+		const call = fetchMock.mock.calls.find(
+			([url, init]) =>
+				String(url).startsWith("/api/meetings") && init?.method === "POST",
+		);
+		expect(call && JSON.parse(String(call[1]?.body))).toEqual({
+			title: "Conselho UI",
+			heldAt: "2026-03-01",
+			classIds: ["class-1"],
+			participants: [{ staffId: "staff-1", roleId: "role-1" }],
+		});
+	});
+
 	it("exibe erro vindo do servidor sem fechar o dialog", async () => {
 		const user = userEvent.setup();
 		vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {

@@ -6,8 +6,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
 	useParticipants: vi.fn(),
 	addAsync: vi.fn(),
-	useStaff: vi.fn(),
-	useRoles: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -21,30 +19,14 @@ vi.mock("#/hooks/meetings/use-participants", () => ({
 vi.mock("#/hooks/meetings/use-add-participant", () => ({
 	useAddParticipant: () => ({ mutateAsync: mocks.addAsync, isPending: false }),
 }));
-vi.mock("#/components/ui/select", () => ({
-	Select: ({ children }: { children: React.ReactNode }) => (
-		<select>{children}</select>
-	),
-	SelectContent: ({ children }: { children: React.ReactNode }) => (
-		<>{children}</>
-	),
-	SelectItem: ({
-		value,
-		children,
-	}: {
-		value: string;
-		children: React.ReactNode;
-	}) => <option value={value}>{children}</option>,
-	SelectTrigger: ({ children }: { children: React.ReactNode }) => (
-		<>{children}</>
-	),
-	SelectValue: () => null,
-}));
-
-vi.mock("#/hooks/staff/use-staff", () => ({ useStaff: mocks.useStaff }));
-vi.mock("#/hooks/roles/use-roles", () => ({ useRoles: mocks.useRoles }));
 
 import { ParticipantsPage } from "./participants";
+
+function fetchJson(data: unknown, total: number) {
+	return new Response(JSON.stringify({ data, total, page: 1, pageSize: 100 }), {
+		status: 200,
+	});
+}
 
 function renderPage() {
 	return render(
@@ -55,22 +37,28 @@ function renderPage() {
 }
 
 beforeEach(() => {
+	vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+		const url = typeof input === "string" ? input : String(input);
+		if (url.startsWith("/api/staff")) {
+			return fetchJson([{ id: "staff-1", name: "Maria Silva" }], 1);
+		}
+		if (url.startsWith("/api/roles")) {
+			return fetchJson([{ id: "role-1", name: "Coordenador" }], 1);
+		}
+		return new Response(JSON.stringify({ error: "x" }), { status: 500 });
+	});
 	mocks.useParticipants.mockReturnValue({
 		data: [{ id: "p-1", staffId: "staff-1", roleId: "role-1" }],
 		isLoading: false,
 	});
-	mocks.useStaff.mockReturnValue({
-		data: { data: [{ id: "staff-1", name: "Maria Silva" }] },
-	});
-	mocks.useRoles.mockReturnValue({
-		data: { data: [{ id: "role-1", name: "Coordenador" }] },
-	});
 });
 
 describe("ParticipantsPage", () => {
-	it("exibe nomes legíveis de servidor e papel", () => {
+	it("exibe nomes legíveis de servidor e papel", async () => {
 		renderPage();
-		expect(screen.getByText(/Maria Silva — Coordenador/)).toBeInTheDocument();
+		expect(
+			await screen.findByText(/Maria Silva — Coordenador/),
+		).toBeInTheDocument();
 	});
 
 	it("exibe estado de carregamento", () => {
@@ -84,22 +72,67 @@ describe("ParticipantsPage", () => {
 		renderPage();
 		await user.click(screen.getByRole("button", { name: "Adicionar" }));
 		expect(
-			screen.getByText("Selecione o servidor e o papel"),
+			await screen.findByText("Selecione o servidor e o papel"),
 		).toBeInTheDocument();
 	});
 
-	it("mostra IDs quando nomes não estão carregados", () => {
+	it("exibe erro do servidor ao adicionar participante", async () => {
+		const user = userEvent.setup();
+		mocks.addAsync.mockRejectedValue(new Error("Participante duplicado"));
+		renderPage();
+		await user.click(screen.getByLabelText("Servidor"));
+		await user.click(
+			await screen.findByRole("option", { name: "Maria Silva" }),
+		);
+		await user.click(screen.getByLabelText("Papel"));
+		await user.click(
+			await screen.findByRole("option", { name: "Coordenador" }),
+		);
+		await user.click(screen.getByRole("button", { name: "Adicionar" }));
+		expect(
+			await screen.findByText("Participante duplicado"),
+		).toBeInTheDocument();
+	});
+
+	it("adiciona participante com os IDs selecionados", async () => {
+		const user = userEvent.setup();
+		mocks.addAsync.mockResolvedValue({});
+		renderPage();
+		await user.click(screen.getByLabelText("Servidor"));
+		await user.click(
+			await screen.findByRole("option", { name: "Maria Silva" }),
+		);
+		await user.click(screen.getByLabelText("Papel"));
+		await user.click(
+			await screen.findByRole("option", { name: "Coordenador" }),
+		);
+		await user.click(screen.getByRole("button", { name: "Adicionar" }));
+		expect(
+			await screen.findByText(/Maria Silva — Coordenador/),
+		).toBeInTheDocument();
+		expect(mocks.addAsync).toHaveBeenCalledWith({
+			staffId: "staff-1",
+			roleId: "role-1",
+		});
+	});
+
+	it("mostra IDs quando nomes não estão carregados", async () => {
+		vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+			const url = typeof input === "string" ? input : String(input);
+			if (url.startsWith("/api/staff") || url.startsWith("/api/roles")) {
+				return fetchJson([], 0);
+			}
+			return new Response(JSON.stringify({ error: "x" }), { status: 500 });
+		});
 		mocks.useParticipants.mockReturnValue({
 			data: [
 				{ id: "p-unknown", staffId: "unknown-staff", roleId: "unknown-role" },
 			],
 			isLoading: false,
 		});
-		mocks.useStaff.mockReturnValue({ data: { data: [] } });
-		mocks.useRoles.mockReturnValue({ data: { data: [] } });
 		renderPage();
 		expect(
-			screen.getByText(/unknown-staff — unknown-role/),
+			await screen.findByText(/unknown-staff — unknown-role/),
 		).toBeInTheDocument();
 	});
 });

@@ -65,20 +65,22 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 		const component = await createComponent(apiContext, "Biologia E2E");
 
 		await page.goto(`/classes/${klass.id}/offers`);
-		const componentTrigger = page.getByRole("combobox", { name: "Componente *" });
+		const componentTrigger = page.getByRole("combobox", { name: "Componente" });
 		await componentTrigger.click();
 		const option = page
 			.locator('[data-slot="select-item"]')
 			.filter({ hasText: component.name });
 		await expect(option).toBeAttached();
 		await option.click();
-		await expect(page.getByRole("combobox", { name: "Componente *" })).toContainText(component.name);
+		await expect(page.getByRole("combobox", { name: "Componente" })).toContainText(component.name);
 		await page.getByRole("button", { name: "Ofertar componente" }).click();
 
 		await expect(
 			page.getByRole("listitem").filter({ hasText: "Biologia E2E" }),
 		).toBeVisible();
-		await expect(page.getByText("Nenhum servidor cadastrado")).toBeVisible();
+		await expect(
+			page.getByText(/Nenhum servidor encontrado para a busca/),
+		).toBeVisible();
 	});
 
 	test("rejeita professor inexistente", async ({ apiContext }) => {

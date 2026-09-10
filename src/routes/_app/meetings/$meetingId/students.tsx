@@ -1,19 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
+import { EntitySelect } from "#/components/ui/entity-select";
 import { Skeleton } from "#/components/ui/skeleton";
-import { useClasses } from "#/hooks/classes/use-classes";
+import { fetchClassesPage } from "#/hooks/entity-fetchers";
 import { useMeetingClassStudents } from "#/hooks/meetings/use-meeting-class-students";
 import { useUpdateStudentStatus } from "#/hooks/meetings/use-update-student-status";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 import type { TrackingStatus } from "#/lib/meeting-student-status/schema";
 
 export const Route = createFileRoute("/_app/meetings/$meetingId/students")({
@@ -36,10 +30,14 @@ const STATUS_ACTIONS: TrackingStatus[] = [
 
 function MeetingStudentsPage() {
 	const { meetingId } = Route.useParams();
-	const { data: classesPage, isLoading: isLoadingClasses } = useClasses({
-		pageSize: 500,
+	const [classSearch, setClassSearch] = useState("");
+	const { data: classesResult, isLoading: isLoadingClasses } = useAsyncOptions({
+		queryKey: ["meeting-students", "classes"],
+		search: classSearch,
+		fetchPage: fetchClassesPage,
+		select: (turma) => ({ id: turma.id, name: turma.name }),
 	});
-	const classes = classesPage?.data ?? [];
+	const classes = classesResult?.options ?? [];
 	const [classId, setClassId] = useState("");
 	const {
 		data: result,
@@ -72,24 +70,23 @@ function MeetingStudentsPage() {
 		<div className="space-y-4">
 			<h1 className="text-2xl font-bold">Acompanhamento de estudantes</h1>
 
-			<Select value={classId} onValueChange={setClassId}>
-				<SelectTrigger aria-label="Turma">
-					<SelectValue placeholder="Selecione a turma" />
-				</SelectTrigger>
-				<SelectContent>
-					{(classes ?? []).map((turma) => (
-						<SelectItem key={turma.id} value={turma.id}>
-							{turma.name}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
+			<EntitySelect
+				label="Turma"
+				placeholder="Selecione a turma"
+				value={classId}
+				onChange={setClassId}
+				options={classes}
+				isLoading={isLoadingClasses}
+				total={classesResult?.total ?? 0}
+				loadedAll={classesResult?.loadedAll ?? true}
+				search={classSearch}
+				onSearchChange={setClassSearch}
+			/>
 
 			{serverError && <p className="text-sm text-destructive">{serverError}</p>}
 
 			{(isLoadingClasses || isLoadingStudents) && classId && (
 				<div className="space-y-2">
-					<Skeleton className="h-4 w-full" />
 					<Skeleton className="h-4 w-full" />
 					<Skeleton className="h-4 w-2/3" />
 				</div>

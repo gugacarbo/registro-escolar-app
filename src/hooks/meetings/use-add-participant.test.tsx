@@ -47,4 +47,30 @@ describe("useAddParticipant", () => {
 			"Falha ao adicionar participante",
 		);
 	});
+	it("invalida participantes após sucesso", async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(
+				new Response(
+					JSON.stringify({ id: "p-1", staffId: "staff-1", roleId: "role-1" }),
+					{ status: 201 },
+				),
+			);
+		const invalidate = vi.fn();
+		const client = new QueryClient({
+			defaultOptions: { mutations: { retry: false } },
+		});
+		client.invalidateQueries = invalidate;
+		const { result } = renderHook(() => useAddParticipant("meeting-1"), {
+			wrapper: ({ children }: { children: ReactNode }) => (
+				<QueryClientProvider client={client}>{children}</QueryClientProvider>
+			),
+		});
+		result.current.mutate({ staffId: "staff-1", roleId: "role-1" });
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(invalidate).toHaveBeenCalledWith({
+			queryKey: ["participants", "meeting-1"],
+		});
+		expect(fetchMock).toHaveBeenCalled();
+	});
 });
