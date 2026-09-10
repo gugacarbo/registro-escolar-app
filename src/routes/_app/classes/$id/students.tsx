@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { ClassHistoryPanel } from "#/components/history/class-history-panel";
 import { Input } from "#/components/ui/input";
 import { useClassStudents } from "#/hooks/enrollments/use-class-students";
 
@@ -40,6 +41,7 @@ function ClassStudentsPage() {
 					))}
 				</ul>
 			)}
+			<ClassHistoryPanel classId={id} />
 		</div>
 	);
 }

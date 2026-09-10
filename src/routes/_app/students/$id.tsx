@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-
+import { StudentHistoryPanel } from "#/components/history/student-history-panel";
 import {
 	StudentForm,
 	type StudentFormValues,
@@ -103,6 +103,7 @@ export function StudentDetailPage() {
 						submitLabel="Salvar alterações"
 						serverError={serverError}
 					/>
+					<StudentHistoryPanel studentId={student.id} />
 				</>
 			)}
 		</div>
