@@ -16,6 +16,7 @@ import {
 	useForm,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { PageShell } from "#/components/ui/page";
 import { Textarea } from "#/components/ui/textarea";
 import { fetchMeetingsPage } from "#/hooks/entity-fetchers";
 import { useMeeting } from "#/hooks/meetings/use-meeting";
@@ -60,9 +61,11 @@ function MinutesPage() {
 	});
 
 	return (
-		<div className="space-y-4">
+		<PageShell>
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Atas</h1>
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+					Atas
+				</h1>
 				<div className="flex gap-2">
 					<Link to="/minutes/templates">
 						<Button variant="secondary">Modelos de ata</Button>
@@ -167,7 +170,9 @@ function MinutesPage() {
 					)}
 
 					<div className="space-y-2 rounded border p-3">
-						<h2 className="text-lg font-semibold">Aprovar ata</h2>
+						<h2 className="font-display text-lg font-semibold tracking-tight">
+							Aprovar ata
+						</h2>
 						<Form {...form}>
 							<FormNative
 								onSubmit={() => {
@@ -217,7 +222,9 @@ function MinutesPage() {
 					</div>
 
 					<div className="space-y-2">
-						<h2 className="text-lg font-semibold">Versões</h2>
+						<h2 className="font-display text-lg font-semibold tracking-tight">
+							Versões
+						</h2>
 						{versions.isLoading && <p>Carregando versões...</p>}
 						{versions.error && (
 							<p role="alert">
@@ -264,6 +271,6 @@ function MinutesPage() {
 					</div>
 				</>
 			)}
-		</div>
+		</PageShell>
 	);
 }

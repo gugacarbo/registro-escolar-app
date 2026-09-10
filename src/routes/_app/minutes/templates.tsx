@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { MinuteTemplateForm } from "#/components/minutes/minute-template-form";
 import { Button } from "#/components/ui/button";
+import { PageShell } from "#/components/ui/page";
 import { useCreateMinuteTemplate } from "#/hooks/minutes/use-create-minute-template";
 import { useMinuteTemplates } from "#/hooks/minutes/use-minute-templates";
 
@@ -16,9 +17,11 @@ function MinuteTemplatesPage() {
 	const create = useCreateMinuteTemplate();
 
 	return (
-		<div className="space-y-4">
+		<PageShell>
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Modelos de ata</h1>
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+					Modelos de ata
+				</h1>
 				<Button variant="secondary" onClick={() => setShowForm((v) => !v)}>
 					{showForm ? "Fechar" : "Novo modelo"}
 				</Button>
@@ -68,6 +71,6 @@ function MinuteTemplatesPage() {
 					))}
 				</ul>
 			)}
-		</div>
+		</PageShell>
 	);
 }
