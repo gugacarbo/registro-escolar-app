@@ -37,7 +37,8 @@
 		"drizzle",
 		"src/db/auth-schema.ts",
 		"coverage/**",
-		"test-results/**"
+		"test-results/**",
+		"storybook-static"
 	],
 	"words": [
 		"Aproveie",
@@ -92,6 +93,9 @@
 		"vaul",
 		"vinxi",
 		"workerd",
-		"wrangler"
+		"wrangler",
+		"hoistados",
+		"miniflare",
+		"supersessão"
 	]
 }
