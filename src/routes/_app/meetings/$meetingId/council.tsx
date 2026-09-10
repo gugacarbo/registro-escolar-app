@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { GeneralReportForm } from "#/components/meetings/general-report-form";
 import {
 	RecordForm,
 	type RecordFormSubmitValues,
@@ -8,6 +9,11 @@ import { TransitionButtons } from "#/components/meetings/transition-buttons";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
+import {
+	useCreateGeneralReport,
+	useGeneralReports,
+	useUpdateGeneralReport,
+} from "#/hooks/general-reports/use-general-reports";
 import { useMeeting } from "#/hooks/meetings/use-meeting";
 import { useMeetingClassStudents } from "#/hooks/meetings/use-meeting-class-students";
 import { useMeetingClasses } from "#/hooks/meetings/use-meeting-classes";
@@ -63,8 +69,16 @@ export function CouncilPage() {
 	const createRecord = useCreateLinkedRecord(meetingId);
 	const updateRecord = useUpdateLinkedRecord(meetingId);
 	const setInclusion = useSetRecordInclusion(meetingId);
+	const {
+		data: generalReports = [],
+		isLoading: isLoadingReports,
+		isError: isErrorReports,
+	} = useGeneralReports(meetingId);
+	const createGeneralReport = useCreateGeneralReport(meetingId);
+	const updateGeneralReport = useUpdateGeneralReport(meetingId);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [editingRecord, setEditingRecord] = useState<string | null>(null);
+	const [editingReport, setEditingReport] = useState<string | null>(null);
 	const canEdit =
 		!!meeting && canEditLinkedRecord(meeting.status as MeetingStatus);
 
@@ -97,6 +111,37 @@ export function CouncilPage() {
 				incluirNaAta: values.incluirNaAta,
 			});
 			setEditingRecord(null);
+		} catch (error) {
+			if (error instanceof Error) setServerError(error.message);
+		}
+	}
+
+	async function handleCreateReport(values: {
+		texto: string;
+		origemId: string | null;
+		incluirNaAta: boolean;
+	}) {
+		setServerError(null);
+		try {
+			await createGeneralReport.mutateAsync(values);
+		} catch (error) {
+			if (error instanceof Error) setServerError(error.message);
+		}
+	}
+
+	async function handleUpdateReport(values: {
+		texto: string;
+		origemId: string | null;
+		incluirNaAta: boolean;
+	}) {
+		if (!editingReport) return;
+		setServerError(null);
+		try {
+			await updateGeneralReport.mutateAsync({
+				reportId: editingReport,
+				...values,
+			});
+			setEditingReport(null);
 		} catch (error) {
 			if (error instanceof Error) setServerError(error.message);
 		}
@@ -321,6 +366,64 @@ export function CouncilPage() {
 					)}
 				</section>
 			)}
+			<section className="space-y-3" aria-labelledby="general-reports-title">
+				<h2 id="general-reports-title" className="text-lg font-semibold">
+					Relatos gerais
+				</h2>
+				{isLoadingReports && <p>Carregando relatos...</p>}
+				{isErrorReports && (
+					<p className="text-sm text-muted-foreground">
+						Não foi possível carregar os relatos gerais.
+					</p>
+				)}
+				{!isLoadingReports && generalReports.length === 0 && (
+					<p className="text-sm text-muted-foreground">Nenhum relato geral.</p>
+				)}
+				<ul className="space-y-2">
+					{generalReports.map((report) => (
+						<li key={report.id} className="rounded border p-3">
+							<div className="flex flex-wrap items-center justify-between gap-2">
+								<div>
+									<p>{report.texto}</p>
+									<p className="text-xs text-muted-foreground">
+										{new Date(report.createdAt).toLocaleString("pt-BR")}
+									</p>
+								</div>
+								<Button
+									type="button"
+									size="sm"
+									variant="outline"
+									disabled={!canEdit || updateGeneralReport.isPending}
+									onClick={() => setEditingReport(report.id)}
+								>
+									Editar
+								</Button>
+							</div>
+							{editingReport === report.id && (
+								<div className="mt-3 border-t pt-3">
+									<GeneralReportForm
+										meetingId={meetingId}
+										defaultValues={{
+											texto: report.texto,
+											origemId: report.originId ?? "",
+											incluirNaAta: report.includeInMinutes,
+										}}
+										onSubmit={handleUpdateReport}
+										submitLabel="Salvar relato"
+										disabled={!canEdit || updateGeneralReport.isPending}
+									/>
+								</div>
+							)}
+						</li>
+					))}
+				</ul>
+				<GeneralReportForm
+					meetingId={meetingId}
+					onSubmit={handleCreateReport}
+					submitLabel="Adicionar relato"
+					disabled={!canEdit || createGeneralReport.isPending}
+				/>
+			</section>
 		</div>
 	);
 }

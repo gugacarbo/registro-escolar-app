@@ -12,6 +12,9 @@ const mocks = vi.hoisted(() => ({
 	useSetRecordInclusion: vi.fn(),
 	useComponents: vi.fn(),
 	useParticipants: vi.fn(),
+	useGeneralReports: vi.fn(),
+	useCreateGeneralReport: vi.fn(),
+	useUpdateGeneralReport: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -40,6 +43,14 @@ vi.mock("#/hooks/components/use-components", () => ({
 }));
 vi.mock("#/hooks/meetings/use-participants", () => ({
 	useParticipants: mocks.useParticipants,
+}));
+vi.mock("#/hooks/general-reports/use-general-reports", () => ({
+	useGeneralReports: mocks.useGeneralReports,
+	useCreateGeneralReport: mocks.useCreateGeneralReport,
+	useUpdateGeneralReport: mocks.useUpdateGeneralReport,
+}));
+vi.mock("#/components/meetings/general-report-form", () => ({
+	GeneralReportForm: () => <form aria-label="Formulário de relato geral" />,
 }));
 vi.mock("#/components/meetings/transition-buttons", () => ({
 	TransitionButtons: () => <div />,
@@ -121,6 +132,21 @@ beforeEach(() => {
 	mocks.useSetRecordInclusion.mockReturnValue(mutation());
 	mocks.useComponents.mockReturnValue({ data: { data: [] } });
 	mocks.useParticipants.mockReturnValue({ data: [] });
+	mocks.useGeneralReports.mockReturnValue({
+		data: [
+			{
+				id: "report-1",
+				texto: "Relato geral",
+				originId: null,
+				includeInMinutes: true,
+				createdAt: "2026-01-01T00:00:00Z",
+			},
+		],
+		isLoading: false,
+		isError: false,
+	});
+	mocks.useCreateGeneralReport.mockReturnValue(mutation());
+	mocks.useUpdateGeneralReport.mockReturnValue(mutation());
 });
 
 describe("CouncilPage", () => {
@@ -133,6 +159,10 @@ describe("CouncilPage", () => {
 		expect(screen.getByRole("button", { name: "João" })).toBeInTheDocument();
 		expect(screen.getByText("Registro vinculado")).toBeInTheDocument();
 		expect(screen.getAllByText("Contexto").length).toBeGreaterThan(0);
+		expect(screen.getByText("Relato geral")).toBeInTheDocument();
+		expect(
+			screen.getByRole("form", { name: "Formulário de relato geral" }),
+		).toBeInTheDocument();
 		expect(screen.queryByText(/spec 0007/i)).not.toBeInTheDocument();
 	});
 
@@ -178,7 +208,7 @@ describe("CouncilPage", () => {
 			isPending: false,
 		});
 		renderPage();
-		fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+		fireEvent.click(screen.getAllByRole("button", { name: "Editar" })[0]);
 		await waitFor(() =>
 			expect(screen.getAllByLabelText("Texto *").length).toBeGreaterThan(1),
 		);
