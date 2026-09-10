@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { StaffForm, type StaffFormValues } from "#/components/staff/staff-form";
+import { PageShell } from "#/components/ui/page";
 import { useCreateStaff } from "#/hooks/staff/use-create-staff";
 
 export const Route = createFileRoute("/_app/staff/new")({
@@ -26,9 +27,11 @@ function NewStaffPage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-md space-y-4">
-			<h1 className="text-2xl font-bold">Novo servidor</h1>
+		<PageShell className="mx-auto max-w-2xl">
+			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+				Novo servidor
+			</h1>
 			<StaffForm onSubmit={handleSubmit} serverError={serverError} />
-		</div>
+		</PageShell>
 	);
 }

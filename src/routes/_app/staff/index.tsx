@@ -3,7 +3,8 @@ import { useState } from "react";
 
 import { DataTable } from "#/components/data-table";
 import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
+import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
+import { SearchInput } from "#/components/ui/search-input";
 import { useStaff } from "#/hooks/staff/use-staff";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import type { StaffMember } from "#/lib/staff/schema";
@@ -23,7 +24,7 @@ const columns = [
 	},
 ];
 
-export function StaffPage() {
+export default function StaffPage() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
@@ -45,19 +46,26 @@ export function StaffPage() {
 	const navigate = useNavigate();
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Servidores</h1>
-				<Link to="/staff/new">
-					<Button>Novo servidor</Button>
-				</Link>
-			</div>
-			<Input
-				placeholder="Buscar por nome ou email"
-				value={search}
-				onChange={(event) => setSearch(event.target.value)}
-				aria-label="Buscar por nome ou email"
+		<PageShell>
+			<PageHeader
+				eyebrow="Equipe"
+				title="Servidores"
+				description="Professores, gestores e especialistas que participam das reuniões e atas do conselho."
+				actions={
+					<Button asChild>
+						<Link to="/staff/new">Novo servidor</Link>
+					</Button>
+				}
 			/>
+			<PageToolbar>
+				<SearchInput
+					className="sm:max-w-md"
+					value={search}
+					onChange={setSearch}
+					placeholder="Buscar por nome ou email"
+					ariaLabel="Buscar por nome ou email"
+				/>
+			</PageToolbar>
 			<DataTable
 				columns={columns}
 				rows={staffPage?.data ?? []}
@@ -79,6 +87,6 @@ export function StaffPage() {
 				emptyTitle="Nenhum servidor encontrado"
 				emptyDescription="Ajuste a busca ou cadastre um novo servidor."
 			/>
-		</div>
+		</PageShell>
 	);
 }

@@ -14,6 +14,7 @@ import {
 	AlertDialogTrigger,
 } from "#/components/ui/alert-dialog";
 import { Button } from "#/components/ui/button";
+import { PageShell } from "#/components/ui/page";
 import { useDeleteStaffMember } from "#/hooks/staff/use-delete-staff-member";
 import { useStaffMember } from "#/hooks/staff/use-staff-member";
 import { useUpdateStaffMember } from "#/hooks/staff/use-update-staff-member";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/_app/staff/$id")({
 	component: StaffDetailPage,
 });
 
-export function StaffDetailPage() {
+export default function StaffDetailPage() {
 	const { id } = Route.useParams();
 	const { data: member, isLoading, isError, error } = useStaffMember(id);
 	const updateMember = useUpdateStaffMember(id);
@@ -60,9 +61,9 @@ export function StaffDetailPage() {
 	}
 
 	return (
-		<div className="space-y-4">
+		<PageShell>
 			<div className="flex items-center justify-between gap-2">
-				<h1 className="text-2xl font-bold">
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
 					{member?.name ?? "Dados do servidor"}
 				</h1>
 				<Link to="/staff">
@@ -120,6 +121,6 @@ export function StaffDetailPage() {
 					</AlertDialog>
 				</>
 			)}
-		</div>
+		</PageShell>
 	);
 }
