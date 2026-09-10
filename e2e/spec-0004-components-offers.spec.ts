@@ -26,6 +26,27 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 		await expect(page.getByText("Matemática E2E")).toBeVisible();
 	});
 
+	test("abre o detalhe do componente ao clicar na linha", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const component = await createComponent(
+			apiContext,
+			"Componente Linha Clicável",
+		);
+
+		await page.goto("/components");
+		const cell = page.getByRole("cell", {
+			name: "Componente Linha Clicável",
+		});
+		await expect(cell).toBeVisible();
+		await cell.click();
+		await expect(page).toHaveURL(new RegExp(`/components/${component.id}`));
+		await expect(
+			page.getByRole("heading", { name: "Componente Linha Clicável" }),
+		).toBeVisible();
+	});
+
 	test("rejeita componente duplicado normalizado", async ({ apiContext }) => {
 		const component = await createComponent(apiContext, "Programação");
 		const duplicate = await createComponentResponse(apiContext, " PROGRAMAÇÃO ");

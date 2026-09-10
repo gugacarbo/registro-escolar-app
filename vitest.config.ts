@@ -1,5 +1,6 @@
 import path from "node:path";
 import { defineConfig } from "vitest/config";
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 
 const ROOT = path.resolve(__dirname, ".");
 
@@ -11,6 +12,21 @@ export default defineConfig({
 		],
 	},
 	test: {
+		projects: [
+			{
+				extends: true,
+				plugins: [storybookTest({ configDir: ".storybook" })],
+				test: {
+					name: "storybook",
+					browser: {
+						enabled: true,
+						headless: true,
+						provider: "playwright",
+						instances: [{ browser: "chromium" }],
+					},
+				},
+			},
+		],
 		environment: "happy-dom",
 		setupFiles: ["./src/test/setup.ts"],
 		globals: true,

@@ -7,10 +7,13 @@ import type { StaffPageResult } from "#/lib/staff/types";
 
 const mocks = vi.hoisted(() => ({
 	useStaff: vi.fn(),
+	useNavigate: vi.fn(),
+	navigate: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
+	useNavigate: mocks.useNavigate,
 	Link: ({
 		children,
 		to,
@@ -71,6 +74,7 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 	});
+	mocks.useNavigate.mockReturnValue(mocks.navigate);
 });
 
 afterEach(() => {
@@ -178,5 +182,26 @@ describe("StaffPage", () => {
 			page: 1,
 			pageSize: 10,
 		});
+	});
+
+	it("navega para o detalhe ao clicar em célula de texto da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de servidores" });
+		fireEvent.click(within(table).getByRole("cell", { name: "João Silva" }));
+
+		expect(mocks.navigate).toHaveBeenCalledTimes(1);
+		expect(mocks.navigate).toHaveBeenCalledWith({
+			to: "/staff/$id",
+			params: { id: "staff-1" },
+		});
+	});
+
+	it("clicar no link do cabeçalho não dispara a navegação da linha", () => {
+		renderPage();
+
+		fireEvent.click(screen.getByRole("link", { name: "Novo servidor" }));
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });

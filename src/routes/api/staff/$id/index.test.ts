@@ -7,7 +7,11 @@ import {
 	updateStaff,
 } from "#/lib/staff/repository";
 
-import { deleteStaffHandler, getStaffHandler, updateStaffHandler } from "./index";
+import {
+	deleteStaffHandler,
+	getStaffHandler,
+	updateStaffHandler,
+} from "./index";
 
 vi.mock("#/lib/auth/session", () => ({
 	getSession: vi.fn(),
@@ -157,7 +161,9 @@ describe("PATCH /api/staff/:id", () => {
 	it("retorna 404 no PATCH quando o servidor não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
-		(findStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
+		(findStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			undefined,
+		);
 		const response = await updateStaffHandler({
 			request: new Request("http://localhost/api/staff/missing/", {
 				method: "PATCH",

@@ -36,6 +36,13 @@ bun run build-storybook # valida o build estático do catálogo
 - Execute `bun run test:visual` localmente e na CI.
 - Para aceitar uma alteração visual intencional, execute `bunx playwright test --grep @visual --update-snapshots` e revise as imagens alteradas.
 
+## Cobertura obrigatória por tela
+
+- Toda tela/rota de UI deve ter pelo menos um teste end-to-end no Playwright exercitando um fluxo real da tela.
+- Toda tela/rota de UI também deve ter teste visual marcado com `@visual` em `e2e/visual/`.
+- Para rotas parametrizadas, cubra ao menos um caso representativo com dados válidos e deterministicamente preparados no teste.
+- Uma rota nova não deve ser considerada concluída enquanto não tiver os testes e2e e visual correspondentes.
+
 ## Onde criar testes
 
 - **Unitários/integração:** colocados ao lado do código, com sufixo `*.test.ts` ou `*.test.tsx` (ex.: `src/lib/utils.test.ts`).

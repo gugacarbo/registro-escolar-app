@@ -2,6 +2,7 @@ import {
 	baseURL,
 	addParticipant,
 	createMeeting,
+	createRole,
 	createRoleResponse,
 	createStaff,
 	listRoles,
@@ -22,6 +23,38 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 
 		await expect.poll(async () => page.url()).toBe(`${baseURL}/staff`);
 		await expect(page.getByText("Servidor E2E")).toBeVisible();
+	});
+
+	test("abre o detalhe do servidor ao clicar na linha", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const staff = await createStaff(apiContext, "Servidor Linha Clicável");
+
+		await page.goto("/staff");
+		const cell = page.getByRole("cell", { name: "Servidor Linha Clicável" });
+		await expect(cell).toBeVisible();
+		await cell.click();
+		await expect(page).toHaveURL(new RegExp(`/staff/${staff.id}`));
+		await expect(
+			page.getByRole("heading", { name: "Servidor Linha Clicável" }),
+		).toBeVisible();
+	});
+
+	test("abre o detalhe do papel ao clicar na linha", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const role = await createRole(apiContext, "Papel Linha Clicável");
+
+		await page.goto("/roles");
+		const cell = page.getByRole("cell", { name: "Papel Linha Clicável" });
+		await expect(cell).toBeVisible();
+		await cell.click();
+		await expect(page).toHaveURL(new RegExp(`/roles/${role.id}`));
+		await expect(
+			page.getByRole("heading", { name: "Papel Linha Clicável" }),
+		).toBeVisible();
 	});
 
 	test("reutiliza servidor já cadastrado", async ({ apiContext }) => {

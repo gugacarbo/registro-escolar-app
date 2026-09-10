@@ -18,6 +18,25 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		await expect(page.getByText("Turma E2E — 2026")).toBeVisible();
 	});
 
+	test("abre os alunos da turma ao clicar na linha", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const klass = await createClass(apiContext, "Turma Linha Clicável", "2026");
+
+		const classesPage = new ClassesPage(page);
+		await classesPage.goto();
+		const cell = page.getByRole("cell", { name: "Turma Linha Clicável" });
+		await expect(cell).toBeVisible();
+		await cell.click();
+		await expect(page).toHaveURL(
+			new RegExp(`/classes/${klass.id}/students`),
+		);
+		await expect(
+			page.getByRole("heading", { name: "Alunos da turma" }),
+		).toBeVisible();
+	});
+
 	test("trata turmas equivalentes de períodos distintos como entidades distintas", async ({
 		apiContext,
 	}) => {

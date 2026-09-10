@@ -6,6 +6,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { PwaUpdatePrompt } from "#/components/pwa/client/pwa-update-prompt.client";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
@@ -26,10 +27,24 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "TanStack Start Starter",
+				title: "Registro Escolar",
 			},
 		],
 		links: [
+			{
+				rel: "icon",
+				href: "/icons/favicon.ico",
+				sizes: "any",
+			},
+			{
+				rel: "icon",
+				href: "/icons/pwa.svg",
+				type: "image/svg+xml",
+			},
+			{
+				rel: "apple-touch-icon",
+				href: "/icons/apple-touch-icon-180x180.png",
+			},
 			{
 				rel: "stylesheet",
 				href: appCss,
@@ -41,7 +56,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="pt-BR" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
@@ -61,6 +76,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						TanStackQueryDevtools,
 					]}
 				/>
+				<PwaUpdatePrompt />
 				<Scripts />
 			</body>
 		</html>

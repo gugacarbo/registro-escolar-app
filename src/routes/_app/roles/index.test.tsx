@@ -7,10 +7,13 @@ import type { RolesPageResult } from "#/lib/roles/types";
 
 const mocks = vi.hoisted(() => ({
 	useRoles: vi.fn(),
+	useNavigate: vi.fn(),
+	navigate: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
+	useNavigate: mocks.useNavigate,
 }));
 
 vi.mock("#/hooks/roles/use-roles", () => ({
@@ -62,6 +65,7 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 	});
+	mocks.useNavigate.mockReturnValue(mocks.navigate);
 });
 
 afterEach(() => {
@@ -151,5 +155,26 @@ describe("RolesPage", () => {
 			page: 1,
 			pageSize: 10,
 		});
+	});
+
+	it("navega para o detalhe ao clicar em célula de texto da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de papéis" });
+		fireEvent.click(within(table).getByRole("cell", { name: "Professor" }));
+
+		expect(mocks.navigate).toHaveBeenCalledTimes(1);
+		expect(mocks.navigate).toHaveBeenCalledWith({
+			to: "/roles/$id",
+			params: { id: "role-1" },
+		});
+	});
+
+	it("clicar no botão Novo papel não dispara a navegação da linha", () => {
+		renderPage();
+
+		fireEvent.click(screen.getByRole("button", { name: "Novo papel" }));
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });

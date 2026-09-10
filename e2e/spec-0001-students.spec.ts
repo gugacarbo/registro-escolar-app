@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/test";
-import { baseURL } from "./fixtures/api";
+import { baseURL, createStudent } from "./fixtures/api";
 import { StudentsPage } from "./pages/students-page";
 
 test.describe("SPEC-0001 cadastro e importação de alunos", () => {
@@ -60,6 +60,27 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		).toBeVisible();
 		await page.getByRole("link", { name: "2" }).click();
 		await expect(page.getByText("Mostrando 11–11 de 11")).toBeVisible();
+	});
+
+	test("abre o detalhe ao clicar em qualquer lugar da linha", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const student = await createStudent(apiContext, "Aluno Linha Clicável");
+
+		const studentsPage = new StudentsPage(page);
+		await studentsPage.goto();
+		await page
+			.getByLabel("Buscar por nome ou documento")
+			.fill("Aluno Linha Clicável");
+
+		const cell = page.getByRole("cell", { name: "Aluno Linha Clicável" });
+		await expect(cell).toBeVisible();
+		await cell.click();
+		await expect(page).toHaveURL(new RegExp(`/students/${student.id}`));
+		await expect(
+			page.getByRole("heading", { name: "Aluno Linha Clicável" }),
+		).toBeVisible();
 	});
 
 	test("rejeita nome vazio no cadastro manual", async ({

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { DataTable } from "#/components/data-table";
@@ -42,6 +42,7 @@ export function StaffPage() {
 		isLoading,
 		isError,
 	} = useStaff({ search: debouncedSearch || undefined, page, pageSize });
+	const navigate = useNavigate();
 
 	return (
 		<div className="space-y-4">
@@ -69,6 +70,9 @@ export function StaffPage() {
 					setPageSize(size);
 					setPage(1);
 				}}
+				onRowClick={(member) =>
+					navigate({ to: "/staff/$id", params: { id: member.id } })
+				}
 				isLoading={isLoading}
 				isError={isError}
 				ariaLabel="Tabela de servidores"

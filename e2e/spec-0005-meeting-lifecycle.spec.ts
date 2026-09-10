@@ -35,6 +35,27 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 		await expect(page.getByText("Rascunho")).toBeVisible();
 	});
 
+	test("abre o detalhe da reunião ao clicar na linha", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const meeting = await createMeeting(apiContext, {
+			title: "Reunião Linha Clicável",
+			heldAt: "2026-05-10",
+			classIds: [],
+			participants: [],
+		});
+
+		await page.goto("/meetings");
+		const cell = page.getByRole("cell", { name: "Reunião Linha Clicável" });
+		await expect(cell).toBeVisible();
+		await cell.click();
+		await expect(page).toHaveURL(new RegExp(`/meetings/${meeting.id}`));
+		await expect(
+			page.getByRole("heading", { name: "Reunião Linha Clicável" }),
+		).toBeVisible();
+	});
+
 	test("cria reunião em rascunho via API", async ({ apiContext }) => {
 		const meeting = await createMeeting(apiContext, {
 			title: "Conselho Rascunho",

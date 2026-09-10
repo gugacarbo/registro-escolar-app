@@ -16,11 +16,14 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppClassesIndexRouteImport } from './routes/_app/classes/index'
 import { Route as AppClassesEnrollRouteImport } from './routes/_app/classes/enroll'
 import { Route as AppComponentsIndexRouteImport } from './routes/_app/components/index'
+import { Route as AppComponentsIdRouteImport } from './routes/_app/components/$id'
 import { Route as AppMeetingsIndexRouteImport } from './routes/_app/meetings/index'
 import { Route as AppMinutesIndexRouteImport } from './routes/_app/minutes/index'
 import { Route as AppMinutesTemplatesRouteImport } from './routes/_app/minutes/templates'
 import { Route as AppRolesIndexRouteImport } from './routes/_app/roles/index'
+import { Route as AppRolesIdRouteImport } from './routes/_app/roles/$id'
 import { Route as AppStaffIndexRouteImport } from './routes/_app/staff/index'
+import { Route as AppStaffIdRouteImport } from './routes/_app/staff/$id'
 import { Route as AppStaffNewRouteImport } from './routes/_app/staff/new'
 import { Route as AppStudentsIndexRouteImport } from './routes/_app/students/index'
 import { Route as AppStudentsIdRouteImport } from './routes/_app/students/$id'
@@ -102,6 +105,11 @@ const AppComponentsIndexRoute = AppComponentsIndexRouteImport.update({
   path: '/components/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppComponentsIdRoute = AppComponentsIdRouteImport.update({
+  id: '/components/$id',
+  path: '/components/$id',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppMeetingsIndexRoute = AppMeetingsIndexRouteImport.update({
   id: '/meetings/',
   path: '/meetings/',
@@ -122,9 +130,19 @@ const AppRolesIndexRoute = AppRolesIndexRouteImport.update({
   path: '/roles/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppRolesIdRoute = AppRolesIdRouteImport.update({
+  id: '/roles/$id',
+  path: '/roles/$id',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppStaffIndexRoute = AppStaffIndexRouteImport.update({
   id: '/staff/',
   path: '/staff/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppStaffIdRoute = AppStaffIdRouteImport.update({
+  id: '/staff/$id',
+  path: '/staff/$id',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppStaffNewRoute = AppStaffNewRouteImport.update({
@@ -386,7 +404,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/classes/enroll': typeof AppClassesEnrollRoute
+  '/components/$id': typeof AppComponentsIdRoute
   '/minutes/templates': typeof AppMinutesTemplatesRoute
+  '/roles/$id': typeof AppRolesIdRoute
+  '/staff/$id': typeof AppStaffIdRoute
   '/staff/new': typeof AppStaffNewRoute
   '/students/$id': typeof AppStudentsIdRoute
   '/students/import': typeof AppStudentsImportRoute
@@ -445,7 +466,10 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/': typeof AppIndexRoute
   '/classes/enroll': typeof AppClassesEnrollRoute
+  '/components/$id': typeof AppComponentsIdRoute
   '/minutes/templates': typeof AppMinutesTemplatesRoute
+  '/roles/$id': typeof AppRolesIdRoute
+  '/staff/$id': typeof AppStaffIdRoute
   '/staff/new': typeof AppStaffNewRoute
   '/students/$id': typeof AppStudentsIdRoute
   '/students/import': typeof AppStudentsImportRoute
@@ -506,7 +530,10 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/': typeof AppIndexRoute
   '/_app/classes/enroll': typeof AppClassesEnrollRoute
+  '/_app/components/$id': typeof AppComponentsIdRoute
   '/_app/minutes/templates': typeof AppMinutesTemplatesRoute
+  '/_app/roles/$id': typeof AppRolesIdRoute
+  '/_app/staff/$id': typeof AppStaffIdRoute
   '/_app/staff/new': typeof AppStaffNewRoute
   '/_app/students/$id': typeof AppStudentsIdRoute
   '/_app/students/import': typeof AppStudentsImportRoute
@@ -567,7 +594,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/classes/enroll'
+    | '/components/$id'
     | '/minutes/templates'
+    | '/roles/$id'
+    | '/staff/$id'
     | '/staff/new'
     | '/students/$id'
     | '/students/import'
@@ -626,7 +656,10 @@ export interface FileRouteTypes {
     | '/register'
     | '/'
     | '/classes/enroll'
+    | '/components/$id'
     | '/minutes/templates'
+    | '/roles/$id'
+    | '/staff/$id'
     | '/staff/new'
     | '/students/$id'
     | '/students/import'
@@ -686,7 +719,10 @@ export interface FileRouteTypes {
     | '/register'
     | '/_app/'
     | '/_app/classes/enroll'
+    | '/_app/components/$id'
     | '/_app/minutes/templates'
+    | '/_app/roles/$id'
+    | '/_app/staff/$id'
     | '/_app/staff/new'
     | '/_app/students/$id'
     | '/_app/students/import'
@@ -833,6 +869,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppComponentsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/components/$id': {
+      id: '/_app/components/$id'
+      path: '/components/$id'
+      fullPath: '/components/$id'
+      preLoaderRoute: typeof AppComponentsIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/meetings/': {
       id: '/_app/meetings/'
       path: '/meetings'
@@ -861,11 +904,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRolesIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/roles/$id': {
+      id: '/_app/roles/$id'
+      path: '/roles/$id'
+      fullPath: '/roles/$id'
+      preLoaderRoute: typeof AppRolesIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/staff/': {
       id: '/_app/staff/'
       path: '/staff'
       fullPath: '/staff/'
       preLoaderRoute: typeof AppStaffIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/staff/$id': {
+      id: '/_app/staff/$id'
+      path: '/staff/$id'
+      fullPath: '/staff/$id'
+      preLoaderRoute: typeof AppStaffIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/staff/new': {
@@ -1196,7 +1253,10 @@ declare module '@tanstack/react-router' {
 interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppClassesEnrollRoute: typeof AppClassesEnrollRoute
+  AppComponentsIdRoute: typeof AppComponentsIdRoute
   AppMinutesTemplatesRoute: typeof AppMinutesTemplatesRoute
+  AppRolesIdRoute: typeof AppRolesIdRoute
+  AppStaffIdRoute: typeof AppStaffIdRoute
   AppStaffNewRoute: typeof AppStaffNewRoute
   AppStudentsIdRoute: typeof AppStudentsIdRoute
   AppStudentsImportRoute: typeof AppStudentsImportRoute
@@ -1218,7 +1278,10 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppClassesEnrollRoute: AppClassesEnrollRoute,
+  AppComponentsIdRoute: AppComponentsIdRoute,
   AppMinutesTemplatesRoute: AppMinutesTemplatesRoute,
+  AppRolesIdRoute: AppRolesIdRoute,
+  AppStaffIdRoute: AppStaffIdRoute,
   AppStaffNewRoute: AppStaffNewRoute,
   AppStudentsIdRoute: AppStudentsIdRoute,
   AppStudentsImportRoute: AppStudentsImportRoute,

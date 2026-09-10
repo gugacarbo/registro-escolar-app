@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
-import { findComponentById, updateComponent } from "#/lib/components/repository";
+import {
+	findComponentById,
+	updateComponent,
+} from "#/lib/components/repository";
 
 import { getComponentHandler, updateComponentHandler } from "./index";
 
@@ -83,9 +86,9 @@ describe("GET /api/components/:id", () => {
 	it("retorna 404 quando o componente não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
-		(
-			findComponentById as ReturnType<typeof vi.fn>
-		).mockResolvedValueOnce(undefined);
+		(findComponentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			undefined,
+		);
 		const response = await getComponentHandler({
 			request: new Request("http://localhost/api/components/missing/", {
 				method: "GET",
@@ -150,9 +153,9 @@ describe("PATCH /api/components/:id", () => {
 	it("retorna 404 no PATCH quando o componente não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
-		(
-			findComponentById as ReturnType<typeof vi.fn>
-		).mockResolvedValueOnce(undefined);
+		(findComponentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+			undefined,
+		);
 		const response = await updateComponentHandler({
 			request: new Request("http://localhost/api/components/missing/", {
 				method: "PATCH",

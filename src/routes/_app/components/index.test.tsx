@@ -7,10 +7,13 @@ import type { ComponentsPageResult } from "#/lib/components/types";
 
 const mocks = vi.hoisted(() => ({
 	useComponents: vi.fn(),
+	useNavigate: vi.fn(),
+	navigate: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
+	useNavigate: mocks.useNavigate,
 }));
 
 vi.mock("#/hooks/components/use-components", () => ({
@@ -64,6 +67,7 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 	});
+	mocks.useNavigate.mockReturnValue(mocks.navigate);
 });
 
 afterEach(() => {
@@ -155,5 +159,28 @@ describe("ComponentsPage", () => {
 			page: 1,
 			pageSize: 10,
 		});
+	});
+
+	it("navega para o detalhe ao clicar em célula de texto da linha", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", {
+			name: "Tabela de componentes",
+		});
+		fireEvent.click(within(table).getByRole("cell", { name: "Matemática" }));
+
+		expect(mocks.navigate).toHaveBeenCalledTimes(1);
+		expect(mocks.navigate).toHaveBeenCalledWith({
+			to: "/components/$id",
+			params: { id: "component-1" },
+		});
+	});
+
+	it("clicar no botão Novo componente não dispara a navegação da linha", () => {
+		renderPage();
+
+		fireEvent.click(screen.getByRole("button", { name: "Novo componente" }));
+
+		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });

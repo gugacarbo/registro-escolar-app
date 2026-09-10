@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { DataTable } from "#/components/data-table";
@@ -40,6 +40,7 @@ export function RolesPage() {
 		isLoading,
 		isError,
 	} = useRoles({ search: debouncedSearch || undefined, page, pageSize });
+	const navigate = useNavigate();
 
 	return (
 		<div className="space-y-4">
@@ -65,6 +66,9 @@ export function RolesPage() {
 					setPageSize(size);
 					setPage(1);
 				}}
+				onRowClick={(role) =>
+					navigate({ to: "/roles/$id", params: { id: role.id } })
+				}
 				isLoading={isLoading}
 				isError={isError}
 				ariaLabel="Tabela de papéis"

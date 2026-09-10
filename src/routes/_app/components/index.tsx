@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { CreateComponentDialog } from "#/components/components/create-component-dialog";
@@ -40,6 +40,7 @@ export function ComponentsPage() {
 		isLoading,
 		isError,
 	} = useComponents({ search: debouncedSearch || undefined, page, pageSize });
+	const navigate = useNavigate();
 
 	return (
 		<div className="space-y-4">
@@ -65,6 +66,9 @@ export function ComponentsPage() {
 					setPageSize(size);
 					setPage(1);
 				}}
+				onRowClick={(component) =>
+					navigate({ to: "/components/$id", params: { id: component.id } })
+				}
 				isLoading={isLoading}
 				isError={isError}
 				ariaLabel="Tabela de componentes"
