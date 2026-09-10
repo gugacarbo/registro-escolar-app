@@ -29,7 +29,9 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run gitleaks
-        run: bunx gitleaks detect --source . --verbose --config .gitleaks.toml
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run cspell
         run: bunx cspell lint --no-progress "**/*"
