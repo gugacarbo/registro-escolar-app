@@ -25,6 +25,7 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { useClasses } from "#/hooks/classes/use-classes";
+import { useMinuteTemplates } from "#/hooks/minutes/use-minute-templates";
 import { useRoles } from "#/hooks/roles/use-roles";
 import { useStaff } from "#/hooks/staff/use-staff";
 
@@ -60,6 +61,7 @@ export function MeetingForm({
 	const staff = staffPage?.data ?? [];
 	const { data: rolesPage } = useRoles({ pageSize: 100 });
 	const roles = rolesPage?.data ?? [];
+	const { data: templates = [] } = useMinuteTemplates();
 
 	const form = useForm<MeetingFormValues>({
 		resolver: zodResolver(meetingFormSchema),
@@ -202,13 +204,30 @@ export function MeetingForm({
 						</Button>
 					</div>
 				</div>
-				<div className="grid gap-2">
-					<Label htmlFor={undefined}>Modelo de ata</Label>
-					<Input
-						disabled
-						placeholder="Seleção de modelo disponível após spec 0009"
-					/>
-				</div>
+				<FormField
+					control={form.control}
+					name="templateId"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Modelo de ata</FormLabel>
+							<FormControl>
+								<Select value={field.value} onValueChange={field.onChange}>
+									<SelectTrigger aria-label="Modelo de ata">
+										<SelectValue placeholder="Selecione o modelo" />
+									</SelectTrigger>
+									<SelectContent>
+										{templates.map((template) => (
+											<SelectItem key={template.id} value={template.id}>
+												{template.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 				{serverError && (
 					<p className="text-sm text-destructive">{serverError}</p>
 				)}

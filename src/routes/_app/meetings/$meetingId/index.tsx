@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-
+import { EditMeetingDialog } from "#/components/meetings/edit-meeting-dialog";
 import { MeetingStatusBadge } from "#/components/meetings/meeting-status-badge";
 import { TransitionButtons } from "#/components/meetings/transition-buttons";
 import { Button } from "#/components/ui/button";
@@ -32,6 +32,9 @@ function MeetingDetailPage() {
 								? new Date(meeting.heldAt).toLocaleDateString("pt-BR")
 								: "Não informada"}
 						</p>
+						{(meeting.status === "draft" || meeting.status === "reopened") && (
+							<EditMeetingDialog meeting={meeting} />
+						)}
 					</div>
 					{meeting.status === "finished" && (
 						<p
@@ -47,6 +50,9 @@ function MeetingDetailPage() {
 						</Link>
 						<Link to="/meetings/$meetingId/participants" params={{ meetingId }}>
 							<Button variant="secondary">Participantes</Button>
+						</Link>
+						<Link to="/meetings/$meetingId/students" params={{ meetingId }}>
+							<Button variant="secondary">Acompanhamento</Button>
 						</Link>
 					</div>
 				</>

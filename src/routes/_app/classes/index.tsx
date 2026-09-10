@@ -25,14 +25,23 @@ const columns = [
 	{
 		header: "Ações",
 		cell: (classRow: Class) => (
-			<Link
-				to="/classes/$id/students"
-				params={{ id: classRow.id }}
-				search={{ date: undefined }}
-				className="text-sm underline"
-			>
-				Ver estudantes
-			</Link>
+			<div className="flex gap-2">
+				<Link
+					to="/classes/$id/students"
+					params={{ id: classRow.id }}
+					search={{ date: undefined }}
+					className="text-sm underline"
+				>
+					Ver estudantes
+				</Link>
+				<Link
+					to="/classes/$id/offers"
+					params={{ id: classRow.id }}
+					className="text-sm underline"
+				>
+					Ofertas
+				</Link>
+			</div>
 		),
 	},
 ];

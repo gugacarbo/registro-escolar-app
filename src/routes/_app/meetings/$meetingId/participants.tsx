@@ -18,13 +18,15 @@ export const Route = createFileRoute("/_app/meetings/$meetingId/participants")({
 	component: ParticipantsPage,
 });
 
-function ParticipantsPage() {
+export function ParticipantsPage() {
 	const { meetingId } = Route.useParams();
 	const { data: participants, isLoading } = useParticipants(meetingId);
 	const { data: staffPage } = useStaff({ pageSize: 100 });
 	const staff = staffPage?.data ?? [];
+	const staffById = new Map(staff.map((member) => [member.id, member.name]));
 	const { data: rolesPage } = useRoles({ pageSize: 100 });
 	const roles = rolesPage?.data ?? [];
+	const roleById = new Map(roles.map((role) => [role.id, role.name]));
 	const addParticipant = useAddParticipant(meetingId);
 	const [staffId, setStaffId] = useState("");
 	const [roleId, setRoleId] = useState("");
@@ -88,7 +90,8 @@ function ParticipantsPage() {
 				<ul className="space-y-2">
 					{participants.map((participant) => (
 						<li key={participant.id} className="rounded border p-2">
-							{participant.staffId} — {participant.roleId}
+							{staffById.get(participant.staffId) ?? participant.staffId} —{" "}
+							{roleById.get(participant.roleId) ?? participant.roleId}
 						</li>
 					))}
 				</ul>

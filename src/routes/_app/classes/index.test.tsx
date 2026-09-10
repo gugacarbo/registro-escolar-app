@@ -107,6 +107,8 @@ describe("ClassesPage", () => {
 		).toBeInTheDocument();
 		const link = within(table).getByRole("link", { name: "Ver estudantes" });
 		expect(link).toHaveAttribute("href", "/classes/$id/students");
+		const offersLink = within(table).getByRole("link", { name: "Ofertas" });
+		expect(offersLink).toHaveAttribute("href", "/classes/$id/offers");
 	});
 
 	it("exibe estado vazio quando não há turmas", () => {

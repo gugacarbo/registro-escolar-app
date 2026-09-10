@@ -104,7 +104,6 @@ export async function createMeetingHandler({
 		}
 	}
 
-	// templateId é pass-through (sem tabela de templates até a spec 0009).
 	// A reunião nasce sempre como rascunho (spec 0005).
 	const meeting = await createMeetingWithRelations(db, {
 		title: parsed.data.title,

@@ -18,7 +18,6 @@ export const meetings = sqliteTable(
 		title: text("title").notNull(),
 		status: text("status").notNull().default("draft"),
 		heldAt: integer("held_at", { mode: "timestamp_ms" }),
-		// TODO(0009): FK para templates quando spec 0009 criar a tabela
 		templateId: text("template_id"),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
