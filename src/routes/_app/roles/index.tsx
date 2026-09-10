@@ -4,7 +4,8 @@ import { useState } from "react";
 import { DataTable } from "#/components/data-table";
 import { CreateRoleDialog } from "#/components/roles/create-role-dialog";
 import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
+import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
+import { SearchInput } from "#/components/ui/search-input";
 import { useRoles } from "#/hooks/roles/use-roles";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import type { Role } from "#/lib/roles/schema";
@@ -20,7 +21,7 @@ const columns = [
 	},
 ];
 
-export function RolesPage() {
+export default function RolesPage() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
@@ -43,17 +44,24 @@ export function RolesPage() {
 	const navigate = useNavigate();
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Papéis</h1>
-				<Button onClick={() => setDialogOpen(true)}>Novo papel</Button>
-			</div>
-			<Input
-				placeholder="Buscar por nome"
-				value={search}
-				onChange={(event) => setSearch(event.target.value)}
-				aria-label="Buscar por nome"
+		<PageShell>
+			<PageHeader
+				eyebrow="Configuração"
+				title="Papéis"
+				description="Defina as funções usadas ao identificar participantes do conselho."
+				actions={
+					<Button onClick={() => setDialogOpen(true)}>Novo papel</Button>
+				}
 			/>
+			<PageToolbar>
+				<SearchInput
+					className="sm:max-w-md"
+					value={search}
+					onChange={setSearch}
+					placeholder="Buscar por nome"
+					ariaLabel="Buscar por nome"
+				/>
+			</PageToolbar>
 			<DataTable
 				columns={columns}
 				rows={rolesPage?.data ?? []}
@@ -76,6 +84,6 @@ export function RolesPage() {
 				emptyDescription="Ajuste a busca ou cadastre um novo papel."
 			/>
 			<CreateRoleDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-		</div>
+		</PageShell>
 	);
 }

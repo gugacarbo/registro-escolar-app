@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { RoleForm, type RoleFormValues } from "#/components/roles/role-form";
 import { Button } from "#/components/ui/button";
+import { PageShell } from "#/components/ui/page";
 import { useRole } from "#/hooks/roles/use-role";
 import { useUpdateRole } from "#/hooks/roles/use-update-role";
 
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/_app/roles/$id")({
 	component: RoleDetailPage,
 });
 
-export function RoleDetailPage() {
+export default function RoleDetailPage() {
 	const { id } = Route.useParams();
 	const { data: role, isLoading, isError, error } = useRole(id);
 	const updateRole = useUpdateRole(id);
@@ -33,9 +34,11 @@ export function RoleDetailPage() {
 	}
 
 	return (
-		<div className="space-y-4">
+		<PageShell>
 			<div className="flex items-center justify-between gap-2">
-				<h1 className="text-2xl font-bold">{role?.name ?? "Dados do papel"}</h1>
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
+					{role?.name ?? "Dados do papel"}
+				</h1>
 				<Link to="/roles">
 					<Button variant="secondary">Voltar para a lista</Button>
 				</Link>
@@ -62,6 +65,6 @@ export function RoleDetailPage() {
 					/>
 				</>
 			)}
-		</div>
+		</PageShell>
 	);
 }

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { CreateComponentDialog } from "#/components/components/create-component-dialog";
 import { DataTable } from "#/components/data-table";
 import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
+import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
+import { SearchInput } from "#/components/ui/search-input";
 import { useComponents } from "#/hooks/components/use-components";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import type { Component } from "#/lib/components/schema";
@@ -20,7 +21,7 @@ const columns = [
 	},
 ];
 
-export function ComponentsPage() {
+export default function ComponentsPage() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
@@ -43,17 +44,24 @@ export function ComponentsPage() {
 	const navigate = useNavigate();
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Componentes</h1>
-				<Button onClick={() => setDialogOpen(true)}>Novo componente</Button>
-			</div>
-			<Input
-				placeholder="Buscar por nome"
-				value={search}
-				onChange={(event) => setSearch(event.target.value)}
-				aria-label="Buscar por nome"
+		<PageShell>
+			<PageHeader
+				eyebrow="Configuração"
+				title="Componentes curriculares"
+				description="Mantenha a nomenclatura oficial das disciplinas usada em ofertas e registros."
+				actions={
+					<Button onClick={() => setDialogOpen(true)}>Novo componente</Button>
+				}
 			/>
+			<PageToolbar>
+				<SearchInput
+					className="sm:max-w-md"
+					value={search}
+					onChange={setSearch}
+					placeholder="Buscar por nome"
+					ariaLabel="Buscar por nome"
+				/>
+			</PageToolbar>
 			<DataTable
 				columns={columns}
 				rows={componentsPage?.data ?? []}
@@ -76,6 +84,6 @@ export function ComponentsPage() {
 				emptyDescription="Ajuste a busca ou cadastre um novo componente."
 			/>
 			<CreateComponentDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-		</div>
+		</PageShell>
 	);
 }

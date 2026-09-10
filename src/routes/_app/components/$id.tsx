@@ -6,6 +6,7 @@ import {
 	type ComponentFormValues,
 } from "#/components/components/component-form";
 import { Button } from "#/components/ui/button";
+import { PageShell } from "#/components/ui/page";
 import { useComponent } from "#/hooks/components/use-component";
 import { useUpdateComponent } from "#/hooks/components/use-update-component";
 
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/_app/components/$id")({
 	component: ComponentDetailPage,
 });
 
-export function ComponentDetailPage() {
+export default function ComponentDetailPage() {
 	const { id } = Route.useParams();
 	const { data: component, isLoading, isError, error } = useComponent(id);
 	const updateComponent = useUpdateComponent(id);
@@ -36,9 +37,9 @@ export function ComponentDetailPage() {
 	}
 
 	return (
-		<div className="space-y-4">
+		<PageShell>
 			<div className="flex items-center justify-between gap-2">
-				<h1 className="text-2xl font-bold">
+				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
 					{component?.name ?? "Dados do componente"}
 				</h1>
 				<Link to="/components">
@@ -69,6 +70,6 @@ export function ComponentDetailPage() {
 					/>
 				</>
 			)}
-		</div>
+		</PageShell>
 	);
 }
