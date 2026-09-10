@@ -180,7 +180,7 @@ function ExampleForm() {
 
 - Execute `npx drizzle-kit generate --name=<nome-descritivo>` (ou via script do repo, ex.: `npm run db:generate -- --name=<nome-descritivo>`).
 - Use nomes em `kebab-case`, descritivos e em português quando o restante do repo estiver em português, por exemplo:
-  - `--name=cria-tabela-alunos`
+  - `--name=cria-tabela-estudantes`
   - `--name=adiciona-coluna-status-usuarios`
   - `--name=remove-indice-unico-cpf`
 - Revise o arquivo gerado em `src/db/migrations/` (ou caminho configurado) antes de commitar, mas apenas para validar; não edite o SQL/JS manualmente.

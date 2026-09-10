@@ -99,7 +99,7 @@ describe("POST /api/students/import", () => {
 		const form = new FormData();
 		form.append(
 			"file",
-			new File(["nome\nJoão"], "alunos.txt", { type: "text/plain" }),
+			new File(["nome\nJoão"], "estudantes.txt", { type: "text/plain" }),
 		);
 		const request = new Request("http://localhost/api/students/import", {
 			method: "POST",
@@ -124,7 +124,7 @@ describe("POST /api/students/import", () => {
 		const form = new FormData();
 		form.append(
 			"file",
-			new File(["nome\nMaria Souza"], "alunos.csv", { type: "text/csv" }),
+			new File(["nome\nMaria Souza"], "estudantes.csv", { type: "text/csv" }),
 		);
 		const request = new Request("http://localhost/api/students/import", {
 			method: "POST",
@@ -158,7 +158,9 @@ describe("POST /api/students/import", () => {
 		const form = new FormData();
 		form.append(
 			"file",
-			new File(["nome\n,\nMaria Souza"], "alunos.csv", { type: "text/csv" }),
+			new File(["nome\n,\nMaria Souza"], "estudantes.csv", {
+				type: "text/csv",
+			}),
 		);
 		const request = new Request("http://localhost/api/students/import", {
 			method: "POST",
@@ -203,7 +205,7 @@ describe("POST /api/students/import", () => {
 			"file",
 			new File(
 				["nome,documento\nJoão Silva,123456\nMaria Souza,789012"],
-				"alunos.csv",
+				"estudantes.csv",
 				{ type: "text/csv" },
 			),
 		);
@@ -295,11 +297,11 @@ describe("POST /api/students/import", () => {
 				["nome", "documento"],
 				["Maria Souza", "789012"],
 			]),
-			"Alunos",
+			"Estudantes",
 		);
 		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
 		const form = new FormData();
-		form.append("file", new File([buffer as ArrayBuffer], "alunos.xlsx"));
+		form.append("file", new File([buffer as ArrayBuffer], "estudantes.xlsx"));
 		const request = new Request("http://localhost/api/students/import", {
 			method: "POST",
 			body: form,
@@ -597,7 +599,7 @@ describe("POST /api/students/import/resolve", () => {
 		const response = await importResolveHandler({ request, context: { env } });
 		expect(response.status).toBe(400);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toContain("Aluno já existe");
+		expect(body.error).toContain("Estudante já existe");
 	});
 
 	it("returns 400 when a create row has an invalid birthDate", async () => {
@@ -665,7 +667,7 @@ describe("POST /api/students/import/resolve", () => {
 		const response = await importResolveHandler({ request, context: { env } });
 		expect(response.status).toBe(400);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toContain("Aluno já existe");
+		expect(body.error).toContain("Estudante já existe");
 	});
 
 	it("returns 400 when two create rows share the same document", async () => {
@@ -714,7 +716,7 @@ describe("POST /api/students/import/resolve", () => {
 		const response = await importResolveHandler({ request, context: { env } });
 		expect(response.status).toBe(400);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toContain("Aluno já existe");
+		expect(body.error).toContain("Estudante já existe");
 	});
 
 	it("returns 400 when a create row duplicates by document an existing student", async () => {
@@ -747,7 +749,7 @@ describe("POST /api/students/import/resolve", () => {
 		const response = await importResolveHandler({ request, context: { env } });
 		expect(response.status).toBe(400);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toContain("Aluno já existe");
+		expect(body.error).toContain("Estudante já existe");
 	});
 
 	it("links using the stored student name even when payload name differs", async () => {

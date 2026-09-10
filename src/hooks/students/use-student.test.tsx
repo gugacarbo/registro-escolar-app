@@ -37,7 +37,7 @@ describe("useStudent", () => {
 
 	it("propaga erro de carregamento", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify({ error: "Aluno não encontrado" }), {
+			new Response(JSON.stringify({ error: "Estudante não encontrado" }), {
 				status: 404,
 			}),
 		);

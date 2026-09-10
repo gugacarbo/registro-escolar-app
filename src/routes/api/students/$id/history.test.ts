@@ -49,7 +49,7 @@ describe("GET /api/students/:id/history (spec 0011)", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("retorna 404 para aluno inexistente", async () => {
+	it("retorna 404 para estudante inexistente", async () => {
 		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
 			mockSession(),
 		);
@@ -61,14 +61,14 @@ describe("GET /api/students/:id/history (spec 0011)", () => {
 		});
 		expect(response.status).toBe(404);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toBe("Aluno não encontrado");
+		expect(body.error).toBe("Estudante não encontrado");
 	});
 
 	it("retorna 200 com linha do tempo e repassa filtros", async () => {
 		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
 			mockSession(),
 		);
-		const payload = { aluno: { id: "student-1" }, eventos: [] };
+		const payload = { estudante: { id: "student-1" }, eventos: [] };
 		const mock = getStudentHistory as ReturnType<typeof vi.fn>;
 		mock.mockResolvedValueOnce(payload);
 		const response = await getStudentHistoryHandler({
@@ -80,7 +80,7 @@ describe("GET /api/students/:id/history (spec 0011)", () => {
 		});
 		expect(response.status).toBe(200);
 		const body = (await response.json()) as typeof payload;
-		expect(body.aluno.id).toBe("student-1");
+		expect(body.estudante.id).toBe("student-1");
 		expect(mock).toHaveBeenCalledWith(
 			expect.anything(),
 			"student-1",

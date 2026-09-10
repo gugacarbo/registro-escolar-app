@@ -65,13 +65,13 @@ describe("POST /api/students/:id/records", () => {
 		expect(response.status).toBe(401);
 	});
 
-	it("retorna 404 para aluno inexistente", async () => {
+	it("retorna 404 para estudante inexistente", async () => {
 		(getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
 			createMockSession(),
 		);
 		const { RecordNotFoundError } = await import("#/lib/records/errors");
 		(createIndependentRecord as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-			new RecordNotFoundError("Aluno não encontrado"),
+			new RecordNotFoundError("Estudante não encontrado"),
 		);
 		const response = await createIndependentRecordHandler({
 			request: postRequest({ texto: "Registro" }),

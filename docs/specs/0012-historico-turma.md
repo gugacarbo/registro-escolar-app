@@ -18,30 +18,30 @@ implemented-by:
 
 ## Objetivo
 
-Permitir consultar reuniões, alunos, registros e evolução temporal de uma turma específica, com filtros e busca textual.
+Permitir consultar reuniões, estudantes, registros e evolução temporal de uma turma específica, com filtros e busca textual.
 
 ## Fluxo
 
 1. O operador seleciona uma turma.
-2. Visualiza dados cadastrais, alunos ativos e históricos.
+2. Visualiza dados cadastrais, estudantes ativos e históricos.
 3. Acessa reuniões relacionadas e registros feitos nelas.
 4. Aplica filtros por período letivo, reunião, categoria, componente curricular ou busca textual.
 
 ## Contrato
 
 - `GET /api/classes/:id/history` — histórico da turma.
-- Query params: `periodo`, `reuniaoId`, `categoriaId`, `componenteId`, `alunoId`, `q`.
-- Resposta: dados da turma, alunos vinculados, reuniões e registros cronologicamente.
+- Query params: `periodo`, `reuniaoId`, `categoriaId`, `componenteId`, `estudanteId`, `q`.
+- Resposta: dados da turma, estudantes vinculados, reuniões e registros cronologicamente.
 
 ## Casos de borda
 
-| #   | QUANDO ⟨gatilho⟩                         | o sistema DEVE ⟨resposta⟩                                     |
-| --- | ---------------------------------------- | ------------------------------------------------------------- |
-| 1   | a turma não tiver reuniões               | exibir empty-state e lista de alunos                          |
-| 2   | houver alunos com vínculos encerrados    | permitir visualizar alunos históricos com indicador de status |
-| 3   | a busca textual não retornar resultados  | exibir mensagem e permitir ajuste de filtros                  |
-| 4   | a turma for equivalente de outro período | não misturar registros; turmas são entidades distintas        |
-| 5   | um registro estiver marcado como interno | ainda aparecer no histórico interno da turma                  |
+| #   | QUANDO ⟨gatilho⟩                          | o sistema DEVE ⟨resposta⟩                                         |
+| --- | ----------------------------------------- | ----------------------------------------------------------------- |
+| 1   | a turma não tiver reuniões                | exibir empty-state e lista de estudantes                          |
+| 2   | houver estudantes com vínculos encerrados | permitir visualizar estudantes históricos com indicador de status |
+| 3   | a busca textual não retornar resultados   | exibir mensagem e permitir ajuste de filtros                      |
+| 4   | a turma for equivalente de outro período  | não misturar registros; turmas são entidades distintas            |
+| 5   | um registro estiver marcado como interno  | ainda aparecer no histórico interno da turma                      |
 
 ## Questões em aberto
 
@@ -64,7 +64,7 @@ scripts/docs-check ................ exit 0
 ## Verificação
 
 DoD executado em 2026-09-09. O histórico da turma retorna dados cadastrais,
-alunos ativos/históricos com datas/status, reuniões relacionadas e eventos
+estudantes ativos/históricos com datas/status, reuniões relacionadas e eventos
 cronológicos (reunião, registros, status e relatos gerais). Período divergente
 não mistura eventos; registros internos permanecem visíveis; filtros e busca
 textual são aplicados no serviço. Gates conforme DoD.

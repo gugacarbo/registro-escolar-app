@@ -94,7 +94,7 @@ describe("StudentsPage", () => {
 	it("renderiza a tabela com nome linkado e documento", () => {
 		renderPage();
 
-		const table = screen.getByRole("table", { name: "Tabela de alunos" });
+		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
 		expect(
 			within(table).getByRole("columnheader", { name: "Nome" }),
 		).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe("StudentsPage", () => {
 		expect(screen.getByText("Mostrando 1–10 de 25")).toBeInTheDocument();
 	});
 
-	it("exibe estado vazio quando não há alunos", () => {
+	it("exibe estado vazio quando não há estudantes", () => {
 		mocks.useStudents.mockReturnValue({
 			data: makePage({ data: [], total: 0 }),
 			isLoading: false,
@@ -131,7 +131,7 @@ describe("StudentsPage", () => {
 		});
 		renderPage();
 
-		expect(screen.getByText("Nenhum aluno encontrado")).toBeInTheDocument();
+		expect(screen.getByText("Nenhum estudante encontrado")).toBeInTheDocument();
 		expect(screen.getByText("Nenhum registro encontrado")).toBeInTheDocument();
 	});
 
@@ -178,7 +178,7 @@ describe("StudentsPage", () => {
 			vi.advanceTimersByTime(300);
 		});
 		expect(
-			screen.getByText("Nenhum aluno corresponde à busca"),
+			screen.getByText("Nenhum estudante corresponde à busca"),
 		).toBeInTheDocument();
 		fireEvent.click(screen.getByRole("button", { name: "Limpar busca" }));
 		expect(search).toHaveValue("");
@@ -216,7 +216,7 @@ describe("StudentsPage", () => {
 	it("navega para o detalhe ao clicar em célula de texto da linha", () => {
 		renderPage();
 
-		const table = screen.getByRole("table", { name: "Tabela de alunos" });
+		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
 		fireEvent.click(within(table).getByRole("cell", { name: "123" }));
 
 		expect(mocks.navigate).toHaveBeenCalledTimes(1);
@@ -229,7 +229,7 @@ describe("StudentsPage", () => {
 	it("clicar no link do nome não dispara a navegação da linha", () => {
 		renderPage();
 
-		const table = screen.getByRole("table", { name: "Tabela de alunos" });
+		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
 		fireEvent.click(within(table).getByRole("link", { name: "João Silva" }));
 
 		expect(mocks.navigate).not.toHaveBeenCalled();
@@ -238,7 +238,7 @@ describe("StudentsPage", () => {
 	it("clicar no botão de ações não dispara a navegação da linha", () => {
 		renderPage();
 
-		const table = screen.getByRole("table", { name: "Tabela de alunos" });
+		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
 		fireEvent.click(
 			within(table).getByRole("link", {
 				name: "Ver detalhes de João Silva",

@@ -25,7 +25,7 @@ function CouncilPage() {
 			<section className="space-y-2">
 				<h2 className="text-lg font-semibold">Turmas</h2>
 				<p className="text-sm text-muted-foreground">
-					Lista de alunos por turma disponível após spec 0007
+					Lista de estudantes por turma disponível após spec 0007
 				</p>
 			</section>
 			<section className="space-y-2">

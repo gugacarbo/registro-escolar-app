@@ -223,7 +223,7 @@ describe("createIndependentRecord", () => {
 		expect(row.classId).toBeNull();
 	});
 
-	it("rejeita aluno inexistente", async () => {
+	it("rejeita estudante inexistente", async () => {
 		await expect(
 			createIndependentRecord(setup.db, {
 				studentId: "missing",
@@ -264,7 +264,7 @@ describe("createLinkedRecord", () => {
 		).rejects.toBeInstanceOf(InvalidOriginError);
 	});
 
-	it("mantém múltiplos registros independentes para o mesmo aluno (CA-003)", async () => {
+	it("mantém múltiplos registros independentes para o mesmo estudante (CA-003)", async () => {
 		const texts = ["Registro 1", "Registro 2", "Registro 3", "Registro 4"];
 		for (const texto of texts) {
 			await createLinkedRecord(setup.db, {
@@ -376,7 +376,7 @@ describe("listStudentRecordsForMeeting", () => {
 	it("inclui registro independente quando a reunião tem a turma dele (borda 7)", async () => {
 		await createIndependentRecord(setup.db, {
 			studentId: "student-1",
-			texto: "Contexto do aluno",
+			texto: "Contexto do estudante",
 			turmaId: "class-1",
 		});
 		const list = await listStudentRecordsForMeeting(setup.db, {
@@ -401,7 +401,7 @@ describe("listStudentRecordsForMeeting", () => {
 		expect(list).toHaveLength(0);
 	});
 
-	it("registro independente sem turma aparece em qualquer reunião do aluno", async () => {
+	it("registro independente sem turma aparece em qualquer reunião do estudante", async () => {
 		await createIndependentRecord(setup.db, {
 			studentId: "student-1",
 			texto: "Contexto geral",

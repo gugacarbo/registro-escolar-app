@@ -42,7 +42,7 @@ function emptyCounters(): TrackingCounters {
 }
 
 /**
- * Lista os alunos vinculados à turma na data da reunião (ADR-0015, sem
+ * Lista os estudantes vinculados à turma na data da reunião (ADR-0015, sem
  * snapshots) com o status de acompanhamento; ausência de registro significa
  * "pendente".
  */
@@ -131,7 +131,7 @@ export async function isStudentEnrolledInClassAtDate(
 }
 
 /**
- * Cria ou atualiza o status de acompanhamento do aluno na turma da reunião.
+ * Cria ou atualiza o status de acompanhamento do estudante na turma da reunião.
  * D1 não expõe .transaction(): upsert atômico via ON CONFLICT no índice
  * único (meeting_id, class_id, student_id).
  */
@@ -182,7 +182,7 @@ export async function findStudentStatus(
 }
 
 /**
- * Progresso geral da reunião: alunos vinculados às turmas da reunião na data
+ * Progresso geral da reunião: estudantes vinculados às turmas da reunião na data
  * da reunião (regra temporal da ADR-0015) e marcados como concluídos.
  */
 export async function getMeetingProgress(

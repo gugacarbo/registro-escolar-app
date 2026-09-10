@@ -157,7 +157,7 @@ describe("listStudentsWithStatus", () => {
 		await seedEnrollments(setup.db);
 	});
 
-	it("lista apenas alunos com vínculo ativo na data da reunião", async () => {
+	it("lista apenas estudantes com vínculo ativo na data da reunião", async () => {
 		const result = await listStudentsWithStatus(setup.db, {
 			meetingId: "meeting-1",
 			classId: "class-1",
@@ -183,7 +183,7 @@ describe("listStudentsWithStatus", () => {
 		expect(result.nextPendingStudentId).toBe("student-1");
 	});
 
-	it("lista alunos que saíram exatamente no dia da reunião (endDate >= data)", async () => {
+	it("lista estudantes que saíram exatamente no dia da reunião (endDate >= data)", async () => {
 		await setup.db.insert(schema.enrollments).values({
 			id: "enroll-5",
 			studentId: "student-2",
@@ -202,7 +202,7 @@ describe("listStudentsWithStatus", () => {
 		]);
 	});
 
-	it("retorna lista vazia para turma sem alunos", async () => {
+	it("retorna lista vazia para turma sem estudantes", async () => {
 		const result = await listStudentsWithStatus(setup.db, {
 			meetingId: "meeting-1",
 			classId: "class-3",
@@ -250,7 +250,7 @@ describe("upsertStudentStatus", () => {
 		expect(rows).toHaveLength(1);
 	});
 
-	it("mantém status independente por turma para o mesmo aluno", async () => {
+	it("mantém status independente por turma para o mesmo estudante", async () => {
 		await upsertStudentStatus(setup.db, {
 			meetingId: "meeting-1",
 			classId: "class-1",
@@ -379,7 +379,7 @@ describe("getMeetingProgress", () => {
 		});
 	});
 
-	it("marca como concluída quando todos os alunos foram concluídos", async () => {
+	it("marca como concluída quando todos os estudantes foram concluídos", async () => {
 		await upsertStudentStatus(setup.db, {
 			meetingId: "meeting-1",
 			classId: "class-1",
@@ -397,7 +397,7 @@ describe("getMeetingProgress", () => {
 		expect(progress.completed).toBe(true);
 	});
 
-	it("não conta registros de alunos fora do vínculo temporal", async () => {
+	it("não conta registros de estudantes fora do vínculo temporal", async () => {
 		await upsertStudentStatus(setup.db, {
 			meetingId: "meeting-1",
 			classId: "class-1",

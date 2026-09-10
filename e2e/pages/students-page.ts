@@ -8,7 +8,7 @@ export class StudentsPage {
 	}
 
 	async clickNew() {
-		await this.page.getByRole("button", { name: "Novo aluno" }).click();
+		await this.page.getByRole("button", { name: "Novo estudante" }).click();
 		await expect(
 			this.page.getByRole("dialog").getByRole("textbox", { name: "Nome" }),
 		).toBeVisible();

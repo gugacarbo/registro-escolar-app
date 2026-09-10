@@ -22,7 +22,7 @@ import type {
 } from "./types";
 
 /**
- * Histórico do aluno (spec 0011) e da turma (spec 0012), compondo eventos de
+ * Histórico do estudante (spec 0011) e da turma (spec 0012), compondo eventos de
  * matrículas, reuniões, registros, statuses e relatos gerais — ADR-0015:
  * composição temporal via vínculos (startDate/endDate), sem snapshots.
  */
@@ -119,7 +119,7 @@ function filterEvents(
 		if (query.componenteId && event.componenteId !== query.componenteId) {
 			return false;
 		}
-		if (query.alunoId && event.studentId !== query.alunoId) {
+		if (query.estudanteId && event.studentId !== query.estudanteId) {
 			return false;
 		}
 		if (
@@ -201,7 +201,7 @@ async function composeStudentEvents(
 		}
 	}
 
-	// Reuniões das turmas do aluno + registros do aluno nessas reuniões.
+	// Reuniões das turmas do estudante + registros do estudante nessas reuniões.
 	const classIds = [...new Set(enrollmentRows.map((row) => row.classId))];
 	const meetingIds = new Set<string>();
 	if (classIds.length > 0) {
@@ -231,7 +231,7 @@ async function composeStudentEvents(
 			: [];
 	const meetingById = new Map(meetingRows.map((row) => [row.id, row]));
 
-	// Statuses do aluno nas reuniões (em discussão / concluído).
+	// Statuses do estudante nas reuniões (em discussão / concluído).
 	const statusRows = await db.query.meetingStudentStatus.findMany({
 		where: eq(meetingStudentStatus.studentId, studentId),
 	});
@@ -273,7 +273,7 @@ async function composeStudentEvents(
 		});
 	}
 
-	// Registros do aluno (inclui internos — borda 4 da 0011).
+	// Registros do estudante (inclui internos — borda 4 da 0011).
 	for (const record of records) {
 		const meeting = record.meetingId
 			? meetingById.get(record.meetingId)
@@ -283,7 +283,7 @@ async function composeStudentEvents(
 			turma = classById.get(record.classId) ?? null;
 		}
 		if (!turma && meeting) {
-			// CA-007: contexto da turma do aluno naquela data.
+			// CA-007: contexto da turma do estudante naquela data.
 			const dateMs = meetingDate(meeting).getTime();
 			const enrollment = enrollmentRows.find((row) => isActiveOn(row, dateMs));
 			turma = enrollment ? (classById.get(enrollment.classId) ?? null) : null;
@@ -324,7 +324,7 @@ export async function getStudentHistory(
 	}
 
 	return {
-		aluno: {
+		estudante: {
 			id: student.id,
 			name: student.name,
 			document: student.document,
@@ -345,12 +345,12 @@ export async function getClassHistory(
 		return null;
 	}
 
-	// Borda 2: alunos históricos (vínculos encerrados inclusos, com status).
+	// Borda 2: estudantes históricos (vínculos encerrados inclusos, com status).
 	const enrollmentRows = await db.query.enrollments.findMany({
 		where: eq(enrollments.classId, classId),
 		with: { student: true },
 	});
-	const alunos: ClassHistoryStudent[] = enrollmentRows
+	const estudantes: ClassHistoryStudent[] = enrollmentRows
 		.map((row) => ({
 			studentId: row.student.id,
 			name: row.student.name,
@@ -472,7 +472,7 @@ export async function getClassHistory(
 			grade: classRow.grade,
 			shift: classRow.shift,
 		},
-		alunos,
+		estudantes,
 		reunioes: meetingRows
 			.map((row) => ({
 				id: row.id,

@@ -23,7 +23,7 @@ function ClassStudentsPage() {
 
 	return (
 		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Alunos da turma</h1>
+			<h1 className="text-2xl font-bold">Estudantes da turma</h1>
 			<Input
 				type="date"
 				value={date}

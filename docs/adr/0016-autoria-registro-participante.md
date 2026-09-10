@@ -20,7 +20,7 @@ Os registros podem indicar quem originou a informação (professor, coordenaçã
 - RF-024, RF-025: autoria opcional e restrição a participantes.
 - RN-008, RN-009: autoria opcional; quando existe, servidor deve ser participante.
 - CA-005: autoria inválida deve ser rejeitada.
-- Seções 17 e 21: regra aplicada a registros de aluno e relatos gerais.
+- Seções 17 e 21: regra aplicada a registros de estudante e relatos gerais.
 
 ## Opções consideradas
 
@@ -41,13 +41,13 @@ Os registros podem indicar quem originou a informação (professor, coordenaçã
 
 ## Decisão
 
-Adotar **Opção 2** com autoria opcional. Registros de aluno e relatos gerais podem indicar um autor; quando indicado, o autor deve obrigatoriamente constar como participante daquela reunião.
+Adotar **Opção 2** com autoria opcional. Registros de estudante e relatos gerais podem indicar um autor; quando indicado, o autor deve obrigatoriamente constar como participante daquela reunião.
 
 ## Consequências
 
 - **Positivas:** ata consistente; autoria confiável; histórico auditável.
 - **Negativas:** validação adicional na API e no formulário; participantes devem estar definidos antes do registro.
-- **Obrigatório:** FK de `registroAluno.origemId` e `relatoGeral.origemId` para `participacaoReuniao` (não para `servidor` diretamente).
+- **Obrigatório:** FK de `registroEstudante.origemId` e `relatoGeral.origemId` para `participacaoReuniao` (não para `servidor` diretamente).
 - **Proibido:** permitir autoria de servidor que não participa da reunião; exigir autoria em todos os registros.
 
 ## Confirmação

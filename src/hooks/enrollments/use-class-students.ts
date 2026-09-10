@@ -21,7 +21,7 @@ export function useClassStudents(classId: string, date: string) {
 				`/api/classes/${classId}/students?${params.toString()}`,
 			);
 			if (!response.ok) {
-				throw new Error("Falha ao carregar alunos da turma");
+				throw new Error("Falha ao carregar estudantes da turma");
 			}
 			return response.json() as Promise<ClassStudentRow[]>;
 		},

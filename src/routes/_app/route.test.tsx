@@ -89,8 +89,8 @@ describe("AppLayout", () => {
 
 		render(<AppLayout />);
 
-		const alunos = await screen.findByRole("link", { name: "Alunos" });
-		expect(alunos).toHaveAttribute("href", "/students");
+		const estudantes = await screen.findByRole("link", { name: "Estudantes" });
+		expect(estudantes).toHaveAttribute("href", "/students");
 		expect(screen.getByRole("link", { name: "Turmas" })).toHaveAttribute(
 			"href",
 			"/classes",

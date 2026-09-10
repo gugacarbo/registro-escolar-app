@@ -26,7 +26,7 @@ export function useStudents({
 			params.set("pageSize", String(pageSize));
 			const response = await fetch(`/api/students?${params.toString()}`);
 			if (!response.ok) {
-				throw new Error("Falha ao carregar alunos");
+				throw new Error("Falha ao carregar estudantes");
 			}
 			return response.json() as Promise<StudentsPageResult>;
 		},

@@ -126,7 +126,7 @@ describe("GET /api/meetings/:id/classes/:classId/students", () => {
 		expect(body.error).toBe("Turma não vinculada a esta reunião");
 	});
 
-	it("retorna 200 com alunos, contadores e próximo pendente", async () => {
+	it("retorna 200 com estudantes, contadores e próximo pendente", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({

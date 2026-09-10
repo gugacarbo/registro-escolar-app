@@ -58,7 +58,7 @@ export async function createClass(
 export async function createEnrollment(
 	ctx: ApiContext,
 	input: {
-		alunoId: string;
+		estudanteId: string;
 		turmaId: string;
 		dataInicio: string;
 		dataTermino?: string;

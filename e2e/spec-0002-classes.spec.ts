@@ -18,7 +18,7 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		await expect(page.getByText("Turma E2E — 2026")).toBeVisible();
 	});
 
-	test("abre os alunos da turma ao clicar na linha", async ({
+	test("abre os estudantes da turma ao clicar na linha", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
@@ -33,7 +33,7 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 			new RegExp(`/classes/${klass.id}/students`),
 		);
 		await expect(
-			page.getByRole("heading", { name: "Alunos da turma" }),
+			page.getByRole("heading", { name: "Estudantes da turma" }),
 		).toBeVisible();
 	});
 
@@ -51,11 +51,11 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		expect(classes.filter((c) => c.id === first.id || c.id === second.id)).toHaveLength(2);
 	});
 
-	test("matricula aluno pela UI e lista vínculo na data", async ({
+	test("matricula estudante pela UI e lista vínculo na data", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Matrícula");
+		const student = await createStudent(apiContext, "Estudante Matrícula");
 		const klass = await createClass(apiContext, "Turma Matrícula", "2026");
 
 		await page.goto("/classes/enroll");
@@ -70,24 +70,24 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		await page.locator("input[type=date]").first().fill("2026-03-01");
 		await page.getByRole("button", { name: "Matricular" }).click();
 
-		await expect(page.getByText("Aluno Matrícula — ativa")).toBeVisible();
+		await expect(page.getByText("Estudante Matrícula — ativa")).toBeVisible();
 		await expect(page).toHaveURL(new RegExp(`/classes/${klass.id}/students`));
 	});
 
 	test("transferência encerra vínculo anterior e preserva histórico", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Transferido");
+		const student = await createStudent(apiContext, "Estudante Transferido");
 		const first = await createClass(apiContext, "Turma Origem", "2026");
 		const second = await createClass(apiContext, "Turma Destino", "2026");
 
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: first.id,
 			dataInicio: "2026-01-01",
 		});
 		const transfer = await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: second.id,
 			dataInicio: "2026-07-01",
 		});
@@ -112,13 +112,13 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		expect(history[0]?.enrollment.status).toBe("transferida");
 	});
 
-	test("não inclui aluno fora do intervalo do vínculo", async ({
+	test("não inclui estudante fora do intervalo do vínculo", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Temporal");
+		const student = await createStudent(apiContext, "Estudante Temporal");
 		const klass = await createClass(apiContext, "Turma Temporal", "2026");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: klass.id,
 			dataInicio: "2026-02-01",
 			dataTermino: "2026-06-30",
@@ -134,10 +134,10 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 	test("rejeita vínculos sobrepostos na mesma turma", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Sobreposto");
+		const student = await createStudent(apiContext, "Estudante Sobreposto");
 		const klass = await createClass(apiContext, "Turma Sobreposta", "2026");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: klass.id,
 			dataInicio: "2026-01-01",
 		});
@@ -146,7 +146,7 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 			method: "POST",
 			headers: { Cookie: apiContext.cookies, "Content-Type": "application/json" },
 			body: JSON.stringify({
-				alunoId: student.id,
+				estudanteId: student.id,
 				turmaId: klass.id,
 				dataInicio: "2026-03-01",
 			}),
@@ -157,10 +157,10 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 	test("mantém vínculo sem término ativo em data futura", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Aberto");
+		const student = await createStudent(apiContext, "Estudante Aberto");
 		const klass = await createClass(apiContext, "Turma Aberta", "2026");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: klass.id,
 			dataInicio: "2026-01-01",
 		});

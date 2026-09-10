@@ -76,7 +76,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(preview.content).toContain("ATA — ATA MÍNIMA");
 		expect(preview.content).toContain("Relatos gerais");
 		expect(preview.content).toContain("Relato público mínimo");
-		expect(preview.content).not.toContain("Registros por aluno");
+		expect(preview.content).not.toContain("Registros por estudante");
 
 		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
 		const generated = await generateMinute(apiContext, meeting.id);
@@ -134,20 +134,20 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(secondPreview.content).not.toContain("CABEÇALHO A");
 	});
 
-	test("omite internos e agrupa registros por turma e aluno", async ({
+	test("omite internos e agrupa registros por turma e estudante", async ({
 		apiContext,
 	}) => {
 		const klassA = await createClass(apiContext, "Turma Ata A", "2026");
 		const klassB = await createClass(apiContext, "Turma Ata B", "2026");
-		const studentA = await createStudent(apiContext, "Aluna Ata A");
-		const studentB = await createStudent(apiContext, "Aluno Ata B");
+		const studentA = await createStudent(apiContext, "Estudante Ata A");
+		const studentB = await createStudent(apiContext, "Estudante Ata B");
 		await createEnrollment(apiContext, {
-			alunoId: studentA.id,
+			estudanteId: studentA.id,
 			turmaId: klassA.id,
 			dataInicio: "2026-01-01",
 		});
 		await createEnrollment(apiContext, {
-			alunoId: studentB.id,
+			estudanteId: studentB.id,
 			turmaId: klassB.id,
 			dataInicio: "2026-01-01",
 		});
@@ -168,11 +168,11 @@ test.describe("SPEC-0009 geração de ata", () => {
 		});
 
 		const preview = await previewMinute(apiContext, meeting.id);
-		expect(preview.content).toContain("Registros por aluno");
+		expect(preview.content).toContain("Registros por estudante");
 		expect(preview.content).toContain("Turma Ata A");
-		expect(preview.content).toContain("Aluna Ata A: Registro A público");
+		expect(preview.content).toContain("Estudante Ata A: Registro A público");
 		expect(preview.content).toContain("Turma Ata B");
-		expect(preview.content).toContain("Aluno Ata B: Registro B público");
+		expect(preview.content).toContain("Estudante Ata B: Registro B público");
 		expect(preview.content).not.toContain("Registro A interno");
 		// Independent default is included when no explicit inclusion row exists.
 		expect(preview.content).toContain("Contexto B incluído por padrão");

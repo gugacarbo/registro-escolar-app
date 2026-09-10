@@ -33,20 +33,20 @@ async function getClassHistory(apiContext: ApiContext, classId: string, query = 
 	if (!response.ok) throw new Error(`class history failed: ${response.status}`);
 	return (await response.json()) as {
 		turma: { id: string; name: string; academicPeriod: string };
-		alunos: Array<{ studentId: string; name: string; status: string; endDate: string | null }>;
+		estudantes: Array<{ studentId: string; name: string; status: string; endDate: string | null }>;
 		reunioes: Array<{ id: string; title: string; status: string }>;
 		eventos: HistoryEvent[];
 	};
 }
 
 test.describe("SPEC-0012 histórico da turma", () => {
-	test("turma sem reuniões retorna alunos e estado vazio de eventos", async ({
+	test("turma sem reuniões retorna estudantes e estado vazio de eventos", async ({
 		apiContext,
 	}) => {
 		const klass = await createClass(apiContext, "Turma Sem Reuniões", "2026");
-		const student = await createStudent(apiContext, "Aluno Sem Reuniões");
+		const student = await createStudent(apiContext, "Estudante Sem Reuniões");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: klass.id,
 			dataInicio: "2026-01-01",
 		});
@@ -55,33 +55,33 @@ test.describe("SPEC-0012 histórico da turma", () => {
 		expect(history.turma.id).toBe(klass.id);
 		expect(history.reunioes).toHaveLength(0);
 		expect(history.eventos).toHaveLength(0);
-		expect(history.alunos.map((row) => row.studentId)).toContain(student.id);
+		expect(history.estudantes.map((row) => row.studentId)).toContain(student.id);
 	});
 
-	test("inclui alunos históricos com status e data de término", async ({
+	test("inclui estudantes históricos com status e data de término", async ({
 		apiContext,
 	}) => {
 		const klass = await createClass(apiContext, "Turma Históricos", "2026");
-		const former = await createStudent(apiContext, "Aluno Histórico Turma");
-		const active = await createStudent(apiContext, "Aluno Ativo Turma");
+		const former = await createStudent(apiContext, "Estudante Histórico Turma");
+		const active = await createStudent(apiContext, "Estudante Ativo Turma");
 		await createEnrollment(apiContext, {
-			alunoId: former.id,
+			estudanteId: former.id,
 			turmaId: klass.id,
 			dataInicio: "2026-01-01",
 			dataTermino: "2026-06-30",
 			status: "concluida",
 		});
 		await createEnrollment(apiContext, {
-			alunoId: active.id,
+			estudanteId: active.id,
 			turmaId: klass.id,
 			dataInicio: "2026-07-01",
 		});
 
 		const history = await getClassHistory(apiContext, klass.id);
-		const formerRow = history.alunos.find((row) => row.studentId === former.id);
+		const formerRow = history.estudantes.find((row) => row.studentId === former.id);
 		expect(formerRow?.status).toBe("concluida");
 		expect(formerRow?.endDate).not.toBeNull();
-		expect(history.alunos.find((row) => row.studentId === active.id)?.status).toBe("ativa");
+		expect(history.estudantes.find((row) => row.studentId === active.id)?.status).toBe("ativa");
 	});
 
 	test("busca sem resultados retorna eventos vazios", async ({ apiContext }) => {
@@ -90,11 +90,11 @@ test.describe("SPEC-0012 histórico da turma", () => {
 		expect(history.eventos).toHaveLength(0);
 	});
 
-	test("aplica filtros de período, aluno, texto, componente e categoria", async ({ apiContext }) => {
+	test("aplica filtros de período, estudante, texto, componente e categoria", async ({ apiContext }) => {
 		const klass = await createClass(apiContext, "Turma Filtros Histórico", "2026");
-		const student = await createStudent(apiContext, "Aluno Filtro Turma");
+		const student = await createStudent(apiContext, "Estudante Filtro Turma");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: klass.id,
 			dataInicio: "2026-01-01",
 		});
@@ -121,7 +121,7 @@ test.describe("SPEC-0012 histórico da turma", () => {
 		const wrongPeriod = await getClassHistory(apiContext, klass.id, "?periodo=2025");
 		expect(wrongPeriod.eventos).toHaveLength(0);
 
-		const byStudent = await getClassHistory(apiContext, klass.id, `?alunoId=${student.id}`);
+		const byStudent = await getClassHistory(apiContext, klass.id, `?estudanteId=${student.id}`);
 		expect(byStudent.eventos.map((event) => event.studentId)).toContain(student.id);
 
 		const byText = await getClassHistory(apiContext, klass.id, "?q=FILTROS");
@@ -151,7 +151,7 @@ test.describe("SPEC-0012 histórico da turma", () => {
 	}) => {
 		const first = await createClass(apiContext, "Turma Equivalente", "2025");
 		const second = await createClass(apiContext, "Turma Equivalente", "2026");
-		const student = await createStudent(apiContext, "Aluno Equivalente");
+		const student = await createStudent(apiContext, "Estudante Equivalente");
 		const meeting = await createMeeting(apiContext, {
 			title: "Reunião Equivalente",
 			heldAt: "2026-05-10",
@@ -169,7 +169,7 @@ test.describe("SPEC-0012 histórico da turma", () => {
 
 	test("mantém registro interno visível no histórico", async ({ apiContext }) => {
 		const klass = await createClass(apiContext, "Turma Interno Histórico", "2026");
-		const student = await createStudent(apiContext, "Aluno Interno Turma");
+		const student = await createStudent(apiContext, "Estudante Interno Turma");
 		const meeting = await createMeeting(apiContext, {
 			title: "Reunião Interno Turma",
 			heldAt: "2026-05-10",

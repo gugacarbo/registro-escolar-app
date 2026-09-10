@@ -30,7 +30,7 @@ export function useCreateStudent() {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao criar aluno");
+				throw new Error(body.error ?? "Falha ao criar estudante");
 			}
 			return response.json() as Promise<Student>;
 		},

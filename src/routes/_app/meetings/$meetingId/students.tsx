@@ -70,7 +70,7 @@ function MeetingStudentsPage() {
 
 	return (
 		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Acompanhamento de alunos</h1>
+			<h1 className="text-2xl font-bold">Acompanhamento de estudantes</h1>
 
 			<Select value={classId} onValueChange={setClassId}>
 				<SelectTrigger aria-label="Turma">
@@ -97,7 +97,7 @@ function MeetingStudentsPage() {
 
 			{!classId && !isLoadingClasses && (
 				<p className="text-sm text-muted-foreground">
-					Selecione uma turma para acompanhar os alunos.
+					Selecione uma turma para acompanhar os estudantes.
 				</p>
 			)}
 

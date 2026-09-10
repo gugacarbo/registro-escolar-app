@@ -35,7 +35,7 @@ type EnrollmentRowInput = {
 
 export function mapEnrollmentRequestToRow(body: Record<string, unknown>) {
 	const row: EnrollmentRowInput = {
-		studentId: body.alunoId,
+		studentId: body.estudanteId,
 		classId: body.turmaId,
 		startDate:
 			typeof body.dataInicio === "string" && isDateString(body.dataInicio)

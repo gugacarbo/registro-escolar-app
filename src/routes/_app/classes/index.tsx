@@ -31,7 +31,7 @@ const columns = [
 				search={{ date: undefined }}
 				className="text-sm underline"
 			>
-				Ver alunos
+				Ver estudantes
 			</Link>
 		),
 	},
@@ -66,7 +66,7 @@ export function ClassesPage() {
 				<div className="flex gap-2">
 					<Button onClick={() => setDialogOpen(true)}>Nova turma</Button>
 					<Link to="/classes/enroll">
-						<Button variant="secondary">Matricular aluno</Button>
+						<Button variant="secondary">Matricular estudante</Button>
 					</Link>
 				</div>
 			</div>

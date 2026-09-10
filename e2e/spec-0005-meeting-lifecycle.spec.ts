@@ -123,9 +123,9 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 		apiContext,
 	}) => {
 		const klass = await createClass(apiContext, "Turma Finalizada", "2026");
-		const student = await createStudent(apiContext, "Aluno Finalizado");
+		const student = await createStudent(apiContext, "Estudante Finalizado");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: klass.id,
 			dataInicio: "2026-01-01",
 		});
@@ -172,7 +172,7 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 		apiContext,
 	}) => {
 		const klass = await createClass(apiContext, "Turma Independente", "2026");
-		const student = await createStudent(apiContext, "Aluno Independente");
+		const student = await createStudent(apiContext, "Estudante Independente");
 		const meeting = await createMeeting(apiContext, {
 			title: "Reunião Independente",
 			heldAt: "2026-05-10",

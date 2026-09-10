@@ -25,7 +25,7 @@ import { useStudents } from "#/hooks/students/use-students";
 import { enrollmentStatusValues } from "#/lib/enrollments/schema";
 
 const enrollmentFormSchema = z.object({
-	alunoId: z.string().min(1, "Aluno é obrigatório"),
+	estudanteId: z.string().min(1, "Estudante é obrigatório"),
 	turmaId: z.string().min(1, "Turma é obrigatória"),
 	dataInicio: z.string().min(1, "Data de início é obrigatória"),
 	dataTermino: z.string().optional(),
@@ -53,7 +53,7 @@ export function EnrollmentForm({
 	const form = useForm<EnrollmentFormValues>({
 		resolver: zodResolver(enrollmentFormSchema),
 		defaultValues: {
-			alunoId: "",
+			estudanteId: "",
 			turmaId: defaultTurmaId ?? "",
 			dataInicio: "",
 			dataTermino: "",
@@ -69,14 +69,14 @@ export function EnrollmentForm({
 			>
 				<FormField
 					control={form.control}
-					name="alunoId"
+					name="estudanteId"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Aluno *</FormLabel>
+							<FormLabel>Estudante *</FormLabel>
 							<Select value={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Selecione o aluno" />
+										<SelectValue placeholder="Selecione o estudante" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>

@@ -147,7 +147,7 @@ export async function importResolveHandler({
 			);
 			if (!existing) {
 				return badRequest(
-					`Aluno existente não encontrado: ${resolution.existingStudentId}`,
+					`Estudante existente não encontrado: ${resolution.existingStudentId}`,
 				);
 			}
 			linked++;
@@ -187,7 +187,7 @@ export async function importResolveHandler({
 		);
 		if (matchesSelfInBatch || duplicate) {
 			return badRequest(
-				`Aluno já existe: ${input.name}. Resolva como vínculo ou ignore a linha.`,
+				`Estudante já existe: ${input.name}. Resolva como vínculo ou ignore a linha.`,
 			);
 		}
 

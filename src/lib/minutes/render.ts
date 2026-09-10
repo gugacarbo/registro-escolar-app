@@ -64,9 +64,9 @@ export function renderMinute(input: RenderInput): RenderedMinute {
 		}
 	}
 
-	// Borda 5 (spec 0009): agrupar registros por turma e por aluno.
+	// Borda 5 (spec 0009): agrupar registros por turma e por estudante.
 	if ((!t || t.showRecords) && input.records.length > 0) {
-		push("Registros por aluno", 2);
+		push("Registros por estudante", 2);
 		const byClass = new Map<string, RecordLike[]>();
 		for (const r of input.records) {
 			const key = r.className ?? "Sem turma";

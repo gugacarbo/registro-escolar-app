@@ -108,7 +108,10 @@ export async function createStudentHandler({
 
 	if (duplicate) {
 		return new Response(
-			JSON.stringify({ error: "Aluno já existe", existingStudent: duplicate }),
+			JSON.stringify({
+				error: "Estudante já existe",
+				existingStudent: duplicate,
+			}),
 			{
 				status: 409,
 				headers: { "Content-Type": "application/json" },

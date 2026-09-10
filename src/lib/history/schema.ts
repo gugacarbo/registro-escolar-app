@@ -9,7 +9,7 @@ export const historyQuerySchema = z
 		reuniaoId: z.string().min(1).optional(),
 		categoriaId: z.string().min(1).optional(),
 		componenteId: z.string().min(1).optional(),
-		alunoId: z.string().min(1).optional(),
+		estudanteId: z.string().min(1).optional(),
 		q: z.string().trim().min(1).optional(),
 	})
 	.strict();
@@ -26,7 +26,7 @@ export function parseHistoryQuery(url: URL): HistoryQuery {
 				"reuniaoId",
 				"categoriaId",
 				"componenteId",
-				"alunoId",
+				"estudanteId",
 				"q",
 			].includes(key)
 		) {

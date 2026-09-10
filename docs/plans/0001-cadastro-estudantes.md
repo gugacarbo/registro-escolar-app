@@ -8,9 +8,9 @@ builds-on:
 implemented-by: []
 ---
 
-# Plano de implementação — Cadastro e importação em lote de alunos
+# Plano de implementação — Cadastro e importação em lote de estudantes
 
-> Especificação: [docs/specs/0001-cadastro-alunos.md](../specs/0001-cadastro-alunos.md)
+> Especificação: [docs/specs/0001-cadastro-estudantes.md](../specs/0001-cadastro-estudantes.md)
 > Convenções: `docs/context/CONVENTIONS.md`
 
 ## Global Constraints
@@ -29,7 +29,7 @@ implemented-by: []
 
 ## Resumo executivo
 
-Implementar o cadastro de alunos como entidade independente (ADR-0011), com
+Implementar o cadastro de estudantes como entidade independente (ADR-0011), com
 criação manual e importação em lote via CSV/planilha (ADR-0018), em ambiente
 single-tenant e operador único (ADR-0017). A importação deve detectar
 possíveis duplicidades e apresentar uma etapa de resolução de conflitos antes
@@ -44,31 +44,31 @@ de persistir.
   - `POST /api/students` — cadastro manual.
   - `POST /api/students/import` — upload e pré-visualização com conflitos.
   - `POST /api/students/import/resolve` — confirmação da resolução.
-- Tela de listagem/cadastro de alunos.
+- Tela de listagem/cadastro de estudantes.
 - Wizard de importação em lote (upload → revisão de conflitos → confirmação).
 - Testes unitários, de integração da API e e2e do fluxo crítico.
 - Migration do banco nomeada via Drizzle Kit.
 
 ### Fora do escopo deste plano
 
-- Vínculo de alunos a turmas (especificação 0002).
+- Vínculo de estudantes a turmas (especificação 0002).
 - Autenticação/RBAC granular (já coberto por ADR-0008/ADR-0017).
 - Integração automática com sistemas externos (fora do escopo, conforme ADR-0018).
 - Geração de PDF ou relatórios.
 
 ## Decisões técnicas
 
-| Tópico | Decisão | Racional |
-| --- | --- | --- |
-| Banco de dados | Tabela `students` em D1/SQLite via Drizzle ORM | ADR-0003, ADR-0004, ADR-0011 |
-| Aluno como entidade independente | Sem coluna `turmaId`; vínculo separado futuro | ADR-0011, ADR-0018 |
-| Validação | Zod derivado do schema Drizzle (`insertSchema`, `selectSchema`) | CONVENTIONS.md — schemas derivados |
-| API | Rotas do TanStack Start em `src/routes/api/students/*.ts` | ADR-0006, ADR-0007 |
-| Autenticação | Proteger rotas via middleware de sessão (Better Auth) | ADR-0008, ADR-0017 |
-| Formulários | react-hook-form + componentes `src/components/ui/form.tsx` | CONVENTIONS.md — formulários |
-| Requisições assíncronas | TanStack Query + invalidação explícita | CONVENTIONS.md — requisições/cache |
-| CSV/Planilha | Biblioteca leve de parse (ex.: `papaparse` para CSV; `xlsx` para planilhas) | Runtime Workers — avaliar bundle/compatibilidade |
-| Matching de duplicidade | Normalização de nome + documento opcional; nunca merge automático | ADR-0018, caso de borda #2 |
+| Tópico                                 | Decisão                                                                               | Racional                                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Banco de dados                         | Tabela `students` em D1/SQLite via Drizzle ORM                                        | ADR-0003, ADR-0004, ADR-0011                                     |
+| Estudante como entidade independente   | Sem coluna `turmaId`; vínculo separado futuro                                         | ADR-0011, ADR-0018                                               |
+| Validação                              | Zod derivado do schema Drizzle (`insertSchema`, `selectSchema`)                       | CONVENTIONS.md — schemas derivados                               |
+| API                                    | Rotas do TanStack Start em `src/routes/api/students/*.ts`                             | ADR-0006, ADR-0007                                               |
+| Autenticação                           | Proteger rotas via middleware de sessão (Better Auth)                                 | ADR-0008, ADR-0017                                               |
+| Formulários                            | react-hook-form + componentes `src/components/ui/form.tsx`                            | CONVENTIONS.md — formulários                                     |
+| Requisições assíncronas                | TanStack Query + invalidação explícita                                                | CONVENTIONS.md — requisições/cache                               |
+| CSV/Planilha                           | Biblioteca leve de parse (ex.: `papaparse` para CSV; `xlsx` para planilhas)           | Runtime Workers — avaliar bundle/compatibilidade                 |
+| Matching de duplicidade                | Normalização de nome + documento opcional; nunca merge automático                     | ADR-0018, caso de borda #2                                       |
 | Armazenamento temporário de importação | Estado somente no cliente durante o wizard (pré-visualização retornada pelo servidor) | Evita estado server-side complexo; fluxo síncrono de confirmação |
 
 ## Entregáveis e estrutura de arquivos
@@ -79,7 +79,7 @@ de persistir.
 src/
   db/
     schema.ts                     # adicionar tabela students
-    migrations/                   # gerado por drizzle-kit generate --name=cria-tabela-alunos
+    migrations/                   # gerado por drizzle-kit generate --name=cria-tabela-estudantes
   routes/
     api/students/
       index.ts                    # POST /api/students (create)
@@ -126,23 +126,23 @@ src/
 ### Tabela `students` (src/db/schema.ts)
 
 ```ts
-export const students = sqliteTable("students", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  document: text("document"),       // opcional — RG/CPF ou documento da escola
-  registrationNumber: text("registration_number"), // opcional — número de matrícula
-  email: text("email"),
-  phone: text("phone"),
-  birthDate: integer("birth_date", { mode: "timestamp_ms" }),
-  notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+export const students = sqliteTable('students', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  document: text('document'), // opcional — RG/CPF ou documento da escola
+  registrationNumber: text('registration_number'), // opcional — número de matrícula
+  email: text('email'),
+  phone: text('phone'),
+  birthDate: integer('birth_date', { mode: 'timestamp_ms' }),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => new Date())
     .notNull(),
-});
+})
 ```
 
 #### Índices recomendados
@@ -157,7 +157,7 @@ export const students = sqliteTable("students", {
 
 ### 1. `POST /api/students`
 
-Cria um aluno manualmente.
+Cria um estudante manualmente.
 
 **Request body (Zod / insertSchema):**
 
@@ -185,7 +185,7 @@ Cria um aluno manualmente.
 
 **Response 400:** erro de validação detalhado (Zod error map).
 
-**Response 409:** aluno já existe (matching por nome/documento) — retorna
+**Response 409:** estudante já existe (matching por nome/documento) — retorna
 `existingStudent` para o operador decidir.
 
 ### 2. `POST /api/students/import`
@@ -199,9 +199,22 @@ Faz upload de arquivo e retorna pré-visualização com conflitos.
 ```json
 {
   "rows": [
-    { "index": 1, "name": "João Silva", "document": "123", "status": "conflict", "existingStudentId": "uuid", "existingStudentName": "João Silva" },
+    {
+      "index": 1,
+      "name": "João Silva",
+      "document": "123",
+      "status": "conflict",
+      "existingStudentId": "uuid",
+      "existingStudentName": "João Silva"
+    },
     { "index": 2, "name": "Maria Souza", "document": "", "status": "valid" },
-    { "index": 3, "name": "", "document": "", "status": "invalid", "errors": ["nome é obrigatório"] }
+    {
+      "index": 3,
+      "name": "",
+      "document": "",
+      "status": "invalid",
+      "errors": ["nome é obrigatório"]
+    }
   ],
   "summary": { "total": 3, "valid": 1, "conflicts": 1, "invalid": 1 }
 }
@@ -234,7 +247,7 @@ Confirma a resolução dos conflitos.
   "created": 1,
   "linked": 1,
   "skipped": 1,
-  "students": [ { "id": "...", "name": "..." } ]
+  "students": [{ "id": "...", "name": "..." }]
 }
 ```
 
@@ -259,15 +272,15 @@ Confirma a resolução dos conflitos.
 
 ### Tela `/app/students`
 
-- Listagem paginada de alunos (TanStack Table).
-- Botões: "Novo aluno" e "Importar alunos".
+- Listagem paginada de estudantes (TanStack Table).
+- Botões: "Novo estudante" e "Importar estudantes".
 - Ação de busca por nome/documento.
 
 ### Tela `/app/students/new`
 
 - Formulário manual com `name` obrigatório e campos opcionais.
 - Ao salvar, chama `useCreateStudent` e invalida a listagem.
-- Se API retornar 409, apresentar modal/link para o aluno existente.
+- Se API retornar 409, apresentar modal/link para o estudante existente.
 
 ### Tela `/app/students/import`
 
@@ -278,12 +291,12 @@ Wizard em passos:
 2. **Pré-visualização:** tabela com todas as linhas, status (`valid`,
    `conflict`, `invalid`) e ações por conflito:
    - "Criar novo" — mantém ação `create`.
-   - "Vincular a existente" — abre seleção do aluno existente; ação `link`.
+   - "Vincular a existente" — abre seleção do estudante existente; ação `link`.
    - "Ignorar" — ação `skip`.
 3. **Confirmação:** resumo das ações; botão "Confirmar importação".
 4. **Resultado:** contador de criados/vinculados/ignorados; botão para listagem.
 
-# Task 1: Infra e modelo de dados de alunos
+# Task 1: Infra e modelo de dados de estudantes
 
 Criar a entidade `students` no banco e seus schemas Zod derivados, sem expor
 API nem UI. Esta tarefa é base para todas as demais.
@@ -294,7 +307,7 @@ API nem UI. Esta tarefa é base para todas as demais.
   `document`, `registrationNumber`, `email`, `phone`, `birthDate`, `notes`,
   `createdAt`, `updatedAt`.
 - Índices: `students_name_idx`, `students_document_idx`.
-- Migration gerada com `bun run db:generate --name=cria-tabela-alunos`.
+- Migration gerada com `bun run db:generate --name=cria-tabela-estudantes`.
 - Schemas Zod derivados em `src/lib/students/schema.ts`: `createStudentSchema`,
   `updateStudentSchema`, `selectStudentSchema`.
 - Repository em `src/lib/students/repository.ts` com funções:
@@ -314,7 +327,7 @@ API nem UI. Esta tarefa é base para todas as demais.
 - `drizzle/` (migration gerada)
 - `package.json` se novas dependências forem adicionadas
 
-# Task 2: API de cadastro manual de alunos
+# Task 2: API de cadastro manual de estudantes
 
 Implementar `POST /api/students` com validação, criação e detecção de
 duplicidade. Proteger rota com sessão ativa do Better Auth.
@@ -323,10 +336,10 @@ duplicidade. Proteger rota com sessão ativa do Better Auth.
 
 - Rota `POST /api/students` em `src/routes/api/students/index.ts`.
 - Recebe JSON validado por `createStudentSchema`.
-- Retorna 201 com o aluno criado.
+- Retorna 201 com o estudante criado.
 - Retorna 400 se validação falhar (nome vazio, etc.).
 - Retorna 409 se `name` normalizado e/ou `document` normalizado coincidirem
-  com aluno existente; corpo inclui `existingStudent`.
+  com estudante existente; corpo inclui `existingStudent`.
 - Requer sessão ativa (Better Auth); 401/403 sem sessão.
 - Testes de integração da rota (mock de auth e DB).
 - `bun run check`, `bunx tsc --noEmit --skipLibCheck` e `bun run test` passam.
@@ -352,7 +365,7 @@ para importação. Ainda sem expor endpoint HTTP.
 - Rejeitar arquivos que não sejam CSV/XLSX/XLS/ODS.
 - Linhas sem `name` devem ser marcadas como `invalid` com mensagem em
   português.
-- Matching em `src/lib/students/matching.ts`: receber linha parseada + alunos
+- Matching em `src/lib/students/matching.ts`: receber linha parseada + estudantes
   existentes e retornar `conflict` com candidatos ordenados por similaridade,
   ou `valid`.
 - Normalização de nome (trim, lowercase, sem acentos, espaços colapsados) e
@@ -361,7 +374,7 @@ para importação. Ainda sem expor endpoint HTTP.
   normalização se documento ausente; (c) similaridade opcional desativada por
   padrão (limiar 1.0 = exato).
 - Testes unitários cobrindo: CSV válido, CSV com colunas extras, linha sem nome,
-  arquivo inválido, matching por documento, matching por nome, não-conflicto.
+  arquivo inválido, matching por documento, matching por nome, não-conflito.
 - `bun run check`, `bunx tsc --noEmit --skipLibCheck` e `bun run test` passam.
 
 ### Write set esperado
@@ -382,10 +395,10 @@ Implementar `POST /api/students/import` (pré-visualização) e
   chama parser e matching, retorna `rows` + `summary`.
 - `POST /api/students/import/resolve` recebe array de resoluções (`create`,
   `link`, `skip`); valida consistência; executa ações; retorna contadores e
-  alunos afetados.
-- `link` vincula a `existingStudentId` (sem criar novo aluno, mas sem alterar
-  o aluno existente além disso).
-- `create` insere novo aluno com os dados da linha.
+  estudantes afetados.
+- `link` vincula a `existingStudentId` (sem criar novo estudante, mas sem alterar
+  o estudante existente além disso).
+- `create` insere novo estudante com os dados da linha.
 - `skip` ignora a linha.
 - 400 se ação `link` sem `existingStudentId` ou ação inválida.
 - Testes de integração das rotas com auth e DB mockados.
@@ -400,13 +413,13 @@ Implementar `POST /api/students/import` (pré-visualização) e
 
 # Task 5: Frontend — listagem e cadastro manual
 
-Criar layout protegido `/app`, tela de listagem e formulário manual de alunos.
+Criar layout protegido `/app`, tela de listagem e formulário manual de estudantes.
 
 ### Critérios de aceite
 
 - Layout/rota protegida `/app` (redireciona para login se não autenticado).
-- Tela `/app/students` listando alunos com busca por nome/documento e botões
-  "Novo aluno" / "Importar alunos".
+- Tela `/app/students` listando estudantes com busca por nome/documento e botões
+  "Novo estudante" / "Importar estudantes".
 - Tela `/app/students/new` com formulário react-hook-form usando
   `createStudentSchema` e componentes `src/components/ui/form.tsx`.
 - Hook `useCreateStudent` com mutation e invalidação de `students` query key.
@@ -454,21 +467,21 @@ Escrever testes e2e cobrindo os fluxos críticos e executar DoD global do repo.
 ### Critérios de aceite
 
 - Testes e2e com Playwright:
-  - cadastro manual de aluno;
+  - cadastro manual de estudante;
   - importação em lote com resolução de conflito por vinculação;
   - rejeição de arquivo inválido;
   - validação de nome vazio.
 - Cobertura ≥ 95% nos novos módulos (`bun run test:coverage`).
 - `bun run check`, `bunx tsc --noEmit --skipLibCheck`, `bun run test`,
   `bun run build` e `scripts/docs-check` passam.
-- Preencher seção "Verificação" da spec `docs/specs/0001-cadastro-alunos.md`.
+- Preencher seção "Verificação" da spec `docs/specs/0001-cadastro-estudantes.md`.
 - Atualizar plano de implementação com ajustes e lições aprendidas (se houver).
 
 ### Write set esperado
 
 - `e2e/students.spec.ts` (ou similar)
-- `docs/specs/0001-cadastro-alunos.md`
-- `docs/plans/0001-cadastro-alunos.md`
+- `docs/specs/0001-cadastro-estudantes.md`
+- `docs/plans/0001-cadastro-estudantes.md`
 
 ## Sequência de execução
 
@@ -488,13 +501,13 @@ compartilham arquivos (`repository.ts`, `schema.ts`, rotas API).
 
 ## Riscos e mitigações
 
-| Risco | Impacto | Mitigação |
-| --- | --- | --- |
-| Biblioteca de planilha não ser compatível com Workers | Alto | Testar `xlsx` ou `papaparse` no ambiente Workers; fallback para CSV apenas se bundle/compatibilidade falhar |
-| Algoritmo de matching agressivo/conservador | Médio | Tornar limiar configurável; revisão humana obrigatória; testes com casos reais |
-| Estado do wizard no cliente perder dados ao recarregar | Médio | Manter etapas rápidas; não persistir upload parcial; instruir operador a concluir em uma sessão |
-| Autenticação não protege rotas corretamente | Alto | Reutilizar middleware Better Auth; testes e2e verificando redirecionamento |
-| Fuga de responsabilidades entre repository e rota | Baixo | Repository lida com D1; rota lida com HTTP/Zod; matching em serviço separado |
+| Risco                                                  | Impacto | Mitigação                                                                                                   |
+| ------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------- |
+| Biblioteca de planilha não ser compatível com Workers  | Alto    | Testar `xlsx` ou `papaparse` no ambiente Workers; fallback para CSV apenas se bundle/compatibilidade falhar |
+| Algoritmo de matching agressivo/conservador            | Médio   | Tornar limiar configurável; revisão humana obrigatória; testes com casos reais                              |
+| Estado do wizard no cliente perder dados ao recarregar | Médio   | Manter etapas rápidas; não persistir upload parcial; instruir operador a concluir em uma sessão             |
+| Autenticação não protege rotas corretamente            | Alto    | Reutilizar middleware Better Auth; testes e2e verificando redirecionamento                                  |
+| Fuga de responsabilidades entre repository e rota      | Baixo   | Repository lida com D1; rota lida com HTTP/Zod; matching em serviço separado                                |
 
 ## Definition of Done
 

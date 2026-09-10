@@ -24,25 +24,25 @@ implemented-by:
   - src/hooks/students/use-import-students.ts
 ---
 
-# Cadastro e importação em lote de alunos
+# Cadastro e importação em lote de estudantes
 
 > Convenções compartilhadas: `docs/context/CONVENTIONS.md`.
 
 ## Objetivo
 
-Permitir que o operador cadastre alunos individualmente e importe alunos em lote via CSV ou planilha, resolvendo duplicidades de forma explícita.
+Permitir que o operador cadastre estudantes individualmente e importe estudantes em lote via CSV ou planilha, resolvendo duplicidades de forma explícita.
 
 ## Fluxo
 
-1. O operador acessa a tela de alunos.
+1. O operador acessa a tela de estudantes.
 2. Escolhe cadastro manual ou importação em lote.
 3. No cadastro manual, preenche os dados obrigatórios e salva.
 4. Na importação, faz upload do arquivo, revisa os registros detectados como duplicidades e confirma ação (criar novo ou vincular a existente).
-5. Alunos importados permanecem disponíveis para vínculo com turmas.
+5. Estudantes importados permanecem disponíveis para vínculo com turmas.
 
 ## Contrato
 
-- `POST /api/students` — cria aluno manual.
+- `POST /api/students` — cria estudante manual.
 - `POST /api/students/import` — inicia importação em lote; retorna pré-visualização com conflitos.
 - `POST /api/students/import/resolve` — confirma resolução de conflitos.
 - Payload mínimo manual: `nome`.
@@ -50,13 +50,13 @@ Permitir que o operador cadastre alunos individualmente e importe alunos em lote
 
 ## Casos de borda
 
-| #   | QUANDO ⟨gatilho⟩                                             | o sistema DEVE ⟨resposta⟩                                 |
-| --- | ------------------------------------------------------------ | --------------------------------------------------------- |
-| 1   | o nome do aluno é enviado vazio                              | rejeitar com erro de validação                            |
-| 2   | a importação detecta mesmo nome/documento de aluno existente | apresentar conflito e não criar duplicado silenciosamente |
-| 3   | o arquivo enviado não é CSV nem planilha reconhecida         | rejeitar com mensagem de formato inválido                 |
-| 4   | a importação contém linhas com dados mínimos ausentes        | listar linhas inválidas na pré-visualização               |
-| 5   | o operador resolve um conflito vinculando a aluno existente  | reutilizar a entidade aluno existente                     |
+| #   | QUANDO ⟨gatilho⟩                                                 | o sistema DEVE ⟨resposta⟩                                 |
+| --- | ---------------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | o nome do estudante é enviado vazio                              | rejeitar com erro de validação                            |
+| 2   | a importação detecta mesmo nome/documento de estudante existente | apresentar conflito e não criar duplicado silenciosamente |
+| 3   | o arquivo enviado não é CSV nem planilha reconhecida             | rejeitar com mensagem de formato inválido                 |
+| 4   | a importação contém linhas com dados mínimos ausentes            | listar linhas inválidas na pré-visualização               |
+| 5   | o operador resolve um conflito vinculando a estudante existente  | reutilizar a entidade estudante existente                 |
 
 ## Questões em aberto
 
@@ -85,7 +85,7 @@ DoD executado em 2026-09-09 no repo registro-escolar-app: `bunx tsc --noEmit
 casos de borda da spec — (1) nome vazio rejeitado (`POST /api/students`
 400; `import/resolve` 400 "Criação requer nome"), (2) mesmo nome/documento
 apresenta conflito sem duplicar (`import` summary.conflicts; `index` e
-`import/resolve` 409 "Aluno já existe"), (3) arquivo fora de CSV/planilha
+`import/resolve` 409 "Estudante já existe"), (3) arquivo fora de CSV/planilha
 rejeitado (`import` 400 "Formato de arquivo inválido"; parser fatal para
 extensão não suportada), (4) linhas sem dados mínimos listadas como inválidas
 na pré-visualização (`import` 200 com summary.invalid e warnings por linha),

@@ -32,12 +32,12 @@ implemented-by:
 
 ## Objetivo
 
-Permitir criar turmas vinculadas a períodos letivos e registrar o vínculo histórico de alunos com cada turma, preservando mudanças de série/curso/período.
+Permitir criar turmas vinculadas a períodos letivos e registrar o vínculo histórico de estudantes com cada turma, preservando mudanças de série/curso/período.
 
 ## Fluxo
 
 1. O operador cadastra uma turma informando nome, período letivo e campos opcionais (curso, série, turno).
-2. O operador seleciona um aluno e define início, término opcional e status do vínculo com a turma.
+2. O operador seleciona um estudante e define início, término opcional e status do vínculo com a turma.
 3. O sistema exibe vínculos ativos e históricos.
 4. Mudanças de turma encerram o vínculo anterior e abrem novo vínculo sem apagar histórico.
 
@@ -45,27 +45,27 @@ Permitir criar turmas vinculadas a períodos letivos e registrar o vínculo hist
 
 - `POST /api/classes` — cria turma.
 - `GET /api/classes` — lista turmas.
-- `POST /api/enrollments` — cria/encerra vínculo aluno-turma.
-- `GET /api/classes/:id/students?date=YYYY-MM-DD` — retorna alunos da turma na data informada.
+- `POST /api/enrollments` — cria/encerra vínculo estudante-turma.
+- `GET /api/classes/:id/students?date=YYYY-MM-DD` — retorna estudantes da turma na data informada.
 - Payload de turma: `nome`, `periodoLetivo`, campos opcionais `curso`, `serie`, `turno`.
-- Payload de vínculo: `alunoId`, `turmaId`, `dataInicio`, `dataTermino` opcional, `status`.
+- Payload de vínculo: `estudanteId`, `turmaId`, `dataInicio`, `dataTermino` opcional, `status`.
 
 ## Casos de borda
 
-| #   | QUANDO ⟨gatilho⟩                                                       | o sistema DEVE ⟨resposta⟩                     |
-| --- | ---------------------------------------------------------------------- | --------------------------------------------- |
-| 1   | duas turmas equivalentes de períodos diferentes forem criadas          | tratá-las como entidades distintas            |
-| 2   | um aluno for transferido para outra turma                              | encerrar vínculo antigo e preservar histórico |
-| 3   | uma reunião consultar alunos da turma em data fora de qualquer vínculo | não incluir o aluno na lista daquela reunião  |
-| 4   | houver vínculos sobrepostos para o mesmo aluno na mesma turma          | rejeitar ou sinalizar inconsistência          |
-| 5   | o vínculo não possuir data de término                                  | considerá-lo ativo até nova data de término   |
+| #   | QUANDO ⟨gatilho⟩                                                           | o sistema DEVE ⟨resposta⟩                        |
+| --- | -------------------------------------------------------------------------- | ------------------------------------------------ |
+| 1   | duas turmas equivalentes de períodos diferentes forem criadas              | tratá-las como entidades distintas               |
+| 2   | um estudante for transferido para outra turma                              | encerrar vínculo antigo e preservar histórico    |
+| 3   | uma reunião consultar estudantes da turma em data fora de qualquer vínculo | não incluir o estudante na lista daquela reunião |
+| 4   | houver vínculos sobrepostos para o mesmo estudante na mesma turma          | rejeitar ou sinalizar inconsistência             |
+| 5   | o vínculo não possuir data de término                                      | considerá-lo ativo até nova data de término      |
 
 ## Questões em aberto
 
 Nenhuma — os cinco casos de borda estão cobertos por testes.
 
-
 ## Definition of Done
+
 ```bash
 bunx tsc --noEmit --skipLibCheck        # exit 0
 bun run check                            # exit 0
@@ -84,7 +84,7 @@ bun run check ....................... exit 0 (190 files)
 bun run test ........................ 30 files, 200 tests, tudo verde
 bun run test:coverage ............... All files 98.48% (teto >= 95%)
 bun run e2e ......................... 1 falha pré-existente em e2e/home.spec.ts
-                                      ("Carregando" — espec não tocado pela spec 0002)
+                                      ("Carregando" — spec não tocado pela spec 0002)
 Bordas: 1 duplicatas coexistem; 2 transferência encerra anterior
   (endDate = novaStart − 1 dia, status transferida); 3 fora de vínculo → 200 [];
   4 sobreposição mesma turma → 409; 5 endDate null ativo em data futura.

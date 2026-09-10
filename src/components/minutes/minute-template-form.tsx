@@ -20,7 +20,7 @@ const BLOCKS = [
 	{ name: "showMeeting", label: "Reunião" },
 	{ name: "showClasses", label: "Turmas" },
 	{ name: "showParticipants", label: "Participantes" },
-	{ name: "showRecords", label: "Registros por aluno" },
+	{ name: "showRecords", label: "Registros por estudante" },
 	{ name: "showGeneralReports", label: "Relatos gerais" },
 	{ name: "showSignatures", label: "Assinaturas" },
 ] as const;

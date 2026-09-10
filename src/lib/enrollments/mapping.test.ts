@@ -31,7 +31,7 @@ describe("enrollment mapping PT->EN", () => {
 	it("mapeia payload de vínculo com datas convertidas", () => {
 		expect(
 			mapEnrollmentRequestToRow({
-				alunoId: "a1",
+				estudanteId: "a1",
 				turmaId: "t1",
 				dataInicio: "2026-02-01",
 				dataTermino: "2026-12-15",
@@ -48,7 +48,7 @@ describe("enrollment mapping PT->EN", () => {
 
 	it("mantém dataTermino ausente como indefinido (borda 5)", () => {
 		const row = mapEnrollmentRequestToRow({
-			alunoId: "a1",
+			estudanteId: "a1",
 			turmaId: "t1",
 			dataInicio: "2026-02-01",
 		});

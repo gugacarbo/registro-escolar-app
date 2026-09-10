@@ -35,32 +35,32 @@ async function getStudentHistory(
 	);
 	if (!response.ok) throw new Error(`history failed: ${response.status}`);
 	return (await response.json()) as {
-		aluno: { id: string; name: string };
+		estudante: { id: string; name: string };
 		eventos: HistoryEvent[];
 	};
 }
 
-test.describe("SPEC-0011 histórico do aluno", () => {
+test.describe("SPEC-0011 histórico do estudante", () => {
 	test("inclui eventos de duas turmas na mesma linha histórica", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Histórico");
+		const student = await createStudent(apiContext, "Estudante Histórico");
 		const first = await createClass(apiContext, "História Turma 2025", "2025");
 		const second = await createClass(apiContext, "História Turma 2026", "2026");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: first.id,
 			dataInicio: "2026-01-01",
 			dataTermino: "2026-12-31",
 		});
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: second.id,
 			dataInicio: "2026-01-01",
 		});
 
 		const history = await getStudentHistory(apiContext, student.id);
-		expect(history.aluno.name).toBe("Aluno Histórico");
+		expect(history.estudante.name).toBe("Estudante Histórico");
 		expect(history.eventos.length).toBeGreaterThan(0);
 		expect(history.eventos.map((event) => event.turmaId)).toEqual(
 			expect.arrayContaining([first.id, second.id]),
@@ -68,7 +68,7 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 	});
 
 	test("filtro sem resultados retorna lista vazia", async ({ apiContext }) => {
-		const student = await createStudent(apiContext, "Aluno Sem Resultado");
+		const student = await createStudent(apiContext, "Estudante Sem Resultado");
 		const history = await getStudentHistory(
 			apiContext,
 			student.id,
@@ -78,7 +78,7 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 	});
 
 	test("busca textual ignora acento e caixa", async ({ apiContext }) => {
-		const student = await createStudent(apiContext, "Aluno Busca");
+		const student = await createStudent(apiContext, "Estudante Busca");
 		const klass = await createClass(apiContext, "Turma Busca", "2026");
 		const meeting = await createMeeting(apiContext, {
 			title: "Reunião Busca",
@@ -100,7 +100,7 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 	});
 
 	test("inclui registro interno no histórico", async ({ apiContext }) => {
-		const student = await createStudent(apiContext, "Aluno Interno");
+		const student = await createStudent(apiContext, "Estudante Interno");
 		const klass = await createClass(apiContext, "Turma Histórico Interno", "2026");
 		const meeting = await createMeeting(apiContext, {
 			title: "Reunião Interno",
@@ -123,17 +123,17 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 	test("filtros por turma, período, reunião e componente funcionam", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Filtros");
+		const student = await createStudent(apiContext, "Estudante Filtros");
 		const first = await createClass(apiContext, "Filtro Turma A", "2025");
 		const second = await createClass(apiContext, "Filtro Turma B", "2026");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: first.id,
 			dataInicio: "2026-01-01",
 			dataTermino: "2026-12-31",
 		});
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: second.id,
 			dataInicio: "2026-01-01",
 		});
@@ -206,10 +206,10 @@ test.describe("SPEC-0011 histórico do aluno", () => {
 	test("relaciona reunião anterior ao contexto da turma na data", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Contexto Antigo");
+		const student = await createStudent(apiContext, "Estudante Contexto Antigo");
 		const oldClass = await createClass(apiContext, "Turma Contexto Antiga", "2026");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: oldClass.id,
 			dataInicio: "2026-01-01",
 			dataTermino: "2026-12-31",

@@ -120,25 +120,25 @@ export function StudentsPage() {
 		<div className="space-y-4 sm:space-y-5">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 				<div className="space-y-1">
-					<h1 className="text-2xl font-bold tracking-tight">Alunos</h1>
+					<h1 className="text-2xl font-bold tracking-tight">Estudantes</h1>
 					<p className="text-sm text-muted-foreground" role="status">
 						{total === 0
-							? "Nenhum aluno cadastrado"
+							? "Nenhum estudante cadastrado"
 							: total === 1
-								? "1 aluno cadastrado"
-								: `${total} alunos cadastrados`}
+								? "1 estudante cadastrado"
+								: `${total} estudantes cadastrados`}
 					</p>
 				</div>
 				<div className="flex flex-wrap items-center gap-2">
 					<Button asChild variant="secondary">
 						<Link to="/students/import">
 							<Upload />
-							Importar alunos
+							Importar estudantes
 						</Link>
 					</Button>
 					<Button onClick={() => setDialogOpen(true)}>
 						<Plus />
-						Novo aluno
+						Novo estudante
 					</Button>
 				</div>
 			</div>
@@ -184,16 +184,16 @@ export function StudentsPage() {
 				onRetry={() => {
 					void refetch();
 				}}
-				ariaLabel="Tabela de alunos"
+				ariaLabel="Tabela de estudantes"
 				emptyTitle={
 					hasSearch
-						? "Nenhum aluno corresponde à busca"
-						: "Nenhum aluno encontrado"
+						? "Nenhum estudante corresponde à busca"
+						: "Nenhum estudante encontrado"
 				}
 				emptyDescription={
 					hasSearch
 						? `Não encontramos resultados para “${debouncedSearch.trim()}”. Tente outro nome ou documento.`
-						: "Cadastre o primeiro aluno ou importe uma lista em CSV."
+						: "Cadastre o primeiro estudante ou importe uma lista em CSV."
 				}
 				emptyAction={
 					hasSearch ? (
@@ -203,7 +203,7 @@ export function StudentsPage() {
 					) : (
 						<Button onClick={() => setDialogOpen(true)}>
 							<Plus />
-							Cadastrar aluno
+							Cadastrar estudante
 						</Button>
 					)
 				}

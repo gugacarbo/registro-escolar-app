@@ -18,9 +18,9 @@ async function setupMeetingWithStudent(
 	title: string,
 ) {
 	const klass = await createClass(apiContext, `Turma Registros ${title}`, "2026");
-	const student = await createStudent(apiContext, `Aluno ${title}`);
+	const student = await createStudent(apiContext, `Estudante ${title}`);
 	await createEnrollment(apiContext, {
-		alunoId: student.id,
+		estudanteId: student.id,
 		turmaId: klass.id,
 		dataInicio: "2026-01-01",
 	});
@@ -55,9 +55,9 @@ async function listRecords(
 	return body.records;
 }
 
-test.describe("SPEC-0007 registros de aluno", () => {
+test.describe("SPEC-0007 registros de estudante", () => {
 	test("rejeita texto vazio nos dois fluxos", async ({ apiContext }) => {
-		const student = await createStudent(apiContext, "Aluno Texto Vazio");
+		const student = await createStudent(apiContext, "Estudante Texto Vazio");
 		const independent = await fetch(`${baseURL}/api/students/${student.id}/records`, {
 			method: "POST",
 			headers: { Cookie: apiContext.cookies, "Content-Type": "application/json" },
@@ -108,9 +108,9 @@ test.describe("SPEC-0007 registros de aluno", () => {
 	test("exibe contexto independente apenas da turma da reunião", async ({ apiContext }) => {
 		const includedClass = await createClass(apiContext, "Turma Contexto Incluída", "2026");
 		const excludedClass = await createClass(apiContext, "Turma Contexto Excluída", "2026");
-		const student = await createStudent(apiContext, "Aluno Contexto");
+		const student = await createStudent(apiContext, "Estudante Contexto");
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: includedClass.id,
 			dataInicio: "2026-01-01",
 		});

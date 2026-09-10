@@ -50,7 +50,7 @@ export async function createEnrollmentHandler({
 	const db = createDb(requireD1(env));
 	const student = await findStudentById(db, parsed.data.studentId);
 	if (!student) {
-		return json({ error: "Aluno não encontrado" }, 404);
+		return json({ error: "Estudante não encontrado" }, 404);
 	}
 	const classRow = await findClassById(db, parsed.data.classId);
 	if (!classRow) {
@@ -61,7 +61,7 @@ export async function createEnrollmentHandler({
 	if ("conflict" in result) {
 		return json(
 			{
-				error: "Vínculo sobreposto para o mesmo aluno nesta turma",
+				error: "Vínculo sobreposto para o mesmo estudante nesta turma",
 				conflictingEnrollment: result.conflict,
 			},
 			409,

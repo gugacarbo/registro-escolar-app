@@ -104,7 +104,7 @@ function ImportStudentsPage() {
 					{result.skipped}
 				</p>
 				<Button onClick={() => navigate({ to: "/students" })}>
-					Ver alunos
+					Ver estudantes
 				</Button>
 			</div>
 		);
@@ -158,7 +158,7 @@ function ImportStudentsPage() {
 
 	return (
 		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">Importar alunos</h1>
+			<h1 className="text-2xl font-bold">Importar estudantes</h1>
 			<p className="text-sm text-muted-foreground">
 				Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a coluna
 				nome.

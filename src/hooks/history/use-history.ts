@@ -12,7 +12,7 @@ export type HistoryFilters = {
 	reuniaoId?: string;
 	categoriaId?: string;
 	componenteId?: string;
-	alunoId?: string;
+	estudanteId?: string;
 	q?: string;
 };
 
@@ -28,7 +28,7 @@ function buildUrl(base: string, filters: HistoryFilters): string {
 }
 
 /**
- * Linha do tempo do aluno (spec 0011). Acessível inclusive durante a reunião
+ * Linha do tempo do estudante (spec 0011). Acessível inclusive durante a reunião
  * (borda 3), sem invalidação automática — histórico é read-only.
  */
 export function useStudentHistory(
@@ -45,7 +45,9 @@ export function useStudentHistory(
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao carregar histórico do aluno");
+				throw new Error(
+					body.error ?? "Falha ao carregar histórico do estudante",
+				);
 			}
 			return response.json() as Promise<StudentHistoryResult>;
 		},
@@ -54,7 +56,7 @@ export function useStudentHistory(
 	});
 }
 
-/** Histórico da turma (spec 0012): dados cadastrais, alunos, reuniões e eventos. */
+/** Histórico da turma (spec 0012): dados cadastrais, estudantes, reuniões e eventos. */
 export function useClassHistory(classId: string, filters: HistoryFilters = {}) {
 	return useQuery<ClassHistoryResult>({
 		queryKey: ["classes", classId, "history", filters],

@@ -71,7 +71,7 @@ describe("useUpdateStudent", () => {
 		const { client, Wrapper } = createWrapper();
 		const invalidateSpy = vi.spyOn(client, "invalidateQueries");
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify({ error: "Aluno não encontrado" }), {
+			new Response(JSON.stringify({ error: "Estudante não encontrado" }), {
 				status: 404,
 			}),
 		);
@@ -81,7 +81,7 @@ describe("useUpdateStudent", () => {
 		});
 		await expect(
 			act(() => result.current.mutateAsync({ name: "Novo" })),
-		).rejects.toThrow("Aluno não encontrado");
+		).rejects.toThrow("Estudante não encontrado");
 		expect(invalidateSpy).not.toHaveBeenCalled();
 	});
 });

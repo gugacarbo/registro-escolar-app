@@ -11,7 +11,7 @@ deciders: []
 
 ## Contexto e problema
 
-O sistema registra informações durante o conselho de classe. É preciso distinguir momentos de preparação, registro, encerramento e correção. Com a decisão de permitir registros de aluno independentes de reunião (ADR-0013), o ciclo de vida passa a controlar principalmente **o que pode ser alterado dentro daquela reunião**, e não a criação de registros do aluno em geral.
+O sistema registra informações durante o conselho de classe. É preciso distinguir momentos de preparação, registro, encerramento e correção. Com a decisão de permitir registros de estudante independentes de reunião (ADR-0013), o ciclo de vida passa a controlar principalmente **o que pode ser alterado dentro daquela reunião**, e não a criação de registros do estudante em geral.
 
 ## Direcionadores da decisão
 
@@ -19,7 +19,7 @@ O sistema registra informações durante o conselho de classe. É preciso distin
 - RF-017, RF-018 (antigo): reabertura e restrição de criação de registros — **RF-018 revogado**.
 - RN-012, RN-013 (antigo): regras temporais de edição de registros — **RN-012 e RN-013 ajustados**.
 - CA-008: reabertura preserva versões anteriores.
-- ADR-0013: registros de aluno podem existir sem reunião.
+- ADR-0013: registros de estudante podem existir sem reunião.
 
 ## Opções consideradas
 
@@ -43,15 +43,15 @@ O sistema registra informações durante o conselho de classe. É preciso distin
 Adotar **Opção 2** com quatro estados principais: **Rascunho**, **Em andamento**, **Finalizada** e **Reaberta**. Transições permitidas: Rascunho → Em andamento → Finalizada; Finalizada → Reaberta → Em andamento → Finalizada.
 
 - Em **Rascunho**, a reunião pode ser preparada (turmas, participantes, papéis, template), mas não se vinculam novos registros exclusivos a ela.
-- Em **Em andamento**, a reunião consome/associa registros já existentes do aluno e permite criar novos registros vinculados diretamente à reunião. O status de acompanhamento dos alunos é controlado.
+- Em **Em andamento**, a reunião consome/associa registros já existentes do estudante e permite criar novos registros vinculados diretamente à reunião. O status de acompanhamento dos estudantes é controlado.
 - Em **Finalizada**, os registros vinculados à reunião não podem mais ser editados nem novos registros vinculados àquela reunião podem ser criados. A ata pode assumir caráter oficial.
 - **Reaberta** permite retornar a Em andamento para correções, gerando nova versão da ata ao finalizar novamente.
 
-Registros independentes de aluno (sem reunião) podem ser criados a qualquer tempo e continuam acessíveis; sua inclusão na ata de uma reunião específica é controlada por reunião.
+Registros independentes de estudante (sem reunião) podem ser criados a qualquer tempo e continuam acessíveis; sua inclusão na ata de uma reunião específica é controlada por reunião.
 
 ## Consequências
 
-- **Positivas:** fluxo claro; auditabilidade; separa edição vinculada à reunião do registro geral do aluno.
+- **Positivas:** fluxo claro; auditabilidade; separa edição vinculada à reunião do registro geral do estudante.
 - **Negativas:** toda mutação de reunião precisa verificar estado; reabertura exige preservação de versões.
 - **Obrigatório:** coluna `status` na tabela `reuniao`; validação de transição na camada de API; reabertura como operação explícita.
 - **Proibido:** editar registros vinculados a uma reunião Finalizada sem reabertura; criar registros vinculados a uma reunião Finalizada; apagar versões/PDFs ao reabrir.

@@ -9,7 +9,7 @@ import * as schema from "#/db/schema";
 import { getClassHistory, getStudentHistory } from "./repository";
 
 /**
- * Specs 0011 (histórico do aluno) e 0012 (histórico da turma): composição
+ * Specs 0011 (histórico do estudante) e 0012 (histórico da turma): composição
  * temporal via vínculos (ADR-0015) sobre sqlite em memória.
  */
 
@@ -189,14 +189,14 @@ describe("getStudentHistory (spec 0011)", () => {
 		await seedBase(setup.db);
 	});
 
-	it("retorna null para aluno inexistente", async () => {
+	it("retorna null para estudante inexistente", async () => {
 		const result = await getStudentHistory(setup.db, "missing", {});
 		expect(result).toBeNull();
 	});
 
 	it("exibe registros de ambas as turmas na mesma linha histórica (borda 1 / CA-001)", async () => {
 		const result = await getStudentHistory(setup.db, "student-1", {});
-		expect(result?.aluno.name).toBe("Ana Souza");
+		expect(result?.estudante.name).toBe("Ana Souza");
 		const tipos = new Set(result?.eventos.map((e) => e.tipo));
 		expect(tipos.has("matricula")).toBe(true);
 		expect(tipos.has("encerramento_matricula")).toBe(true);
@@ -315,19 +315,21 @@ describe("getClassHistory (spec 0012)", () => {
 		expect(result).toBeNull();
 	});
 
-	it("turma sem reuniões exibe empty-state de reuniões e lista de alunos (borda 1)", async () => {
+	it("turma sem reuniões exibe empty-state de reuniões e lista de estudantes (borda 1)", async () => {
 		await dbInsertEnrollment(setup.db);
 		const result = await getClassHistory(setup.db, "class-3", {});
 		expect(result?.reunioes).toEqual([]);
 		expect(result?.eventos).toEqual([]);
-		expect(result?.alunos).toHaveLength(1);
+		expect(result?.estudantes).toHaveLength(1);
 	});
 
-	it("inclui alunos com vínculo encerrado e status (borda 2)", async () => {
+	it("inclui estudantes com vínculo encerrado e status (borda 2)", async () => {
 		const result = await getClassHistory(setup.db, "class-2", {});
-		const aluno = result?.alunos.find((a) => a.studentId === "student-1");
-		expect(aluno?.status).toBe("encerrada");
-		expect(aluno?.endDate).toBe(end.toISOString());
+		const estudante = result?.estudantes.find(
+			(a) => a.studentId === "student-1",
+		);
+		expect(estudante?.status).toBe("encerrada");
+		expect(estudante?.endDate).toBe(end.toISOString());
 	});
 
 	it("compõe reunião, registro e relato geral cronologicamente", async () => {
@@ -344,7 +346,7 @@ describe("getClassHistory (spec 0012)", () => {
 		expect(interno?.interno).toBe(true);
 	});
 
-	it("registro de reunião da turma nomeia o aluno", async () => {
+	it("registro de reunião da turma nomeia o estudante", async () => {
 		const result = await getClassHistory(setup.db, "class-1", {});
 		const registro = result?.eventos.find((e) => e.id === "record:rec-1");
 		expect(registro?.studentName).toBe("Ana Souza");
@@ -358,13 +360,13 @@ describe("getClassHistory (spec 0012)", () => {
 		expect(result?.eventos).toEqual([]);
 	});
 
-	it("filtra por aluno", async () => {
+	it("filtra por estudante", async () => {
 		const result = await getClassHistory(setup.db, "class-1", {
-			alunoId: "student-1",
+			estudanteId: "student-1",
 		});
 		expect(result?.eventos.length).toBeGreaterThan(0);
 		const result2 = await getClassHistory(setup.db, "class-1", {
-			alunoId: "other",
+			estudanteId: "other",
 		});
 		expect(result2?.eventos.filter((e) => e.tipo === "registro")).toHaveLength(
 			0,

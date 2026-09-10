@@ -42,7 +42,7 @@ export async function getStudentHandler({
 	const db = createDb(requireD1(env));
 	const student = await findStudentById(db, params.id);
 	if (!student) {
-		return json({ error: "Aluno não encontrado" }, 404);
+		return json({ error: "Estudante não encontrado" }, 404);
 	}
 	return json(student, 200);
 }
@@ -79,7 +79,7 @@ export async function updateStudentHandler({
 	const db = createDb(requireD1(env));
 	const student = await findStudentById(db, params.id);
 	if (!student) {
-		return json({ error: "Aluno não encontrado" }, 404);
+		return json({ error: "Estudante não encontrado" }, 404);
 	}
 
 	const updated = await updateStudent(db, params.id, parsed.data);

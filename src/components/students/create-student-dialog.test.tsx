@@ -33,7 +33,7 @@ describe("CreateStudentDialog", () => {
 		renderDialog();
 
 		expect(await screen.findByRole("dialog")).toBeInTheDocument();
-		expect(screen.getByText("Novo aluno")).toBeVisible();
+		expect(screen.getByText("Novo estudante")).toBeVisible();
 		expect(screen.getByLabelText("Nome *")).toBeVisible();
 		expect(screen.getByRole("button", { name: "Salvar" })).toBeInTheDocument();
 	});
@@ -47,7 +47,7 @@ describe("CreateStudentDialog", () => {
 		expect(await screen.findByText("Nome é obrigatório")).toBeVisible();
 	});
 
-	it("cria o aluno, fecha o dialog e notifica sucesso", async () => {
+	it("cria o estudante, fecha o dialog e notifica sucesso", async () => {
 		const user = userEvent.setup();
 		const onSuccess = vi.fn();
 		const fetchMock = vi
@@ -87,7 +87,7 @@ describe("CreateStudentDialog", () => {
 	it("exibe erro vindo do servidor sem fechar o dialog", async () => {
 		const user = userEvent.setup();
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify({ error: "Aluno já existe" }), {
+			new Response(JSON.stringify({ error: "Estudante já existe" }), {
 				status: 409,
 			}),
 		);
@@ -96,7 +96,7 @@ describe("CreateStudentDialog", () => {
 		await user.type(await screen.findByLabelText("Nome *"), "João Silva");
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 
-		expect(await screen.findByText("Aluno já existe")).toBeVisible();
+		expect(await screen.findByText("Estudante já existe")).toBeVisible();
 		expect(screen.getByRole("dialog")).toBeInTheDocument();
 	});
 });

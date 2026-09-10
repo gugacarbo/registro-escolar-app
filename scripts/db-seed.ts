@@ -1,7 +1,7 @@
 /**
  * Seed de desenvolvimento com faker pt_BR.
  *
- * Gera volume realista coerente com o domínio (turmas, alunos, matrículas,
+ * Gera volume realista coerente com o domínio (turmas, estudantes, matrículas,
  * servidores, reuniões, registros, relatos e atas) diretamente no D1 local.
  *
  * Uso:
@@ -175,14 +175,14 @@ const MEETING_TITLES = [
 ];
 
 const RECORD_TEXTS = [
-	"Aluno participativo nas atividades em grupo, demonstra boa interação com os colegas.",
+	"Estudante participativo nas atividades em grupo, demonstra boa interação com os colegas.",
 	"Apresenta dificuldade em Matemática; sugerido reforço no contraturno.",
 	"Faltas recorrentes nas últimas semanas; família foi comunicada.",
 	"Evolução significativa na leitura e interpretação de textos neste bimestre.",
 	"Comportamento agitado em sala; combinados estabelecidos com a turma.",
 	"Destaque em Ciências, com ótimo desempenho nas avaliações.",
 	"Necessita de acompanhamento individualizado em Língua Portuguesa.",
-	"Participação da família tem sido fundamental para o progresso do aluno.",
+	"Participação da família tem sido fundamental para o progresso do estudante.",
 ];
 
 const REPORT_TEXTS = [
@@ -369,8 +369,8 @@ async function main() {
 		}
 	}
 
-	// 6. Alunos
-	console.log(`  → ${COUNT.students} alunos...`);
+	// 6. Estudantes
+	console.log(`  → ${COUNT.students} estudantes...`);
 	const studentRows = await db
 		.insert(students)
 		.values(
@@ -404,7 +404,7 @@ async function main() {
 		)
 		.returning();
 
-	// 7. Matrículas (cada aluno em 1 turma ativa; ~10% com histórico extra)
+	// 7. Matrículas (cada estudante em 1 turma ativa; ~10% com histórico extra)
 	console.log("  → matrículas...");
 	for (const student of studentRows) {
 		const classRow = pick(classRows);
@@ -436,7 +436,7 @@ async function main() {
 		}
 	}
 
-	// 8. Reuniões + vínculos (turmas, participantes, status por aluno)
+	// 8. Reuniões + vínculos (turmas, participantes, status por estudante)
 	console.log(`  → ${COUNT.meetings} reuniões...`);
 	for (let i = 0; i < COUNT.meetings; i++) {
 		const meetingClassesSample = pickMany(
@@ -500,7 +500,7 @@ async function main() {
 			)[0];
 		if (!author) continue;
 
-		// alunos das turmas vinculadas
+		// estudantes das turmas vinculadas
 		const enrolled = await db
 			.select({ studentId: enrollments.studentId })
 			.from(enrollments)
@@ -535,7 +535,7 @@ async function main() {
 			}
 		}
 
-		// 9. Registros de aluno vinculados à reunião
+		// 9. Registros de estudante vinculados à reunião
 		for (const { studentId } of discussed) {
 			const n = between(1, 2);
 			for (let k = 0; k < n; k++) {

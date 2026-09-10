@@ -18,7 +18,7 @@ describe("useStudentHistory (spec 0011)", () => {
 			.spyOn(globalThis, "fetch")
 			.mockResolvedValueOnce(
 				new Response(
-					JSON.stringify({ aluno: { id: "student-1" }, eventos: [] }),
+					JSON.stringify({ estudante: { id: "student-1" }, eventos: [] }),
 					{ status: 200 },
 				),
 			);
@@ -35,12 +35,12 @@ describe("useStudentHistory (spec 0011)", () => {
 		expect(fetchMock).toHaveBeenCalledWith(
 			"/api/students/student-1/history?turmaId=class-1&q=rendimento",
 		);
-		expect(result.current.data?.aluno.id).toBe("student-1");
+		expect(result.current.data?.estudante.id).toBe("student-1");
 	});
 
 	it("propaga erro da API", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify({ error: "Aluno não encontrado" }), {
+			new Response(JSON.stringify({ error: "Estudante não encontrado" }), {
 				status: 404,
 			}),
 		);
@@ -48,7 +48,7 @@ describe("useStudentHistory (spec 0011)", () => {
 			wrapper,
 		});
 		await waitFor(() => expect(result.current.isError).toBe(true));
-		expect(result.current.error?.message).toBe("Aluno não encontrado");
+		expect(result.current.error?.message).toBe("Estudante não encontrado");
 	});
 
 	it("usa mensagem padrão quando o corpo do erro não traz error", async () => {
@@ -60,7 +60,7 @@ describe("useStudentHistory (spec 0011)", () => {
 		});
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(result.current.error?.message).toBe(
-			"Falha ao carregar histórico do aluno",
+			"Falha ao carregar histórico do estudante",
 		);
 	});
 });

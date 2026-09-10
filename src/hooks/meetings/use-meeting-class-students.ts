@@ -13,7 +13,7 @@ export function useMeetingClassStudents(meetingId: string, classId: string) {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao carregar alunos da turma");
+				throw new Error(body.error ?? "Falha ao carregar estudantes da turma");
 			}
 			return response.json() as Promise<MeetingClassStudentsResult>;
 		},

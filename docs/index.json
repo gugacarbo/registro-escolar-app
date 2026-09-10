@@ -122,7 +122,7 @@
     "id": "ADR-0011",
     "path": "docs/adr/0011-modelo-entidades-dominio.md",
     "layer": "adr",
-    "title": "Adota modelo de entidades independentes para alunos, turmas, vínculos, servidores e componentes",
+    "title": "Adota modelo de entidades independentes para estudantes, turmas, vínculos, servidores e componentes",
     "status": "accepted",
     "builds-on": [],
     "superseded-by": null,
@@ -142,9 +142,9 @@
   },
   {
     "id": "ADR-0013",
-    "path": "docs/adr/0013-registros-aluno-independentes.md",
+    "path": "docs/adr/0013-registros-estudante-independentes.md",
     "layer": "adr",
-    "title": "Adota registros de aluno como entidades independentes e reutilizáveis entre reuniões",
+    "title": "Adota registros de estudante como entidades independentes e reutilizáveis entre reuniões",
     "status": "accepted",
     "builds-on": [
       "ADR-0011",
@@ -206,9 +206,9 @@
   },
   {
     "id": "ADR-0018",
-    "path": "docs/adr/0018-importacao-alunos-csv.md",
+    "path": "docs/adr/0018-importacao-estudantes-csv.md",
     "layer": "adr",
-    "title": "Adota importação em lote de alunos via CSV/planilha com detecção de duplicidade",
+    "title": "Adota importação em lote de estudantes via CSV/planilha com detecção de duplicidade",
     "status": "accepted",
     "builds-on": [
       "ADR-0011",
@@ -232,9 +232,9 @@
   },
   {
     "id": "SPEC-0001",
-    "path": "docs/specs/0001-cadastro-alunos.md",
+    "path": "docs/specs/0001-cadastro-estudantes.md",
     "layer": "specs",
-    "title": "Cadastro e importação em lote de alunos",
+    "title": "Cadastro e importação em lote de estudantes",
     "status": "implemented",
     "builds-on": [
       "ADR-0011",
@@ -399,9 +399,9 @@
   },
   {
     "id": "SPEC-0006",
-    "path": "docs/specs/0006-acompanhamento-alunos-reuniao.md",
+    "path": "docs/specs/0006-acompanhamento-estudantes-reuniao.md",
     "layer": "specs",
-    "title": "Acompanhamento dos alunos durante a reunião",
+    "title": "Acompanhamento dos estudantes durante a reunião",
     "status": "implemented",
     "builds-on": [
       "ADR-0012",
@@ -421,9 +421,9 @@
   },
   {
     "id": "SPEC-0007",
-    "path": "docs/specs/0007-registros-aluno.md",
+    "path": "docs/specs/0007-registros-estudante.md",
     "layer": "specs",
-    "title": "Registros de aluno",
+    "title": "Registros de estudante",
     "status": "implemented",
     "builds-on": [
       "ADR-0013",
@@ -508,9 +508,9 @@
   },
   {
     "id": "SPEC-0011",
-    "path": "docs/specs/0011-historico-aluno.md",
+    "path": "docs/specs/0011-historico-estudante.md",
     "layer": "specs",
-    "title": "Histórico do aluno",
+    "title": "Histórico do estudante",
     "status": "implemented",
     "builds-on": [
       "ADR-0011",

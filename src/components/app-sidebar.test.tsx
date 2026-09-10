@@ -54,7 +54,7 @@ describe("AppSidebar", () => {
 	it("exibe os botões de navegação apontando para as listas", () => {
 		renderSidebar("/");
 
-		expect(screen.getByRole("link", { name: "Alunos" })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: "Estudantes" })).toHaveAttribute(
 			"href",
 			"/students",
 		);
@@ -85,25 +85,25 @@ describe("AppSidebar", () => {
 		expect(screen.getAllByRole("link")).toHaveLength(7);
 	});
 
-	it("marca Alunos como ativo na lista e nas subrotas", () => {
+	it("marca Estudantes como ativo na lista e nas subrotas", () => {
 		const { unmount } = renderSidebar("/students/");
-		expect(screen.getByRole("link", { name: "Alunos" })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: "Estudantes" })).toHaveAttribute(
 			"data-active",
 			"true",
 		);
 		unmount();
 
 		renderSidebar("/students/import");
-		expect(screen.getByRole("link", { name: "Alunos" })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: "Estudantes" })).toHaveAttribute(
 			"data-active",
 			"true",
 		);
 	});
 
-	it("não marca Alunos como ativo fora da lista", () => {
+	it("não marca Estudantes como ativo fora da lista", () => {
 		renderSidebar("/");
 
-		expect(screen.getByRole("link", { name: "Alunos" })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: "Estudantes" })).toHaveAttribute(
 			"data-active",
 			"false",
 		);

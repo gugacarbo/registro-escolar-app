@@ -26,7 +26,7 @@ export function useUpdateStudentStatus(meetingId: string) {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao atualizar status do aluno");
+				throw new Error(body.error ?? "Falha ao atualizar status do estudante");
 			}
 			return response.json() as Promise<MeetingStudentStatus>;
 		},

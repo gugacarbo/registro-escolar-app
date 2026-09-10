@@ -152,7 +152,7 @@ describe("PATCH /api/meetings/:id/students/:studentId/status", () => {
 		expect(response.status).toBe(409);
 	});
 
-	it("retorna 422 quando o aluno não está vinculado à turma na data", async () => {
+	it("retorna 422 quando o estudante não está vinculado à turma na data", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		mockInProgressMeeting();

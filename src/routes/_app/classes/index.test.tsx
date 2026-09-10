@@ -89,7 +89,7 @@ afterEach(() => {
 });
 
 describe("ClassesPage", () => {
-	it("renderiza a tabela com nome, período e ação Ver alunos", () => {
+	it("renderiza a tabela com nome, período e ação Ver estudantes", () => {
 		renderPage();
 
 		const table = screen.getByRole("table", { name: "Tabela de turmas" });
@@ -105,7 +105,7 @@ describe("ClassesPage", () => {
 		expect(
 			within(table).getByRole("cell", { name: "2026" }),
 		).toBeInTheDocument();
-		const link = within(table).getByRole("link", { name: "Ver alunos" });
+		const link = within(table).getByRole("link", { name: "Ver estudantes" });
 		expect(link).toHaveAttribute("href", "/classes/$id/students");
 	});
 
@@ -180,7 +180,7 @@ describe("ClassesPage", () => {
 		});
 	});
 
-	it("navega para os alunos da turma ao clicar em célula de texto da linha", () => {
+	it("navega para os estudantes da turma ao clicar em célula de texto da linha", () => {
 		renderPage();
 
 		const table = screen.getByRole("table", { name: "Tabela de turmas" });
@@ -194,11 +194,13 @@ describe("ClassesPage", () => {
 		});
 	});
 
-	it("clicar no link Ver alunos não dispara a navegação da linha", () => {
+	it("clicar no link Ver estudantes não dispara a navegação da linha", () => {
 		renderPage();
 
 		const table = screen.getByRole("table", { name: "Tabela de turmas" });
-		fireEvent.click(within(table).getByRole("link", { name: "Ver alunos" }));
+		fireEvent.click(
+			within(table).getByRole("link", { name: "Ver estudantes" }),
+		);
 
 		expect(mocks.navigate).not.toHaveBeenCalled();
 	});

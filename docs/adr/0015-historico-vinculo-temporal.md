@@ -11,7 +11,7 @@ deciders: []
 
 ## Contexto e problema
 
-Para responder perguntas do tipo "esse aluno estava nessa turma naquela reunião?", o sistema precisa saber a composição histórica da turma sem depender de snapshots feitos em cada reunião. Snapshots facilitam consultas pontuais, mas duplicam dados e dificultam análise longitudinal.
+Para responder perguntas do tipo "esse estudante estava nessa turma naquela reunião?", o sistema precisa saber a composição histórica da turma sem depender de snapshots feitos em cada reunião. Snapshots facilitam consultas pontuais, mas duplicam dados e dificultam análise longitudinal.
 
 ## Direcionadores da decisão
 
@@ -22,10 +22,10 @@ Para responder perguntas do tipo "esse aluno estava nessa turma naquela reunião
 
 ## Opções consideradas
 
-### Opção 1 — Snapshot da lista de alunos por reunião
+### Opção 1 — Snapshot da lista de estudantes por reunião
 
 **Prós:** fácil de recuperar participação em uma reunião específica.
-**Contras:** duplicação; histórico do aluno fica fragmentado; conflita com RN-004.
+**Contras:** duplicação; histórico do estudante fica fragmentado; conflita com RN-004.
 
 ### Opção 2 — Vínculo temporal com consulta por data
 
@@ -34,14 +34,14 @@ Para responder perguntas do tipo "esse aluno estava nessa turma naquela reunião
 
 ## Decisão
 
-Adotar **Opção 2**. A composição da turma em uma data qualquer é derivada dos vínculos aluno-turma: `startDate <= data` e (`endDate` é nulo ou `endDate >= data`). Não serão criados snapshots de alunos por reunião.
+Adotar **Opção 2**. A composição da turma em uma data qualquer é derivada dos vínculos estudante-turma: `startDate <= data` e (`endDate` é nulo ou `endDate >= data`). Não serão criados snapshots de estudantes por reunião.
 
 ## Consequências
 
 - **Positivas:** histórico imutável; análise longitudinal; menos redundância.
 - **Negativas:** queries de histórico exigem joins com condição temporal; cargas muito grandes podem exigir índices específicos.
-- **Obrigatório:** toda consulta de alunos de uma turma em data específica usar a regra temporal; vínculos nunca serem excluídos fisicamente.
-- **Proibido:** criar tabela de snapshot de alunos por reunião; usar turma atual do aluno como proxy para composição histórica.
+- **Obrigatório:** toda consulta de estudantes de uma turma em data específica usar a regra temporal; vínculos nunca serem excluídos fisicamente.
+- **Proibido:** criar tabela de snapshot de estudantes por reunião; usar turma atual do estudante como proxy para composição histórica.
 
 ## Confirmação
 

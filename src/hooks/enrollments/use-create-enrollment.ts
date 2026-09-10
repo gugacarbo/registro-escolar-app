@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getClassesQueryKey } from "#/hooks/classes/use-classes";
 
 export type CreateEnrollmentValues = {
-	alunoId: string;
+	estudanteId: string;
 	turmaId: string;
 	dataInicio: string;
 	dataTermino?: string;
@@ -29,7 +29,7 @@ export function useCreateEnrollment() {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao matricular aluno");
+				throw new Error(body.error ?? "Falha ao matricular estudante");
 			}
 			return response.json() as Promise<CreateEnrollmentResult>;
 		},

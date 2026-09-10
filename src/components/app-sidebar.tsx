@@ -37,7 +37,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-	{ title: "Alunos", to: "/students", icon: GraduationCap },
+	{ title: "Estudantes", to: "/students", icon: GraduationCap },
 	{ title: "Turmas", to: "/classes", icon: LayoutGrid },
 	{ title: "Servidores", to: "/staff", icon: Briefcase },
 	{ title: "Papéis", to: "/roles", icon: Shield },

@@ -39,7 +39,7 @@ async function setupStartedMeeting(
 	const students = await Promise.all(names.map((name) => createStudent(ctx, name)));
 	for (const student of students) {
 		await createEnrollment(ctx, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: klass.id,
 			dataInicio: "2026-01-01",
 		});
@@ -54,21 +54,21 @@ async function setupStartedMeeting(
 	return { klass, students, meeting };
 }
 
-test.describe("SPEC-0006 acompanhamento dos alunos", () => {
-	test("lista somente alunos vinculados na data e destaca próximo pendente", async ({
+test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
+	test("lista somente estudantes vinculados na data e destaca próximo pendente", async ({
 		apiContext,
 	}) => {
-		const active = await createStudent(apiContext, "Aluno Ativo");
-		const former = await createStudent(apiContext, "Aluno Antigo");
+		const active = await createStudent(apiContext, "Estudante Ativo");
+		const former = await createStudent(apiContext, "Estudante Antigo");
 		const klass = await createClass(apiContext, "Turma Temporal", "2026");
 		await createEnrollment(apiContext, {
-			alunoId: former.id,
+			estudanteId: former.id,
 			turmaId: klass.id,
 			dataInicio: "2025-01-01",
 			dataTermino: "2026-04-30",
 		});
 		await createEnrollment(apiContext, {
-			alunoId: active.id,
+			estudanteId: active.id,
 			turmaId: klass.id,
 			dataInicio: "2026-05-01",
 		});
@@ -81,7 +81,7 @@ test.describe("SPEC-0006 acompanhamento dos alunos", () => {
 		await startMeeting(apiContext, meeting.id);
 
 		const result = await listMeetingClassStudents(apiContext, meeting.id, klass.id);
-		expect(result.students.map((student) => student.name)).toEqual(["Aluno Ativo"]);
+		expect(result.students.map((student) => student.name)).toEqual(["Estudante Ativo"]);
 		expect(result.nextPendingStudentId).toBe(active.id);
 	});
 
@@ -156,24 +156,24 @@ test.describe("SPEC-0006 acompanhamento dos alunos", () => {
 		expect(students).toHaveLength(1);
 	});
 
-	test("trata o mesmo aluno em duas turmas da reunião de forma independente", async ({
+	test("trata o mesmo estudante em duas turmas da reunião de forma independente", async ({
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Duas Turmas");
+		const student = await createStudent(apiContext, "Estudante Duas Turmas");
 		const first = await createClass(apiContext, "Primeira Turma Dupla", "2026");
 		const second = await createClass(apiContext, "Segunda Turma Dupla", "2026");
 		const firstEnrollment = await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: first.id,
 			dataInicio: "2026-01-01",
 		});
 		await createEnrollment(apiContext, {
-			alunoId: student.id,
+			estudanteId: student.id,
 			turmaId: second.id,
 			dataInicio: "2026-01-01",
 		});
 		// A API aplica a semântica de transferência da SPEC-0002 ao criar o
-		// segundo vínculo. Esta spec exige o mesmo aluno simultaneamente em duas
+		// segundo vínculo. Esta spec exige o mesmo estudante simultaneamente em duas
 		// turmas da mesma reunião, então restauramos o vínculo histórico no banco
 		// isolado sem alterar a regra de transferência.
 		restoreEnrollmentAsActive(

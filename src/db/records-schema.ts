@@ -12,8 +12,8 @@ import { components } from "./components-schema";
 import { meetingParticipants, meetings } from "./meetings-schema";
 import { students } from "./students-schema";
 
-// Registros de aluno (spec 0007): múltiplos registros independentes sobre
-// um aluno, com ou sem reunião. `originId` aponta para meeting_participants
+// Registros de estudante (spec 0007): múltiplos registros independentes sobre
+// um estudante, com ou sem reunião. `originId` aponta para meeting_participants
 // (participação na reunião), garantindo autoria válida (CA-005) — por isso a
 // origem só existe em registros vinculados a reunião.
 export const studentRecords = sqliteTable(

@@ -26,9 +26,9 @@ Criar a base compartilhada usada por todas as outras tarefas.
 - Criar `e2e/fixtures/auth.ts`: signup/login de usuário de teste via API
   (`better-auth`) retornando sessão/cookies para Playwright.
 - Criar `e2e/fixtures/db.ts`: helper para resetar banco sqlite de teste
-  (` better-sqlite3 ` abrindo o caminho configurado em `.env.test` ou
+  (`better-sqlite3` abrindo o caminho configurado em `.env.test` ou
   `wrangler.toml` local) e aplicar migrations.
-- Criar `e2e/fixtures/factories.ts`: factories para criar alunos, turmas,
+- Criar `e2e/fixtures/factories.ts`: factories para criar estudantes, turmas,
   matrículas, servidores, papéis, reuniões, componentes, ofertas, registros,
   relatos e templates de ata via API (fetch contra `http://localhost:3001/api`).
 - Criar `e2e/fixtures/test.ts` estendendo `test` do Playwright com fixture
@@ -41,14 +41,14 @@ Criar a base compartilhada usada por todas as outras tarefas.
 - Validar: `bun run typecheck`, `bun run check`, `bun run e2e` (pelo menos
   `home.spec.ts` continua passando).
 
-### Task 2: e2e para SPEC-0001 — Cadastro e importação em lote de alunos
+### Task 2: e2e para SPEC-0001 — Cadastro e importação em lote de estudantes
 
 - Testar redirecionamento para login quando não autenticado.
-- Testar cadastro manual de aluno (`/students/new`) com nome obrigatório.
+- Testar cadastro manual de estudante (`/students/new`) com nome obrigatório.
 - Testar validação: nome vazio rejeitado.
 - Testar importação em lote (`/students/import`) com CSV válido.
 - Testar importação com conflito de nome/documento: pré-visualização mostra
-  conflito e resolução vincula a aluno existente.
+  conflito e resolução vincula a estudante existente.
 - Testar arquivo inválido: rejeitado com mensagem.
 - Testar CSV com linha sem nome: aparece como inválida na pré-visualização.
 - Validar: `bun run e2e -- e2e/spec-0001-students.spec.ts` passa.
@@ -57,8 +57,8 @@ Criar a base compartilhada usada por todas as outras tarefas.
 
 - Criar turma via UI (`/classes/new`).
 - Listar turmas (`/classes`).
-- Matricular aluno em turma (`/classes/:id/enroll`) com data de início.
-- Transferir aluno para outra turma: encerrar vínculo antigo e criar novo.
+- Matricular estudante em turma (`/classes/:id/enroll`) com data de início.
+- Transferir estudante para outra turma: encerrar vínculo antigo e criar novo.
 - Testar endpoint `GET /api/classes/:id/students?date=YYYY-MM-DD` via UI/API
   integrada.
 - Testar sobreposição de vínculos: rejeitada/sinalizada.
@@ -101,27 +101,27 @@ Criar a base compartilhada usada por todas as outras tarefas.
 - Testar criação de registro independente durante reunião finalizada: permitido.
 - Validar: `bun run e2e -- e2e/spec-0005-meeting-lifecycle.spec.ts` passa.
 
-### Task 7: e2e para SPEC-0006 — Acompanhamento dos alunos durante a reunião
+### Task 7: e2e para SPEC-0006 — Acompanhamento dos estudantes durante a reunião
 
-- Na reunião em andamento, selecionar turma e listar alunos vinculados.
-- Marcar aluno como `em_discussao`, depois `concluido`.
-- Testar aluno não vinculado à turma na data: não aparece.
+- Na reunião em andamento, selecionar turma e listar estudantes vinculados.
+- Marcar estudante como `em_discussao`, depois `concluido`.
+- Testar estudante não vinculado à turma na data: não aparece.
 - Testar progresso 100% quando todas as turmas concluídas.
 - Testar conclusão sem registros: permitida.
 - Testar alternância entre turmas mantendo estado independente.
-- Testar mesmo aluno em duas turmas da reunião: tratado independentemente.
+- Testar mesmo estudante em duas turmas da reunião: tratado independentemente.
 - Validar: `bun run e2e -- e2e/spec-0006-meeting-tracking.spec.ts` passa.
 
-### Task 8: e2e para SPEC-0007 — Registros de aluno
+### Task 8: e2e para SPEC-0007 — Registros de estudante
 
-- Criar registro independente na ficha do aluno.
+- Criar registro independente na ficha do estudante.
 - Criar registro vinculado à reunião em andamento.
 - Listar registros na reunião: mostra independentes aplicáveis como contexto.
 - Editar registro vinculado (somente reunião em andamento/reaberta).
 - Marcar inclusão de registro independente na ata da reunião.
 - Testar texto vazio: rejeitado.
 - Testar origem não participante: rejeitado.
-- Testar múltiplos registros para mesmo aluno na mesma reunião: mantidos.
+- Testar múltiplos registros para mesmo estudante na mesma reunião: mantidos.
 - Testar registro independente de turma não envolvida na reunião: não exibido.
 - Validar: `bun run e2e -- e2e/spec-0007-student-records.spec.ts` passa.
 
@@ -147,7 +147,7 @@ Criar a base compartilhada usada por todas as outras tarefas.
 - Testar template alterado após prévia: próxima prévia reflete novo template.
 - Testar reunião rascunho: prévia permitida, oficial rejeitada.
 - Testar registros internos omitidos na ata/PDF.
-- Testar múltiplas turmas: agrupamento por turma/aluno.
+- Testar múltiplas turmas: agrupamento por turma/estudante.
 - Validar: `bun run e2e -- e2e/spec-0009-minutes.spec.ts` passa.
 
 ### Task 11: e2e para SPEC-0010 — Versionamento e aprovação de ata
@@ -162,13 +162,13 @@ Criar a base compartilhada usada por todas as outras tarefas.
 - Testar apenas uma versão marcada como atual.
 - Validar: `bun run e2e -- e2e/spec-0010-minute-versions.spec.ts` passa.
 
-### Task 12: e2e para SPEC-0011 — Histórico do aluno
+### Task 12: e2e para SPEC-0011 — Histórico do estudante
 
-- Consultar histórico do aluno (`/students/:id/history` ou API equivalente).
+- Consultar histórico do estudante (`/students/:id/history` ou API equivalente).
 - Ver turmas, períodos, reuniões e registros agrupados.
 - Aplicar filtros por turma, período, reunião, categoria, componente, busca
   textual.
-- Testar aluno que mudou de turma: registros de ambas aparecem.
+- Testar estudante que mudou de turma: registros de ambas aparecem.
 - Testar filtro sem resultados: empty-state com limpar filtros.
 - Testar registro interno aparece no histórico.
 - Testar reunião antiga: contexto da turma naquela data.
@@ -177,11 +177,11 @@ Criar a base compartilhada usada por todas as outras tarefas.
 ### Task 13: e2e para SPEC-0012 — Histórico da turma
 
 - Consultar histórico da turma (`/classes/:id/history`).
-- Ver dados cadastrais, alunos ativos/históricos, reuniões e registros.
-- Aplicar filtros por período, reunião, categoria, componente, aluno, busca
+- Ver dados cadastrais, estudantes ativos/históricos, reuniões e registros.
+- Aplicar filtros por período, reunião, categoria, componente, estudante, busca
   textual.
-- Testar turma sem reuniões: empty-state com lista de alunos.
-- Testar alunos com vínculos encerrados: indicador de status.
+- Testar turma sem reuniões: empty-state com lista de estudantes.
+- Testar estudantes com vínculos encerrados: indicador de status.
 - Testar busca textual sem resultados: mensagem e ajuste de filtros.
 - Testar turma equivalente de outro período: não mistura registros.
 - Testar registro interno aparece no histórico da turma.

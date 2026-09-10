@@ -2,24 +2,24 @@ import { expect, test } from "./fixtures/test";
 import { baseURL, createStudent } from "./fixtures/api";
 import { StudentsPage } from "./pages/students-page";
 
-test.describe("SPEC-0001 cadastro e importação de alunos", () => {
-	test("exige autenticação para acessar alunos", async ({ page }) => {
+test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
+	test("exige autenticação para acessar estudantes", async ({ page }) => {
 		await page.goto("/students");
 		await expect(
 			page.getByText("Acesse o Registro Escolar com sua conta."),
 		).toBeVisible();
 	});
 
-	test("cadastra aluno manualmente pela UI", async ({
+	test("cadastra estudante manualmente pela UI", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
 		const studentsPage = new StudentsPage(page);
-		await studentsPage.create("Aluno Manual E2E");
+		await studentsPage.create("Estudante Manual E2E");
 
 		await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10_000 });
 		await expect.poll(async () => page.url()).toBe(`${baseURL}/students`);
-		await expect(page.getByText("Aluno Manual E2E")).toBeVisible();
+		await expect(page.getByText("Estudante Manual E2E")).toBeVisible();
 		const response = await fetch(`${baseURL}/api/students`, {
 			headers: { Cookie: apiContext.cookies },
 		});
@@ -28,15 +28,15 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 			total: number;
 		};
 		expect(
-			body.data.some((student) => student.name === "Aluno Manual E2E"),
+			body.data.some((student) => student.name === "Estudante Manual E2E"),
 		).toBe(true);
 	});
 
-	test("filtra alunos pela busca e pagina o resultado", async ({
+	test("filtra estudantes pela busca e pagina o resultado", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
-		const seed = "Aluno Paginado E2E";
+		const seed = "Estudante Paginado E2E";
 		for (let i = 1; i <= 11; i++) {
 			await fetch(`${baseURL}/api/students`, {
 				method: "POST",
@@ -52,7 +52,7 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		await studentsPage.goto();
 		await page
 			.getByLabel("Buscar por nome ou documento")
-			.fill("Aluno Paginado E2E");
+			.fill("Estudante Paginado E2E");
 
 		await expect(page.getByText("Mostrando 1–10 de 11")).toBeVisible();
 		await expect(
@@ -66,20 +66,20 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		authenticatedPage: page,
 		apiContext,
 	}) => {
-		const student = await createStudent(apiContext, "Aluno Linha Clicável");
+		const student = await createStudent(apiContext, "Estudante Linha Clicável");
 
 		const studentsPage = new StudentsPage(page);
 		await studentsPage.goto();
 		await page
 			.getByLabel("Buscar por nome ou documento")
-			.fill("Aluno Linha Clicável");
+			.fill("Estudante Linha Clicável");
 
-		const cell = page.getByRole("cell", { name: "Aluno Linha Clicável" });
+		const cell = page.getByRole("cell", { name: "Estudante Linha Clicável" });
 		await expect(cell).toBeVisible();
 		await cell.click();
 		await expect(page).toHaveURL(new RegExp(`/students/${student.id}`));
 		await expect(
-			page.getByRole("heading", { name: "Aluno Linha Clicável" }),
+			page.getByRole("heading", { name: "Estudante Linha Clicável" }),
 		).toBeVisible();
 	});
 
@@ -94,14 +94,14 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		await expect(page.getByText("Nome é obrigatório")).toBeVisible();
 	});
 
-	test("importa CSV válido e cria alunos", async ({
+	test("importa CSV válido e cria estudantes", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
 		await page.goto("/students/import");
 		const csv = "nome,documento\nAlice Import,1234567\nBob Import,7654321\n";
 		await page.setInputFiles("input[type=file]", {
-			name: "alunos.csv",
+			name: "estudantes.csv",
 			mimeType: "text/csv",
 			buffer: Buffer.from(csv, "utf8"),
 		});
@@ -124,7 +124,7 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 		expect(body.data.filter((s) => s.name.includes("Import"))).toHaveLength(2);
 	});
 
-	test("mostra conflito e vincula aluno existente", async ({
+	test("mostra conflito e vincula estudante existente", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
@@ -149,7 +149,7 @@ test.describe("SPEC-0001 cadastro e importação de alunos", () => {
 
 		await expect(page.getByText("Revisar importação")).toBeVisible();
 		await expect(page.getByRole("cell", { name: "Conflito", exact: true })).toBeVisible();
-		await expect(page.getByLabel("Aluno existente")).toBeVisible();
+		await expect(page.getByLabel("Estudante existente")).toBeVisible();
 		await page.getByRole("button", { name: "Confirmar importação" }).click();
 		await expect(page.getByText(/Vinculados: 1/)).toBeVisible();
 

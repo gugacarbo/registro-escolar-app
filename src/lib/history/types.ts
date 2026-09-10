@@ -28,7 +28,7 @@ export type HistoryEvent = {
 };
 
 export type StudentHistoryResult = {
-	aluno: {
+	estudante: {
 		id: string;
 		name: string;
 		document: string | null;
@@ -61,7 +61,7 @@ export type ClassHistoryResult = {
 		grade: string | null;
 		shift: string | null;
 	};
-	alunos: ClassHistoryStudent[];
+	estudantes: ClassHistoryStudent[];
 	reunioes: ClassHistoryMeeting[];
 	eventos: HistoryEvent[];
 };

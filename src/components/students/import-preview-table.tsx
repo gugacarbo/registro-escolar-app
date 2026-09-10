@@ -131,7 +131,7 @@ function ConflictResolver({
 						onChange({ action: "link", existingStudentId: e.target.value })
 					}
 					className="rounded border px-2 py-1"
-					aria-label="Aluno existente"
+					aria-label="Estudante existente"
 				>
 					{row.candidates.map((candidate) => (
 						<option key={candidate.id} value={candidate.id}>

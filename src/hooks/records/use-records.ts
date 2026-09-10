@@ -13,7 +13,9 @@ export function useMeetingStudentRecords(meetingId: string, studentId: string) {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao carregar registros do aluno");
+				throw new Error(
+					body.error ?? "Falha ao carregar registros do estudante",
+				);
 			}
 			return response.json() as Promise<{ records: MeetingStudentRecord[] }>;
 		},

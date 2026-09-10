@@ -67,9 +67,9 @@ export function CreateStudentDialog({
 			{trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Novo aluno</DialogTitle>
+					<DialogTitle>Novo estudante</DialogTitle>
 					<DialogDescription>
-						Preencha os dados para cadastrar um aluno.
+						Preencha os dados para cadastrar um estudante.
 					</DialogDescription>
 				</DialogHeader>
 				<StudentForm

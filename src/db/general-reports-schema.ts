@@ -3,7 +3,7 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { meetingParticipants, meetings } from "./meetings-schema";
 
 // Relatos gerais da reunião (spec 0008): observações sobre a reunião que não
-// se vinculam a alunos. `originId` aponta para meeting_participants, garantindo
+// se vinculam a estudantes. `originId` aponta para meeting_participants, garantindo
 // autoria válida (borda 1); `includeInMinutes` controla a inclusão na ata
 // (borda 2 — interno é armazenado e omitido na ata/PDF).
 export const generalReports = sqliteTable(

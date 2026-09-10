@@ -80,7 +80,7 @@ describe("GET /api/students/:id", () => {
 		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
-	it("retorna 404 quando o aluno não existe", async () => {
+	it("retorna 404 quando o estudante não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
@@ -95,10 +95,10 @@ describe("GET /api/students/:id", () => {
 		});
 		expect(response.status).toBe(404);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toBe("Aluno não encontrado");
+		expect(body.error).toBe("Estudante não encontrado");
 	});
 
-	it("retorna 200 com o aluno", async () => {
+	it("retorna 200 com o estudante", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -147,7 +147,7 @@ describe("PATCH /api/students/:id", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("retorna 404 no PATCH quando o aluno não existe", async () => {
+	it("retorna 404 no PATCH quando o estudante não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
@@ -164,7 +164,7 @@ describe("PATCH /api/students/:id", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 200 e atualiza o aluno", async () => {
+	it("retorna 200 e atualiza o estudante", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({

@@ -83,7 +83,7 @@ export async function updateStudentStatusHandler({
 	});
 	if (!enrolled) {
 		return json(
-			{ error: "Aluno não vinculado à turma na data da reunião" },
+			{ error: "Estudante não vinculado à turma na data da reunião" },
 			422,
 		);
 	}

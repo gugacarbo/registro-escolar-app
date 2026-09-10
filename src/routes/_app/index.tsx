@@ -13,7 +13,7 @@ function AppHome() {
 					to="/students"
 					className="rounded bg-primary px-4 py-2 text-primary-foreground"
 				>
-					Alunos
+					Estudantes
 				</Link>
 			</div>
 		</div>

@@ -130,11 +130,11 @@ describe("POST /api/meetings/:id/students/:studentId/records", () => {
 		expect(response.status).toBe(422);
 	});
 
-	it("retorna 404 quando o aluno não existe", async () => {
+	it("retorna 404 quando o estudante não existe", async () => {
 		session();
 		inProgressMeeting();
 		(createLinkedRecord as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-			new RecordNotFoundError("Aluno não encontrado"),
+			new RecordNotFoundError("Estudante não encontrado"),
 		);
 		const response = await createLinkedRecordHandler({
 			request: post({ texto: "Registro" }),

@@ -17,7 +17,7 @@ function EnrollPage() {
 		setServerError(null);
 		try {
 			await createEnrollment.mutateAsync({
-				alunoId: values.alunoId,
+				estudanteId: values.estudanteId,
 				turmaId: values.turmaId,
 				dataInicio: values.dataInicio,
 				...(values.dataTermino ? { dataTermino: values.dataTermino } : {}),
@@ -37,7 +37,7 @@ function EnrollPage() {
 
 	return (
 		<div className="mx-auto max-w-md space-y-4">
-			<h1 className="text-2xl font-bold">Matricular aluno</h1>
+			<h1 className="text-2xl font-bold">Matricular estudante</h1>
 			<EnrollmentForm onSubmit={handleSubmit} serverError={serverError} />
 		</div>
 	);

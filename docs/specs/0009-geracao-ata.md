@@ -34,7 +34,7 @@ Permitir gerar a ata formal de uma reunião a partir de template, dados da reuni
 - `GET /api/meetings/:id/minutes/preview` — retorna prévia da ata.
 - `POST /api/meetings/:id/minutes/generate` — gera versão oficial e PDF.
 - `POST /api/minute-templates` — cadastra template.
-- Template define blocos: cabeçalho, reunião, turmas, participantes, registros por aluno, relatos gerais, assinaturas, rodapé.
+- Template define blocos: cabeçalho, reunião, turmas, participantes, registros por estudante, relatos gerais, assinaturas, rodapé.
 
 ## Casos de borda
 
@@ -44,7 +44,7 @@ Permitir gerar a ata formal de uma reunião a partir de template, dados da reuni
 | 2   | o template for alterado após prévia         | próxima prévia refletir novo template; dados permanecem inalterados |
 | 3   | a reunião ainda estiver em Rascunho         | permitir prévia, mas não gerar versão oficial                       |
 | 4   | houver registros internos                   | omiti-los da ata e do PDF                                           |
-| 5   | a reunião possuir múltiplas turmas          | agrupar registros por turma e por aluno conforme template           |
+| 5   | a reunião possuir múltiplas turmas          | agrupar registros por turma e por estudante conforme template       |
 
 ## Questões em aberto
 
@@ -72,6 +72,6 @@ DoD executado em 2026-09-09. Templates são persistidos em `minute_templates`;
 as atas ficam 1:1 com a reunião (`minutes`) e cada versão guarda conteúdo e PDF
 em `minute_versions`. Prévia funciona inclusive em rascunho; geração oficial é
 rejeitada em rascunho; registros/relatos internos são omitidos; a renderização
-agrupa registros por turma e aluno; sem registros a ata mínima continua gerável.
+agrupa registros por turma e estudante; sem registros a ata mínima continua gerável.
 PDF é gerado com `pdf-lib` (A4, paginação e quebra por largura real de fonte) e
 persistido em BLOB D1. Gates conforme DoD.

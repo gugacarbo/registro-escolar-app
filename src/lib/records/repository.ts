@@ -75,7 +75,7 @@ export async function createIndependentRecord(
 
 /**
  * Registro vinculado à reunião (CA-003: vários registros independentes para
- * o mesmo aluno na mesma reunião). Valida que origemId pertence à reunião.
+ * o mesmo estudante na mesma reunião). Valida que origemId pertence à reunião.
  */
 export async function createLinkedRecord(
 	db: DB,
@@ -225,10 +225,10 @@ export async function setIndependentRecordInclusion(
 }
 
 /**
- * Registros do aluno na reunião: vinculados à reunião + independentes
+ * Registros do estudante na reunião: vinculados à reunião + independentes
  * aplicáveis como contexto (bordas 7/8 — o registro independente aparece
  * quando a reunião inclui a turma à qual ele está vinculado; sem turma,
- * aparece para qualquer reunião em que o aluno seja discutido).
+ * aparece para qualquer reunião em que o estudante seja discutido).
  */
 export async function listStudentRecordsForMeeting(
 	db: DB,
@@ -303,7 +303,7 @@ export async function listStudentRecordsForMeeting(
 	];
 }
 
-/** Lista registros independentes de um aluno (tela de contexto do aluno). */
+/** Lista registros independentes de um estudante (tela de contexto do estudante). */
 export async function listIndependentRecordsByStudent(
 	db: DB,
 	studentId: string,

@@ -21,7 +21,7 @@ implemented-by:
 
 ## Objetivo
 
-Permitir registrar observações gerais sobre a reunião, independentes de alunos, com categoria, autor e controle de inclusão na ata.
+Permitir registrar observações gerais sobre a reunião, independentes de estudantes, com categoria, autor e controle de inclusão na ata.
 
 ## Fluxo
 

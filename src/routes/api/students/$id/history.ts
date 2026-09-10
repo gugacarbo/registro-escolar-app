@@ -48,7 +48,7 @@ export async function getStudentHistoryHandler({
 	const db = createDb(requireD1(env));
 	const result = await getStudentHistory(db, params.id, query);
 	if (!result) {
-		return json({ error: "Aluno não encontrado" }, 404);
+		return json({ error: "Estudante não encontrado" }, 404);
 	}
 	return json(result, 200);
 }

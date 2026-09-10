@@ -117,7 +117,7 @@ describe("GET /api/classes/:id/students", () => {
 		expect(await response.json()).toEqual([]);
 	});
 
-	it("retorna 200 com alunos e vínculo serializado", async () => {
+	it("retorna 200 com estudantes e vínculo serializado", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findClassById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({

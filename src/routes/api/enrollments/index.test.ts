@@ -61,7 +61,7 @@ function postRequest(body: unknown) {
 }
 
 const validBody = {
-	alunoId: "a1",
+	estudanteId: "a1",
 	turmaId: "t1",
 	dataInicio: "2026-02-01",
 	status: "ativa",
@@ -88,7 +88,7 @@ describe("POST /api/enrollments", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("retorna 404 quando aluno não existe", async () => {
+	it("retorna 404 quando estudante não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(

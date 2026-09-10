@@ -8,7 +8,7 @@ describe("parseStudentImportFile", () => {
 	it("parses a valid CSV", async () => {
 		const file = new File(
 			["nome,documento\nJoão Silva,123456\nMaria Souza,789012"],
-			"alunos.csv",
+			"estudantes.csv",
 			{
 				type: "text/csv",
 			},
@@ -21,7 +21,9 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("rejects unsupported files", async () => {
-		const file = new File(["not csv"], "alunos.txt", { type: "text/plain" });
+		const file = new File(["not csv"], "estudantes.txt", {
+			type: "text/plain",
+		});
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(true);
 		expect(rows).toHaveLength(0);
@@ -29,9 +31,13 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("parses csv with semicolon delimiter", async () => {
-		const file = new File(["nome;documento\nJoão Silva;123456"], "alunos.csv", {
-			type: "text/csv",
-		});
+		const file = new File(
+			["nome;documento\nJoão Silva;123456"],
+			"estudantes.csv",
+			{
+				type: "text/csv",
+			},
+		);
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(false);
 		expect(errors).toEqual([]);
@@ -47,10 +53,10 @@ describe("parseStudentImportFile", () => {
 				["nome", "documento"],
 				["João Silva", "123456"],
 			]),
-			"Alunos",
+			"Estudantes",
 		);
 		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
-		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const file = new File([buffer as ArrayBuffer], "estudantes.xlsx");
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(false);
 		expect(errors).toEqual([]);
@@ -64,10 +70,10 @@ describe("parseStudentImportFile", () => {
 		XLSX.utils.book_append_sheet(
 			workbook,
 			XLSX.utils.aoa_to_sheet([["documento"], ["123456"]]),
-			"Alunos",
+			"Estudantes",
 		);
 		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
-		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const file = new File([buffer as ArrayBuffer], "estudantes.xlsx");
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(true);
 		expect(rows).toHaveLength(0);
@@ -75,7 +81,7 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("flags rows without name", async () => {
-		const file = new File(["nome\n,\nJoão Silva"], "alunos.csv", {
+		const file = new File(["nome\n,\nJoão Silva"], "estudantes.csv", {
 			type: "text/csv",
 		});
 		const { rows, fatal } = await parseStudentImportFile(file);
@@ -89,7 +95,7 @@ describe("parseStudentImportFile", () => {
 	it("returns recoverable rows with line warnings instead of failing", async () => {
 		const file = new File(
 			['"nome","documento"\n"João Silva","unclosed'],
-			"alunos.csv",
+			"estudantes.csv",
 			{
 				type: "text/csv",
 			},
@@ -106,7 +112,7 @@ describe("parseStudentImportFile", () => {
 			"Nome,Documento,Matricula,Email,Telefone,Data_Nascimento,Observacoes",
 			"João Silva,123.456,2026001,joao@escola.test,11999999999,2010-05-20,Atendimento",
 		].join("\n");
-		const file = new File([csv], "alunos.csv", { type: "text/csv" });
+		const file = new File([csv], "estudantes.csv", { type: "text/csv" });
 		const { rows, errors } = await parseStudentImportFile(file);
 		expect(errors).toEqual([]);
 		expect(rows[0]).toMatchObject({
@@ -121,7 +127,7 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("reports missing columns for an empty CSV", async () => {
-		const file = new File([""], "alunos.csv", { type: "text/csv" });
+		const file = new File([""], "estudantes.csv", { type: "text/csv" });
 		const { rows, errors } = await parseStudentImportFile(file);
 		expect(rows).toEqual([]);
 		expect(errors[0]).toContain("nome");
@@ -136,10 +142,10 @@ describe("parseStudentImportFile", () => {
 				["João Silva", new Date("2010-05-20T12:00:00Z"), "123456"],
 				["", "", ""],
 			]),
-			"Alunos",
+			"Estudantes",
 		);
 		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
-		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const file = new File([buffer as ArrayBuffer], "estudantes.xlsx");
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(false);
 		expect(errors.length).toBeGreaterThan(0);
@@ -149,7 +155,7 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("requires nome column", async () => {
-		const file = new File(["documento\n123456"], "alunos.csv", {
+		const file = new File(["documento\n123456"], "estudantes.csv", {
 			type: "text/csv",
 		});
 		const { rows, errors } = await parseStudentImportFile(file);
@@ -160,7 +166,7 @@ describe("parseStudentImportFile", () => {
 	it("detects pipe delimiter from a cluttered header line", async () => {
 		const file = new File(
 			["  nome | documento \nJoão Silva|123456"],
-			"alunos.csv",
+			"estudantes.csv",
 			{ type: "text/csv" },
 		);
 		const { rows, fatal } = await parseStudentImportFile(file);
@@ -169,7 +175,7 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("falls back to comma when no delimiter is detected", async () => {
-		const file = new File(["nome\nJoão Silva"], "alunos.csv", {
+		const file = new File(["nome\nJoão Silva"], "estudantes.csv", {
 			type: "text/csv",
 		});
 		const { rows, fatal } = await parseStudentImportFile(file);
@@ -179,9 +185,13 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("parses csv with pipe delimiter", async () => {
-		const file = new File(["nome|documento\nJoão Silva|123456"], "alunos.csv", {
-			type: "text/csv",
-		});
+		const file = new File(
+			["nome|documento\nJoão Silva|123456"],
+			"estudantes.csv",
+			{
+				type: "text/csv",
+			},
+		);
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(false);
 		expect(errors).toEqual([]);
@@ -192,7 +202,7 @@ describe("parseStudentImportFile", () => {
 	it("parses csv with tab delimiter", async () => {
 		const file = new File(
 			["nome\tdocumento\nJoão Silva\t123456"],
-			"alunos.csv",
+			"estudantes.csv",
 			{
 				type: "text/csv",
 			},
@@ -213,10 +223,10 @@ describe("parseStudentImportFile", () => {
 				["nome", "data_nascimento", "documento", "email"],
 				["Maria Souza", 40544, 123456, true],
 			]),
-			"Alunos",
+			"Estudantes",
 		);
 		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
-		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const file = new File([buffer as ArrayBuffer], "estudantes.xlsx");
 		const { rows, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(false);
 		expect(rows).toHaveLength(1);
@@ -225,7 +235,7 @@ describe("parseStudentImportFile", () => {
 	});
 
 	it("rejects an unreadable spreadsheet buffer", async () => {
-		const file = new File(["não é planilha"], "alunos.xlsx", {
+		const file = new File(["não é planilha"], "estudantes.xlsx", {
 			type: "application/octet-stream",
 		});
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
@@ -239,10 +249,10 @@ describe("parseStudentImportFile", () => {
 		XLSX.utils.book_append_sheet(
 			workbook,
 			XLSX.utils.aoa_to_sheet([]),
-			"Alunos",
+			"Estudantes",
 		);
 		const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
-		const file = new File([buffer as ArrayBuffer], "alunos.xlsx");
+		const file = new File([buffer as ArrayBuffer], "estudantes.xlsx");
 		const { rows, errors, fatal } = await parseStudentImportFile(file);
 		expect(fatal).toBe(true);
 		expect(rows).toHaveLength(0);
