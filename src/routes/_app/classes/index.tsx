@@ -6,48 +6,41 @@ import { DataTable } from "#/components/data-table";
 import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
 import { SearchInput } from "#/components/ui/search-input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#/components/ui/select";
 import { useClasses } from "#/hooks/classes/use-classes";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
-import type { Class } from "#/lib/classes/schema";
+import type { ClassListItem } from "#/lib/classes/types";
 
 export const Route = createFileRoute("/_app/classes/")({
 	component: ClassesPage,
 });
 
+const ALL_PERIODS = "__all__";
+
 const columns = [
 	{
 		header: "Nome",
-		cell: (classRow: Class) => classRow.name,
+		cell: (classRow: ClassListItem) => classRow.name,
 	},
 	{
 		header: "Período letivo",
-		cell: (classRow: Class) => classRow.academicPeriod,
+		cell: (classRow: ClassListItem) => classRow.academicPeriod,
 	},
 	{
-		header: "Ações",
-		cell: (classRow: Class) => (
-			<div className="flex gap-2">
-				<Link
-					to="/classes/$id/students"
-					params={{ id: classRow.id }}
-					className="text-sm underline"
-				>
-					Ver estudantes
-				</Link>
-				<Link
-					to="/classes/$id/offers"
-					params={{ id: classRow.id }}
-					className="text-sm underline"
-				>
-					Ofertas
-				</Link>
-			</div>
-		),
+		header: "Estudantes ativos",
+		cell: (classRow: ClassListItem) => classRow.activeStudentCount,
 	},
 ];
 
 export default function ClassesPage() {
 	const [search, setSearch] = useState("");
+	const [academicPeriod, setAcademicPeriod] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -66,14 +59,19 @@ export default function ClassesPage() {
 		data: classesPage,
 		isLoading,
 		isError,
-	} = useClasses({ search: debouncedSearch || undefined, page, pageSize });
+	} = useClasses({
+		search: debouncedSearch || undefined,
+		academicPeriod: academicPeriod || undefined,
+		page,
+		pageSize,
+	});
+	const periodOptions = classesPage?.academicPeriods ?? [];
+	const hasFilter = debouncedSearch.trim().length > 0 || academicPeriod !== "";
 
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Estrutura escolar"
 				title="Turmas"
-				description="Organize turmas por período letivo, curso e turno antes de gerar matrículas e ofertas."
 				actions={
 					<>
 						<Button asChild variant="secondary">
@@ -83,7 +81,7 @@ export default function ClassesPage() {
 					</>
 				}
 			/>
-			<PageToolbar>
+			<PageToolbar className="sm:justify-between">
 				<SearchInput
 					className="sm:max-w-md"
 					value={search}
@@ -91,6 +89,28 @@ export default function ClassesPage() {
 					placeholder="Buscar por nome"
 					ariaLabel="Buscar por nome"
 				/>
+				<Select
+					value={academicPeriod || ALL_PERIODS}
+					onValueChange={(value) => {
+						setAcademicPeriod(value === ALL_PERIODS ? "" : value);
+						setPage(1);
+					}}
+				>
+					<SelectTrigger
+						aria-label="Filtrar por período letivo"
+						className="w-52"
+					>
+						<SelectValue placeholder="Todos os períodos" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value={ALL_PERIODS}>Todos os períodos</SelectItem>
+						{periodOptions.map((period) => (
+							<SelectItem key={period} value={period}>
+								{period}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</PageToolbar>
 			<DataTable
 				columns={columns}
@@ -113,8 +133,16 @@ export default function ClassesPage() {
 				isLoading={isLoading}
 				isError={isError}
 				ariaLabel="Tabela de turmas"
-				emptyTitle="Nenhuma turma encontrada"
-				emptyDescription="Ajuste a busca ou cadastre uma nova turma."
+				emptyTitle={
+					hasFilter
+						? "Nenhuma turma corresponde aos filtros"
+						: "Nenhuma turma encontrada"
+				}
+				emptyDescription={
+					hasFilter
+						? "Ajuste a busca ou o período letivo."
+						: "Cadastre uma nova turma."
+				}
 			/>
 			<CreateClassDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 		</PageShell>

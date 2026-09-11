@@ -8,9 +8,17 @@ import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
 import { SearchInput } from "#/components/ui/search-input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#/components/ui/select";
+import { useClasses } from "#/hooks/classes/use-classes";
 import { useStudents } from "#/hooks/students/use-students";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
-import type { Student } from "#/lib/students/schema";
+import type { StudentWithTurmas } from "#/lib/students/types";
 
 export const Route = createFileRoute("/_app/students/")({
 	component: StudentsPage,
@@ -26,7 +34,7 @@ function getInitials(name: string): string {
 	return `${first}${last}`.toUpperCase() || "?";
 }
 
-function StudentRowActions({ student }: { student: Student }) {
+function StudentRowActions({ student }: { student: StudentWithTurmas }) {
 	return (
 		<Button asChild variant="ghost" size="icon-sm">
 			<Link
@@ -45,7 +53,7 @@ const columns = [
 		key: "name",
 		header: "Nome",
 		skeletonClassName: "h-9 w-44 max-w-full",
-		cell: (student: Student) => (
+		cell: (student: StudentWithTurmas) => (
 			<span className="flex min-w-0 items-center gap-3">
 				<Avatar size="sm" aria-hidden="true">
 					<AvatarFallback>{getInitials(student.name)}</AvatarFallback>
@@ -61,12 +69,29 @@ const columns = [
 		),
 	},
 	{
+		key: "turmas",
+		header: "Turmas",
+		skeletonClassName: "h-5 w-28",
+		cell: (student: StudentWithTurmas) =>
+			student.turmas.length > 0 ? (
+				<span className="flex flex-wrap items-center gap-1">
+					{student.turmas.map((turma) => (
+						<Badge key={turma.id} variant="secondary">
+							{turma.name}
+						</Badge>
+					))}
+				</span>
+			) : (
+				<span className="text-muted-foreground">—</span>
+			),
+	},
+	{
 		key: "document",
 		header: "Documento",
 		align: "right" as const,
 		className: "hidden sm:table-cell",
 		skeletonClassName: "ml-auto h-4 w-24",
-		cell: (student: Student) =>
+		cell: (student: StudentWithTurmas) =>
 			student.document ? (
 				<Badge variant="secondary" className="font-mono tabular-nums">
 					{student.document}
@@ -80,12 +105,15 @@ const columns = [
 		header: <span className="sr-only">Ações</span>,
 		align: "right" as const,
 		skeletonClassName: "ml-auto size-8",
-		cell: (student: Student) => <StudentRowActions student={student} />,
+		cell: (student: StudentWithTurmas) => (
+			<StudentRowActions student={student} />
+		),
 	},
 ];
 
 export default function StudentsPage() {
 	const [search, setSearch] = useState("");
+	const [classId, setClassId] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -100,6 +128,11 @@ export default function StudentsPage() {
 		}
 	}
 
+	const { data: classesPage, isLoading: isClassesLoading } = useClasses({
+		pageSize: 100,
+	});
+	const classOptions = classesPage?.data ?? [];
+
 	const {
 		data: studentsPage,
 		isLoading,
@@ -107,18 +140,18 @@ export default function StudentsPage() {
 		refetch,
 	} = useStudents({
 		search: debouncedSearch || undefined,
+		classId: classId || undefined,
 		page,
 		pageSize,
 	});
 	const total = studentsPage?.total ?? 0;
 	const hasSearch = debouncedSearch.trim().length > 0;
+	const hasFilter = hasSearch || classId !== "";
 
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Cadastro"
 				title="Estudantes"
-				description="Busque, cadastre e importe alunos. Cada linha leva ao histórico completo e aos registros do conselho."
 				actions={
 					<>
 						<Button asChild variant="secondary">
@@ -134,7 +167,7 @@ export default function StudentsPage() {
 					</>
 				}
 			/>
-			<PageToolbar>
+			<PageToolbar className="sm:justify-between">
 				<SearchInput
 					className="sm:max-w-md"
 					value={search}
@@ -142,6 +175,29 @@ export default function StudentsPage() {
 					placeholder="Buscar por nome ou documento"
 					ariaLabel="Buscar por nome ou documento"
 				/>
+				<Select
+					value={classId}
+					onValueChange={(value) => {
+						setClassId(value);
+						setPage(1);
+					}}
+				>
+					<SelectTrigger aria-label="Filtrar por turma" className="w-44">
+						<SelectValue placeholder="Todas as turmas" />
+					</SelectTrigger>
+					<SelectContent>
+						{classOptions.map((turma) => (
+							<SelectItem key={turma.id} value={turma.id}>
+								{turma.name}
+							</SelectItem>
+						))}
+						{!isClassesLoading && classOptions.length === 0 && (
+							<SelectItem value="__vazia__" disabled>
+								Nenhuma turma cadastrada
+							</SelectItem>
+						)}
+					</SelectContent>
+				</Select>
 			</PageToolbar>
 			<DataTable
 				columns={columns}
@@ -165,19 +221,28 @@ export default function StudentsPage() {
 				}}
 				ariaLabel="Tabela de estudantes"
 				emptyTitle={
-					hasSearch
-						? "Nenhum estudante corresponde à busca"
+					hasFilter
+						? "Nenhum estudante corresponde aos filtros"
 						: "Nenhum estudante encontrado"
 				}
 				emptyDescription={
 					hasSearch
 						? `Não encontramos resultados para “${debouncedSearch.trim()}”. Tente outro nome ou documento.`
-						: "Cadastre o primeiro estudante ou importe uma lista em CSV."
+						: classId
+							? "Nenhum estudante com matrícula ativa nesta turma."
+							: "Cadastre o primeiro estudante ou importe uma lista em CSV."
 				}
 				emptyAction={
-					hasSearch ? (
-						<Button variant="outline" onClick={() => setSearch("")}>
-							Limpar busca
+					hasFilter ? (
+						<Button
+							variant="outline"
+							onClick={() => {
+								setSearch("");
+								setClassId("");
+								setPage(1);
+							}}
+						>
+							Limpar filtros
 						</Button>
 					) : (
 						<Button onClick={() => setDialogOpen(true)}>

@@ -71,7 +71,7 @@ function buildStudentsWhere(search?: string, classId?: string) {
 		conditions.push(
 			inArray(
 				students.id,
-				sql`(SELECT student_id FROM enrollments WHERE class_id = ${classId} AND (status = 'ativa' OR end_date IS NULL))`,
+				sql`(SELECT student_id FROM enrollments WHERE class_id = ${classId} AND end_date IS NULL)`,
 			),
 		);
 	}
@@ -82,7 +82,7 @@ function buildStudentsWhere(search?: string, classId?: string) {
 }
 
 function activeTurmasCondition() {
-	return or(eq(enrollments.status, "ativa"), isNull(enrollments.endDate));
+	return isNull(enrollments.endDate);
 }
 
 async function fetchTurmasByStudent(
@@ -94,7 +94,10 @@ async function fetchTurmasByStudent(
 		return map;
 	}
 	const rows = await db.query.enrollments.findMany({
-		where: and(inArray(enrollments.studentId, studentIds), activeTurmasCondition()),
+		where: and(
+			inArray(enrollments.studentId, studentIds),
+			activeTurmasCondition(),
+		),
 		orderBy: (enrollment, { asc }) => [asc(enrollment.startDate)],
 		with: { class: true },
 	});

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { cn } from "cn";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import {
 	Form,
 	FormControl,
@@ -14,7 +14,6 @@ import {
 	FormSubmit,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
-import { cn } from "cn";
 
 const historySearchSchema = z.object({
 	q: z.string(),

@@ -16,3 +16,5 @@
 | [SPEC-0010](0010-versionamento-aprovacao-ata.md) | Versionamento e aprovação de ata | implemented |
 | [SPEC-0011](0011-historico-estudante.md) | Histórico do estudante | implemented |
 | [SPEC-0012](0012-historico-turma.md) | Histórico da turma | implemented |
+| [SPEC-0013](0013-gerenciamento-de-templates-de-ata.md) | Gerenciamento de templates de ata | accepted |
+| [SPEC-0014](0014-administra-usuarios-e-autorizacao-por-papeis.md) | Administra usuários e autorização por papéis | accepted |

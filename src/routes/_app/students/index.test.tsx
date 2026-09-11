@@ -2,11 +2,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Student } from "#/lib/students/schema";
-import type { StudentsPageResult } from "#/lib/students/types";
+import type {
+	StudentsPageResult,
+	StudentWithTurmas,
+} from "#/lib/students/types";
 
 const mocks = vi.hoisted(() => ({
 	useStudents: vi.fn(),
+	useClasses: vi.fn(),
 	useNavigate: vi.fn(),
 	navigate: vi.fn(),
 }));
@@ -29,13 +32,19 @@ vi.mock("#/hooks/students/use-students", () => ({
 	useStudents: mocks.useStudents,
 }));
 
+vi.mock("#/hooks/classes/use-classes", () => ({
+	useClasses: mocks.useClasses,
+}));
+
 vi.mock("#/components/students/create-student-dialog", () => ({
 	CreateStudentDialog: () => null,
 }));
 
 import StudentsPage from "./index";
 
-function makeStudent(overrides: Partial<Student> = {}): Student {
+function makeStudent(
+	overrides: Partial<StudentWithTurmas> = {},
+): StudentWithTurmas {
 	const now = new Date("2026-01-01T00:00:00Z");
 	return {
 		id: "student-1",
@@ -48,6 +57,7 @@ function makeStudent(overrides: Partial<Student> = {}): Student {
 		notes: null,
 		createdAt: now,
 		updatedAt: now,
+		turmas: [],
 		...overrides,
 	};
 }
@@ -82,6 +92,10 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 	});
+	mocks.useClasses.mockReturnValue({
+		data: { data: [], total: 0 },
+		isLoading: false,
+	});
 	mocks.useNavigate.mockReturnValue(mocks.navigate);
 });
 
@@ -101,11 +115,45 @@ describe("StudentsPage", () => {
 		expect(
 			within(table).getByRole("columnheader", { name: "Documento" }),
 		).toBeInTheDocument();
+		expect(
+			within(table).getByRole("columnheader", { name: "Turmas" }),
+		).toBeInTheDocument();
 		const link = within(table).getByRole("link", { name: "João Silva" });
 		expect(link).toHaveAttribute("href", "/students/$id");
 		expect(
 			within(table).getByRole("cell", { name: "123" }),
 		).toBeInTheDocument();
+	});
+
+	it("exibe as turmas ativas do estudante como badges", () => {
+		mocks.useStudents.mockReturnValue({
+			data: makePage({
+				data: [
+					makeStudent({
+						turmas: [
+							{ id: "class-1", name: "Turma A" },
+							{ id: "class-2", name: "Turma B" },
+						],
+					}),
+				],
+			}),
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
+		expect(within(table).getByText("Turma A")).toBeInTheDocument();
+		expect(within(table).getByText("Turma B")).toBeInTheDocument();
+	});
+
+	it("exibe — quando o estudante não tem turma", () => {
+		renderPage();
+		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
+		expect(table).toBeInTheDocument();
+		expect(
+			within(table).getAllByRole("cell", { name: "—" }).length,
+		).toBeGreaterThanOrEqual(1);
 	});
 
 	it("oculta o documento no mobile sem ocultar a ação de detalhes", () => {
@@ -137,7 +185,7 @@ describe("StudentsPage", () => {
 		});
 		renderPage();
 
-		expect(screen.getByRole("cell", { name: "—" })).toBeInTheDocument();
+		expect(screen.getAllByRole("cell", { name: "—" })).toHaveLength(2);
 		expect(screen.getByText("Mostrando 1–10 de 25")).toBeInTheDocument();
 	});
 
@@ -166,6 +214,80 @@ describe("StudentsPage", () => {
 		);
 	});
 
+	it("chama o refetch ao clicar em tentar novamente", () => {
+		const refetch = vi.fn();
+		mocks.useStudents.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+			refetch,
+		});
+		renderPage();
+
+		fireEvent.click(screen.getByRole("button", { name: "Tentar novamente" }));
+		expect(refetch).toHaveBeenCalledTimes(1);
+	});
+
+	it("muda o tamanho da página e volta para a página 1", () => {
+		mocks.useStudents.mockReturnValue({
+			data: makePage({ total: 25 }),
+			isLoading: false,
+			isError: false,
+		});
+		renderPage();
+		mocks.useStudents.mockClear();
+
+		fireEvent.click(screen.getByRole("link", { name: "2" }));
+		fireEvent.click(screen.getByRole("combobox", { name: "Itens por página" }));
+		fireEvent.click(screen.getByRole("option", { name: "20 / página" }));
+
+		expect(mocks.useStudents).toHaveBeenLastCalledWith({
+			search: undefined,
+			classId: undefined,
+			page: 1,
+			pageSize: 20,
+		});
+	});
+
+	it("exibe a mensagem de matrícula ativa quando o filtro é por turma", () => {
+		mocks.useStudents.mockReturnValue({
+			data: makePage({ data: [], total: 0 }),
+			isLoading: false,
+			isError: false,
+		});
+		mocks.useClasses.mockReturnValue({
+			data: {
+				data: [
+					{
+						id: "class-1",
+						name: "Turma A",
+						academicPeriod: "2026.1",
+						course: null,
+						grade: null,
+						shift: null,
+						createdAt: new Date("2026-01-01T00:00:00Z"),
+						updatedAt: new Date("2026-01-01T00:00:00Z"),
+					},
+				],
+				total: 1,
+			},
+			isLoading: false,
+		});
+		renderPage();
+
+		fireEvent.click(
+			screen.getByRole("combobox", { name: "Filtrar por turma" }),
+		);
+		fireEvent.click(screen.getByRole("option", { name: "Turma A" }));
+
+		expect(
+			screen.getByText("Nenhum estudante corresponde aos filtros"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Nenhum estudante com matrícula ativa nesta turma."),
+		).toBeInTheDocument();
+	});
+
 	it("troca de página chamando o hook com a nova página", () => {
 		mocks.useStudents.mockReturnValue({
 			data: makePage({ total: 25 }),
@@ -178,12 +300,13 @@ describe("StudentsPage", () => {
 
 		expect(mocks.useStudents).toHaveBeenLastCalledWith({
 			search: undefined,
+			classId: undefined,
 			page: 2,
 			pageSize: 10,
 		});
 	});
 
-	it("mostra botão para limpar a busca", () => {
+	it("mostra botão para limpar os filtros", () => {
 		mocks.useStudents.mockReturnValue({
 			data: makePage({ data: [], total: 0 }),
 			isLoading: false,
@@ -196,9 +319,9 @@ describe("StudentsPage", () => {
 			vi.advanceTimersByTime(300);
 		});
 		expect(
-			screen.getByText("Nenhum estudante corresponde à busca"),
+			screen.getByText("Nenhum estudante corresponde aos filtros"),
 		).toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: "Limpar busca" }));
+		fireEvent.click(screen.getByRole("button", { name: "Limpar filtros" }));
 		expect(search).toHaveValue("");
 	});
 
@@ -217,6 +340,7 @@ describe("StudentsPage", () => {
 
 		expect(mocks.useStudents).toHaveBeenLastCalledWith({
 			search: undefined,
+			classId: undefined,
 			page: 2,
 			pageSize: 10,
 		});
@@ -226,6 +350,48 @@ describe("StudentsPage", () => {
 		});
 		expect(mocks.useStudents).toHaveBeenLastCalledWith({
 			search: "Maria",
+			classId: undefined,
+			page: 1,
+			pageSize: 10,
+		});
+	});
+
+	it("filtra por turma e volta para a página 1", () => {
+		mocks.useStudents.mockReturnValue({
+			data: makePage({ total: 25 }),
+			isLoading: false,
+			isError: false,
+		});
+		mocks.useClasses.mockReturnValue({
+			data: {
+				data: [
+					{
+						id: "class-1",
+						name: "Turma A",
+						academicPeriod: "2026.1",
+						course: null,
+						grade: null,
+						shift: null,
+						createdAt: new Date("2026-01-01T00:00:00Z"),
+						updatedAt: new Date("2026-01-01T00:00:00Z"),
+					},
+				],
+				total: 1,
+			},
+			isLoading: false,
+		});
+		renderPage();
+		mocks.useStudents.mockClear();
+
+		fireEvent.click(screen.getByRole("link", { name: "2" }));
+		fireEvent.click(
+			screen.getByRole("combobox", { name: "Filtrar por turma" }),
+		);
+		fireEvent.click(screen.getByRole("option", { name: "Turma A" }));
+
+		expect(mocks.useStudents).toHaveBeenLastCalledWith({
+			search: undefined,
+			classId: "class-1",
 			page: 1,
 			pageSize: 10,
 		});

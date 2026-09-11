@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 describe("useClasses", () => {
-	it("busca a página com search, page e pageSize", async () => {
+	it("busca a página com search, academicPeriod, page e pageSize", async () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
 			new Response(
 				JSON.stringify({
@@ -29,12 +29,19 @@ describe("useClasses", () => {
 					total: 1,
 					page: 2,
 					pageSize: 10,
+					academicPeriods: ["2026"],
 				}),
 				{ status: 200 },
 			),
 		);
 		const { result } = renderHook(
-			() => useClasses({ search: "7º", page: 2, pageSize: 10 }),
+			() =>
+				useClasses({
+					search: "7º",
+					academicPeriod: "2026",
+					page: 2,
+					pageSize: 10,
+				}),
 			{ wrapper: createWrapper() },
 		);
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -44,6 +51,7 @@ describe("useClasses", () => {
 		);
 		expect(url.pathname).toBe("/api/classes");
 		expect(url.searchParams.get("search")).toBe("7º");
+		expect(url.searchParams.get("academicPeriod")).toBe("2026");
 		expect(url.searchParams.get("page")).toBe("2");
 		expect(url.searchParams.get("pageSize")).toBe("10");
 		expect(result.current.data).toMatchObject({ total: 1, page: 2 });
@@ -69,6 +77,7 @@ describe("useClasses", () => {
 		expect(url.searchParams.get("page")).toBe("1");
 		expect(url.searchParams.get("pageSize")).toBe("10");
 		expect(url.searchParams.has("search")).toBe(false);
+		expect(url.searchParams.has("academicPeriod")).toBe(false);
 	});
 
 	it("propaga erro de carregamento", async () => {

@@ -9,3 +9,10 @@ formato da tabela é apontada pelo comando, nunca lida em silêncio.
 | NNNN | título | data | situação |
 |---|---|---|---|
 | 0013 | gerenciamento-de-templates-de-ata | 2026-09-10 | em uso |
+| 0014 | Administra usuários e autorização por papéis | 2026-09-11 | em uso |
+
+## Reservas ADR
+
+| NNNN | título | data | situação |
+|---|---|---|---|
+| 0020 | Adota controle de acesso por papéis | 2026-09-11 | em uso |

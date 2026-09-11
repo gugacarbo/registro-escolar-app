@@ -18,6 +18,29 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		await expect(page.getByRole("row", { name: /Turma E2E/ })).toBeVisible();
 	});
 
+	test("filtra turmas por período letivo", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		await createClass(apiContext, "Turma Filtro 2025", "2025");
+		await createClass(apiContext, "Turma Filtro 2026", "2026");
+
+		const classesPage = new ClassesPage(page);
+		await classesPage.goto();
+		await expect(page.getByRole("heading", { name: "Turmas" })).toBeVisible();
+		await expect(page.getByRole("row", { name: /Turma Filtro 2025/ })).toBeVisible();
+		await expect(page.getByRole("row", { name: /Turma Filtro 2026/ })).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Ver estudantes" }),
+		).toHaveCount(0);
+		await expect(page.getByRole("link", { name: "Ofertas" })).toHaveCount(0);
+
+		await page.getByRole("combobox", { name: "Filtrar por período letivo" }).click();
+		await page.getByRole("option", { name: "2025", exact: true }).click();
+		await expect(page.getByRole("row", { name: /Turma Filtro 2025/ })).toBeVisible();
+		await expect(page.getByRole("row", { name: /Turma Filtro 2026/ })).toHaveCount(0);
+	});
+
 	test("abre os estudantes da turma ao clicar na linha", async ({
 		authenticatedPage: page,
 		apiContext,

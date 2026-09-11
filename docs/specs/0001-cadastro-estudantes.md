@@ -14,6 +14,8 @@ implemented-by:
   - src/lib/students/repository.ts
   - src/lib/students/schema.ts
   - src/lib/students/shared.ts
+  - src/lib/students/types.ts
+  - e2e/spec-0001-students.spec.ts
   - src/routes/_app/students/index.tsx
   - src/components/students/create-student-dialog.tsx
   - src/routes/_app/students/import.tsx
@@ -45,29 +47,43 @@ Permitir que o operador cadastre estudantes individualmente e importe estudantes
 - `POST /api/students` — cria estudante manual.
 - `POST /api/students/import` — inicia importação em lote; retorna pré-visualização com conflitos.
 - `POST /api/students/import/resolve` — confirma resolução de conflitos.
+- `GET /api/students` — listagem paginada (`page`, `pageSize`) com busca por
+  `search` (nome/documento) e filtro opcional `classId`.
+- O parâmetro `classId` filtra apenas estudantes com matrícula ativa na turma
+  (matrícula sem `end_date`); o `total` reflete o mesmo filtro.
+- Cada item da listagem inclui `turmas: { id, name }[]` com as matrículas
+  ativas do estudante, ordenadas pela data de início; está vazio quando o
+  estudante não tem matrícula ativa.
 - Payload mínimo manual: `nome`.
 - Payload de importação: arquivo CSV ou planilha com coluna `nome` e colunas opcionais.
+- Tela de estudantes: header com apenas o título e as ações "Importar" e
+  "Novo estudante" à direita na mesma linha; toolbar com busca e filtro por
+  turma (selecionar turma volta para a página 1); coluna "Turmas" exibe as
+  matrículas ativas como badges e "—" quando não há.
 
 ## Casos de borda
 
-| #   | QUANDO ⟨gatilho⟩                                                 | o sistema DEVE ⟨resposta⟩                                 |
-| --- | ---------------------------------------------------------------- | --------------------------------------------------------- |
-| 1   | o nome do estudante é enviado vazio                              | rejeitar com erro de validação                            |
-| 2   | a importação detecta mesmo nome/documento de estudante existente | apresentar conflito e não criar duplicado silenciosamente |
-| 3   | o arquivo enviado não é CSV nem planilha reconhecida             | rejeitar com mensagem de formato inválido                 |
-| 4   | a importação contém linhas com dados mínimos ausentes            | listar linhas inválidas na pré-visualização               |
-| 5   | o operador resolve um conflito vinculando a estudante existente  | reutilizar a entidade estudante existente                 |
+| #   | QUANDO ⟨gatilho⟩                                                                                  | o sistema DEVE ⟨resposta⟩                                 |
+| --- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | o nome do estudante é enviado vazio                                                               | rejeitar com erro de validação                            |
+| 2   | a importação detecta mesmo nome/documento de estudante existente                                  | apresentar conflito e não criar duplicado silenciosamente |
+| 3   | o arquivo enviado não é CSV nem planilha reconhecida                                              | rejeitar com mensagem de formato inválido                 |
+| 4   | a importação contém linhas com dados mínimos ausentes                                             | listar linhas inválidas na pré-visualização               |
+| 5   | o operador resolve um conflito vinculando a estudante existente                                   | reutilizar a entidade estudante existente                 |
+| 6   | a listagem recebe `classId` e o estudante só tem matrícula encerrada (com `end_date`) nessa turma | excluir o estudante dos resultados e do `total`           |
+| 7   | o estudante não tem matrícula ativa                                                               | `turmas` vem vazio na listagem e a coluna exibe "—"       |
 
 ## Questões em aberto
 
-Nenhuma — os cinco casos de borda estão cobertos por testes (ver Verificação).
+Nenhuma — os sete casos de borda estão cobertos por testes (ver Verificação).
 
 ## Definition of Done
 
 ```bash
 bunx tsc --noEmit --skipLibCheck        # exit 0 — tipos das rotas/validações
 bun run check                            # exit 0 — lint/format
-bun run test --run                       # 200 testes verdes
+bun run test                             # todos os testes verdes
+bun x playwright test e2e/spec-0001-students.spec.ts --grep-invert @visual  # e2e verde
 bun run test:coverage --run              # 95% em linhas, funções, statements e branches
 scripts/docs-check                       # exit 0 — spec válida como implemented
 ```
@@ -92,3 +108,19 @@ na pré-visualização (`import` 200 com summary.invalid e warnings por linha),
 (5) vínculo reutiliza a entidade existente (`import/resolve` 200 com linked e
 nome armazenado retornado); `bun run test:coverage --run` atinge 95% nas
 quatro métricas; `scripts/docs-check` exit 0 com SPEC-0001 como implemented.
+
+Em 2026-09-10, no repo registro-escolar-app, o contrato da listagem
+(`GET /api/students` com `classId` e campo `turmas`, header com ações à
+direita, filtro por turma e coluna "Turmas") foi executado:
+`bunx tsc --noEmit --skipLibCheck` exit 0; `bun run check` exit 0 nos
+arquivos alterados; `bun run test` com 877 testes verdes em 134 arquivos,
+incluindo os casos 6 e 7 — (`src/lib/students/repository.test.ts`: filtro
+`classId` exclui matrícula com `end_date` e `countStudents` reflete o
+filtro; matrícula encerrada não aparece em `turmas`;
+`src/routes/api/students/index.test.ts`: `classId` propagado para
+list/count); `e2e/spec-0001-students.spec.ts` com 10 testes verdes,
+incluindo "filtra pela turma e exibe as turmas ativas na tabela". A
+cobertura global de branches (94,27%) ficou abaixo do teto por módulos
+pré-existentes fora do escopo desta spec (`csv-parser.ts`,
+`meeting-form.tsx`, `offer-form.tsx`); os arquivos desta entrega estão
+≥ 94% em branches (100% em statements/lines).

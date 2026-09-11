@@ -197,11 +197,11 @@
     "path": "docs/adr/0017-single-tenant-operador-unico.md",
     "layer": "adr",
     "title": "Adota modelo single-tenant com operador único e sem permissões granulares",
-    "status": "accepted",
+    "status": "superseded",
     "builds-on": [
       "ADR-0008"
     ],
-    "superseded-by": null,
+    "superseded-by": "ADR-0020",
     "implemented-by": []
   },
   {
@@ -231,6 +231,19 @@
     "implemented-by": []
   },
   {
+    "id": "ADR-0020",
+    "path": "docs/adr/0020-adota-controle-de-acesso-por-papeis.md",
+    "layer": "adr",
+    "title": "Adota controle de acesso por papéis",
+    "status": "accepted",
+    "builds-on": [
+      "ADR-0008",
+      "ADR-0003"
+    ],
+    "superseded-by": null,
+    "implemented-by": []
+  },
+  {
     "id": "SPEC-0001",
     "path": "docs/specs/0001-cadastro-estudantes.md",
     "layer": "specs",
@@ -251,6 +264,8 @@
       "src/lib/students/repository.ts",
       "src/lib/students/schema.ts",
       "src/lib/students/shared.ts",
+      "src/lib/students/types.ts",
+      "e2e/spec-0001-students.spec.ts",
       "src/routes/_app/students/index.tsx",
       "src/components/students/create-student-dialog.tsx",
       "src/routes/_app/students/import.tsx",
@@ -552,5 +567,31 @@
       "src/hooks/history/use-history.ts",
       "src/components/history/class-history-panel.tsx"
     ]
+  },
+  {
+    "id": "SPEC-0013",
+    "path": "docs/specs/0013-gerenciamento-de-templates-de-ata.md",
+    "layer": "specs",
+    "title": "Gerenciamento de templates de ata",
+    "status": "accepted",
+    "builds-on": [
+      "ADR-0014",
+      "SPEC-0009"
+    ],
+    "superseded-by": null,
+    "implemented-by": []
+  },
+  {
+    "id": "SPEC-0014",
+    "path": "docs/specs/0014-administra-usuarios-e-autorizacao-por-papeis.md",
+    "layer": "specs",
+    "title": "Administra usuários e autorização por papéis",
+    "status": "accepted",
+    "builds-on": [
+      "ADR-0008",
+      "ADR-0020"
+    ],
+    "superseded-by": null,
+    "implemented-by": []
   }
 ]

@@ -35,11 +35,14 @@ export function OfferForm({
 	submitLabel = "Ofertar componente",
 	defaultValues,
 	serverError,
+	fixedTurma,
 }: {
 	onSubmit: (values: OfferFormValues) => void | Promise<void>;
 	submitLabel?: string;
 	defaultValues?: Partial<OfferFormValues>;
 	serverError?: string | null;
+	/** Quando definido, a turma fica travada e o select de turma é ocultado. */
+	fixedTurma?: { id: string; name?: string };
 }) {
 	const [classSearch, setClassSearch] = useState("");
 	const [componentSearch, setComponentSearch] = useState("");
@@ -52,6 +55,7 @@ export function OfferForm({
 			id: classRow.id,
 			name: `${classRow.name} — ${classRow.academicPeriod}`,
 		}),
+		enabled: !fixedTurma,
 	});
 	const classes = classesResult?.options ?? [];
 	const { data: componentsResult, isLoading: isLoadingComponents } =
@@ -76,7 +80,7 @@ export function OfferForm({
 	const form = useForm<OfferFormValues>({
 		resolver: zodResolver(offerFormSchema),
 		defaultValues: {
-			turmaId: "",
+			turmaId: fixedTurma?.id ?? "",
 			componenteId: "",
 			professorIds: [],
 			...defaultValues,
@@ -89,30 +93,39 @@ export function OfferForm({
 				onSubmit={() => form.handleSubmit(onSubmit)()}
 				className="space-y-4"
 			>
-				<FormField
-					control={form.control}
-					name="turmaId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Turma *</FormLabel>
-							<FormControl>
-								<EntitySelect
-									label="Turma"
-									placeholder="Selecione a turma"
-									value={field.value}
-									onChange={field.onChange}
-									options={classes}
-									isLoading={isLoadingClasses}
-									total={classesResult?.total ?? 0}
-									loadedAll={classesResult?.loadedAll ?? true}
-									search={classSearch}
-									onSearchChange={setClassSearch}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+				{fixedTurma ? (
+					<p className="text-sm text-muted-foreground">
+						Turma:{" "}
+						<strong className="font-medium text-foreground">
+							{fixedTurma.name ?? "Turma atual"}
+						</strong>
+					</p>
+				) : (
+					<FormField
+						control={form.control}
+						name="turmaId"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Turma *</FormLabel>
+								<FormControl>
+									<EntitySelect
+										label="Turma"
+										placeholder="Selecione a turma"
+										value={field.value}
+										onChange={field.onChange}
+										options={classes}
+										isLoading={isLoadingClasses}
+										total={classesResult?.total ?? 0}
+										loadedAll={classesResult?.loadedAll ?? true}
+										search={classSearch}
+										onSearchChange={setClassSearch}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				)}
 				<FormField
 					control={form.control}
 					name="componenteId"

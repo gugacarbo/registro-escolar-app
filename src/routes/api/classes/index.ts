@@ -5,6 +5,7 @@ import { getSession } from "#/lib/auth/session";
 import {
 	countClasses,
 	createClass,
+	listAcademicPeriods,
 	listClasses,
 } from "#/lib/classes/repository";
 import { createClassSchema } from "#/lib/classes/schema";
@@ -47,13 +48,16 @@ export async function listClassesHandler({
 	const { page, pageSize, limit, offset, search } = parsePageParams(
 		url.searchParams,
 	);
+	const rawAcademicPeriod = url.searchParams.get("academicPeriod")?.trim();
+	const academicPeriod = rawAcademicPeriod ? rawAcademicPeriod : undefined;
 
 	const db = createDb(requireD1(env));
-	const [classes, total] = await Promise.all([
-		listClasses(db, { search, limit, offset }),
-		countClasses(db, { search }),
+	const [classes, total, academicPeriods] = await Promise.all([
+		listClasses(db, { search, academicPeriod, limit, offset }),
+		countClasses(db, { search, academicPeriod }),
+		listAcademicPeriods(db),
 	]);
-	return json({ data: classes, total, page, pageSize }, 200);
+	return json({ data: classes, total, page, pageSize, academicPeriods }, 200);
 }
 
 export async function createClassHandler({

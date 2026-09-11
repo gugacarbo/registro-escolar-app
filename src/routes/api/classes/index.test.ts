@@ -4,6 +4,7 @@ import { getSession } from "#/lib/auth/session";
 import {
 	countClasses,
 	createClass,
+	listAcademicPeriods,
 	listClasses,
 } from "#/lib/classes/repository";
 
@@ -16,6 +17,7 @@ vi.mock("#/lib/auth/session", () => ({
 vi.mock("#/lib/classes/repository", () => ({
 	countClasses: vi.fn().mockResolvedValue(0),
 	createClass: vi.fn(),
+	listAcademicPeriods: vi.fn().mockResolvedValue([]),
 	listClasses: vi.fn().mockResolvedValue([]),
 }));
 
@@ -76,7 +78,12 @@ describe("GET /api/classes", () => {
 		expect(capped.status).toBe(200);
 		expect(listMock).toHaveBeenLastCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 100, offset: 100, search: undefined }),
+			expect.objectContaining({
+				limit: 100,
+				offset: 100,
+				search: undefined,
+				academicPeriod: undefined,
+			}),
 		);
 		const defaulted = await listClassesHandler({
 			request: new Request("http://localhost/api/classes?limit=0&offset=-1"),
@@ -85,7 +92,12 @@ describe("GET /api/classes", () => {
 		expect(defaulted.status).toBe(200);
 		expect(listMock).toHaveBeenLastCalledWith(
 			expect.anything(),
-			expect.objectContaining({ limit: 10, offset: 0, search: undefined }),
+			expect.objectContaining({
+				limit: 10,
+				offset: 0,
+				search: undefined,
+				academicPeriod: undefined,
+			}),
 		);
 	});
 
@@ -127,10 +139,12 @@ describe("GET /api/classes", () => {
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const listMock = listClasses as ReturnType<typeof vi.fn>;
 		listMock.mockResolvedValueOnce([
-			{ id: "t1", name: "7º A", academicPeriod: "2026" },
+			{ id: "t1", name: "7º A", academicPeriod: "2026", activeStudentCount: 3 },
 		]);
 		const countMock = countClasses as ReturnType<typeof vi.fn>;
 		countMock.mockResolvedValueOnce(1);
+		const periodsMock = listAcademicPeriods as ReturnType<typeof vi.fn>;
+		periodsMock.mockResolvedValueOnce(["2026"]);
 		const request = new Request("http://localhost/api/classes", {
 			method: "GET",
 		});
@@ -140,16 +154,45 @@ describe("GET /api/classes", () => {
 		});
 		expect(response.status).toBe(200);
 		const body = (await response.json()) as {
-			data: Array<{ name: string }>;
+			data: Array<{ name: string; activeStudentCount: number }>;
 			total: number;
 			page: number;
 			pageSize: number;
+			academicPeriods: string[];
 		};
 		expect(body.data).toHaveLength(1);
-		expect(body).toMatchObject({ total: 1, page: 1, pageSize: 10 });
+		expect(body.data[0].activeStudentCount).toBe(3);
+		expect(body).toMatchObject({
+			total: 1,
+			page: 1,
+			pageSize: 10,
+			academicPeriods: ["2026"],
+		});
 		expect(countMock).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ search: undefined }),
+			expect.objectContaining({ search: undefined, academicPeriod: undefined }),
+		);
+	});
+
+	it("propaga academicPeriod para listagem e contagem", async () => {
+		(getSession as ReturnType<typeof vi.fn>).mockResolvedValue(
+			createMockSession(),
+		);
+		const listMock = listClasses as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValue([]);
+		const countMock = countClasses as ReturnType<typeof vi.fn>;
+		const response = await listClassesHandler({
+			request: new Request("http://localhost/api/classes?academicPeriod=2026"),
+			context: { env: createEnv() },
+		});
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ academicPeriod: "2026" }),
+		);
+		expect(countMock).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ academicPeriod: "2026" }),
 		);
 	});
 });

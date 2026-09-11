@@ -1,11 +1,13 @@
 ---
-status: accepted
+status: superseded
 date: 2026-09-08
 builds-on:
   - ADR-0008
-superseded-by: null
+superseded-by: ADR-0020
 deciders: []
 ---
+
+> ⚠️ VERDADE ATUAL: a instância continua single-tenant; o operador único e a ausência de papéis de acesso foram revogados. ADR-0020 é a fonte para autorização.
 
 # Adota modelo single-tenant com operador único e sem permissões granulares
 

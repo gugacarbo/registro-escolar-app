@@ -24,6 +24,7 @@ export function useAsyncOptions<TItem extends { id: string }>({
 	select,
 	staleTime = 30_000,
 	gcTime = 5 * 60_000,
+	enabled = true,
 }: {
 	queryKey: readonly unknown[];
 	search?: string;
@@ -33,6 +34,7 @@ export function useAsyncOptions<TItem extends { id: string }>({
 	select: (item: TItem) => EntityOption;
 	staleTime?: number;
 	gcTime?: number;
+	enabled?: boolean;
 }) {
 	const debouncedSearch = useDebouncedValue(search ?? "", 300);
 	return useQuery<{
@@ -42,6 +44,7 @@ export function useAsyncOptions<TItem extends { id: string }>({
 		isSearching: boolean;
 	}>({
 		queryKey: [...queryKey, { search: debouncedSearch, pageSize, maxPages }],
+		enabled,
 		queryFn: async () => {
 			const options: EntityOption[] = [];
 			let page = 1;

@@ -20,6 +20,7 @@
 | [ADR-0014](0014-ata-entidade-separada.md) | Adota ata como entidade separada da reunião com template, versionamento e PDF | accepted |
 | [ADR-0015](0015-historico-vinculo-temporal.md) | Adota histórico baseado em vínculo temporal sem snapshots | accepted |
 | [ADR-0016](0016-autoria-registro-participante.md) | Adota restrição de autoria de registros a participantes da reunião | accepted |
-| [ADR-0017](0017-single-tenant-operador-unico.md) | Adota modelo single-tenant com operador único e sem permissões granulares | accepted |
+| [ADR-0017](0017-single-tenant-operador-unico.md) | Adota modelo single-tenant com operador único e sem permissões granulares | superseded |
 | [ADR-0018](0018-importacao-estudantes-csv.md) | Adota importação em lote de estudantes via CSV/planilha com detecção de duplicidade | accepted |
 | [ADR-0019](0019-geracao-pdf-serverless.md) | Adota geração de PDF das atas em pipeline serverless/edge | accepted |
+| [ADR-0020](0020-adota-controle-de-acesso-por-papeis.md) | Adota controle de acesso por papéis | accepted |

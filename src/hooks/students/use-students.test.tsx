@@ -73,23 +73,20 @@ describe("useStudents", () => {
 	});
 
 	it("envia classId quando fornecido", async () => {
-		const fetchMock = vi
-			.spyOn(globalThis, "fetch")
-			.mockResolvedValueOnce(
-				new Response(
-					JSON.stringify({
-						data: [],
-						total: 0,
-						page: 1,
-						pageSize: 10,
-					}),
-					{ status: 200 },
-				),
-			);
-		const { result } = renderHook(
-			() => useStudents({ classId: "class-1" }),
-			{ wrapper: createWrapper() },
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+			new Response(
+				JSON.stringify({
+					data: [],
+					total: 0,
+					page: 1,
+					pageSize: 10,
+				}),
+				{ status: 200 },
+			),
 		);
+		const { result } = renderHook(() => useStudents({ classId: "class-1" }), {
+			wrapper: createWrapper(),
+		});
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 		const url = new URL(
 			fetchMock.mock.calls[0][0] as string,

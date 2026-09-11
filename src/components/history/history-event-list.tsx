@@ -67,9 +67,7 @@ export function HistoryEventList({
 					</div>
 					{event.texto && <p className="mt-2">{event.texto}</p>}
 					<div className="mt-1 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-						{event.studentName && (
-							<span>Estudante: {event.studentName}</span>
-						)}
+						{event.studentName && <span>Estudante: {event.studentName}</span>}
 						{event.turmaNome && event.turmaNome !== turmaNome && (
 							<span>Turma: {event.turmaNome}</span>
 						)}
