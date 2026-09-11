@@ -17,7 +17,7 @@ import Database from "better-sqlite3";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { fakerPT_BR as faker } from "@faker-js/faker";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import * as schema from "../src/db/schema.ts";
@@ -96,18 +96,42 @@ faker.seed(42);
 // Banco local (D1 via miniflare)
 // ---------------------------------------------------------------------------
 
-const SQLITE_PATH = join(
+// Descoberta dinâmica do arquivo do banco (o hash no nome muda entre builds;
+// mesmo pattern de scripts/e2e-setup).
+const DB_DIR = join(
 	process.cwd(),
 	".wrangler/state/v3/d1/miniflare-D1DatabaseObject",
-	"a4926725177bf51d2522ff30e24d859c3d392a5068faab53e3951d5df4f2664c.sqlite",
 );
 
-if (!existsSync(SQLITE_PATH)) {
+function findLocalDatabase(): string {
+	const candidates = existsSync(DB_DIR)
+		? readdirSync(DB_DIR)
+			.filter(
+				(f) =>
+					f.endsWith(".sqlite") && f !== "metadata.sqlite",
+			)
+			.map((f) => join(DB_DIR, f))
+		: [];
+
+	if (candidates.length === 1) return candidates[0] as string;
+
+	if (candidates.length === 0) {
+		console.error(
+			`Banco local não encontrado em ${DB_DIR} (nenhum *.sqlite além de metadata.sqlite)\n` +
+				`Rode antes: bun run pre-dev (ou bun run build) para criar o state local do D1.`,
+		);
+		process.exit(1);
+	}
+
 	console.error(
-		`Banco local não encontrado em ${SQLITE_PATH}\nRode antes: bun run db:local:migrate`,
+		`Vários bancos encontrados em ${DB_DIR}:\n` +
+			candidates.map((c) => `  - ${c}`).join("\n") +
+			`\nApague o diretório ${join(process.cwd(), ".wrangler/state/v3/d1")} e rode bun run pre-dev para resetar.`,
 	);
 	process.exit(1);
 }
+
+const SQLITE_PATH = findLocalDatabase();
 
 const sqlite = new Database(SQLITE_PATH);
 const db = drizzle(sqlite, { schema });

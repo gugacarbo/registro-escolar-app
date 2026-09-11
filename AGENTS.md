@@ -51,7 +51,10 @@ npm run e2e              # tudo verde (CI)
 <!-- Conhecimento NÃO-INFERÍVEL que já custou tentativas falhas. Todo gotcha
      descoberto pelo agente DEVE ser registrado aqui. -->
 
--
+- `db:seed` descobre o arquivo do banco dinamicamente em
+  `.wrangler/state/v3/d1/miniflare-D1DatabaseObject/*.sqlite`; se existirem
+  múltiplos `.sqlite` lá, apague o diretório `.wrangler/state/v3/d1` e rode
+  `pre-dev`.
 
 ## Mapa de contexto
 
