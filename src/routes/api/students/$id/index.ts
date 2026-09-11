@@ -3,7 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
-import { findStudentById, updateStudent } from "#/lib/students/repository";
+import {
+	findStudentById,
+	findStudentDetail,
+	updateStudent,
+} from "#/lib/students/repository";
 import { updateStudentSchema } from "#/lib/students/schema";
 import { d1Middleware } from "#/middleware/d1";
 
@@ -40,7 +44,7 @@ export async function getStudentHandler({
 	}
 
 	const db = createDb(requireD1(env));
-	const student = await findStudentById(db, params.id);
+	const student = await findStudentDetail(db, params.id);
 	if (!student) {
 		return json({ error: "Estudante não encontrado" }, 404);
 	}

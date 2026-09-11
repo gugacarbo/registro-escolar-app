@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
-import { findStudentById, updateStudent } from "#/lib/students/repository";
+import {
+	findStudentById,
+	findStudentDetail,
+	updateStudent,
+} from "#/lib/students/repository";
 
 import { getStudentHandler, updateStudentHandler } from "./index";
 
@@ -11,6 +15,7 @@ vi.mock("#/lib/auth/session", () => ({
 
 vi.mock("#/lib/students/repository", () => ({
 	findStudentById: vi.fn(),
+	findStudentDetail: vi.fn(),
 	updateStudent: vi.fn(),
 }));
 
@@ -47,6 +52,7 @@ function createEnv() {
 beforeEach(() => {
 	vi.clearAllMocks();
 	(findStudentById as ReturnType<typeof vi.fn>).mockReset();
+	(findStudentDetail as ReturnType<typeof vi.fn>).mockReset();
 	(updateStudent as ReturnType<typeof vi.fn>).mockReset();
 	(getSession as ReturnType<typeof vi.fn>).mockReset();
 });
@@ -83,9 +89,7 @@ describe("GET /api/students/:id", () => {
 	it("retorna 404 quando o estudante não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
-		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-			undefined,
-		);
+		(findStudentDetail as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
 		const response = await getStudentHandler({
 			request: new Request("http://localhost/api/students/missing/", {
 				method: "GET",
@@ -98,12 +102,21 @@ describe("GET /api/students/:id", () => {
 		expect(body.error).toBe("Estudante não encontrado");
 	});
 
-	it("retorna 200 com o estudante", async () => {
+	it("retorna 200 com o estudante e seus vínculos", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
-		(findStudentById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+		(findStudentDetail as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "student-1",
 			name: "João Silva",
+			matriculas: [
+				{
+					id: "class-1",
+					name: "7º A",
+					startDate: "2026-02-01T00:00:00.000Z",
+					endDate: null,
+					status: "ativa",
+				},
+			],
 		});
 		const response = await getStudentHandler({
 			request: new Request("http://localhost/api/students/student-1/", {
@@ -113,8 +126,14 @@ describe("GET /api/students/:id", () => {
 			params: { id: "student-1" },
 		});
 		expect(response.status).toBe(200);
-		const body = (await response.json()) as { id: string };
+		const body = (await response.json()) as {
+			id: string;
+			matriculas: Array<{ id: string; name: string }>;
+		};
 		expect(body.id).toBe("student-1");
+		expect(body.matriculas).toEqual([
+			expect.objectContaining({ id: "class-1", name: "7º A" }),
+		]);
 	});
 });
 

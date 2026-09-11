@@ -31,6 +31,16 @@ export function createAuth(d1: D1Database, env: Env) {
 		emailAndPassword: {
 			enabled: true,
 		},
+		user: {
+			additionalFields: {
+				role: { type: "string", required: true, defaultValue: "user" },
+				isPermanentAdmin: {
+					type: "boolean",
+					required: true,
+					defaultValue: false,
+				},
+			},
+		},
 		plugins: [tanstackStartCookies()],
 	});
 }

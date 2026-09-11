@@ -1,7 +1,25 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { createAuth } from "./auth";
 
 describe("createAuth", () => {
+	it("expõe os campos adicionais na sessão", () => {
+		const auth = createAuth(
+			{ prepare: vi.fn() } as unknown as D1Database,
+			{ BETTER_AUTH_SECRET: "super-secret-32-bytes-long-ok" } as Env,
+		);
+		const fields = (auth.options as any).user.additionalFields;
+
+		expect(fields).toMatchObject({
+			role: { type: "string", required: true, defaultValue: "user" },
+			isPermanentAdmin: {
+				type: "boolean",
+				required: true,
+				defaultValue: false,
+			},
+		});
+	});
+
 	it("cria instância do better-auth com configurações mínimas", () => {
 		const d1 = { prepare: vi.fn() } as unknown as D1Database;
 		const env = {

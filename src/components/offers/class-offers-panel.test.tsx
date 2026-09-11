@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -83,7 +83,22 @@ describe("ClassOffersPanel", () => {
 		expect(screen.getByText("Nenhum componente ofertado")).toBeInTheDocument();
 	});
 
+	it("abre o formulário de oferta pelo trigger do cabeçalho", async () => {
+		const user = userEvent.setup();
+		renderPanel();
+
+		expect(screen.getByRole("button", { name: "Nova oferta" })).toBeVisible();
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+		await user.click(screen.getByRole("button", { name: "Nova oferta" }));
+
+		const dialog = await screen.findByRole("dialog");
+		expect(dialog).toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: "Nova oferta" })).toBeVisible();
+	});
+
 	it("envia a turma fixa ao criar oferta", async () => {
+		const user = userEvent.setup();
 		mocks.offerForm.mockImplementation(
 			(props: {
 				onSubmit: (values: {
@@ -102,7 +117,8 @@ describe("ClassOffersPanel", () => {
 			),
 		);
 		renderPanel();
-		await userEvent.click(screen.getByRole("button", { name: "ofertar" }));
+		await user.click(screen.getByRole("button", { name: "Nova oferta" }));
+		await user.click(await screen.findByRole("button", { name: "ofertar" }));
 		expect(mocks.mutateAsync).toHaveBeenCalledWith({
 			turmaId: "class-1",
 			componenteId: "comp-1",
@@ -110,7 +126,45 @@ describe("ClassOffersPanel", () => {
 		});
 	});
 
+	it("mantém o dialog aberto enquanto cria a oferta", async () => {
+		const user = userEvent.setup();
+		let resolveCreation: (() => void) | undefined;
+		mocks.mutateAsync.mockReturnValue(
+			new Promise<void>((resolve) => {
+				resolveCreation = resolve;
+			}),
+		);
+		mocks.offerForm.mockImplementation(
+			(props: {
+				onSubmit: (values: {
+					componenteId: string;
+					professorIds: string[];
+				}) => Promise<void>;
+			}) => (
+				<button
+					type="button"
+					onClick={() =>
+						props.onSubmit({ componenteId: "comp-1", professorIds: [] })
+					}
+				>
+					ofertar
+				</button>
+			),
+		);
+		renderPanel();
+		await user.click(screen.getByRole("button", { name: "Nova oferta" }));
+		await user.click(await screen.findByRole("button", { name: "ofertar" }));
+		await user.click(screen.getByRole("button", { name: "Fechar" }));
+
+		expect(screen.getByRole("dialog")).toBeInTheDocument();
+		resolveCreation?.();
+		await waitFor(() =>
+			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+		);
+	});
+
 	it("exibe erro de servidor ao falhar", async () => {
+		const user = userEvent.setup();
 		mocks.mutateAsync.mockRejectedValue(new Error("Oferta duplicada"));
 		mocks.offerForm.mockImplementation(
 			(props: {
@@ -131,7 +185,8 @@ describe("ClassOffersPanel", () => {
 			),
 		);
 		renderPanel();
-		await userEvent.click(screen.getByRole("button", { name: /ofertar/ }));
+		await user.click(screen.getByRole("button", { name: "Nova oferta" }));
+		await user.click(await screen.findByRole("button", { name: /ofertar/ }));
 		expect(
 			await screen.findByText("ofertar (Oferta duplicada)"),
 		).toBeInTheDocument();

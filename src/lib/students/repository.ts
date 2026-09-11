@@ -4,7 +4,11 @@ import type { DB } from "#/db";
 import { enrollments, students } from "#/db/schema";
 
 import type { CreateStudentInput, UpdateStudentInput } from "./schema";
-import type { ListStudentsOptions, StudentWithTurmas } from "./types";
+import type {
+	ListStudentsOptions,
+	StudentDetail,
+	StudentWithTurmas,
+} from "./types";
 
 export async function createStudent(db: DB, input: CreateStudentInput) {
 	return db
@@ -34,6 +38,31 @@ export async function findStudentById(db: DB, id: string) {
 	return db.query.students.findFirst({
 		where: eq(students.id, id),
 	});
+}
+
+export async function findStudentDetail(
+	db: DB,
+	id: string,
+): Promise<StudentDetail | null> {
+	const student = await findStudentById(db, id);
+	if (!student) {
+		return null;
+	}
+	const rows = await db.query.enrollments.findMany({
+		where: eq(enrollments.studentId, id),
+		with: { class: true },
+		orderBy: (row, { desc }) => [desc(row.startDate)],
+	});
+	return {
+		...student,
+		matriculas: rows.map((row) => ({
+			id: row.classId,
+			name: row.class.name,
+			startDate: row.startDate.toISOString(),
+			endDate: row.endDate ? row.endDate.toISOString() : null,
+			status: row.status,
+		})),
+	};
 }
 
 export async function findStudentsByNameOrDocument(

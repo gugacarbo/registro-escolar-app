@@ -5,6 +5,7 @@ import {
 	HistorySearchForm,
 	type HistorySearchValues,
 } from "#/components/history/history-search-form";
+import { PageSection } from "#/components/ui/page";
 import { useStudentHistory } from "#/hooks/history/use-history";
 
 export function StudentHistoryPanel({ studentId }: { studentId: string }) {
@@ -26,17 +27,20 @@ export function StudentHistoryPanel({ studentId }: { studentId: string }) {
 	}
 
 	return (
-		<section className="space-y-3" aria-labelledby="student-history-title">
-			<h2 id="student-history-title" className="text-lg font-semibold">
-				Histórico
-			</h2>
-			<HistorySearchForm onSubmit={handleSearch} />
+		<PageSection
+			title="Linha do tempo"
+			description="Eventos do estudante em ordem cronológica: matrículas, reuniões, registros e relatos."
+		>
+			<HistorySearchForm
+				onSubmit={handleSearch}
+				onReset={() => setFilters({})}
+			/>
 			<HistoryEventList
 				events={data?.eventos ?? []}
 				isLoading={isLoading}
 				isError={isError}
 				emptyMessage="Nenhum evento no histórico do estudante."
 			/>
-		</section>
+		</PageSection>
 	);
 }

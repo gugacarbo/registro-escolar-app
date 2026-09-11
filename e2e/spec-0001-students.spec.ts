@@ -117,6 +117,47 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 		).toBeVisible();
 	});
 
+	test("mostra no detalhe os dados compactos, vínculos e linha do tempo", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const student = await createStudent(apiContext, "Estudante Detalhe E2E", {
+			document: "11122233",
+			email: "detalhe@example.com",
+			phone: "11 98888-7777",
+		});
+		const turma = await createClass(apiContext, "Turma Detalhe E2E", "2026.1");
+		await createEnrollment(apiContext, {
+			estudanteId: student.id,
+			turmaId: turma.id,
+			dataInicio: "2026-02-01",
+		});
+
+		await page.goto(`/students/${student.id}`);
+		await expect(
+			page.getByRole("heading", { name: "Dados do estudante" }),
+		).toBeVisible();
+		await expect(page.getByText("11122233")).toBeVisible();
+		await expect(page.getByText("detalhe@example.com")).toBeVisible();
+		await expect(page.getByText("11 98888-7777")).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Turmas" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Turma Detalhe E2E" }),
+		).toBeVisible();
+		await expect(page.getByText(/Início 01\/02\/2026 · Em andamento/)).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Linha do tempo" }),
+		).toBeVisible();
+		await expect(page.getByRole("button", { name: "Editar" })).toBeVisible();
+
+		await page.getByRole("button", { name: "Editar" }).click();
+		await expect(
+			page.getByRole("button", { name: "Salvar alterações" }),
+		).toBeVisible();
+	});
+
 	test("rejeita nome vazio no cadastro manual", async ({
 		authenticatedPage: page,
 	}) => {

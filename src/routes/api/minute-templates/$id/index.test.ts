@@ -38,6 +38,8 @@ function createSession() {
 			name: "Operador",
 			email: "op@example.com",
 			emailVerified: true,
+			role: "user",
+			isPermanentAdmin: false,
 			createdAt: now,
 			updatedAt: now,
 		},

@@ -12,6 +12,7 @@ import {
 	countStudents,
 	createStudent,
 	findStudentById,
+	findStudentDetail,
 	findStudentsByNameOrDocument,
 	listStudents,
 	updateStudent,
@@ -136,6 +137,57 @@ describe("students repository", () => {
 		expect(updated.id).toBe(created.id);
 		expect(updated.name).toBe("João Souza");
 		expect(updated.document).toBe("123456");
+	});
+
+	it("busca o detalhe com vínculos, período e status em ordem decrescente", async () => {
+		const { db } = createTestDb();
+		const student = await createStudent(db, { name: "Ana Vínculos" });
+		const classA = await createClass(db, {
+			name: "7º A",
+			academicPeriod: "2026.1",
+		});
+		const classB = await createClass(db, {
+			name: "6º B",
+			academicPeriod: "2025.2",
+		});
+		await createEnrollment(db, {
+			studentId: student.id,
+			classId: classA.id,
+			startDate: ts("2026-02-01"),
+		});
+		await createEnrollment(db, {
+			studentId: student.id,
+			classId: classB.id,
+			startDate: ts("2025-02-01"),
+			endDate: ts("2025-06-30"),
+			status: "encerrada",
+		});
+
+		const detail = await findStudentDetail(db, student.id);
+		expect(detail?.name).toBe("Ana Vínculos");
+		expect(detail?.matriculas).toHaveLength(2);
+		expect(detail?.matriculas[0]).toMatchObject({
+			id: classA.id,
+			name: "7º A",
+			endDate: null,
+			status: "ativa",
+		});
+		expect(String(detail?.matriculas[0].startDate)).toBe(
+			"2026-02-01T00:00:00.000Z",
+		);
+		expect(detail?.matriculas[1]).toMatchObject({
+			id: classB.id,
+			name: "6º B",
+			status: "encerrada",
+		});
+		expect(String(detail?.matriculas[1].endDate)).toBe(
+			"2025-06-30T00:00:00.000Z",
+		);
+	});
+
+	it("retorna null no detalhe quando o estudante não existe", async () => {
+		const { db } = createTestDb();
+		expect(await findStudentDetail(db, "missing")).toBeNull();
 	});
 
 	it("returns an empty list when no duplicate filter is provided", async () => {

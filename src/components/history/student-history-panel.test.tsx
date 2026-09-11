@@ -57,7 +57,7 @@ describe("StudentHistoryPanel", () => {
 		});
 		renderPanel();
 		expect(
-			screen.getByRole("heading", { name: "Histórico" }),
+			screen.getByRole("heading", { name: "Linha do tempo" }),
 		).toBeInTheDocument();
 		expect(screen.getByText("Acompanhamento")).toBeInTheDocument();
 	});
@@ -163,6 +163,30 @@ describe("StudentHistoryPanel", () => {
 		});
 		renderPanel();
 		fireEvent.click(screen.getByRole("button", { name: "Filtrar" }));
+		await waitFor(() =>
+			expect(mocks.useStudentHistory).toHaveBeenLastCalledWith("student-1", {}),
+		);
+	});
+
+	it("limpa os filtros ao clicar em Limpar", async () => {
+		mocks.useClasses.mockReturnValue({ data: { data: [] } });
+		mocks.useComponents.mockReturnValue({ data: { data: [] } });
+		mocks.useStudentHistory.mockReturnValue({
+			data: { estudante: { id: "student-1" }, eventos: [] },
+			isLoading: false,
+			isError: false,
+		});
+		renderPanel();
+		fireEvent.change(screen.getByLabelText("Período"), {
+			target: { value: "2026" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Filtrar" }));
+		await waitFor(() =>
+			expect(mocks.useStudentHistory).toHaveBeenLastCalledWith("student-1", {
+				periodo: "2026",
+			}),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Limpar" }));
 		await waitFor(() =>
 			expect(mocks.useStudentHistory).toHaveBeenLastCalledWith("student-1", {}),
 		);
