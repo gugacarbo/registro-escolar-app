@@ -65,6 +65,12 @@ export default function AppLayout() {
 
 	return (
 		<SidebarProvider>
+			<a
+				href="#conteudo-principal"
+				className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow-md"
+			>
+				Pular para o conteúdo
+			</a>
 			<AppSidebar />
 			<SidebarInset>
 				<AppHeader
@@ -72,7 +78,10 @@ export default function AppLayout() {
 					userEmail={session.user.email}
 					onSignOut={handleSignOut}
 				/>
-				<main className="mx-auto w-full max-w-6xl flex-1 p-4 pb-10 sm:p-6 sm:pb-14 lg:p-8">
+				<main
+					className="mx-auto w-full max-w-6xl flex-1 p-4 pb-10 sm:p-6 sm:pb-14 lg:p-8"
+					id="conteudo-principal"
+				>
 					<Outlet />
 				</main>
 			</SidebarInset>

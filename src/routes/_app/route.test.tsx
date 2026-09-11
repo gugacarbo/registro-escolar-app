@@ -115,7 +115,25 @@ describe("AppLayout", () => {
 			"href",
 			"/minutes",
 		);
-		expect(screen.getAllByRole("link")).toHaveLength(8);
+		expect(screen.getAllByRole("link")).toHaveLength(9);
+	});
+
+	it("exibe um skip-link para o conteúdo principal", async () => {
+		mocks.getSession.mockResolvedValue({ data: session });
+
+		render(<AppLayout />);
+
+		const skipLink = await screen.findByRole("link", {
+			name: "Pular para o conteúdo",
+		});
+		expect(skipLink).toHaveAttribute("href", "#conteudo-principal");
+		// O SidebarInset também renderiza um <main>; o destino do skip-link
+		// é o <main> interno identificado por id — dois landmarks "main"
+		// aparecem no teste, então a consulta por id é mais precisa.
+		const main = document.getElementById("conteudo-principal");
+		expect(main?.getAttribute("role") ?? main?.tagName.toLowerCase()).toBe(
+			"main",
+		);
 	});
 
 	it("expõe o controle de tema no header", async () => {
