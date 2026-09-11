@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ImportPreviewTable } from "#/components/students/import-preview-table";
 import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell } from "#/components/ui/page";
@@ -16,11 +16,13 @@ const STEP_UPLOAD = 0;
 const STEP_PREVIEW = 1;
 const STEP_RESULT = 2;
 
-function ImportStudentsPage() {
+export default function ImportStudentsPage() {
 	const navigate = useNavigate();
 	const importPreview = useImportPreview();
 	const resolveImport = useResolveImport();
 	const [step, setStep] = useState(STEP_UPLOAD);
+	const [fileName, setFileName] = useState<string | null>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 	const [preview, setPreview] = useState<Awaited<
 		ReturnType<typeof importPreview.mutateAsync>
 	> | null>(null);
@@ -168,15 +170,32 @@ function ImportStudentsPage() {
 				title="Importar estudantes"
 				description="Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a coluna nome, revise conflitos e confirme os vínculos."
 			/>
-			<input
-				type="file"
-				accept=".csv,.xlsx,.xls,.ods"
-				className="file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-semibold file:text-secondary-foreground hover:file:bg-accent"
-				onChange={(e) => {
-					const file = e.target.files?.[0];
-					if (file) void handleUpload(file);
-				}}
-			/>
+			<div className="flex items-center gap-3">
+				<Button
+					variant="outline"
+					type="button"
+					onClick={() => inputRef.current?.click()}
+				>
+					Selecionar arquivo
+				</Button>
+				{fileName && (
+					<span className="text-sm text-muted-foreground">{fileName}</span>
+				)}
+				<input
+					ref={inputRef}
+					type="file"
+					accept=".csv,.xlsx,.xls,.ods"
+					aria-label="Selecionar arquivo para importar"
+					className="hidden"
+					onChange={(e) => {
+						const file = e.target.files?.[0];
+						if (file) {
+							setFileName(file.name);
+							void handleUpload(file);
+						}
+					}}
+				/>
+			</div>
 			{error && <p className="text-destructive">{error}</p>}
 		</PageShell>
 	);
