@@ -23,11 +23,14 @@ export function HistoryEventList({
 	isLoading,
 	isError,
 	emptyMessage = "Nenhum evento no histórico.",
+	turmaNome,
 }: {
 	events: HistoryEvent[];
 	isLoading: boolean;
 	isError: boolean;
 	emptyMessage?: string;
+	/** Quando informado, oculta o campo "Turma" redundante nos eventos. */
+	turmaNome?: string;
 }) {
 	if (isLoading) {
 		return (
@@ -64,7 +67,12 @@ export function HistoryEventList({
 					</div>
 					{event.texto && <p className="mt-2">{event.texto}</p>}
 					<div className="mt-1 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-						{event.turmaNome && <span>Turma: {event.turmaNome}</span>}
+						{event.studentName && (
+							<span>Estudante: {event.studentName}</span>
+						)}
+						{event.turmaNome && event.turmaNome !== turmaNome && (
+							<span>Turma: {event.turmaNome}</span>
+						)}
 						{event.reuniaoTitulo && <span>Reunião: {event.reuniaoTitulo}</span>}
 						{event.interno && <span>Registro interno</span>}
 					</div>

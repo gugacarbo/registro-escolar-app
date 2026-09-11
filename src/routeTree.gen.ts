@@ -19,6 +19,7 @@ import { Route as AppComponentsIndexRouteImport } from './routes/_app/components
 import { Route as AppComponentsIdRouteImport } from './routes/_app/components/$id'
 import { Route as AppMeetingsIndexRouteImport } from './routes/_app/meetings/index'
 import { Route as AppMinutesIndexRouteImport } from './routes/_app/minutes/index'
+import { Route as AppMinutesMeetingIdRouteImport } from './routes/_app/minutes/$meetingId'
 import { Route as AppMinutesTemplatesRouteImport } from './routes/_app/minutes/templates'
 import { Route as AppRolesIndexRouteImport } from './routes/_app/roles/index'
 import { Route as AppRolesIdRouteImport } from './routes/_app/roles/$id'
@@ -123,6 +124,11 @@ const AppMeetingsIndexRoute = AppMeetingsIndexRouteImport.update({
 const AppMinutesIndexRoute = AppMinutesIndexRouteImport.update({
   id: '/minutes/',
   path: '/minutes/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMinutesMeetingIdRoute = AppMinutesMeetingIdRouteImport.update({
+  id: '/minutes/$meetingId',
+  path: '/minutes/$meetingId',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppMinutesTemplatesRoute = AppMinutesTemplatesRouteImport.update({
@@ -438,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/classes/enroll': typeof AppClassesEnrollRoute
   '/components/$id': typeof AppComponentsIdRoute
+  '/minutes/$meetingId': typeof AppMinutesMeetingIdRoute
   '/minutes/templates': typeof AppMinutesTemplatesRouteWithChildren
   '/roles/$id': typeof AppRolesIdRoute
   '/staff/$id': typeof AppStaffIdRoute
@@ -505,6 +512,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/classes/enroll': typeof AppClassesEnrollRoute
   '/components/$id': typeof AppComponentsIdRoute
+  '/minutes/$meetingId': typeof AppMinutesMeetingIdRoute
   '/roles/$id': typeof AppRolesIdRoute
   '/staff/$id': typeof AppStaffIdRoute
   '/staff/new': typeof AppStaffNewRoute
@@ -573,6 +581,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/classes/enroll': typeof AppClassesEnrollRoute
   '/_app/components/$id': typeof AppComponentsIdRoute
+  '/_app/minutes/$meetingId': typeof AppMinutesMeetingIdRoute
   '/_app/minutes/templates': typeof AppMinutesTemplatesRouteWithChildren
   '/_app/roles/$id': typeof AppRolesIdRoute
   '/_app/staff/$id': typeof AppStaffIdRoute
@@ -642,6 +651,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/classes/enroll'
     | '/components/$id'
+    | '/minutes/$meetingId'
     | '/minutes/templates'
     | '/roles/$id'
     | '/staff/$id'
@@ -709,6 +719,7 @@ export interface FileRouteTypes {
     | '/'
     | '/classes/enroll'
     | '/components/$id'
+    | '/minutes/$meetingId'
     | '/roles/$id'
     | '/staff/$id'
     | '/staff/new'
@@ -776,6 +787,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/classes/enroll'
     | '/_app/components/$id'
+    | '/_app/minutes/$meetingId'
     | '/_app/minutes/templates'
     | '/_app/roles/$id'
     | '/_app/staff/$id'
@@ -952,6 +964,13 @@ declare module '@tanstack/react-router' {
       path: '/minutes'
       fullPath: '/minutes/'
       preLoaderRoute: typeof AppMinutesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/minutes/$meetingId': {
+      id: '/_app/minutes/$meetingId'
+      path: '/minutes/$meetingId'
+      fullPath: '/minutes/$meetingId'
+      preLoaderRoute: typeof AppMinutesMeetingIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/minutes/templates': {
@@ -1366,6 +1385,7 @@ interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppClassesEnrollRoute: typeof AppClassesEnrollRoute
   AppComponentsIdRoute: typeof AppComponentsIdRoute
+  AppMinutesMeetingIdRoute: typeof AppMinutesMeetingIdRoute
   AppMinutesTemplatesRoute: typeof AppMinutesTemplatesRouteWithChildren
   AppRolesIdRoute: typeof AppRolesIdRoute
   AppStaffIdRoute: typeof AppStaffIdRoute
@@ -1391,6 +1411,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppClassesEnrollRoute: AppClassesEnrollRoute,
   AppComponentsIdRoute: AppComponentsIdRoute,
+  AppMinutesMeetingIdRoute: AppMinutesMeetingIdRoute,
   AppMinutesTemplatesRoute: AppMinutesTemplatesRouteWithChildren,
   AppRolesIdRoute: AppRolesIdRoute,
   AppStaffIdRoute: AppStaffIdRoute,

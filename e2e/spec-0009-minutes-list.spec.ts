@@ -38,12 +38,21 @@ test.describe("Lista de atas no padrão de tabela do app", () => {
 		await expect(row.getByRole("cell", { name: "Modelo lista de atas" })).toBeVisible();
 		await expect(row.getByRole("cell", { name: "Pendente" })).toBeVisible();
 
-		// Clique na linha (fora dos links) abre o detalhe da ata:
-		// prévia + aprovação + versões.
+		// Clique na linha (fora dos links) abre a tela de visualização/edição
+		// da ata: prévia + geração de versão + aprovação.
 		await row
 			.getByRole("cell")
 			.filter({ has: authenticatedPage.getByText("Pendente", { exact: true }) })
 			.click();
+		await expect(authenticatedPage).toHaveURL(
+			new RegExp(`/minutes/${meeting.id}$`),
+		);
+		await expect(
+			authenticatedPage.getByRole("heading", { name: /^Ata de / }),
+		).toBeVisible();
+		await expect(
+			authenticatedPage.getByText("Prévia da ata"),
+		).toBeVisible();
 		await expect(
 			authenticatedPage.getByRole("heading", {
 				name: "Aprovar ata",
@@ -53,18 +62,30 @@ test.describe("Lista de atas no padrão de tabela do app", () => {
 			authenticatedPage.getByRole("heading", { name: "Versões" }),
 		).toBeVisible();
 
-		// Aprovação via UI atualiza a linha da tabela (invalidação da lista).
+		// Aprovação via UI registra o status na própria tela.
 		await authenticatedPage.getByLabel("Data de aprovação").fill("2026-05-20");
 		await authenticatedPage.getByRole("button", { name: "Aprovar ata" }).click();
+		await expect(authenticatedPage.getByText("Ata aprovada")).toBeVisible();
+
+		// Ao voltar para a lista, a linha reflete a aprovação.
+		await authenticatedPage.goto("/minutes");
+		await expect(table).toBeVisible();
 		await expect(
-			row.getByRole("cell", { name: "Aprovada" }),
+			table
+				.getByRole("row")
+				.filter({
+					has: authenticatedPage.getByRole("link", {
+						name: "Ata da lista de atas",
+					}),
+				})
+				.getByRole("cell", { name: "Aprovada" }),
 		).toBeVisible();
 
 		// Busca sem casamento exibe o estado vazio.
 		const search = authenticatedPage.getByLabel("Buscar por reunião");
 		await search.fill("reunião que não existe");
 		await expect(
-			authenticatedPage.getByRole("text", { name: "Nenhuma ata encontrada" }),
+			authenticatedPage.getByText("Nenhuma ata encontrada"),
 		).toBeVisible();
 		await expect(
 			table.getByRole("cell", { name: "Ata da lista de atas" }),

@@ -74,7 +74,10 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		await page.locator("input[type=date]").first().fill("2026-03-01");
 		await page.getByRole("button", { name: "Matricular" }).click();
 
-		await expect(page.getByText("Estudante Matrícula — ativa")).toBeVisible();
+		const row = page
+			.getByRole("listitem")
+			.filter({ hasText: "Estudante Matrícula" });
+		await expect(row).toContainText("Ativa");
 		await expect(page).toHaveURL(new RegExp(`/classes/${klass.id}/students`));
 	});
 

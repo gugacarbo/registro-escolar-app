@@ -104,6 +104,37 @@ describe("GET /api/students", () => {
 		);
 	});
 
+	it("passes the classId filter to list and count", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		const listMock = listStudents as ReturnType<typeof vi.fn>;
+		listMock.mockResolvedValueOnce([]);
+		const env = {
+			DB: {} as D1Database,
+			BETTER_AUTH_SECRET: "secret",
+			BETTER_AUTH_URL: "http://localhost:3000",
+		} as Env;
+		const request = new Request(
+			"http://localhost/api/students?classId=class-1",
+			{ method: "GET" },
+		);
+		const response = await listStudentsHandler({ request, context: { env } });
+		expect(response.status).toBe(200);
+		expect(listMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				search: undefined,
+				classId: "class-1",
+				limit: 10,
+				offset: 0,
+			}),
+		);
+		expect(countStudents as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ search: undefined, classId: "class-1" }),
+		);
+	});
+
 	it("lists without search and applies defaults with invalid params", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());

@@ -10,9 +10,11 @@ import {
 	FormLabel,
 	FormMessage,
 	FormNative,
+	FormReset,
 	FormSubmit,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { cn } from "cn";
 
 const historySearchSchema = z.object({
 	q: z.string(),
@@ -26,11 +28,17 @@ export type HistorySearchValues = z.infer<typeof historySearchSchema>;
 export function HistorySearchForm({
 	defaultValues,
 	onSubmit,
+	onReset,
 	hideStudentFilters = false,
+	className,
 }: {
 	defaultValues?: Partial<HistorySearchValues>;
 	onSubmit: (values: HistorySearchValues) => void;
+	/** Chamado ao clicar em "Limpar", após resetar os campos. */
+	onReset?: () => void;
 	hideStudentFilters?: boolean;
+	/** Classes extras da grade do formulário (ex.: mais colunas). */
+	className?: string;
 }) {
 	const form = useForm<HistorySearchValues>({
 		resolver: zodResolver(historySearchSchema),
@@ -47,7 +55,7 @@ export function HistorySearchForm({
 		<Form {...form}>
 			<FormNative
 				onSubmit={() => form.handleSubmit(onSubmit)()}
-				className="grid gap-3 md:grid-cols-2"
+				className={cn("grid gap-3 md:grid-cols-2", className)}
 			>
 				<FormField
 					control={form.control}
@@ -103,7 +111,10 @@ export function HistorySearchForm({
 						</FormItem>
 					)}
 				/>
-				<FormSubmit>Filtrar</FormSubmit>
+				<div className="flex items-center gap-2 md:col-span-2">
+					<FormSubmit>Filtrar</FormSubmit>
+					{onReset && <FormReset onClick={onReset} />}
+				</div>
 			</FormNative>
 		</Form>
 	);

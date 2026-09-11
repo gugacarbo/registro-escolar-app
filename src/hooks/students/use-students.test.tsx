@@ -69,6 +69,33 @@ describe("useStudents", () => {
 		expect(url.searchParams.get("page")).toBe("1");
 		expect(url.searchParams.get("pageSize")).toBe("10");
 		expect(url.searchParams.has("search")).toBe(false);
+		expect(url.searchParams.has("classId")).toBe(false);
+	});
+
+	it("envia classId quando fornecido", async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						data: [],
+						total: 0,
+						page: 1,
+						pageSize: 10,
+					}),
+					{ status: 200 },
+				),
+			);
+		const { result } = renderHook(
+			() => useStudents({ classId: "class-1" }),
+			{ wrapper: createWrapper() },
+		);
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		const url = new URL(
+			fetchMock.mock.calls[0][0] as string,
+			"http://localhost",
+		);
+		expect(url.searchParams.get("classId")).toBe("class-1");
 	});
 
 	it("propaga erro de carregamento", async () => {

@@ -1,5 +1,10 @@
 import { expect, test } from "./fixtures/test";
-import { baseURL, createStudent } from "./fixtures/api";
+import {
+	baseURL,
+	createClass,
+	createEnrollment,
+	createStudent,
+} from "./fixtures/api";
 import { StudentsPage } from "./pages/students-page";
 
 test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
@@ -60,6 +65,35 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 		).toBeVisible();
 		await page.getByRole("navigation", { name: "pagination" }).getByRole("link", { name: "2" }).click();
 		await expect(page.getByText("Mostrando 11–11 de 11")).toBeVisible();
+	});
+
+	test("filtra pela turma e exibe as turmas ativas na tabela", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const turma = await createClass(apiContext, "Turma Filtro E2E", "2026.1");
+		const matriculado = await createStudent(apiContext, "Aluno Filtro Turma E2E");
+		await createEnrollment(apiContext, {
+			estudanteId: matriculado.id,
+			turmaId: turma.id,
+			dataInicio: "2026-02-01",
+		});
+		await createStudent(apiContext, "Aluno Sem Turma E2E");
+
+		const studentsPage = new StudentsPage(page);
+		await studentsPage.goto();
+		await page.getByRole("combobox", { name: "Filtrar por turma" }).click();
+		await page
+			.getByRole("option", { name: "Turma Filtro E2E", exact: true })
+			.click();
+
+		await expect(page.getByText("Mostrando 1–1 de 1")).toBeVisible();
+		await expect(
+			page
+				.getByRole("row", { name: /Aluno Filtro Turma E2E/ })
+				.getByText("Turma Filtro E2E"),
+		).toBeVisible();
+		await expect(page.getByText("Aluno Sem Turma E2E")).not.toBeVisible();
 	});
 
 	test("abre o detalhe ao clicar em qualquer lugar da linha", async ({

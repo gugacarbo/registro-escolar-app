@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 
 import type { DB } from "#/db";
 import * as schema from "#/db/schema";
+import { enrollments } from "#/db/schema";
+import { createClass } from "#/lib/classes/repository";
+import { dateStringToTimestamp } from "#/lib/enrollments/dates";
 
 import {
 	countStudents,
@@ -29,9 +32,53 @@ function createTestDb() {
 			created_at INTEGER NOT NULL,
 			updated_at INTEGER NOT NULL
 		);
+		CREATE TABLE classes (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			academic_period TEXT NOT NULL,
+			course TEXT,
+			grade TEXT,
+			shift TEXT,
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL
+		);
+		CREATE TABLE enrollments (
+			id TEXT PRIMARY KEY,
+			student_id TEXT NOT NULL,
+			class_id TEXT NOT NULL,
+			start_date INTEGER NOT NULL,
+			end_date INTEGER,
+			status TEXT NOT NULL DEFAULT 'ativa',
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL
+		);
 	`);
 	const db = drizzle(sqlite, { schema }) as unknown as DB;
 	return { db, sqlite };
+}
+
+function ts(day: string) {
+	return new Date(dateStringToTimestamp(day));
+}
+
+async function createEnrollment(
+	db: DB,
+	override: {
+		studentId: string;
+		classId: string;
+		startDate?: Date;
+		endDate?: Date | null;
+		status?: string;
+	},
+) {
+	await db.insert(enrollments).values({
+		id: crypto.randomUUID(),
+		studentId: override.studentId,
+		classId: override.classId,
+		startDate: override.startDate ?? ts("2026-02-01"),
+		endDate: override.endDate ?? null,
+		status: override.status ?? "ativa",
+	});
 }
 
 describe("students repository", () => {
@@ -104,6 +151,103 @@ describe("students repository", () => {
 		const results = await listStudents(db, { search: "Carlos" });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Carlos Andrade");
+	});
+
+	it("anexa as turmas ativas de cada estudante", async () => {
+		const { db } = createTestDb();
+		const student = await createStudent(db, { name: "Ana Turma" });
+		const classA = await createClass(db, {
+			name: "7º A",
+			academicPeriod: "2026.1",
+		});
+		const classB = await createClass(db, {
+			name: "8º B",
+			academicPeriod: "2026.1",
+		});
+		await createEnrollment(db, {
+			studentId: student.id,
+			classId: classA.id,
+			startDate: ts("2026-02-01"),
+		});
+		await createEnrollment(db, {
+			studentId: student.id,
+			classId: classB.id,
+			startDate: ts("2026-03-01"),
+		});
+
+		const [row] = await listStudents(db, { limit: 10 });
+		expect(row.turmas).toEqual(
+			expect.arrayContaining([
+				{ id: classA.id, name: "7º A" },
+				{ id: classB.id, name: "8º B" },
+			]),
+		);
+		expect(row.turmas).toHaveLength(2);
+	});
+
+	it("exclui matrícula encerrada da lista de turmas", async () => {
+		const { db } = createTestDb();
+		const student = await createStudent(db, { name: "Ana Encerrada" });
+		const classA = await createClass(db, {
+			name: "7º A",
+			academicPeriod: "2025.2",
+		});
+		await createEnrollment(db, {
+			studentId: student.id,
+			classId: classA.id,
+			startDate: ts("2025-02-01"),
+			endDate: ts("2025-06-30"),
+		});
+
+		const [row] = await listStudents(db, { limit: 10 });
+		expect(row.turmas).toEqual([]);
+	});
+
+	it("filtra estudantes pela turma apenas com matrícula ativa", async () => {
+		const { db } = createTestDb();
+		const active = await createStudent(db, { name: "Ativo Turma" });
+		const inactive = await createStudent(db, { name: "Inativo Turma" });
+		const classRow = await createClass(db, {
+			name: "7º A",
+			academicPeriod: "2026.1",
+		});
+		await createEnrollment(db, {
+			studentId: active.id,
+			classId: classRow.id,
+		});
+		await createEnrollment(db, {
+			studentId: inactive.id,
+			classId: classRow.id,
+			endDate: ts("2026-06-30"),
+		});
+
+		const results = await listStudents(db, {
+			classId: classRow.id,
+			limit: 10,
+		});
+		expect(results.map((row) => row.name)).toEqual(["Ativo Turma"]);
+	});
+
+	it("combina busca e filtro por turma", async () => {
+		const { db } = createTestDb();
+		const match = await createStudent(db, { name: "Carlos Turma" });
+		await createStudent(db, { name: "Carlos Sem Turma" });
+		const classRow = await createClass(db, {
+			name: "7º A",
+			academicPeriod: "2026.1",
+		});
+		await createEnrollment(db, { studentId: match.id, classId: classRow.id });
+
+		const results = await listStudents(db, {
+			search: "Carlos",
+			classId: classRow.id,
+			limit: 10,
+		});
+		expect(results.map((row) => row.name)).toEqual(["Carlos Turma"]);
+		expect(await countStudents(db, { classId: classRow.id })).toBe(1);
+		expect(
+			await countStudents(db, { search: "Carlos", classId: classRow.id }),
+		).toBe(1);
 	});
 
 	it("counts students with the same filter as list", async () => {

@@ -27,7 +27,6 @@ function EnrollPage() {
 			void navigate({
 				to: "/classes/$id/students",
 				params: { id: values.turmaId },
-				search: { date: values.dataInicio },
 			});
 		} catch (error) {
 			if (error instanceof Error) {

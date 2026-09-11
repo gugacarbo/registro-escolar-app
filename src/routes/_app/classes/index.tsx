@@ -30,7 +30,6 @@ const columns = [
 				<Link
 					to="/classes/$id/students"
 					params={{ id: classRow.id }}
-					search={{ date: undefined }}
 					className="text-sm underline"
 				>
 					Ver estudantes
@@ -109,7 +108,6 @@ export default function ClassesPage() {
 					navigate({
 						to: "/classes/$id/students",
 						params: { id: classRow.id },
-						search: { date: undefined },
 					})
 				}
 				isLoading={isLoading}
