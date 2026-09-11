@@ -336,7 +336,7 @@ export function DataTable<TData>({
 						<PaginationContent>
 							<PaginationItem>
 								<PaginationPrevious
-									href="#"
+									href={page <= 1 ? undefined : "#"}
 									aria-label="Página anterior"
 									aria-disabled={page <= 1}
 									className={
@@ -360,7 +360,7 @@ export function DataTable<TData>({
 								) : (
 									<PaginationItem key={visible}>
 										<PaginationLink
-											href="#"
+											href={visible === page ? undefined : "#"}
 											isActive={visible === page}
 											onClick={(event) => {
 												event.preventDefault();
@@ -374,7 +374,7 @@ export function DataTable<TData>({
 							)}
 							<PaginationItem>
 								<PaginationNext
-									href="#"
+									href={page >= totalPages ? undefined : "#"}
 									aria-label="Próxima página"
 									aria-disabled={page >= totalPages}
 									className={

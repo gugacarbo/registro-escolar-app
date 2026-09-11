@@ -147,6 +147,60 @@ describe("DataTable", () => {
 			"Falha ao carregar os dados",
 		);
 	});
+
+	it("na página inicial, o botão 'Anterior' não tem href nem foco", () => {
+		renderTable({ page: 1 });
+
+		const previous = document.querySelector(
+			'[aria-label="Página anterior"]',
+		) as HTMLAnchorElement;
+		expect(previous).toBeInTheDocument();
+		expect(previous).toHaveAttribute("aria-disabled", "true");
+		expect(previous).not.toHaveAttribute("href");
+		expect(previous).not.toHaveAttribute("tabindex");
+
+		// a página ativa também é desabilitada (sem href)
+		const activePage = document.querySelector('[aria-current="page"]');
+		expect(activePage).toHaveTextContent("1");
+		expect(activePage).not.toHaveAttribute("href");
+		expect(screen.queryByRole("link", { name: "1" })).toBeNull();
+
+		// itens habilitados continuam links com href="#"
+		expect(screen.getByRole("link", { name: "2" })).toHaveAttribute(
+			"href",
+			"#",
+		);
+		expect(
+			screen.getByRole("link", { name: "Próxima página" }),
+		).toHaveAttribute("href", "#");
+	});
+
+	it("na última página, o botão 'Próxima' não tem href nem foco", () => {
+		renderTable({ page: 3 });
+
+		const next = document.querySelector(
+			'[aria-label="Próxima página"]',
+		) as HTMLAnchorElement;
+		expect(next).toBeInTheDocument();
+		expect(next).toHaveAttribute("aria-disabled", "true");
+		expect(next).not.toHaveAttribute("href");
+		expect(next).not.toHaveAttribute("tabindex");
+
+		// a página ativa também é desabilitada (sem href)
+		const activePage = document.querySelector('[aria-current="page"]');
+		expect(activePage).toHaveTextContent("3");
+		expect(activePage).not.toHaveAttribute("href");
+		expect(screen.queryByRole("link", { name: "3" })).toBeNull();
+
+		// itens habilitados continuam links com href="#"
+		expect(screen.getByRole("link", { name: "2" })).toHaveAttribute(
+			"href",
+			"#",
+		);
+		expect(
+			screen.getByRole("link", { name: "Página anterior" }),
+		).toHaveAttribute("href", "#");
+	});
 });
 
 describe("DataTable com onRowClick", () => {
