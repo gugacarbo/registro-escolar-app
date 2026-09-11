@@ -22,9 +22,11 @@ import {
 } from "./render";
 import {
 	approveMinute,
+	countMinutes,
 	createMinuteTemplate,
 	findMinuteVersionPdf,
 	generateMinuteVersion,
+	listMinutes,
 	listMinuteVersions,
 	previewMinute,
 	updateMinuteTemplate,
@@ -440,5 +442,75 @@ describe("minutes repository (specs 0009/0010)", () => {
 				updatedAt: new Date(),
 			}).hasPdf,
 		).toBe(false);
+	});
+
+	it("lista todas as atas com busca por reunião, filtro de status e paginação", async () => {
+		const template = await createMinuteTemplate(setup.db, {
+			name: "Modelo padrão",
+		});
+		await setup.db.insert(schema.minutes).values([
+			{
+				id: "minute-1",
+				meetingId: "meeting-1",
+				templateId: template.id,
+				approvalStatus: "aprovada",
+				approvedAt: meetingDate,
+				createdAt: meetingDate,
+				updatedAt: new Date("2025-07-01T00:00:00.000Z"),
+			},
+			{
+				id: "minute-2",
+				meetingId: "draft-1",
+				templateId: null,
+				approvalStatus: "pendente_aprovacao",
+				createdAt: meetingDate,
+				updatedAt: new Date("2025-08-01T00:00:00.000Z"),
+			},
+		]);
+		await setup.db.insert(schema.minuteVersions).values({
+			id: "version-1",
+			minuteId: "minute-1",
+			version: 2,
+			content: "conteúdo",
+			isCurrent: true,
+		});
+
+		const all = await listMinutes(setup.db);
+		expect(all).toHaveLength(2);
+		// Ordenado por updatedAt desc; versão atual refletida via max(version).
+		expect(all[0]).toMatchObject({
+			id: "minute-2",
+			meetingId: "draft-1",
+			meetingTitle: "Rascunho",
+			templateName: null,
+			approvalStatus: "pendente_aprovacao",
+			currentVersion: null,
+		});
+		expect(all[1]).toMatchObject({
+			id: "minute-1",
+			meetingId: "meeting-1",
+			meetingTitle: "Conselho 1º Ano",
+			templateName: "Modelo padrão",
+			approvalStatus: "aprovada",
+			approvedAt: meetingDate.toISOString(),
+			currentVersion: 2,
+		});
+
+		const bySearch = await listMinutes(setup.db, { search: "conselho" });
+		expect(bySearch.map((row) => row.id)).toEqual(["minute-1"]);
+
+		const byStatus = await listMinutes(setup.db, {
+			approvalStatus: "aprovada",
+		});
+		expect(byStatus.map((row) => row.id)).toEqual(["minute-1"]);
+
+		const paged = await listMinutes(setup.db, { limit: 1, offset: 1 });
+		expect(paged.map((row) => row.id)).toEqual(["minute-1"]);
+
+		expect(await countMinutes(setup.db)).toBe(2);
+		expect(await countMinutes(setup.db, { search: "conselho" })).toBe(1);
+		expect(await countMinutes(setup.db, { approvalStatus: "aprovada" })).toBe(
+			1,
+		);
 	});
 });

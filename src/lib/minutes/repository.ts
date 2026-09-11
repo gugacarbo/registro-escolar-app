@@ -1,10 +1,11 @@
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, like, sql } from "drizzle-orm";
 
 import type { DB } from "#/db";
 import {
 	generalReports,
 	meetingClasses,
 	meetingParticipants,
+	meetings,
 	minutes,
 	minuteTemplates,
 	minuteVersions,
@@ -38,7 +39,8 @@ import {
 	renderMinute,
 	serializeVersionRow,
 } from "./render";
-import type { MinuteRow } from "./types";
+import type { MinuteApprovalStatus } from "./schema";
+import type { ListMinutesOptions, MinuteListItem, MinuteRow } from "./types";
 
 // ---------------------------------------------------------------------------
 // Templates (spec 0009)
@@ -98,6 +100,98 @@ export async function updateMinuteTemplate(
 		.where(eq(minuteTemplates.id, id))
 		.returning()
 		.get();
+}
+
+// ---------------------------------------------------------------------------
+// Lista de atas (todos os registros, com busca por reunião e filtro de
+// aprovação; padrão de paginação do app)
+// ---------------------------------------------------------------------------
+
+async function findMeetingIdsMatchingSearch(db: DB, term: string) {
+	const rows = await db
+		.select()
+		.from(meetings)
+		.where(like(meetings.title, sql`'%' || ${term} || '%'`));
+	return rows.map((row) => row.id);
+}
+
+function buildMinutesListWhere(options: {
+	meetingIds: string[] | null;
+	approvalStatus?: MinuteApprovalStatus;
+}) {
+	const conditions = [];
+	if (options.meetingIds !== null) {
+		// Busca sem casamentos não retorna atas (restrito às reuniões casadas).
+		conditions.push(
+			inArray(
+				minutes.meetingId,
+				options.meetingIds.length > 0
+					? options.meetingIds
+					: ["__sem-reuniao__"],
+			),
+		);
+	}
+	if (options.approvalStatus) {
+		conditions.push(eq(minutes.approvalStatus, options.approvalStatus));
+	}
+	return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
+export async function listMinutes(
+	db: DB,
+	options: ListMinutesOptions = {},
+): Promise<MinuteListItem[]> {
+	const { limit = 50, offset = 0, search, approvalStatus } = options;
+	const term = search?.trim();
+	const where = buildMinutesListWhere({
+		meetingIds: term ? await findMeetingIdsMatchingSearch(db, term) : null,
+		approvalStatus,
+	});
+	const rows = await db.query.minutes.findMany({
+		where,
+		with: { meeting: true, template: true },
+		orderBy: (minutes, { desc }) => [desc(minutes.updatedAt)],
+		limit,
+		offset,
+	});
+	const currentVersions =
+		rows.length > 0
+			? await db.query.minuteVersions.findMany({
+					where: and(
+						inArray(
+							minuteVersions.minuteId,
+							rows.map((row) => row.id),
+						),
+						eq(minuteVersions.isCurrent, true),
+					),
+				})
+			: [];
+	const versionByMinute = new Map(
+		currentVersions.map((row) => [row.minuteId, row.version]),
+	);
+	return rows.map((row) => ({
+		id: row.id,
+		meetingId: row.meetingId,
+		meetingTitle: row.meeting?.title ?? "",
+		templateName: row.template?.name ?? null,
+		approvalStatus: row.approvalStatus as MinuteApprovalStatus,
+		approvedAt: row.approvedAt?.toISOString() ?? null,
+		currentVersion: versionByMinute.get(row.id) ?? null,
+		updatedAt: row.updatedAt.toISOString(),
+	}));
+}
+
+export async function countMinutes(
+	db: DB,
+	options: Pick<ListMinutesOptions, "search" | "approvalStatus"> = {},
+): Promise<number> {
+	const { search, approvalStatus } = options;
+	const term = search?.trim();
+	const where = buildMinutesListWhere({
+		meetingIds: term ? await findMeetingIdsMatchingSearch(db, term) : null,
+		approvalStatus,
+	});
+	return db.$count(minutes, where);
 }
 
 // ---------------------------------------------------------------------------

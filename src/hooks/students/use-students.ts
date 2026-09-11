@@ -6,21 +6,29 @@ const STUDENTS_QUERY_KEY = ["students"] as const;
 
 export type UseStudentsParams = {
 	search?: string;
+	classId?: string;
 	page?: number;
 	pageSize?: number;
 };
 
 export function useStudents({
 	search,
+	classId,
 	page = 1,
 	pageSize = 10,
 }: UseStudentsParams = {}) {
 	return useQuery<StudentsPageResult>({
-		queryKey: [...STUDENTS_QUERY_KEY, { search: search ?? "", page, pageSize }],
+		queryKey: [
+			...STUDENTS_QUERY_KEY,
+			{ search: search ?? "", classId: classId ?? "", page, pageSize },
+		],
 		queryFn: async () => {
 			const params = new URLSearchParams();
 			if (search) {
 				params.set("search", search);
+			}
+			if (classId) {
+				params.set("classId", classId);
 			}
 			params.set("page", String(page));
 			params.set("pageSize", String(pageSize));

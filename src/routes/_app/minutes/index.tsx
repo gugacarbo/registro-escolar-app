@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { DataTable, type DataTableColumn } from "#/components/data-table";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import { EntitySelect } from "#/components/ui/entity-select";
 import {
 	Form,
 	FormControl,
@@ -16,16 +16,24 @@ import {
 	useForm,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
-import { PageShell } from "#/components/ui/page";
+import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
+import { SearchInput } from "#/components/ui/search-input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
-import { fetchMeetingsPage } from "#/hooks/entity-fetchers";
 import { useMeeting } from "#/hooks/meetings/use-meeting";
 import { useApproveMinute } from "#/hooks/minutes/use-approve-minute";
 import { useGenerateMinute } from "#/hooks/minutes/use-generate-minute";
 import { useMinutePreview } from "#/hooks/minutes/use-minute-preview";
-import { useMinuteTemplates } from "#/hooks/minutes/use-minute-templates";
 import { useMinuteVersions } from "#/hooks/minutes/use-minute-versions";
-import { useAsyncOptions } from "#/hooks/use-async-options";
+import { useMinutes } from "#/hooks/minutes/use-minutes";
+import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import type { MinuteApprovalStatus, MinuteListItem } from "#/lib/minutes/types";
 
 export const Route = createFileRoute("/_app/minutes/")({
 	component: MinutesPage,
@@ -36,18 +44,86 @@ type ApproveFormValues = {
 	observacao: string;
 };
 
-function MinutesPage() {
+const APPROVAL_OPTIONS: Array<{ value: MinuteApprovalStatus; label: string }> =
+	[
+		{ value: "pendente_aprovacao", label: "Pendente de aprovação" },
+		{ value: "aprovada", label: "Aprovada" },
+	];
+
+function ApprovalStatusBadge({ status }: { status: MinuteApprovalStatus }) {
+	return (
+		<Badge variant={status === "aprovada" ? "default" : "secondary"}>
+			{status === "aprovada" ? "Aprovada" : "Pendente"}
+		</Badge>
+	);
+}
+
+const columns: DataTableColumn<MinuteListItem>[] = [
+	{
+		header: "Reunião",
+		cell: (row) => (
+			<Link
+				to="/meetings/$meetingId"
+				params={{ meetingId: row.meetingId }}
+				className="block min-w-0"
+			>
+				<span className="block truncate underline">{row.meetingTitle}</span>
+			</Link>
+		),
+	},
+	{
+		header: "Modelo",
+		className: "hidden md:table-cell",
+		cell: (row) =>
+			row.templateName ?? <span className="text-muted-foreground">Padrão</span>,
+	},
+	{
+		header: "Aprovação",
+		cell: (row) => <ApprovalStatusBadge status={row.approvalStatus} />,
+	},
+	{
+		header: "Versão",
+		align: "center" as const,
+		cell: (row) =>
+			row.currentVersion ?? <span className="text-muted-foreground">—</span>,
+	},
+	{
+		header: "Atualizada em",
+		className: "hidden sm:table-cell",
+		cell: (row) => new Date(row.updatedAt).toLocaleDateString("pt-BR"),
+	},
+];
+
+export default function MinutesPage() {
+	const [search, setSearch] = useState("");
+	const [approvalStatus, setApprovalStatus] = useState<
+		MinuteApprovalStatus | ""
+	>("");
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
 	const [meetingId, setMeetingId] = useState<string>("");
-	const [meetingSearch, setMeetingSearch] = useState("");
-	const { data: meetingsResult, isLoading: isLoadingMeetings } =
-		useAsyncOptions({
-			queryKey: ["minutes-page", "meetings"],
-			search: meetingSearch,
-			fetchPage: fetchMeetingsPage,
-			select: (meeting) => ({ id: meeting.id, name: meeting.title }),
-		});
-	const meetings = meetingsResult?.options;
-	const { data: templates } = useMinuteTemplates();
+	const debouncedSearch = useDebouncedValue(search, 300);
+	const [activeSearch, setActiveSearch] = useState(debouncedSearch);
+
+	if (activeSearch !== debouncedSearch) {
+		setActiveSearch(debouncedSearch);
+		if (page !== 1) {
+			setPage(1);
+		}
+	}
+
+	const {
+		data: minutesPage,
+		isLoading,
+		isError,
+		refetch,
+	} = useMinutes({
+		search: activeSearch || undefined,
+		approvalStatus: approvalStatus || undefined,
+		page,
+		pageSize,
+	});
+
 	const preview = useMinutePreview(meetingId || undefined);
 	const versions = useMinuteVersions(meetingId || undefined);
 	const generate = useGenerateMinute(meetingId);
@@ -62,75 +138,75 @@ function MinutesPage() {
 
 	return (
 		<PageShell>
-			<div className="flex items-center justify-between">
-				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
-					Atas
-				</h1>
-				<div className="flex gap-2">
+			<PageHeader
+				eyebrow="Conselho de classe"
+				title="Atas"
+				description="Todas as atas das reuniões, com status de aprovação e versões geradas."
+				actions={
 					<Link to="/minutes/templates">
 						<Button variant="secondary">Modelos de ata</Button>
 					</Link>
-					{meetingId && (
-						<Link to="/meetings/$meetingId" params={{ meetingId }}>
-							<Button variant="secondary">Ver reunião</Button>
-						</Link>
-					)}
-				</div>
-			</div>
-
-			<div className="max-w-xs">
-				<EntitySelect
-					label="Reunião"
-					placeholder="Selecione uma reunião"
-					value={meetingId}
-					onChange={setMeetingId}
-					options={[
-						...(meetings ?? []),
-						...(meetingId && !(meetings ?? []).some((m) => m.id === meetingId)
-							? [{ id: meetingId, name: selectedMeeting?.title ?? meetingId }]
-							: []),
-					]}
-					isLoading={isLoadingMeetings}
-					total={meetingsResult?.total ?? 0}
-					loadedAll={meetingsResult?.loadedAll ?? true}
-					search={meetingSearch}
-					onSearchChange={setMeetingSearch}
+				}
+			/>
+			<PageToolbar className="sm:justify-between">
+				<SearchInput
+					className="sm:max-w-sm"
+					value={search}
+					onChange={setSearch}
+					placeholder="Buscar por reunião"
+					ariaLabel="Buscar por reunião"
 				/>
-			</div>
-
-			{isLoadingMeetings && <p>Carregando reuniões...</p>}
-
-			{!meetingId && !isLoadingMeetings && (
-				<p>Selecione uma reunião para ver a ata.</p>
-			)}
+				<Select
+					value={approvalStatus}
+					onValueChange={(value) => {
+						setApprovalStatus(value as MinuteApprovalStatus | "");
+						setPage(1);
+					}}
+				>
+					<SelectTrigger aria-label="Status de aprovação" className="w-48">
+						<SelectValue placeholder="Todos os status" />
+					</SelectTrigger>
+					<SelectContent>
+						{APPROVAL_OPTIONS.map((option) => (
+							<SelectItem key={option.value} value={option.value}>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</PageToolbar>
+			<DataTable
+				columns={columns}
+				rows={minutesPage?.data ?? []}
+				getRowKey={(row) => row.id}
+				total={minutesPage?.total ?? 0}
+				page={page}
+				pageSize={pageSize}
+				onPageChange={setPage}
+				onPageSizeChange={(size) => {
+					setPageSize(size);
+					setPage(1);
+				}}
+				onRowClick={(row) => setMeetingId(row.meetingId)}
+				isLoading={isLoading}
+				isError={isError}
+				onRetry={() => void refetch()}
+				ariaLabel="Tabela de atas"
+				emptyTitle="Nenhuma ata encontrada"
+				emptyDescription="Ajuste a busca ou gere a ata de uma reunião."
+			/>
 
 			{meetingId && (
-				<>
-					<div className="flex flex-wrap items-center gap-2">
-						{preview.data && (
-							<>
-								<span className="text-sm font-medium">Aprovação:</span>
-								<Badge
-									variant={
-										preview.data.approvalStatus === "aprovada"
-											? "default"
-											: "secondary"
-									}
-								>
-									{preview.data.approvalStatus}
-								</Badge>
-							</>
-						)}
-						{selectedMeeting?.templateId &&
-							templates?.find((t) => t.id === selectedMeeting.templateId) && (
-								<span className="text-sm text-muted-foreground">
-									Modelo:{" "}
-									{
-										templates.find((t) => t.id === selectedMeeting?.templateId)
-											?.name
-									}
-								</span>
-							)}
+				<section className="space-y-4">
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<h2 className="font-display text-lg font-semibold tracking-tight">
+							Ata de {selectedMeeting?.title ?? meetingId}
+						</h2>
+						<div className="flex gap-2">
+							<Link to="/meetings/$meetingId" params={{ meetingId }}>
+								<Button variant="secondary">Ver reunião</Button>
+							</Link>
+						</div>
 					</div>
 
 					{preview.isLoading && <p>Carregando prévia...</p>}
@@ -170,9 +246,9 @@ function MinutesPage() {
 					)}
 
 					<div className="space-y-2 rounded border p-3">
-						<h2 className="font-display text-lg font-semibold tracking-tight">
+						<h3 className="font-display text-lg font-semibold tracking-tight">
 							Aprovar ata
-						</h2>
+						</h3>
 						<Form {...form}>
 							<FormNative
 								onSubmit={() => {
@@ -222,9 +298,9 @@ function MinutesPage() {
 					</div>
 
 					<div className="space-y-2">
-						<h2 className="font-display text-lg font-semibold tracking-tight">
+						<h3 className="font-display text-lg font-semibold tracking-tight">
 							Versões
-						</h2>
+						</h3>
 						{versions.isLoading && <p>Carregando versões...</p>}
 						{versions.error && (
 							<p role="alert">
@@ -269,7 +345,7 @@ function MinutesPage() {
 							</ul>
 						)}
 					</div>
-				</>
+				</section>
 			)}
 		</PageShell>
 	);

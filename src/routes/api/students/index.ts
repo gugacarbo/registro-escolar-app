@@ -44,11 +44,13 @@ export async function listStudentsHandler({
 	const { page, pageSize, limit, offset, search } = parsePageParams(
 		url.searchParams,
 	);
+	const rawClassId = url.searchParams.get("classId")?.trim();
+	const classId = rawClassId ? rawClassId : undefined;
 
 	const db = createDb(requireD1(env));
 	const [students, total] = await Promise.all([
-		listStudents(db, { search, limit, offset }),
-		countStudents(db, { search }),
+		listStudents(db, { search, classId, limit, offset }),
+		countStudents(db, { search, classId }),
 	]);
 	return new Response(
 		JSON.stringify({ data: students, total, page, pageSize }),

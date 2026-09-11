@@ -1,10 +1,10 @@
-import { eq, like, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, like, or, sql } from "drizzle-orm";
 
 import type { DB } from "#/db";
-import { students } from "#/db/schema";
+import { enrollments, students } from "#/db/schema";
 
 import type { CreateStudentInput, UpdateStudentInput } from "./schema";
-import type { ListStudentsOptions } from "./types";
+import type { ListStudentsOptions, StudentWithTurmas } from "./types";
 
 export async function createStudent(db: DB, input: CreateStudentInput) {
 	return db
@@ -56,33 +56,83 @@ export async function findStudentsByNameOrDocument(
 	});
 }
 
-function buildStudentsWhere(search?: string) {
+function buildStudentsWhere(search?: string, classId?: string) {
 	const term = search?.trim();
-	if (!term) {
+	const conditions = [];
+	if (term) {
+		conditions.push(
+			or(
+				like(students.name, sql`'%' || ${term} || '%'`),
+				like(students.document, sql`'%' || ${term} || '%'`),
+			),
+		);
+	}
+	if (classId) {
+		conditions.push(
+			inArray(
+				students.id,
+				sql`(SELECT student_id FROM enrollments WHERE class_id = ${classId} AND (status = 'ativa' OR end_date IS NULL))`,
+			),
+		);
+	}
+	if (conditions.length === 0) {
 		return undefined;
 	}
-	return or(
-		like(students.name, sql`'%' || ${term} || '%'`),
-		like(students.document, sql`'%' || ${term} || '%'`),
-	);
+	return and(...conditions);
 }
 
-export async function listStudents(db: DB, options: ListStudentsOptions = {}) {
-	const { limit = 50, offset = 0, search } = options;
-	const where = buildStudentsWhere(search);
+function activeTurmasCondition() {
+	return or(eq(enrollments.status, "ativa"), isNull(enrollments.endDate));
+}
 
-	return db.query.students.findMany({
+async function fetchTurmasByStudent(
+	db: DB,
+	studentIds: string[],
+): Promise<Map<string, { id: string; name: string }[]>> {
+	const map = new Map<string, { id: string; name: string }[]>();
+	if (studentIds.length === 0) {
+		return map;
+	}
+	const rows = await db.query.enrollments.findMany({
+		where: and(inArray(enrollments.studentId, studentIds), activeTurmasCondition()),
+		orderBy: (enrollment, { asc }) => [asc(enrollment.startDate)],
+		with: { class: true },
+	});
+	for (const row of rows) {
+		const list = map.get(row.studentId) ?? [];
+		list.push({ id: row.classId, name: row.class.name });
+		map.set(row.studentId, list);
+	}
+	return map;
+}
+
+export async function listStudents(
+	db: DB,
+	options: ListStudentsOptions = {},
+): Promise<StudentWithTurmas[]> {
+	const { limit = 50, offset = 0, search, classId } = options;
+	const where = buildStudentsWhere(search, classId);
+
+	const rows = await db.query.students.findMany({
 		where,
 		limit,
 		offset,
 		orderBy: (students, { desc }) => [desc(students.createdAt)],
 	});
+	const turmasByStudent = await fetchTurmasByStudent(
+		db,
+		rows.map((row) => row.id),
+	);
+	return rows.map((row) => ({
+		...row,
+		turmas: turmasByStudent.get(row.id) ?? [],
+	}));
 }
 
 export async function countStudents(
 	db: DB,
-	options: Pick<ListStudentsOptions, "search"> = {},
+	options: Pick<ListStudentsOptions, "search" | "classId"> = {},
 ) {
-	const where = buildStudentsWhere(options.search);
+	const where = buildStudentsWhere(options.search, options.classId);
 	return db.$count(students, where);
 }

@@ -34,6 +34,7 @@ import { Route as ApiComponentsIndexRouteImport } from './routes/api/components/
 import { Route as ApiEnrollmentsIndexRouteImport } from './routes/api/enrollments/index'
 import { Route as ApiMeetingsIndexRouteImport } from './routes/api/meetings/index'
 import { Route as ApiMinuteTemplatesIndexRouteImport } from './routes/api/minute-templates/index'
+import { Route as ApiMinutesIndexRouteImport } from './routes/api/minutes/index'
 import { Route as ApiRolesIndexRouteImport } from './routes/api/roles/index'
 import { Route as ApiStaffIndexRouteImport } from './routes/api/staff/index'
 import { Route as ApiStudentsIndexRouteImport } from './routes/api/students/index'
@@ -197,6 +198,11 @@ const ApiMeetingsIndexRoute = ApiMeetingsIndexRouteImport.update({
 const ApiMinuteTemplatesIndexRoute = ApiMinuteTemplatesIndexRouteImport.update({
   id: '/api/minute-templates/',
   path: '/api/minute-templates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMinutesIndexRoute = ApiMinutesIndexRouteImport.update({
+  id: '/api/minutes/',
+  path: '/api/minutes/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiRolesIndexRoute = ApiRolesIndexRouteImport.update({
@@ -452,6 +458,7 @@ export interface FileRoutesByFullPath {
   '/api/enrollments/': typeof ApiEnrollmentsIndexRoute
   '/api/meetings/': typeof ApiMeetingsIndexRoute
   '/api/minute-templates/': typeof ApiMinuteTemplatesIndexRoute
+  '/api/minutes/': typeof ApiMinutesIndexRoute
   '/api/roles/': typeof ApiRolesIndexRoute
   '/api/staff/': typeof ApiStaffIndexRoute
   '/api/students/': typeof ApiStudentsIndexRoute
@@ -517,6 +524,7 @@ export interface FileRoutesByTo {
   '/api/enrollments': typeof ApiEnrollmentsIndexRoute
   '/api/meetings': typeof ApiMeetingsIndexRoute
   '/api/minute-templates': typeof ApiMinuteTemplatesIndexRoute
+  '/api/minutes': typeof ApiMinutesIndexRoute
   '/api/roles': typeof ApiRolesIndexRoute
   '/api/staff': typeof ApiStaffIndexRoute
   '/api/students': typeof ApiStudentsIndexRoute
@@ -585,6 +593,7 @@ export interface FileRoutesById {
   '/api/enrollments/': typeof ApiEnrollmentsIndexRoute
   '/api/meetings/': typeof ApiMeetingsIndexRoute
   '/api/minute-templates/': typeof ApiMinuteTemplatesIndexRoute
+  '/api/minutes/': typeof ApiMinutesIndexRoute
   '/api/roles/': typeof ApiRolesIndexRoute
   '/api/staff/': typeof ApiStaffIndexRoute
   '/api/students/': typeof ApiStudentsIndexRoute
@@ -653,6 +662,7 @@ export interface FileRouteTypes {
     | '/api/enrollments/'
     | '/api/meetings/'
     | '/api/minute-templates/'
+    | '/api/minutes/'
     | '/api/roles/'
     | '/api/staff/'
     | '/api/students/'
@@ -718,6 +728,7 @@ export interface FileRouteTypes {
     | '/api/enrollments'
     | '/api/meetings'
     | '/api/minute-templates'
+    | '/api/minutes'
     | '/api/roles'
     | '/api/staff'
     | '/api/students'
@@ -785,6 +796,7 @@ export interface FileRouteTypes {
     | '/api/enrollments/'
     | '/api/meetings/'
     | '/api/minute-templates/'
+    | '/api/minutes/'
     | '/api/roles/'
     | '/api/staff/'
     | '/api/students/'
@@ -837,6 +849,7 @@ export interface RootRouteChildren {
   ApiEnrollmentsIndexRoute: typeof ApiEnrollmentsIndexRoute
   ApiMeetingsIndexRoute: typeof ApiMeetingsIndexRoute
   ApiMinuteTemplatesIndexRoute: typeof ApiMinuteTemplatesIndexRoute
+  ApiMinutesIndexRoute: typeof ApiMinutesIndexRoute
   ApiRolesIndexRoute: typeof ApiRolesIndexRoute
   ApiStaffIndexRoute: typeof ApiStaffIndexRoute
   ApiStudentsIndexRoute: typeof ApiStudentsIndexRoute
@@ -1044,6 +1057,13 @@ declare module '@tanstack/react-router' {
       path: '/api/minute-templates'
       fullPath: '/api/minute-templates/'
       preLoaderRoute: typeof ApiMinuteTemplatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/minutes/': {
+      id: '/api/minutes/'
+      path: '/api/minutes'
+      fullPath: '/api/minutes/'
+      preLoaderRoute: typeof ApiMinutesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/roles/': {
@@ -1418,6 +1438,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEnrollmentsIndexRoute: ApiEnrollmentsIndexRoute,
   ApiMeetingsIndexRoute: ApiMeetingsIndexRoute,
   ApiMinuteTemplatesIndexRoute: ApiMinuteTemplatesIndexRoute,
+  ApiMinutesIndexRoute: ApiMinutesIndexRoute,
   ApiRolesIndexRoute: ApiRolesIndexRoute,
   ApiStaffIndexRoute: ApiStaffIndexRoute,
   ApiStudentsIndexRoute: ApiStudentsIndexRoute,

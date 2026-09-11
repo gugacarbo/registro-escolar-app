@@ -6,6 +6,11 @@ export type ListStudentsOptions = {
 	limit?: number;
 	offset?: number;
 	search?: string;
+	classId?: string;
 };
 
-export type StudentsPageResult = PaginatedResult<Student>;
+export type StudentTurma = { id: string; name: string };
+
+export type StudentWithTurmas = Student & { turmas: StudentTurma[] };
+
+export type StudentsPageResult = PaginatedResult<StudentWithTurmas>;

@@ -2,9 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { GenerateMinuteJson } from "#/lib/minutes/types";
 
-import { getMinutePreviewQueryKey } from "./use-minute-preview";
-import { getMinuteVersionsQueryKey } from "./use-minute-versions";
-
 export type GenerateMinuteValues = {
 	observacao?: string;
 };
@@ -28,12 +25,8 @@ export function useGenerateMinute(meetingId: string) {
 			return response.json() as Promise<GenerateMinuteJson>;
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: getMinutePreviewQueryKey(meetingId),
-			});
-			queryClient.invalidateQueries({
-				queryKey: getMinuteVersionsQueryKey(meetingId),
-			});
+			// ["minutes"] cobre a prévia/versões e a lista paginada de atas.
+			queryClient.invalidateQueries({ queryKey: ["minutes"] });
 		},
 	});
 }
