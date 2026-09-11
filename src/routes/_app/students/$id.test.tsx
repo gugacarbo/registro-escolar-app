@@ -38,6 +38,15 @@ vi.mock("#/hooks/history/use-history", () => ({
 	useStudentHistory: mocks.useStudentHistory,
 }));
 
+vi.mock("#/components/students/create-independent-record-dialog", () => ({
+	CreateIndependentRecordDialog: ({
+		trigger,
+	}: {
+		trigger?: React.ReactNode;
+		studentId: string;
+	}) => <>{trigger}</>,
+}));
+
 import StudentDetailPage from "./$id";
 
 // A API serializa datas como string (JSON); o type do Drizzle diz Date.
@@ -111,6 +120,26 @@ describe("StudentDetailPage", () => {
 			screen.queryByRole("heading", { name: "Dados do estudante" }),
 		).not.toBeInTheDocument();
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+	});
+
+	it("exibe a ação de novo registro apenas com o estudante carregado", () => {
+		renderPage();
+		expect(
+			screen.getByRole("button", { name: "Novo registro" }),
+		).toBeInTheDocument();
+	});
+
+	it("oculta a ação de novo registro durante o carregamento", () => {
+		mocks.useStudent.mockReturnValue({
+			data: undefined,
+			isLoading: true,
+			isError: false,
+			error: null,
+		});
+		renderPage();
+		expect(
+			screen.queryByRole("button", { name: "Novo registro" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("exibe mensagem de erro quando a consulta falha", () => {

@@ -4,6 +4,7 @@ import type { DB } from "#/db";
 import { enrollments, students } from "#/db/schema";
 
 import type { CreateStudentInput, UpdateStudentInput } from "./schema";
+import { normalizeDocument, normalizeName } from "./shared";
 import type {
 	ListStudentsOptions,
 	StudentDetail,
@@ -69,20 +70,24 @@ export async function findStudentsByNameOrDocument(
 	db: DB,
 	{ name, document }: { name?: string; document?: string },
 ) {
-	const conditions = [];
-	if (name) {
-		conditions.push(eq(students.name, name));
-	}
-	if (document) {
-		conditions.push(eq(students.document, document));
-	}
-	if (conditions.length === 0) {
+	const normalizedName = name ? normalizeName(name) : null;
+	const normalizedDocument = document ? normalizeDocument(document) : null;
+	if (normalizedName === null && normalizedDocument === null) {
 		return [];
 	}
-	return db.query.students.findMany({
-		where: or(...conditions),
-		limit: 10,
-	});
+	const candidates = await db.query.students.findMany({ limit: 5000 });
+	return candidates
+		.filter((student) => {
+			const matchesName =
+				normalizedName !== null &&
+				normalizeName(student.name) === normalizedName;
+			const matchesDocument =
+				normalizedDocument !== null &&
+				student.document !== null &&
+				normalizeDocument(student.document) === normalizedDocument;
+			return matchesName || matchesDocument;
+		})
+		.slice(0, 10);
 }
 
 function buildStudentsWhere(search?: string, classId?: string) {

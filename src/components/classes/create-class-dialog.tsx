@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { toast } from "sonner";
 
 import {
 	Dialog,
@@ -51,6 +52,7 @@ export function CreateClassDialog({
 				...(values.serie ? { serie: values.serie } : {}),
 				...(values.turno ? { turno: values.turno } : {}),
 			});
+			toast.success("Turma cadastrada");
 			handleOpenChange(false);
 			onSuccess?.();
 		} catch (error) {

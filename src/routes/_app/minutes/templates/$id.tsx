@@ -6,7 +6,7 @@ import {
 	type MinuteTemplateFormValues,
 } from "#/components/minutes/minute-template-form";
 import { Button } from "#/components/ui/button";
-import { PageShell } from "#/components/ui/page";
+import { PageHeader, PageShell } from "#/components/ui/page";
 import { useMinuteTemplate } from "#/hooks/minutes/use-minute-template";
 import { useUpdateMinuteTemplate } from "#/hooks/minutes/use-update-minute-template";
 
@@ -38,14 +38,15 @@ export default function MinuteTemplateDetailPage() {
 
 	return (
 		<PageShell>
-			<div className="flex items-center justify-between gap-2">
-				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
-					{template?.name ?? "Editar modelo de ata"}
-				</h1>
-				<Link to="/minutes/templates">
-					<Button variant="secondary">Voltar para a lista</Button>
-				</Link>
-			</div>
+			<PageHeader
+				eyebrow="Configuração"
+				title={template?.name ?? "Editar modelo de ata"}
+				actions={
+					<Link to="/minutes/templates">
+						<Button variant="secondary">Voltar para a lista</Button>
+					</Link>
+				}
+			/>
 			{isLoading && <p>Carregando...</p>}
 			{isError && (
 				<p className="text-sm text-destructive">
@@ -62,7 +63,7 @@ export default function MinuteTemplateDetailPage() {
 						</p>
 					)}
 					<MinuteTemplateForm
-						key={template.id}
+						key={template.id + String(template.updatedAt)}
 						defaultValues={{
 							name: template.name,
 							headerText: template.headerText,

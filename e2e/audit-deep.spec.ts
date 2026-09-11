@@ -1,4 +1,4 @@
-import { test } from "./fixtures/test";
+import { expect, test } from "./fixtures/test";
 import { baseURL } from "./fixtures/api";
 import * as fs from "node:fs";
 
@@ -48,9 +48,19 @@ test.describe("Deep UI/UX Audit", () => {
 		await publicPage.waitForTimeout(300);
 		await publicPage.screenshot({ path: `${OUT_DIR}/01d-login-mobile.png` });
 
-		// Register page
+		// Register page (cadastro por convite: cria um convite e abre com o token)
 		await publicPage.setViewportSize({ width: 1440, height: 900 });
-		await publicPage.goto(`${baseURL}/register`);
+		const inviteRes = await fetch(`${baseURL}/api/invitations`, {
+			method: "POST",
+			headers: {
+				Cookie: apiContext.cookies,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ email: "audit-convite@example.com" }),
+		});
+		expect(inviteRes.status).toBe(201);
+		const invite = (await inviteRes.json()) as { token: string };
+		await publicPage.goto(`${baseURL}/register?token=${invite.token}`);
 		await publicPage.waitForLoadState("networkidle");
 		await publicPage.screenshot({ path: `${OUT_DIR}/02-register-desktop.png` });
 

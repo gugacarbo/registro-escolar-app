@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { toast } from "sonner";
 
 import {
 	OfferForm,
@@ -49,6 +50,7 @@ export function CreateOfferDialog({
 				componenteId: values.componenteId,
 				professorIds: values.professorIds,
 			});
+			toast.success("Oferta criada");
 			setOpen(false);
 		} catch (error) {
 			if (error instanceof Error) {

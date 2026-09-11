@@ -7,6 +7,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CreateClassDialog } from "./create-class-dialog";
 
+const mocks = vi.hoisted(() => ({
+	toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock("sonner", () => ({ toast: mocks.toast }));
+
 function createWrapper() {
 	const client = new QueryClient({
 		defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -26,6 +32,7 @@ function renderDialog(props?: { open?: boolean }) {
 
 beforeEach(() => {
 	vi.unstubAllGlobals();
+	mocks.toast.success.mockReset();
 });
 
 describe("CreateClassDialog", () => {
@@ -87,6 +94,7 @@ describe("CreateClassDialog", () => {
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);
 		expect(onSuccess).toHaveBeenCalled();
+		expect(mocks.toast.success).toHaveBeenCalledWith("Turma cadastrada");
 	});
 
 	it("envia campos opcionais preenchidos", async () => {

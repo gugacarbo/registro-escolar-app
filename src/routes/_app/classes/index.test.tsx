@@ -13,14 +13,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
 	useNavigate: mocks.useNavigate,
-	Link: ({
-		children,
-		to,
-		...rest
-	}: { children: React.ReactNode; to: string } & Record<string, unknown>) => (
-		<a href={to} {...rest}>
-			{children}
-		</a>
+	Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+		<a href={to}>{children}</a>
 	),
 }));
 
@@ -125,9 +119,8 @@ describe("ClassesPage", () => {
 		expect(
 			within(table).queryByRole("link", { name: "Ver estudantes" }),
 		).not.toBeInTheDocument();
-		expect(
-			within(table).queryByRole("link", { name: "Ofertas" }),
-		).not.toBeInTheDocument();
+		const offersLink = within(table).getByRole("link", { name: "Ofertas" });
+		expect(offersLink).toHaveAttribute("href", "/classes/$id/offers");
 	});
 
 	it("exibe estado vazio quando não há turmas", () => {

@@ -9,6 +9,7 @@ import {
 	LayoutGrid,
 	type LucideIcon,
 	Shield,
+	Users,
 } from "lucide-react";
 
 import {
@@ -21,6 +22,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "#/components/ui/sidebar";
+import { useAuthSession } from "#/lib/auth/session-context";
 
 type AppRoute =
 	| "/"
@@ -30,7 +32,8 @@ type AppRoute =
 	| "/roles"
 	| "/components"
 	| "/meetings"
-	| "/minutes";
+	| "/minutes"
+	| "/admin/users";
 
 interface NavItem {
 	title: string;
@@ -49,6 +52,10 @@ const NAV_ITEMS: NavItem[] = [
 	{ title: "Atas", to: "/minutes", icon: FileText },
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [
+	{ title: "Usuários", to: "/admin/users", icon: Users },
+];
+
 function normalize(path: string): string {
 	return path.length > 1 ? path.replace(/\/+$/, "") : path;
 }
@@ -61,6 +68,10 @@ function isActivePath(pathname: string, to: AppRoute): boolean {
 
 export function AppSidebar() {
 	const pathname = useLocation({ select: (s) => s.pathname });
+	const session = useAuthSession();
+	const role = (session?.user as { role?: string } | undefined)?.role;
+	const navItems =
+		role === "admin" ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS;
 
 	return (
 		<Sidebar collapsible="icon" variant="floating">
@@ -83,7 +94,7 @@ export function AppSidebar() {
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							{NAV_ITEMS.map((item) => (
+							{navItems.map((item) => (
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton
 										asChild

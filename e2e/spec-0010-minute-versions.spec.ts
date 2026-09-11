@@ -79,6 +79,46 @@ test.describe("SPEC-0010 versionamento e aprovação de ata", () => {
 		expect(await response.json()).toMatchObject({ error: "Nenhuma ata gerada para esta reunião" });
 	});
 
+	test("rejeita segunda aprovação de ata já aprovada", async ({ apiContext }) => {
+		const meeting = await setupFinishedMeeting(apiContext);
+		await generateMinute(apiContext, meeting.id);
+		const approved = await approveMinute(apiContext, meeting.id);
+		expect(approved.approvalStatus).toBe("aprovada");
+
+		const response = await fetch(
+			`${baseURL}/api/meetings/${meeting.id}/minutes/approve`,
+			{
+				method: "PATCH",
+				headers: { Cookie: apiContext.cookies, "Content-Type": "application/json" },
+				body: JSON.stringify({ observacao: "Aprovação duplicada" }),
+			},
+		);
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ error: "Ata já aprovada" });
+	});
+
+	test("exibe versões e link de PDF na tela da ata", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const meeting = await setupFinishedMeeting(apiContext);
+		await generateMinute(apiContext, meeting.id, "Versão UI");
+
+		await page.goto(`/minutes/${meeting.id}`);
+		await expect(
+			page.getByRole("heading", { name: "Versões", exact: true }),
+		).toBeVisible();
+		await expect(page.getByText("Versão 1", { exact: true })).toBeVisible();
+		await expect(page.getByText("1 versão(ões) gerada(s)")).toBeVisible();
+
+		const pdfLink = page.getByRole("link", { name: "Baixar PDF" });
+		await expect(pdfLink).toBeVisible();
+		await expect(pdfLink).toHaveAttribute(
+			"href",
+			`/api/meetings/${meeting.id}/minutes/versions/1/pdf`,
+		);
+	});
+
 	test("nova versão após aprovação volta para pendente", async ({ apiContext }) => {
 		const meeting = await setupFinishedMeeting(apiContext);
 		const first = await generateMinute(apiContext, meeting.id);

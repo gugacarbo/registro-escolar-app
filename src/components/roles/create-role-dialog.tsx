@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { toast } from "sonner";
 
 import { RoleForm, type RoleFormValues } from "#/components/roles/role-form";
 import {
@@ -44,6 +45,7 @@ export function CreateRoleDialog({
 		setServerError(null);
 		try {
 			await createRole.mutateAsync(values);
+			toast.success("Papel cadastrado");
 			handleOpenChange(false);
 			onSuccess?.();
 		} catch (error) {

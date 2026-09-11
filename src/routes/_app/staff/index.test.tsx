@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
 	useStaff: vi.fn(),
 	useNavigate: vi.fn(),
 	navigate: vi.fn(),
+	deleteAsync: vi.fn(),
+	toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -27,6 +29,14 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("#/hooks/staff/use-staff", () => ({
 	useStaff: mocks.useStaff,
+}));
+
+vi.mock("sonner", () => ({ toast: mocks.toast }));
+vi.mock("#/hooks/staff/use-delete-staff-member", () => ({
+	useDeleteStaffMember: () => ({
+		mutateAsync: mocks.deleteAsync,
+		isPending: false,
+	}),
 }));
 
 import StaffPage from "./index";
@@ -69,6 +79,9 @@ function renderPage() {
 
 beforeEach(() => {
 	vi.useFakeTimers();
+	mocks.deleteAsync.mockReset();
+	mocks.deleteAsync.mockResolvedValue(undefined);
+	mocks.toast.success.mockReset();
 	mocks.useStaff.mockReturnValue({
 		data: makePage(),
 		isLoading: false,
@@ -207,5 +220,25 @@ describe("StaffPage", () => {
 			screen.getByRole("heading", { name: "Novo servidor" }),
 		).toBeVisible();
 		expect(mocks.navigate).not.toHaveBeenCalled();
+	});
+
+	it("remove um servidor após a confirmação da linha", async () => {
+		renderPage();
+
+		fireEvent.click(screen.getByRole("button", { name: "Remover João Silva" }));
+		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+
+		fireEvent.click(
+			within(screen.getByRole("alertdialog")).getByRole("button", {
+				name: "Remover",
+			}),
+		);
+
+		expect(mocks.deleteAsync).toHaveBeenCalledTimes(1);
+		await act(async () => {
+			await Promise.resolve();
+			await Promise.resolve();
+		});
+		expect(mocks.toast.success).toHaveBeenCalledWith("Servidor removido");
 	});
 });

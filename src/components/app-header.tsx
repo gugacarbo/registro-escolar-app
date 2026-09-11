@@ -1,3 +1,4 @@
+import { InvitationDialog } from "#/components/invitations/invitation-dialog";
 import { ModeToggle } from "#/components/mode-toggle";
 import { Button } from "#/components/ui/button";
 import { Separator } from "#/components/ui/separator";
@@ -20,6 +21,7 @@ export function AppHeader({ userName, userEmail, onSignOut }: AppHeaderProps) {
 				)}
 			</div>
 			<ModeToggle />
+			<InvitationDialog />
 			<Separator orientation="vertical" className="hidden h-6 sm:block" />
 			<Button type="button" variant="outline" size="sm" onClick={onSignOut}>
 				Sair

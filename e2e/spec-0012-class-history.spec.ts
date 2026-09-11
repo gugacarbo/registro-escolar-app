@@ -167,6 +167,56 @@ test.describe("SPEC-0012 histórico da turma", () => {
 		expect(secondHistory.eventos.map((event) => event.texto)).toContain("Registro equivalente 2026");
 	});
 
+	test("exibe linha do tempo da turma e busca sem resultados", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const klass = await createClass(apiContext, "Turma Linha do Tempo Turma UI", "2026");
+		const student = await createStudent(apiContext, "Estudante Linha do Tempo Turma UI");
+		await createEnrollment(apiContext, {
+			estudanteId: student.id,
+			turmaId: klass.id,
+			dataInicio: "2026-01-01",
+		});
+		const meeting = await createMeeting(apiContext, {
+			title: "Reunião Linha do Tempo Turma UI",
+			heldAt: "2026-05-10",
+			classIds: [klass.id],
+			participants: [],
+		});
+		await startMeeting(apiContext, meeting.id);
+		await createLinkedRecord(
+			apiContext,
+			meeting.id,
+			student.id,
+			"Registro histórico turma UI",
+		);
+
+		await page.goto(`/classes/${klass.id}/students`);
+		await page.getByRole("tab", { name: /Linha do tempo/ }).click();
+
+		await expect(
+			page.getByText(/Reunião Linha do Tempo Turma UI/).first(),
+		).toBeVisible();
+		await expect(
+			page.getByText("Registro histórico turma UI", { exact: true }),
+		).toBeVisible();
+
+		await page.getByLabel("Busca").fill("zzz-termo-inexistente-456");
+		await page.getByRole("button", { name: "Filtrar" }).click();
+		await expect(
+			page.getByText("Nenhum evento no histórico da turma.", { exact: true }),
+		).toBeVisible();
+		await expect(
+			page.getByText("Registro histórico turma UI", { exact: true }),
+		).toBeHidden();
+
+		await page.getByRole("button", { name: "Limpar" }).click();
+		await expect(
+			page.getByText("Registro histórico turma UI", { exact: true }),
+		).toBeVisible();
+	});
+
 	test("mantém registro interno visível no histórico", async ({ apiContext }) => {
 		const klass = await createClass(apiContext, "Turma Interno Histórico", "2026");
 		const student = await createStudent(apiContext, "Estudante Interno Turma");

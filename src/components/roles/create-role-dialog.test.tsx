@@ -7,6 +7,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CreateRoleDialog } from "./create-role-dialog";
 
+const mocks = vi.hoisted(() => ({
+	toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock("sonner", () => ({ toast: mocks.toast }));
+
 function createWrapper() {
 	const client = new QueryClient({
 		defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -26,6 +32,7 @@ function renderDialog(props?: { open?: boolean }) {
 
 beforeEach(() => {
 	vi.unstubAllGlobals();
+	mocks.toast.success.mockReset();
 });
 
 describe("CreateRoleDialog", () => {
@@ -73,6 +80,7 @@ describe("CreateRoleDialog", () => {
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);
 		expect(onSuccess).toHaveBeenCalled();
+		expect(mocks.toast.success).toHaveBeenCalledWith("Papel cadastrado");
 	});
 
 	it("exibe erro vindo do servidor sem fechar o dialog", async () => {

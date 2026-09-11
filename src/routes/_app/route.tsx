@@ -1,10 +1,17 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import {
+	ClientOnly,
+	createFileRoute,
+	Outlet,
+	useNavigate,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { AppHeader } from "#/components/app-header";
 import { AppSidebar } from "#/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
+import { Toaster } from "#/components/ui/sonner";
 import { Spinner } from "#/components/ui/spinner";
+import { AuthSessionContext } from "#/lib/auth/session-context";
 import { authClient } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/_app")({
@@ -64,27 +71,32 @@ export default function AppLayout() {
 	}
 
 	return (
-		<SidebarProvider>
-			<a
-				href="#conteudo-principal"
-				className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow-md"
-			>
-				Pular para o conteúdo
-			</a>
-			<AppSidebar />
-			<SidebarInset>
-				<AppHeader
-					userName={session.user.name}
-					userEmail={session.user.email}
-					onSignOut={handleSignOut}
-				/>
-				<main
-					className="mx-auto w-full max-w-6xl flex-1 p-4 pb-10 sm:p-6 sm:pb-14 lg:p-8"
-					id="conteudo-principal"
+		<AuthSessionContext.Provider value={session}>
+			<SidebarProvider>
+				<a
+					href="#conteudo-principal"
+					className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow-md"
 				>
-					<Outlet />
-				</main>
-			</SidebarInset>
-		</SidebarProvider>
+					Pular para o conteúdo
+				</a>
+				<AppSidebar />
+				<SidebarInset>
+					<AppHeader
+						userName={session.user.name}
+						userEmail={session.user.email}
+						onSignOut={handleSignOut}
+					/>
+					<main
+						className="mx-auto w-full max-w-6xl flex-1 p-4 pb-10 sm:p-6 sm:pb-14 lg:p-8"
+						id="conteudo-principal"
+					>
+						<Outlet />
+					</main>
+				</SidebarInset>
+				<ClientOnly>
+					<Toaster />
+				</ClientOnly>
+			</SidebarProvider>
+		</AuthSessionContext.Provider>
 	);
 }

@@ -23,7 +23,10 @@ import {
 } from "#/components/ui/select";
 import { fetchClassesPage, fetchStudentsPage } from "#/hooks/entity-fetchers";
 import { useAsyncOptions } from "#/hooks/use-async-options";
-import { enrollmentStatusValues } from "#/lib/enrollments/schema";
+import {
+	type EnrollmentStatus,
+	enrollmentStatusValues,
+} from "#/lib/enrollments/schema";
 
 const enrollmentFormSchema = z.object({
 	estudanteId: z.string().min(1, "Estudante é obrigatório"),
@@ -34,6 +37,15 @@ const enrollmentFormSchema = z.object({
 });
 
 export type EnrollmentFormValues = z.infer<typeof enrollmentFormSchema>;
+
+const CREATE_STATUSES: EnrollmentStatus[] = ["ativa"];
+
+const STATUS_LABELS: Record<EnrollmentStatus, string> = {
+	ativa: "Ativa",
+	transferida: "Transferida",
+	concluida: "Concluída",
+	cancelada: "Cancelada",
+};
 
 export function EnrollmentForm({
 	onSubmit,
@@ -171,9 +183,9 @@ export function EnrollmentForm({
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{enrollmentStatusValues.map((status) => (
+									{CREATE_STATUSES.map((status) => (
 										<SelectItem key={status} value={status}>
-											{status}
+											{STATUS_LABELS[status]}
 										</SelectItem>
 									))}
 								</SelectContent>

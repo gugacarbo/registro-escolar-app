@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -168,7 +168,7 @@ describe("MinuteDetailPage", () => {
 		expect(await screen.findByText("Ata aprovada")).toBeInTheDocument();
 	});
 
-	it("gera nova versão e exibe confirmação", async () => {
+	it("gera nova versão direto quando a ata não está aprovada", async () => {
 		const user = userEvent.setup();
 		renderPage();
 
@@ -181,5 +181,60 @@ describe("MinuteDetailPage", () => {
 		expect(mocks.mutateAsync).toHaveBeenCalledWith({
 			observacao: "Ajuste de registros",
 		});
+		expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+	});
+
+	it("requer confirmação antes de regenerar a ata aprovada", async () => {
+		const user = userEvent.setup();
+		mocks.useMinutePreview.mockReturnValue({
+			data: {
+				meetingId: "meeting-1",
+				templateId: null,
+				status: "in_progress",
+				approvalStatus: "aprovada",
+				content: "ATA",
+			},
+			isLoading: false,
+			error: null,
+		});
+		renderPage();
+
+		await user.click(screen.getByRole("button", { name: "Gerar nova versão" }));
+
+		expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+		expect(mocks.mutateAsync).not.toHaveBeenCalled();
+
+		await user.click(
+			within(screen.getByRole("alertdialog")).getByRole("button", {
+				name: "Gerar nova versão",
+			}),
+		);
+		expect(mocks.mutateAsync).toHaveBeenCalledTimes(1);
+		expect(mocks.mutateAsync).toHaveBeenCalledWith({ observacao: undefined });
+	});
+
+	it("não regenera nada se cancelar a confirmação da ata aprovada", async () => {
+		const user = userEvent.setup();
+		mocks.useMinutePreview.mockReturnValue({
+			data: {
+				meetingId: "meeting-1",
+				templateId: null,
+				status: "in_progress",
+				approvalStatus: "aprovada",
+				content: "ATA",
+			},
+			isLoading: false,
+			error: null,
+		});
+		renderPage();
+
+		await user.click(screen.getByRole("button", { name: "Gerar nova versão" }));
+		await user.click(
+			within(screen.getByRole("alertdialog")).getByRole("button", {
+				name: "Cancelar",
+			}),
+		);
+
+		expect(mocks.mutateAsync).not.toHaveBeenCalled();
 	});
 });

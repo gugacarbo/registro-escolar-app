@@ -4,8 +4,10 @@ import {
 	FileTextIcon,
 	PlusIcon,
 	SearchIcon,
+	Users2Icon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { GeneralReportForm } from "#/components/meetings/general-report-form";
 import {
 	RecordForm,
@@ -125,9 +127,9 @@ export default function CouncilPage() {
 				(student.registrationNumber || "").toLowerCase().includes(query),
 		);
 	}, [students, studentSearch]);
-	const selectedStudent =
-		students.find((student) => student.studentId === selectedStudentId) ??
-		students[0];
+	const selectedStudent = students.find(
+		(student) => student.studentId === selectedStudentId,
+	);
 	const {
 		data: recordsResult,
 		isLoading: isLoadingRecords,
@@ -189,6 +191,7 @@ export default function CouncilPage() {
 				origemId: values.origemId,
 				incluirNaAta: values.incluirNaAta,
 			});
+			toast.success("Registro criado");
 			setRecordDialogOpen(false);
 		} catch (error) {
 			if (error instanceof Error) setServerError(error.message);
@@ -207,6 +210,7 @@ export default function CouncilPage() {
 				origemId: values.origemId,
 				incluirNaAta: values.incluirNaAta,
 			});
+			toast.success("Registro atualizado");
 			setEditingRecord(null);
 		} catch (error) {
 			if (error instanceof Error) setServerError(error.message);
@@ -221,6 +225,7 @@ export default function CouncilPage() {
 		setServerError(null);
 		try {
 			await createGeneralReport.mutateAsync(values);
+			toast.success("Relato criado");
 		} catch (error) {
 			if (error instanceof Error) setServerError(error.message);
 		}
@@ -237,6 +242,7 @@ export default function CouncilPage() {
 				reportId: editingReport!,
 				...values,
 			});
+			toast.success("Relato atualizado");
 			setEditingReport(null);
 		} catch (error) {
 			if (error instanceof Error) setServerError(error.message);
@@ -375,7 +381,7 @@ export default function CouncilPage() {
 								<p>Carregando estudantes...</p>
 							)}
 							{activeClassId && isErrorStudents && (
-								<p className="text-sm text-muted-foreground">
+								<p role="alert" className="text-sm text-muted-foreground">
 									Não foi possível carregar os estudantes desta turma.
 								</p>
 							)}
@@ -441,6 +447,28 @@ export default function CouncilPage() {
 					)}
 				</CardContent>
 			</Card>
+
+			{activeClassId &&
+				!isLoadingStudents &&
+				students.length > 0 &&
+				!selectedStudent && (
+					<Card>
+						<CardContent className="p-10">
+							<Empty className="border-0">
+								<EmptyHeader>
+									<EmptyMedia variant="icon">
+										<Users2Icon />
+									</EmptyMedia>
+									<EmptyTitle>Nenhum estudante selecionado</EmptyTitle>
+									<EmptyDescription>
+										Escolha um estudante na lista acima para ver os registros e
+										relatos.
+									</EmptyDescription>
+								</EmptyHeader>
+							</Empty>
+						</CardContent>
+					</Card>
+				)}
 
 			{selectedStudent && (
 				<Tabs value={tab} onValueChange={setTab}>
@@ -510,7 +538,7 @@ export default function CouncilPage() {
 							<CardContent className="space-y-3">
 								{isLoadingRecords && <Skeleton className="h-20 w-full" />}
 								{isErrorRecords && (
-									<p className="text-sm text-muted-foreground">
+									<p role="alert" className="text-sm text-muted-foreground">
 										Não foi possível carregar os registros.
 									</p>
 								)}
@@ -635,7 +663,7 @@ export default function CouncilPage() {
 							<CardContent className="space-y-3">
 								{isLoadingReports && <p>Carregando relatos...</p>}
 								{isErrorReports && (
-									<p className="text-sm text-muted-foreground">
+									<p role="alert" className="text-sm text-muted-foreground">
 										Não foi possível carregar os relatos gerais.
 									</p>
 								)}

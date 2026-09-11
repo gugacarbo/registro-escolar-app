@@ -20,7 +20,7 @@ export function ClassOffersPanel({
 	classId: string;
 	turmaName?: string;
 }) {
-	const { data: offers, isLoading } = useOffers(classId);
+	const { data: offers, isLoading, isError, error } = useOffers(classId);
 
 	return (
 		<PageSection
@@ -34,7 +34,13 @@ export function ClassOffersPanel({
 				/>
 			}
 		>
-			{isLoading ? (
+			{isError ? (
+				<p role="alert" className="text-sm text-destructive">
+					{error instanceof Error
+						? error.message
+						: "Falha ao carregar ofertas da turma"}
+				</p>
+			) : isLoading ? (
 				<div className="space-y-2">
 					<Skeleton className="h-16 w-full" />
 				</div>

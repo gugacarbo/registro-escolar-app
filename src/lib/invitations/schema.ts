@@ -2,8 +2,9 @@ import { z } from "zod";
 
 export const createInvitationSchema = z.object({
 	email: z
-		.string({ required_error: "Email obrigatório" })
+		.string()
 		.trim()
+		.min(1, "Email obrigatório")
 		.toLowerCase()
 		.email("Email inválido"),
 });

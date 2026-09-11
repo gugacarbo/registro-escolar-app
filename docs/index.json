@@ -593,5 +593,18 @@
     ],
     "superseded-by": null,
     "implemented-by": []
+  },
+  {
+    "id": "SPEC-0015",
+    "path": "docs/specs/0015-cadastro-por-convite.md",
+    "layer": "specs",
+    "title": "Cadastro por convite",
+    "status": "accepted",
+    "builds-on": [
+      "ADR-0008",
+      "ADR-0020"
+    ],
+    "superseded-by": null,
+    "implemented-by": []
   }
 ]

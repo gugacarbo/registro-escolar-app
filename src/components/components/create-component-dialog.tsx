@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { toast } from "sonner";
 
 import {
 	Dialog,
@@ -45,6 +46,7 @@ export function CreateComponentDialog({
 		setServerError(null);
 		try {
 			await createComponent.mutateAsync({ name: values.nome });
+			toast.success("Componente cadastrado");
 			handleOpenChange(false);
 			onSuccess?.();
 		} catch (error) {

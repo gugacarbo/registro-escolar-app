@@ -8,6 +8,7 @@ import {
 	createMeeting,
 	createStudent,
 	startMeeting,
+	transitionMeetingResponse,
 } from "./fixtures/api";
 import { expect, test, type ApiContext } from "./fixtures/test";
 
@@ -201,6 +202,62 @@ test.describe("SPEC-0011 histórico do estudante", () => {
 		expect(byCategory.eventos.map((event) => event.texto)).toContain(
 			"Registro com categoria",
 		);
+	});
+
+	test("exibe linha do tempo no perfil do estudante e limpar filtros restaura", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const student = await createStudent(apiContext, "Estudante Linha do Tempo UI");
+		const klass = await createClass(apiContext, "Turma Linha do Tempo UI", "2026");
+		await createEnrollment(apiContext, {
+			estudanteId: student.id,
+			turmaId: klass.id,
+			dataInicio: "2026-01-01",
+		});
+		const meeting = await createMeeting(apiContext, {
+			title: "Reunião Linha do Tempo UI",
+			heldAt: "2026-05-10",
+			classIds: [klass.id],
+			participants: [],
+		});
+		await startMeeting(apiContext, meeting.id);
+		await createLinkedRecord(
+			apiContext,
+			meeting.id,
+			student.id,
+			"Registro na linha do tempo UI",
+		);
+		const finish = await transitionMeetingResponse(
+			apiContext,
+			meeting.id,
+			"finalize",
+		);
+		expect(finish.status).toBe(200);
+
+		await page.goto(`/students/${student.id}`);
+		await expect(
+			page.getByRole("heading", { name: "Linha do tempo", exact: true }),
+		).toBeVisible();
+		await expect(
+			page.getByText("Registro na linha do tempo UI", { exact: true }),
+		).toBeVisible();
+
+		await page.getByLabel("Busca").fill("zzz-termo-inexistente-987");
+		await page.getByRole("button", { name: "Filtrar" }).click();
+		await expect(
+			page.getByText("Nenhum evento no histórico do estudante.", {
+				exact: true,
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByText("Registro na linha do tempo UI", { exact: true }),
+		).toBeHidden();
+
+		await page.getByRole("button", { name: "Limpar" }).click();
+		await expect(
+			page.getByText("Registro na linha do tempo UI", { exact: true }),
+		).toBeVisible();
 	});
 
 	test("relaciona reunião anterior ao contexto da turma na data", async ({

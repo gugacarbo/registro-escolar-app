@@ -66,6 +66,11 @@ vi.mock("#/hooks/general-reports/use-general-reports", () => ({
 vi.mock("#/components/meetings/transition-buttons", () => ({
 	TransitionButtons: () => <div />,
 }));
+vi.mock("sonner", () => ({
+	toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+import { toast } from "sonner";
 
 import CouncilPage from "./council";
 
@@ -93,8 +98,15 @@ function mockFetchComponents() {
 	);
 }
 
+// A seleção de estudante é explícita: sem clique na lista não há painel.
+async function selectStudent(user: ReturnType<typeof userEvent.setup>) {
+	await user.click(screen.getByRole("button", { name: "Selecionar João" }));
+}
+
 beforeEach(() => {
 	localStorage.clear();
+	vi.mocked(toast.success).mockReset();
+	vi.mocked(toast.error).mockReset();
 	mockFetchComponents();
 	mocks.useMeeting.mockReturnValue({
 		data: { id: "meeting-1", title: "Conselho", status: "in_progress" },
@@ -190,8 +202,10 @@ beforeEach(() => {
 });
 
 describe("CouncilPage", () => {
-	it("renderiza turmas, estudantes e registros com nova hierarquia", () => {
+	it("renderiza turmas, estudantes e registros com nova hierarquia", async () => {
+		const user = userEvent.setup();
 		renderPage();
+		await selectStudent(user);
 		expect(
 			screen.getByRole("heading", { name: "Conselho de classe" }),
 		).toBeInTheDocument();
@@ -263,6 +277,7 @@ describe("CouncilPage", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("button", { name: "Novo registro" }));
 		expect(
 			screen.getByRole("dialog", { name: /Novo registro de João/ }),
@@ -279,15 +294,18 @@ describe("CouncilPage", () => {
 				incluirNaAta: true,
 			}),
 		);
+		expect(toast.success).toHaveBeenCalledWith("Registro criado");
 	});
 
-	it("exibe empty state com CTA quando sem registros", () => {
+	it("exibe empty state com CTA quando sem registros", async () => {
+		const user = userEvent.setup();
 		mocks.useMeetingStudentRecords.mockReturnValue({
 			data: { records: [] },
 			isLoading: false,
 			isError: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		expect(
 			screen.getByText("Nenhum registro para este estudante"),
 		).toBeInTheDocument();
@@ -304,6 +322,7 @@ describe("CouncilPage", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		const toggle = screen.getByRole("switch", {
 			name: 'Remover registro "Contexto" na ata',
 		});
@@ -322,6 +341,7 @@ describe("CouncilPage", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		const editButtons = screen.getAllByRole("button", { name: "Editar" });
 		await user.click(editButtons[0]);
 		await waitFor(() =>
@@ -338,14 +358,17 @@ describe("CouncilPage", () => {
 		expect(mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({ recordId: "record-1" }),
 		);
+		expect(toast.success).toHaveBeenCalledWith("Registro atualizado");
 	});
 
-	it("bloqueia edição quando a reunião está finalizada", () => {
+	it("bloqueia edição quando a reunião está finalizada", async () => {
+		const user = userEvent.setup();
 		mocks.useMeeting.mockReturnValue({
 			data: { id: "meeting-1", title: "Conselho", status: "finished" },
 			isLoading: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		expect(
 			screen.getByText(/Reunião finalizada — reabra para editar registros/i),
 		).toBeInTheDocument();
@@ -367,34 +390,37 @@ describe("CouncilPage", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
 		expect(screen.getByText("Relato geral")).toBeInTheDocument();
 		await user.type(screen.getAllByLabelText("Texto *")[0], "Novo relato");
 		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
 		await waitFor(() => expect(createReport).toHaveBeenCalled());
+		expect(toast.success).toHaveBeenCalledWith("Relato criado");
 	});
 
 	it("abre edição de relato geral e exibe estados de carregamento/erro", async () => {
 		const user = userEvent.setup();
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
 		await user.click(screen.getByRole("button", { name: "Editar" }));
 		expect(
 			screen.getByRole("button", { name: "Salvar relato" }),
 		).toBeInTheDocument();
+
+		// Alterna de aba para forçar o re-render de estados do relato.
+		async function toggleToReportsTab() {
+			await user.click(screen.getByRole("tab", { name: /Registros de João/ }));
+			await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		}
+
 		mocks.useGeneralReports.mockReturnValue({
 			data: [],
 			isLoading: true,
 			isError: false,
 		});
-		const { rerender } = renderPage();
-		rerender(
-			<QueryClientProvider client={new QueryClient()}>
-				<CouncilPage />
-			</QueryClientProvider>,
-		);
-		const tabs = screen.getAllByRole("tab", { name: /Relatos gerais/ });
-		await user.click(tabs[tabs.length - 1]);
+		await toggleToReportsTab();
 		expect(screen.getAllByText("Carregando relatos...").length).toBeGreaterThan(
 			0,
 		);
@@ -403,31 +429,17 @@ describe("CouncilPage", () => {
 			isLoading: false,
 			isError: true,
 		});
-		{
-			const { unmount } = renderPage();
-			const errorTabs = screen.getAllByRole("tab", {
-				name: /Relatos gerais/,
-			});
-			await user.click(errorTabs[errorTabs.length - 1]);
-			expect(
-				screen.getByText("Não foi possível carregar os relatos gerais."),
-			).toBeInTheDocument();
-			unmount();
-		}
+		await toggleToReportsTab();
+		expect(
+			screen.getByText("Não foi possível carregar os relatos gerais."),
+		).toBeInTheDocument();
 		mocks.useGeneralReports.mockReturnValue({
 			data: [],
 			isLoading: false,
 			isError: false,
 		});
-		{
-			const { unmount } = renderPage();
-			const emptyTabs = screen.getAllByRole("tab", {
-				name: /Relatos gerais/,
-			});
-			await user.click(emptyTabs[emptyTabs.length - 1]);
-			expect(screen.getByText("Nenhum relato geral")).toBeInTheDocument();
-			unmount();
-		}
+		await toggleToReportsTab();
+		expect(screen.getByText("Nenhum relato geral")).toBeInTheDocument();
 	});
 
 	it("exibe vazio de turmas, loading e vazio de busca de estudantes", () => {
@@ -668,13 +680,15 @@ describe("CouncilPage estados adicionais", () => {
 		);
 	});
 
-	it("exibe loading/erro/vazio de registros e erro de servidor", () => {
+	it("exibe loading/erro/vazio de registros e erro de servidor", async () => {
+		const user = userEvent.setup();
 		mocks.useMeetingStudentRecords.mockReturnValue({
 			data: undefined,
 			isLoading: true,
 			isError: false,
 		});
 		const { rerender } = renderPage();
+		await selectStudent(user);
 		expect(
 			screen.queryByText(/Nenhum registro para este estudante/),
 		).not.toBeInTheDocument();
@@ -706,15 +720,30 @@ describe("CouncilPage estados adicionais", () => {
 		).toBeInTheDocument();
 	});
 
-	it("mostra mensagem específica para rascunho", () => {
+	it("mostra mensagem específica para rascunho", async () => {
+		const user = userEvent.setup();
 		mocks.useMeeting.mockReturnValue({
 			data: { id: "meeting-1", title: "Conselho", status: "draft" },
 			isLoading: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		expect(
 			screen.getByText("Inicie a reunião para criar registros vinculados."),
 		).toBeInTheDocument();
+	});
+
+	it("exige seleção explícita de estudante antes de exibir o painel", () => {
+		renderPage();
+		expect(
+			screen.getByText("Nenhum estudante selecionado"),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("tab", { name: /Registros de João/ }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Novo registro" }),
+		).not.toBeInTheDocument();
 	});
 });
 
@@ -729,6 +758,7 @@ describe("CouncilPage erros de mutação", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
 		await user.click(screen.getByRole("button", { name: "Editar" }));
 		await user.click(screen.getByRole("button", { name: "Salvar relato" }));
@@ -748,6 +778,7 @@ describe("CouncilPage erros de mutação", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
 		await user.type(screen.getAllByLabelText("Texto *")[0], "Relato com erro");
 		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
@@ -765,6 +796,7 @@ describe("CouncilPage erros de mutação", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("button", { name: "Novo registro" }));
 		await user.type(screen.getByLabelText("Texto *"), "Novo registro");
 		await user.click(
@@ -786,6 +818,7 @@ describe("CouncilPage mutações de relato bem-sucedidas", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
 		await user.type(screen.getAllByLabelText("Texto *")[0], "Relato novo");
 		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
@@ -800,10 +833,12 @@ describe("CouncilPage mutações de relato bem-sucedidas", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
 		await user.click(screen.getByRole("button", { name: "Editar" }));
 		await user.click(screen.getByRole("button", { name: "Salvar relato" }));
 		await waitFor(() => expect(updateReport).toHaveBeenCalled());
+		expect(toast.success).toHaveBeenCalledWith("Relato atualizado");
 		await waitFor(() =>
 			expect(
 				screen.queryByRole("button", { name: "Salvar relato" }),
@@ -823,6 +858,7 @@ describe("CouncilPage erros de registros", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		await user.click(screen.getByRole("button", { name: "Editar" }));
 		await user.click(screen.getByRole("button", { name: "Salvar registro" }));
 		await waitFor(() => expect(updateRecord).toHaveBeenCalled());
@@ -841,6 +877,7 @@ describe("CouncilPage erros de registros", () => {
 			isPending: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		const toggle = screen.getByRole("switch", {
 			name: 'Remover registro "Contexto" na ata',
 		});
@@ -853,7 +890,8 @@ describe("CouncilPage erros de registros", () => {
 });
 
 describe("CouncilPage variações de registro", () => {
-	it("rendera registro interno, sem matrícula e estados de turma", () => {
+	it("rendera registro interno, sem matrícula e estados de turma", async () => {
+		const user = userEvent.setup();
 		mocks.useMeetingClassStudents.mockReturnValue({
 			data: {
 				students: [
@@ -909,6 +947,7 @@ describe("CouncilPage variações de registro", () => {
 			isError: false,
 		});
 		renderPage();
+		await selectStudent(user);
 		expect(screen.getAllByText("Interno").length).toBeGreaterThan(1);
 		expect(screen.queryByText(/Matrícula/)).not.toBeInTheDocument();
 		expect(

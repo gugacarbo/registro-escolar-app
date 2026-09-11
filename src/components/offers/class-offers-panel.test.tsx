@@ -9,11 +9,14 @@ const mocks = vi.hoisted(() => ({
 	useOffers: vi.fn(),
 	mutateAsync: vi.fn(),
 	offerForm: vi.fn(),
+	toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock("#/components/offers/offer-form", () => ({
 	OfferForm: (props: Record<string, unknown>) => mocks.offerForm(props),
 }));
+
+vi.mock("sonner", () => ({ toast: mocks.toast }));
 
 vi.mock("#/hooks/offers/use-offers", () => ({
 	useOffers: mocks.useOffers,
@@ -64,6 +67,7 @@ function renderPanel() {
 
 beforeEach(() => {
 	mocks.mutateAsync.mockReset();
+	mocks.toast.success.mockReset();
 	mocks.useOffers.mockReturnValue({
 		data: [makeOffer()],
 		isLoading: false,
@@ -124,6 +128,20 @@ describe("ClassOffersPanel", () => {
 			componenteId: "comp-1",
 			professorIds: [],
 		});
+		expect(mocks.toast.success).toHaveBeenCalledWith("Oferta criada");
+	});
+
+	it("exibe aviso de erro quando a query de ofertas falha", () => {
+		mocks.useOffers.mockReturnValue({
+			isError: true,
+			error: new Error("Falha ao carregar ofertas da turma"),
+			isLoading: false,
+		});
+		renderPanel();
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Falha ao carregar ofertas da turma",
+		);
 	});
 
 	it("mantém o dialog aberto enquanto cria a oferta", async () => {

@@ -111,7 +111,7 @@ function MeetingStudentsPage() {
 			)}
 
 			{isError && classId && (
-				<p className="text-sm text-muted-foreground">
+				<p role="alert" className="text-sm text-muted-foreground">
 					Esta turma não participa desta reunião ou não pôde ser carregada.
 				</p>
 			)}
@@ -139,9 +139,9 @@ function MeetingStudentsPage() {
 					</div>
 
 					{isComplete && (
-						<p className="text-sm font-medium">
-							Todas as turmas foram concluídas: progresso de 100%. Revise os
-							registros e encerre a reunião.
+						<p role="status" className="text-sm font-medium">
+							Todos os estudantes desta turma foram concluídos: progresso de
+							100%. Revise os registros e encerre a reunião.
 						</p>
 					)}
 

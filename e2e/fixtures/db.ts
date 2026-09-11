@@ -36,6 +36,7 @@ export function resetDatabase() {
 	try {
 		// Drop all application tables. Order matters due to FKs.
 		const tables = [
+			"invitation",
 			"verification",
 			"account",
 			"session",

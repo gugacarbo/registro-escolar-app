@@ -13,3 +13,12 @@ BETTER_AUTH_TRUSTED_ORIGINS=
 VITE_APP_TITLE="Registro Escolar"
 
 RESEND_API_KEY=re_
+# Remetente dos e-mails enviados pelo Resend
+EMAIL_FROM="Registro Escolar <onboarding@resend.dev>"
+
+# Database seeding (small | medium | large; opcional, padrão: medium)
+SEED_SCALE=medium
+
+# E2E/test tooling (opcionais; os comandos usam os valores padrão)
+E2E_BASE_URL=http://localhost:3001
+E2E_PERSIST_STATE=.wrangler/state/e2e

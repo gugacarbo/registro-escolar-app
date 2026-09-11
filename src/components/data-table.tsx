@@ -67,6 +67,8 @@ export type DataTableProps<TData> = {
 	retryLabel?: string;
 	ariaLabel?: string;
 	onRowClick?: (row: TData) => void;
+	/** Classes adicionais para a tabela (ex.: `table-fixed` para larguras estáveis). */
+	tableClassName?: string;
 };
 
 const INTERACTIVE_ROW_SELECTOR =
@@ -160,6 +162,7 @@ export function DataTable<TData>({
 	retryLabel = "Tentar novamente",
 	ariaLabel = "Tabela de resultados",
 	onRowClick,
+	tableClassName,
 }: DataTableProps<TData>) {
 	const totalPages = Math.max(1, Math.ceil(total / pageSize));
 	const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -167,7 +170,7 @@ export function DataTable<TData>({
 
 	return (
 		<div className="overflow-hidden rounded-xl border bg-card shadow-xs">
-			<Table aria-label={ariaLabel}>
+			<Table aria-label={ariaLabel} className={tableClassName}>
 				<TableHeader>
 					<TableRow className="bg-muted/60 hover:bg-muted/60">
 						{columns.map((column, index) => (

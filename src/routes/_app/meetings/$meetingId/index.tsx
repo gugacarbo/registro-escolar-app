@@ -18,6 +18,17 @@ import { useMemo, useState } from "react";
 import { EditMeetingDialog } from "#/components/meetings/edit-meeting-dialog";
 import { MeetingStatusBadge } from "#/components/meetings/meeting-status-badge";
 import { TransitionButtons } from "#/components/meetings/transition-buttons";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "#/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "#/components/ui/avatar";
 import { Badge } from "#/components/ui/badge";
 import {
@@ -138,6 +149,7 @@ export default function MeetingDetailPage() {
 	const canEdit =
 		!!meeting && canEditLinkedRecord(meeting.status as MeetingStatus);
 	const isDraft = meeting?.status === "draft";
+	const isApproved = preview.data?.approvalStatus === "aprovada";
 	const activeTemplate = templates.find((t) => t.id === meeting?.templateId);
 
 	async function handleAddParticipant() {
@@ -522,7 +534,7 @@ export default function MeetingDetailPage() {
 												{item.class?.name ?? item.classId}
 											</p>
 											<p className="text-xs text-muted-foreground">
-												{item.class?.academicPeriod ?? "2026"}
+												{item.class?.academicPeriod ?? "—"}
 												{item.class?.course ? ` · ${item.class.course}` : ""}
 												{item.class?.shift ? ` · ${item.class.shift}` : ""}
 											</p>
@@ -581,7 +593,7 @@ export default function MeetingDetailPage() {
 												)}
 											</div>
 											<p className="text-xs text-muted-foreground">
-												Período: {item.class?.academicPeriod ?? "2026"}
+												Período: {item.class?.academicPeriod ?? "—"}
 												{item.class?.shift
 													? ` · Turno ${item.class.shift}`
 													: ""}
@@ -725,12 +737,42 @@ export default function MeetingDetailPage() {
 									</CardDescription>
 								</div>
 								<div className="flex items-center gap-2">
-									<Button
-										onClick={() => generate.mutate({})}
-										disabled={generate.isPending || isDraft}
-									>
-										{generate.isPending ? "Gerando..." : "Gerar nova versão"}
-									</Button>
+									{isApproved ? (
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<Button disabled={generate.isPending || isDraft}>
+													{generate.isPending
+														? "Gerando..."
+														: "Gerar nova versão"}
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>
+														Gerar nova versão?
+													</AlertDialogTitle>
+													<AlertDialogDescription>
+														Gerar nova versão vai reabrir a aprovação da ata.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancelar</AlertDialogCancel>
+													<AlertDialogAction
+														onClick={() => generate.mutate({})}
+													>
+														Gerar nova versão
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+									) : (
+										<Button
+											onClick={() => generate.mutate({})}
+											disabled={generate.isPending || isDraft}
+										>
+											{generate.isPending ? "Gerando..." : "Gerar nova versão"}
+										</Button>
+									)}
 									<Link to="/minutes">
 										<Button variant="outline">Ir para Atas</Button>
 									</Link>
@@ -770,7 +812,10 @@ export default function MeetingDetailPage() {
 													: "secondary"
 											}
 										>
-											Status: {preview.data.approvalStatus}
+											Status:{" "}
+											{preview.data.approvalStatus === "aprovada"
+												? "Aprovada"
+												: "Pendente de aprovação"}
 										</Badge>
 									</div>
 									<pre className="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-lg border bg-muted/40 p-4 font-mono text-xs leading-relaxed text-foreground">

@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, sql } from "drizzle-orm";
+import { and, desc, eq, gt } from "drizzle-orm";
 
 import type { DB } from "#/db";
 import { invitation, user } from "#/db/schema";
@@ -21,36 +21,26 @@ export async function countPendingInvitationsByUser(
 	userId: string,
 ): Promise<number> {
 	const now = new Date();
-	const result = await db
-		.select({ count: sql<number>`count(*)` })
-		.from(invitation)
-		.where(
-			and(
-				eq(invitation.invitedById, userId),
-				eq(invitation.status, "pending"),
-				gt(invitation.expiresAt, now),
-			),
-		)
-		.get();
-
-	return Number(result?.count ?? 0);
+	return db.$count(
+		invitation,
+		and(
+			eq(invitation.invitedById, userId),
+			eq(invitation.status, "pending"),
+			gt(invitation.expiresAt, now),
+		),
+	);
 }
 
+/**
+ * Retorna true quando o cadastro inicial já foi concluído. A verificação
+ * considera qualquer usuário existente, não apenas o administrador
+ * permanente, para não reabrir o cadastro livre em bases legadas.
+ *
+ * Seleciona somente o identificador para que o endpoint continue funcionando
+ * enquanto uma base legada ainda não recebeu as colunas de papéis.
+ */
 export async function hasPermanentAdmin(db: DB): Promise<boolean> {
-	const admin = await db
-		.select({ id: user.id })
-		.from(user)
-		.where(eq(user.isPermanentAdmin, true))
-		.limit(1)
-		.get();
-
-	if (admin) return true;
-
-	const anyUser = await db
-		.select({ id: user.id })
-		.from(user)
-		.limit(1)
-		.get();
+	const anyUser = await db.select({ id: user.id }).from(user).limit(1).get();
 
 	return Boolean(anyUser);
 }
@@ -68,12 +58,9 @@ export async function createInvitation(
 ) {
 	const normalizedEmail = email.trim().toLowerCase();
 
-	const existingUser = await db
-		.select({ id: user.id })
-		.from(user)
-		.where(eq(user.email, normalizedEmail))
-		.limit(1)
-		.get();
+	const existingUser = await db.query.user.findFirst({
+		where: eq(user.email, normalizedEmail),
+	});
 
 	if (existingUser) {
 		throw new Error("Este e-mail já possui uma conta cadastrada.");
@@ -91,23 +78,29 @@ export async function createInvitation(
 	const token = crypto.randomUUID();
 	const id = crypto.randomUUID();
 
-	const newInvitation = await db
-		.insert(invitation)
-		.values({
-			id,
-			email: normalizedEmail,
-			invitedById,
-			token,
-			status: "pending",
-			expiresAt,
-			createdAt: now,
-		})
-		.returning()
-		.get();
+	await db.insert(invitation).values({
+		id,
+		email: normalizedEmail,
+		invitedById,
+		token,
+		status: "pending",
+		expiresAt,
+		createdAt: now,
+	});
+
+	const created = await db.query.invitation.findFirst({
+		where: eq(invitation.id, id),
+	});
+
+	if (!created) {
+		throw new Error("Erro ao registrar convite.");
+	}
 
 	const baseURL =
 		appBaseURL ||
-		(typeof process !== "undefined" ? process.env.BETTER_AUTH_URL : undefined) ||
+		(typeof process !== "undefined"
+			? process.env.BETTER_AUTH_URL
+			: undefined) ||
 		"http://localhost:3001";
 	const inviteUrl = `${baseURL.replace(/\/+$/, "")}/register?token=${token}`;
 
@@ -120,20 +113,16 @@ export async function createInvitation(
 			from: resendFrom,
 		});
 	} catch (error) {
-		// Log error if email fails, but keep created invitation so it can be copied or resent
 		console.error("Falha ao enviar e-mail via Resend:", error);
 	}
 
-	return newInvitation;
+	return created;
 }
 
 export async function findInvitationByToken(db: DB, token: string) {
-	const inv = await db
-		.select()
-		.from(invitation)
-		.where(eq(invitation.token, token))
-		.limit(1)
-		.get();
+	const inv = await db.query.invitation.findFirst({
+		where: eq(invitation.token, token),
+	});
 
 	if (!inv) return null;
 
@@ -189,32 +178,30 @@ export async function validateInviteForRegistration(
 }
 
 export async function markInvitationAccepted(db: DB, token: string) {
-	return db
+	await db
 		.update(invitation)
 		.set({
 			status: "accepted",
 			acceptedAt: new Date(),
 		})
-		.where(eq(invitation.token, token))
-		.returning()
-		.get();
+		.where(eq(invitation.token, token));
+
+	return db.query.invitation.findFirst({
+		where: eq(invitation.token, token),
+	});
 }
 
 export async function listInvitationsByUser(db: DB, userId: string) {
-	return db
-		.select()
-		.from(invitation)
-		.where(eq(invitation.invitedById, userId))
-		.orderBy(desc(invitation.createdAt));
+	return db.query.invitation.findMany({
+		where: eq(invitation.invitedById, userId),
+		orderBy: [desc(invitation.createdAt)],
+	});
 }
 
 export async function revokeInvitation(db: DB, id: string, userId: string) {
-	const inv = await db
-		.select()
-		.from(invitation)
-		.where(and(eq(invitation.id, id), eq(invitation.invitedById, userId)))
-		.limit(1)
-		.get();
+	const inv = await db.query.invitation.findFirst({
+		where: and(eq(invitation.id, id), eq(invitation.invitedById, userId)),
+	});
 
 	if (!inv) {
 		throw new Error("Convite não encontrado.");
@@ -224,10 +211,12 @@ export async function revokeInvitation(db: DB, id: string, userId: string) {
 		throw new Error("Apenas convites pendentes podem ser cancelados.");
 	}
 
-	return db
+	await db
 		.update(invitation)
 		.set({ status: "revoked" })
-		.where(eq(invitation.id, id))
-		.returning()
-		.get();
+		.where(eq(invitation.id, id));
+
+	return db.query.invitation.findFirst({
+		where: eq(invitation.id, id),
+	});
 }

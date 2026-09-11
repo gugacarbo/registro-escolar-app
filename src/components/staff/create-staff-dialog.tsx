@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { toast } from "sonner";
 
 import { StaffForm, type StaffFormValues } from "#/components/staff/staff-form";
 import {
@@ -44,6 +45,7 @@ export function CreateStaffDialog({
 		setServerError(null);
 		try {
 			await createStaff.mutateAsync(values);
+			toast.success("Servidor cadastrado");
 			handleOpenChange(false);
 			onSuccess?.();
 		} catch (error) {

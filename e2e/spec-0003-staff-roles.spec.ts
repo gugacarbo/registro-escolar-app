@@ -39,7 +39,10 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		const staff = await createStaff(apiContext, "Servidor Linha Clicável");
 
 		await page.goto("/staff");
-		const cell = page.getByRole("cell", { name: "Servidor Linha Clicável" });
+		const cell = page.getByRole("cell", {
+			name: "Servidor Linha Clicável",
+			exact: true,
+		});
 		await expect(cell).toBeVisible();
 		await cell.click();
 		await expect(page).toHaveURL(new RegExp(`/staff/${staff.id}`));

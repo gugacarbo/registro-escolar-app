@@ -1,12 +1,15 @@
 import {
 	baseURL,
+	addParticipant,
 	createClass,
 	createEnrollment,
 	createIndependentRecord,
 	createLinkedRecord,
 	createMeeting,
+	createRole,
 	createStaff,
 	createStudent,
+	previewMinute,
 	setRecordInclusion,
 	startMeeting,
 	transitionMeetingResponse,
@@ -168,6 +171,134 @@ test.describe("SPEC-0007 registros de estudante", () => {
 		).toBe("Contexto toggle");
 
 		expect(records.find((item) => item.id === record.id)?.texto).toBe("Contexto toggle");
+	});
+
+	async function setupCouncilMeeting(apiContext: ApiContext, suffix: string) {
+		const klass = await createClass(apiContext, `Turma Conselho ${suffix}`, "2026");
+		const student = await createStudent(apiContext, `Estudante ${suffix}`);
+		await createEnrollment(apiContext, {
+			estudanteId: student.id,
+			turmaId: klass.id,
+			dataInicio: "2026-01-01",
+		});
+		const meeting = await createMeeting(apiContext, {
+			title: `Conselho ${suffix}`,
+			heldAt: "2026-05-10",
+			classIds: [klass.id],
+			participants: [],
+		});
+		await startMeeting(apiContext, meeting.id);
+		const staff = await createStaff(apiContext, `Servidor ${suffix}`);
+		const role = await createRole(apiContext, `Papel ${suffix}`);
+		await addParticipant(apiContext, meeting.id, staff.id, role.id);
+		return { klass, student, meeting };
+	}
+
+	test("exige seleção explícita de estudante e cria registro vinculado pela UI", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const { student, meeting } = await setupCouncilMeeting(
+			apiContext,
+			"Criação UICouncil",
+		);
+		await page.goto(`/meetings/${meeting.id}/council`);
+
+		await expect(
+			page.getByText("Nenhum estudante selecionado", { exact: true }),
+		).toBeVisible();
+
+		await page
+			.getByRole("button", { name: `Selecionar ${student.name}` })
+			.click();
+		await expect(
+			page.getByText(`Registros de ${student.name}`, { exact: true }),
+		).toBeVisible();
+
+		await page.getByRole("button", { name: "Novo registro" }).click();
+		const dialog = page.getByRole("dialog");
+		const texto = dialog.getByRole("textbox", { name: "Texto *" });
+		await texto.fill("Fato observado no conselho de classe");
+		await dialog.getByRole("button", { name: "Adicionar registro" }).click();
+
+		await expect(page.getByText("Registro criado")).toBeVisible();
+		await expect(
+			page.getByText("Fato observado no conselho de classe", { exact: true }),
+		).toBeVisible();
+	});
+
+	test("edita registro vinculado pela UI", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const { student, meeting } = await setupCouncilMeeting(
+			apiContext,
+			"Edição UICouncil",
+		);
+		await createLinkedRecord(apiContext, meeting.id, student.id, "Texto original");
+
+		await page.goto(`/meetings/${meeting.id}/council`);
+		await page
+			.getByRole("button", { name: `Selecionar ${student.name}` })
+			.click();
+		await expect(page.getByText("Texto original", { exact: true })).toBeVisible();
+
+		await page.getByRole("button", { name: "Editar" }).click();
+		const editField = page.getByRole("textbox", { name: "Texto *" });
+		await expect(editField).toHaveValue("Texto original");
+		await editField.fill("Texto corrigido no conselho");
+		await page.getByRole("button", { name: "Salvar registro" }).click();
+
+		await expect(page.getByText("Registro atualizado")).toBeVisible();
+		await expect(
+			page.getByText("Texto corrigido no conselho", { exact: true }),
+		).toBeVisible();
+		await expect(page.getByText("Texto original", { exact: true })).toBeHidden();
+	});
+
+	test("toggle de inclusão de contexto independente pela UI", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const { klass, student, meeting } = await setupCouncilMeeting(
+			apiContext,
+			"Toggle UICouncil",
+		);
+		const contextRecord = await createIndependentRecord(
+			apiContext,
+			student.id,
+			"Contexto independente toggle",
+			{ turmaId: klass.id },
+		);
+
+		await page.goto(`/meetings/${meeting.id}/council`);
+		await page
+			.getByRole("button", { name: `Selecionar ${student.name}` })
+			.click();
+		await expect(
+			page.getByText(contextRecord.texto, { exact: true }),
+		).toBeVisible();
+		await expect(page.getByText("Histórico", { exact: true })).toBeVisible();
+		await expect(page.getByText("Na ata", { exact: true })).toBeVisible();
+
+		let preview = await previewMinute(apiContext, meeting.id);
+		expect(preview.content).toContain(contextRecord.texto);
+
+		await page
+			.getByRole("switch", { name: /na ata$/ })
+			.click();
+
+		await expect(page.getByText("Interno", { exact: true })).toBeVisible();
+		preview = await previewMinute(apiContext, meeting.id);
+		expect(preview.content).not.toContain(contextRecord.texto);
+
+		await page
+			.getByRole("switch", { name: /na ata$/ })
+			.click();
+
+		await expect(page.getByText("Na ata", { exact: true })).toBeVisible();
+		preview = await previewMinute(apiContext, meeting.id);
+		expect(preview.content).toContain(contextRecord.texto);
 	});
 
 	test("edita registro vinculado enquanto em andamento e rejeita após finalizar", async ({

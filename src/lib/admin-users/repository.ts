@@ -1,4 +1,4 @@
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, eq, like, or, sql } from "drizzle-orm";
 
 import type { DB } from "#/db";
 import { account, session, user } from "#/db/schema";
@@ -48,9 +48,9 @@ export async function updateUserRole(db: DB, id: string, role: UserRole) {
 }
 
 export async function deleteUserWithCascade(db: DB, id: string) {
-	await db.transaction(async (tx) => {
-		await tx.delete(session).where(eq(session.userId, id));
-		await tx.delete(account).where(eq(account.userId, id));
-		await tx.delete(user).where(eq(user.id, id));
-	});
+	// D1 não expõe .transaction(): deletes sequenciais, com FK cascade como
+	// rede de segurança (mesma convenção dos demais repositórios).
+	await db.delete(session).where(eq(session.userId, id));
+	await db.delete(account).where(eq(account.userId, id));
+	await db.delete(user).where(eq(user.id, id));
 }

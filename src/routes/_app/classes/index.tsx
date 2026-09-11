@@ -36,6 +36,16 @@ const columns = [
 		header: "Estudantes ativos",
 		cell: (classRow: ClassListItem) => classRow.activeStudentCount,
 	},
+	{
+		header: "Ofertas",
+		cell: (classRow: ClassListItem) => (
+			<Button asChild variant="ghost" size="sm">
+				<Link to="/classes/$id/offers" params={{ id: classRow.id }}>
+					Ofertas
+				</Link>
+			</Button>
+		),
+	},
 ];
 
 export default function ClassesPage() {

@@ -13,7 +13,7 @@ export function generateTestUser(): TestUser {
 	};
 }
 
-export async function signUpTestUser(user = generateTestUser()) {
+export async function signUpTestUser(user = generateTestUser(), inviteToken?: string) {
 	const response = await fetch(`${baseURL}/api/auth/sign-up/email`, {
 		method: "POST",
 		headers: {
@@ -24,6 +24,7 @@ export async function signUpTestUser(user = generateTestUser()) {
 			email: user.email,
 			password: user.password,
 			name: user.name,
+			...(inviteToken ? { token: inviteToken } : {}),
 		}),
 	});
 

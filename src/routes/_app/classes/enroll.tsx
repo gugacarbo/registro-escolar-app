@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { EnrollmentFormValues } from "#/components/enrollments/enrollment-form";
 import { EnrollmentForm } from "#/components/enrollments/enrollment-form";
 import { Button } from "#/components/ui/button";
@@ -26,6 +27,7 @@ export function EnrollPage() {
 				...(values.dataTermino ? { dataTermino: values.dataTermino } : {}),
 				status: values.status,
 			});
+			toast.success("Estudante matriculado");
 			void navigate({
 				to: "/classes/$id/students",
 				params: { id: values.turmaId },
@@ -52,3 +54,5 @@ export function EnrollPage() {
 		</PageShell>
 	);
 }
+
+export default EnrollPage;

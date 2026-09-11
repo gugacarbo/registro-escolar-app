@@ -3,6 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	pathname: "/",
+	useSession: vi.fn(),
+}));
+
+vi.mock("#/lib/auth-client", () => ({
+	authClient: {
+		useSession: mocks.useSession,
+	},
+}));
+
+vi.mock("#/lib/auth/session-context", () => ({
+	useAuthSession: () => mocks.useSession()?.data ?? null,
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -37,8 +48,9 @@ import { SidebarProvider } from "#/components/ui/sidebar";
 
 import { AppSidebar } from "./app-sidebar";
 
-function renderSidebar(pathname = "/") {
+function renderSidebar(pathname = "/", session: unknown = null) {
 	mocks.pathname = pathname;
+	mocks.useSession.mockReturnValue({ data: session, isPending: false });
 	return render(
 		<SidebarProvider>
 			<AppSidebar />
@@ -46,9 +58,25 @@ function renderSidebar(pathname = "/") {
 	);
 }
 
+function adminSession() {
+	return {
+		session: { id: "session-1", userId: "admin-1" },
+		user: { id: "admin-1", name: "Admin", email: "admin@e.com", role: "admin" },
+	};
+}
+
+function userSession() {
+	return {
+		session: { id: "session-1", userId: "user-1" },
+		user: { id: "user-1", name: "Comum", email: "comum@e.com", role: "user" },
+	};
+}
+
 describe("AppSidebar", () => {
 	beforeEach(() => {
 		mocks.pathname = "/";
+		mocks.useSession.mockReset();
+		mocks.useSession.mockReturnValue({ data: null, isPending: false });
 	});
 
 	it("exibe os botões de navegação apontando para as listas", () => {
@@ -82,6 +110,25 @@ describe("AppSidebar", () => {
 			"href",
 			"/minutes",
 		);
+		expect(screen.getAllByRole("link")).toHaveLength(8);
+	});
+
+	it("exibe Usuários apenas para sessão admin", () => {
+		renderSidebar("/", adminSession());
+
+		expect(screen.getByRole("link", { name: "Usuários" })).toHaveAttribute(
+			"href",
+			"/admin/users",
+		);
+		expect(screen.getAllByRole("link")).toHaveLength(9);
+	});
+
+	it("oculta Usuários para sessão de user comum", () => {
+		renderSidebar("/", userSession());
+
+		expect(
+			screen.queryByRole("link", { name: "Usuários" }),
+		).not.toBeInTheDocument();
 		expect(screen.getAllByRole("link")).toHaveLength(8);
 	});
 

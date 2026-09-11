@@ -1,4 +1,4 @@
-import { signInTestUser, signUpTestUser, type TestUser } from "./auth";
+import { generateTestUser, signInTestUser, signUpTestUser, type TestUser } from "./auth";
 
 export const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3001";
 
@@ -362,4 +362,83 @@ export async function setRecordInclusion(ctx: ApiContext, meetingId: string, stu
 	const res = await api("PATCH", `/api/meetings/${meetingId}/students/${studentId}/records/${recordId}/include`, ctx.cookies, { incluir });
 	if (!res.ok) throw new Error(`setRecordInclusion failed: ${res.status}`);
 	return res.json();
+}
+
+export type AdminUser = {
+	id: string;
+	name: string;
+	email: string;
+	role: string;
+	isPermanentAdmin: boolean;
+	createdAt: string;
+	updatedAt: string;
+};
+
+export async function createInvitation(
+	ctx: ApiContext,
+	email: string,
+): Promise<{ token: string }> {
+	const res = await api("POST", "/api/invitations", ctx.cookies, { email });
+	if (!res.ok) throw new Error(`createInvitation failed: ${res.status}`);
+	return res.json();
+}
+
+export async function createSecondaryUserContext(admin?: ApiContext): Promise<ApiContext> {
+	if (!admin) return createAuthenticatedContext();
+	const user = generateTestUser();
+	const invitation = await createInvitation(admin, user.email);
+	await signUpTestUser(user, invitation.token);
+	const response = await signInTestUser(user);
+	if (!response.ok) {
+		throw new Error(`Failed to sign in via API: ${response.status}`);
+	}
+	const cookies = response.headers.get("set-cookie") ?? "";
+	if (!cookies) {
+		throw new Error("No set-cookie header returned from sign-in");
+	}
+	return { cookies, user };
+}
+
+export function adminApiRequest(
+	method: string,
+	path: string,
+	cookies: string,
+	body?: unknown,
+) {
+	const headers: Record<string, string> = { Cookie: cookies };
+	const init: RequestInit = { method, headers };
+	if (body !== undefined) {
+		headers["Content-Type"] = "application/json";
+		init.body = JSON.stringify(body);
+	}
+	return fetch(`${baseURL}${path}`, init);
+}
+
+export async function listAdminUsers(cookies: string) {
+	return adminApiRequest(
+		"GET",
+		"/api/admin/users?page=1&pageSize=50",
+		cookies,
+	);
+}
+
+export async function updateAdminUserRole(
+	cookies: string,
+	userId: string,
+	role: string,
+) {
+	return adminApiRequest("PATCH", `/api/admin/users/${userId}`, cookies, {
+		role,
+	});
+}
+
+export async function deleteAdminUser(cookies: string, userId: string) {
+	return adminApiRequest("DELETE", `/api/admin/users/${userId}`, cookies);
+}
+
+export async function listAdminUsersData(cookies: string) {
+	const res = await listAdminUsers(cookies);
+	if (!res.ok) throw new Error(`listAdminUsers failed: ${res.status}`);
+	const body = (await res.json()) as { data: AdminUser[] };
+	return body.data;
 }

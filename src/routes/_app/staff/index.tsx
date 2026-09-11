@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { DataTable } from "#/components/data-table";
 import { CreateStaffDialog } from "#/components/staff/create-staff-dialog";
+import { StaffRowActions } from "#/components/staff/staff-row-actions";
 import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
 import { SearchInput } from "#/components/ui/search-input";
@@ -22,6 +23,11 @@ const columns = [
 	{
 		header: "Email",
 		cell: (member: StaffMember) => member.email ?? "—",
+	},
+	{
+		header: "Ações",
+		cell: (member: StaffMember) => <StaffRowActions member={member} />,
+		align: "right" as const,
 	},
 ];
 

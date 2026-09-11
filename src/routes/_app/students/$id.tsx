@@ -4,11 +4,13 @@ import {
 	HashIcon,
 	IdCardIcon,
 	PencilIcon,
+	PlusIcon,
 	Users2Icon,
 } from "lucide-react";
 import { useState } from "react";
 import { EnrollmentStatusBadge } from "#/components/enrollments/enrollment-status-badge";
 import { StudentHistoryPanel } from "#/components/history/student-history-panel";
+import { CreateIndependentRecordDialog } from "#/components/students/create-independent-record-dialog";
 import {
 	StudentForm,
 	type StudentFormValues,
@@ -196,6 +198,19 @@ export default function StudentDetailPage() {
 						</div>
 					) : isLoading ? (
 						<Skeleton className="h-4 w-64" />
+					) : undefined
+				}
+				actions={
+					student ? (
+						<CreateIndependentRecordDialog
+							studentId={student.id}
+							trigger={
+								<Button variant="outline" size="sm">
+									<PlusIcon className="mr-1.5 size-3.5" />
+									Novo registro
+								</Button>
+							}
+						/>
 					) : undefined
 				}
 			/>

@@ -2,6 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertCircleIcon, DownloadIcon, FileTextIcon } from "lucide-react";
 import { useState } from "react";
 
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "#/components/ui/alert-dialog";
 import { Badge } from "#/components/ui/badge";
 import {
 	Breadcrumb,
@@ -71,8 +81,10 @@ export default function MinuteDetailPage() {
 	const generate = useGenerateMinute(meetingId);
 	const approve = useApproveMinute(meetingId);
 	const [saved, setSaved] = useState(false);
+	const [confirmGenerate, setConfirmGenerate] = useState(false);
 
 	const isDraft = meeting?.status === "draft";
+	const isApproved = preview.data?.approvalStatus === "aprovada";
 
 	const approveForm = useForm<ApproveFormValues>({
 		defaultValues: { data: "", observacao: "" },
@@ -80,6 +92,15 @@ export default function MinuteDetailPage() {
 	const generateForm = useForm<GenerateFormValues>({
 		defaultValues: { observacao: "" },
 	});
+
+	async function runGenerate() {
+		setSaved(false);
+		const values = generateForm.getValues();
+		await generate.mutateAsync({
+			observacao: values.observacao || undefined,
+		});
+		generateForm.reset();
+	}
 
 	if (isLoadingMeeting) {
 		return (
@@ -201,12 +222,11 @@ export default function MinuteDetailPage() {
 					<FormNative
 						className="space-y-3"
 						onSubmit={async () => {
-							setSaved(false);
-							const values = generateForm.getValues();
-							await generate.mutateAsync({
-								observacao: values.observacao || undefined,
-							});
-							generateForm.reset();
+							if (isApproved) {
+								setConfirmGenerate(true);
+								return;
+							}
+							await runGenerate();
 						}}
 					>
 						<FormField
@@ -230,6 +250,22 @@ export default function MinuteDetailPage() {
 						</FormSubmit>
 					</FormNative>
 				</Form>
+				<AlertDialog open={confirmGenerate} onOpenChange={setConfirmGenerate}>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Gerar nova versão?</AlertDialogTitle>
+							<AlertDialogDescription>
+								Gerar nova versão vai reabrir a aprovação da ata.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Cancelar</AlertDialogCancel>
+							<AlertDialogAction onClick={() => void runGenerate()}>
+								Gerar nova versão
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
 				{generate.error && (
 					<p role="alert" className="text-sm text-destructive">
 						{generate.error.message || "Falha ao gerar ata"}

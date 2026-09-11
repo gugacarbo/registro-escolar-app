@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({}),
+	ClientOnly: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 	Outlet: () => <div>conteúdo privado</div>,
 	useNavigate: () => mocks.navigate,
 	Link: ({
@@ -35,6 +36,10 @@ vi.mock("#/lib/auth-client", () => ({
 
 vi.mock("next-themes", () => ({
 	useTheme: () => ({ setTheme: mocks.setTheme }),
+}));
+
+vi.mock("#/components/invitations/invitation-dialog", () => ({
+	InvitationDialog: () => null,
 }));
 
 Object.defineProperty(window, "matchMedia", {

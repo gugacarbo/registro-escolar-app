@@ -83,4 +83,30 @@ describe("EnrollmentForm", () => {
 			undefined,
 		);
 	});
+
+	it("mostra o status em pt-BR e limita as opções para criação", async () => {
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+			fetchJson([], 0),
+		);
+		const user = userEvent.setup();
+		render(
+			<QueryClientProvider client={new QueryClient()}>
+				<EnrollmentForm onSubmit={vi.fn()} />
+			</QueryClientProvider>,
+		);
+
+		const statusLabel = (await screen.findByText("Status")) as HTMLElement;
+		const trigger = document.getElementById(
+			statusLabel.getAttribute("for") as string,
+		);
+		expect(trigger).not.toBeNull();
+		await user.click(trigger as Element);
+
+		expect(
+			await screen.findByRole("option", { name: "Ativa" }),
+		).toBeInTheDocument();
+		expect(screen.getAllByRole("option")).toHaveLength(1);
+		expect(screen.queryByText("ativa")).not.toBeInTheDocument();
+		expect(screen.queryByText("cancelada")).not.toBeInTheDocument();
+	});
 });

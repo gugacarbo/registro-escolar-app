@@ -1,5 +1,6 @@
 import { expect, test } from "./fixtures/test";
 import {
+	adminApiRequest,
 	baseURL,
 	createClass,
 	createEnrollment,
@@ -137,9 +138,9 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 		await expect(
 			page.getByRole("heading", { name: "Dados do estudante" }),
 		).toBeVisible();
-		await expect(page.getByText("11122233")).toBeVisible();
-		await expect(page.getByText("detalhe@example.com")).toBeVisible();
-		await expect(page.getByText("11 98888-7777")).toBeVisible();
+		await expect(page.getByText("11122233", { exact: true }).first()).toBeVisible();
+		await expect(page.getByText("detalhe@example.com", { exact: true }).first()).toBeVisible();
+		await expect(page.getByText("11 98888-7777", { exact: true }).first()).toBeVisible();
 		await expect(
 			page.getByRole("heading", { name: "Turmas" }),
 		).toBeVisible();
@@ -253,6 +254,40 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 		});
 
 		await expect(page.getByText("Falha ao processar arquivo")).toBeVisible();
+	});
+
+	test("busca estudantes por documento na tela", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const student = await createStudent(apiContext, "Estudante Documento Busca", {
+			document: "DOC-9876",
+		});
+
+		const studentsPage = new StudentsPage(page);
+		await studentsPage.goto();
+		await page.getByLabel("Buscar por nome ou documento").fill("DOC-9876");
+
+		await expect(
+			page.getByRole("row", { name: /Estudante Documento Busca/ }),
+		).toBeVisible();
+		await expect(page.getByText("Mostrando 1–1 de 1")).toBeVisible();
+		expect(student.id).toBeTruthy();
+	});
+
+	test("rejeita criação manual duplicada com 409", async ({ apiContext }) => {
+		// O matching de duplicidade compara o nome normalizado (minúsculas)
+		// com igualdade exata, então o nome de referência já nasce normalizado.
+		const name = "estudante duplicado 409";
+		const first = await adminApiRequest("POST", "/api/students", apiContext.cookies, {
+			name,
+		});
+		expect(first.status).toBe(201);
+
+		const second = await adminApiRequest("POST", "/api/students", apiContext.cookies, {
+			name,
+		});
+		expect(second.status).toBe(409);
 	});
 
 	test("lista linhas inválidas na pré-visualização", async ({

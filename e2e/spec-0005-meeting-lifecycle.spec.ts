@@ -32,7 +32,7 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 			.click();
 		await dialog.getByRole("button", { name: "Salvar" }).click();
 		await expect(page.getByRole("heading", { name: "Conselho UI" })).toBeVisible();
-		await expect(page.getByText("Rascunho")).toBeVisible();
+		await expect(page.getByText("Rascunho", { exact: true })).toBeVisible();
 	});
 
 	test("abre o detalhe da reunião ao clicar na linha", async ({
@@ -166,6 +166,87 @@ test.describe("SPEC-0005 ciclo de vida da reunião", () => {
 		);
 		expect(updateResponse.status).toBe(409);
 		expect(await updateResponse.json()).toMatchObject({ meetingStatus: "finished" });
+	});
+
+	test("transições pela UI atualizam o badge", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const klass = await createClass(apiContext, "Turma Transição UI", "2026");
+		const meeting = await createMeeting(apiContext, {
+			title: "Reunião Transição UI",
+			heldAt: "2026-05-10",
+			classIds: [klass.id],
+			participants: [],
+		});
+
+		await page.goto(`/meetings/${meeting.id}`);
+		await expect(page.getByText("Rascunho", { exact: true })).toBeVisible();
+
+		await page.getByRole("button", { name: "Iniciar", exact: true }).click();
+		await page.getByRole("button", { name: "Confirmar início" }).click();
+		await expect(page.getByText("Em andamento", { exact: true })).toBeVisible();
+
+		await page.getByRole("button", { name: "Finalizar" }).click();
+		await page.getByRole("button", { name: "Confirmar finalização" }).click();
+		await expect(page.getByText("Finalizada", { exact: true })).toBeVisible();
+	});
+
+	test("rejeita finalizar a partir de rascunho (409)", async ({
+		apiContext,
+	}) => {
+		const klass = await createClass(apiContext, "Turma Finalizar Rascunho", "2026");
+		const meeting = await createMeeting(apiContext, {
+			title: "Reunião Finalizar Rascunho",
+			heldAt: "2026-05-10",
+			classIds: [klass.id],
+			participants: [],
+		});
+		const response = await transitionMeetingResponse(
+			apiContext,
+			meeting.id,
+			"finalize",
+		);
+		expect(response.status).toBe(409);
+	});
+
+	test("ciclo completo finalizada → reaberta → em andamento → finalizada", async ({
+		apiContext,
+	}) => {
+		const klass = await createClass(apiContext, "Turma Ciclo Completo", "2026");
+		const meeting = await createMeeting(apiContext, {
+			title: "Reunião Ciclo Completo",
+			heldAt: "2026-05-10",
+			classIds: [klass.id],
+			participants: [],
+		});
+
+		const start = await transitionMeetingResponse(apiContext, meeting.id, "start");
+		expect(start.status).toBe(200);
+		expect(((await start.json()) as { status: string }).status).toBe("in_progress");
+		const finish = await transitionMeetingResponse(
+			apiContext,
+			meeting.id,
+			"finalize",
+		);
+		expect(finish.status).toBe(200);
+		expect(((await finish.json()) as { status: string }).status).toBe("finished");
+
+		const reopen = await transitionMeetingResponse(apiContext, meeting.id, "reopen");
+		expect(reopen.status).toBe(200);
+		expect(((await reopen.json()) as { status: string }).status).toBe("reopened");
+
+		const resume = await transitionMeetingResponse(apiContext, meeting.id, "start");
+		expect(resume.status).toBe(200);
+		expect(((await resume.json()) as { status: string }).status).toBe("in_progress");
+
+		const finalize = await transitionMeetingResponse(
+			apiContext,
+			meeting.id,
+			"finalize",
+		);
+		expect(finalize.status).toBe(200);
+		expect(((await finalize.json()) as { status: string }).status).toBe("finished");
 	});
 
 	test("permite registro independente com reunião finalizada", async ({

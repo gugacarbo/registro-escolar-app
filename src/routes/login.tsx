@@ -149,7 +149,9 @@ export default function LoginPage() {
 					<p className="mt-4 text-center text-sm">
 						Não tem conta?{" "}
 						<Button variant="link" asChild className="h-auto p-0">
-							<Link to="/register">Cadastre-se</Link>
+							<Link to="/register" search={{ token: undefined }}>
+								Cadastre-se
+							</Link>
 						</Button>
 					</p>
 				</CardContent>

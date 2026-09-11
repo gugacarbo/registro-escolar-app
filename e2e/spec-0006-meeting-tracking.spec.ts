@@ -156,6 +156,91 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 		expect(students).toHaveLength(1);
 	});
 
+	test("marcar não discutido atualiza os contadores", async ({
+		authenticatedPage: page,
+		apiContext,
+	}) => {
+		const { klass, meeting } = await setupStartedMeeting(apiContext, [
+			"Marcia Não Discutido",
+		]);
+
+		await page.goto(`/meetings/${meeting.id}/students`);
+		await page.getByRole("combobox", { name: "Turma" }).click();
+		await page
+			.locator('[data-slot="select-item"]')
+			.filter({ hasText: klass.name })
+			.click();
+
+		await expect(page.getByText("0 de 1 concluídos (0%)")).toBeVisible();
+
+		await page
+			.getByRole("button", { name: "Marcar Marcia Não Discutido como Concluído" })
+			.click();
+		await expect(page.getByText("1 de 1 concluídos (100%)")).toBeVisible();
+
+		await page
+			.getByRole("button", {
+				name: "Marcar Marcia Não Discutido como Não discutido",
+			})
+			.click();
+		await expect(page.getByText("0 de 1 concluídos (0%)")).toBeVisible();
+
+		const result = await listMeetingClassStudents(
+			apiContext,
+			meeting.id,
+			klass.id,
+		);
+		expect(result.students[0]?.status).toBe("nao_discutido");
+		expect(result.counters.nao_discutido).toBe(1);
+		expect(result.counters.concluido).toBe(0);
+	});
+
+	test("independência de status por turma na mesma reunião", async ({
+		apiContext,
+	}) => {
+		const student = await createStudent(apiContext, "Estudante Independência Status");
+		const classA = await createClass(apiContext, "Turma Independência A", "2026");
+		const classB = await createClass(apiContext, "Turma Independência B", "2026");
+		const enrollmentA = await createEnrollment(apiContext, {
+			estudanteId: student.id,
+			turmaId: classA.id,
+			dataInicio: "2026-01-01",
+		});
+		await createEnrollment(apiContext, {
+			estudanteId: student.id,
+			turmaId: classB.id,
+			dataInicio: "2026-01-01",
+		});
+		// A API encerra o vínculo anterior (regra de transferência); restauramos
+		// o vínculo histórico no banco isolado para testar as duas turmas juntas.
+		restoreEnrollmentAsActive(enrollmentA.enrollment.id);
+
+		const meeting = await createMeeting(apiContext, {
+			title: "Reunião Status Independente",
+			heldAt: "2026-05-10",
+			classIds: [classA.id, classB.id],
+			participants: [],
+		});
+		await startMeeting(apiContext, meeting.id);
+
+		await updateStudentStatus(
+			apiContext,
+			meeting.id,
+			student.id,
+			"concluido",
+			classA.id,
+		);
+
+		const statusA = await listMeetingClassStudents(apiContext, meeting.id, classA.id);
+		const statusB = await listMeetingClassStudents(apiContext, meeting.id, classB.id);
+		expect(statusA.students.find((s) => s.studentId === student.id)?.status).toBe(
+			"concluido",
+		);
+		expect(statusB.students.find((s) => s.studentId === student.id)?.status).toBe(
+			"pendente",
+		);
+	});
+
 	test("trata o mesmo estudante em duas turmas da reunião de forma independente", async ({
 		apiContext,
 	}) => {

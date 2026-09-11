@@ -30,10 +30,14 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		await expect(page.getByRole("heading", { name: "Turmas" })).toBeVisible();
 		await expect(page.getByRole("row", { name: /Turma Filtro 2025/ })).toBeVisible();
 		await expect(page.getByRole("row", { name: /Turma Filtro 2026/ })).toBeVisible();
-		await expect(
-			page.getByRole("link", { name: "Ver estudantes" }),
-		).toHaveCount(0);
-		await expect(page.getByRole("link", { name: "Ofertas" })).toHaveCount(0);
+		await expect(page.getByRole("link", { name: "Ofertas" })).toHaveCount(2);
+		await page
+			.getByRole("row", { name: /Turma Filtro 2025/ })
+			.getByRole("link", { name: "Ofertas" })
+			.click();
+		await expect(page).toHaveURL(/\/classes\/[^/]+\/offers$/);
+		await page.goBack();
+		await expect(page.getByRole("heading", { name: "Turmas" })).toBeVisible();
 
 		await page.getByRole("combobox", { name: "Filtrar por período letivo" }).click();
 		await page.getByRole("option", { name: "2025", exact: true }).click();

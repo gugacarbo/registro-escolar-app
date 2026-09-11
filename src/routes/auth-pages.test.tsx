@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	navigate: vi.fn(),
@@ -42,6 +42,28 @@ beforeEach(() => {
 	mocks.getSession.mockResolvedValue({ data: null });
 	mocks.signInEmail.mockResolvedValue({ data: {}, error: null });
 	mocks.signUpEmail.mockResolvedValue({ data: {}, error: null });
+
+	global.fetch = vi.fn().mockImplementation((url: string) => {
+		if (url.includes("/api/invitations/status")) {
+			return Promise.resolve({
+				ok: true,
+				json: () =>
+					Promise.resolve({
+						open: true,
+						isInitialSetup: true,
+						requiresInvite: false,
+					}),
+			});
+		}
+		return Promise.resolve({
+			ok: true,
+			json: () => Promise.resolve({}),
+		});
+	});
+});
+
+afterEach(() => {
+	window.history.pushState({}, "", "/");
 });
 
 describe("LoginPage", () => {
@@ -180,9 +202,151 @@ describe("RegisterPage", () => {
 				email: "operador@escola.test",
 				password: "senha-segura",
 				callbackURL: "/",
+				fetchOptions: undefined,
 			}),
 		);
 		expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" });
+	});
+
+	it("bloqueia cadastro público quando a instância já possui admin e nenhum convite é informado", async () => {
+		global.fetch = vi.fn().mockImplementation((url: string) => {
+			if (url.includes("/api/invitations/status")) {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							open: false,
+							isInitialSetup: false,
+							requiresInvite: true,
+						}),
+				});
+			}
+			return Promise.resolve({
+				ok: true,
+				json: () => Promise.resolve({}),
+			});
+		});
+
+		render(<RegisterPage />);
+
+		await waitFor(() =>
+			expect(screen.getByText("Cadastro por Convite")).toBeInTheDocument(),
+		);
+		expect(
+			screen.getByText(/O cadastro público está restrito/i),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Ir para o login" }),
+		).toBeInTheDocument();
+	});
+
+	it("preenche e bloqueia o e-mail quando recebe token de convite válido", async () => {
+		window.history.pushState({}, "", "/register?token=tok-convite-valido");
+
+		global.fetch = vi.fn().mockImplementation((url: string) => {
+			if (url.includes("/api/invitations/status")) {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							open: false,
+							isInitialSetup: false,
+							requiresInvite: true,
+						}),
+				});
+			}
+			if (url.includes("/api/invitations/verify")) {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							valid: true,
+							email: "convidado.especial@escola.test",
+						}),
+				});
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+
+		render(<RegisterPage />);
+
+		await waitFor(() =>
+			expect(
+				screen.getByDisplayValue("convidado.especial@escola.test"),
+			).toBeInTheDocument(),
+		);
+
+		const emailInput = screen.getByLabelText("Email");
+		expect(emailInput).toHaveAttribute("readonly");
+
+		fireEvent.change(screen.getByLabelText("Nome"), {
+			target: { value: "Convidado Especial" },
+		});
+		fireEvent.change(screen.getByLabelText("Senha"), {
+			target: { value: "senha-segura" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Cadastrar" }));
+
+		await waitFor(() =>
+			expect(mocks.signUpEmail).toHaveBeenCalledWith({
+				name: "Convidado Especial",
+				email: "convidado.especial@escola.test",
+				password: "senha-segura",
+				callbackURL: "/",
+				fetchOptions: {
+					headers: {
+						"x-invite-token": "tok-convite-valido",
+					},
+				},
+			}),
+		);
+
+		// Limpar url
+		window.history.pushState({}, "", "/register");
+	});
+
+	it("exibe tela de erro se o token de convite for inválido ou expirado", async () => {
+		window.history.pushState({}, "", "/register?token=tok-expirado");
+
+		global.fetch = vi.fn().mockImplementation((url: string) => {
+			if (url.includes("/api/invitations/status")) {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							open: false,
+							isInitialSetup: false,
+							requiresInvite: true,
+						}),
+				});
+			}
+			if (url.includes("/api/invitations/verify")) {
+				return Promise.resolve({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							valid: false,
+							error: "Este convite expirou (validade de 7 dias).",
+						}),
+				});
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		});
+
+		render(<RegisterPage />);
+
+		await waitFor(() =>
+			expect(screen.getByText("Convite Inválido")).toBeInTheDocument(),
+		);
+		expect(
+			screen.getByText("Este convite expirou (validade de 7 dias)."),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Voltar para o login" }),
+		).toBeInTheDocument();
+
+		// Limpar url
+		window.history.pushState({}, "", "/register");
 	});
 
 	it("não navega após desmontar durante a checagem de sessão", async () => {
