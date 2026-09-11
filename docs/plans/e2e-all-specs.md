@@ -67,7 +67,7 @@ Criar a base compartilhada usada por todas as outras tarefas.
 
 ### Task 4: e2e para SPEC-0003 — Servidores e papéis de reunião
 
-- Cadastrar servidor (`/staff/new`).
+- Cadastrar servidor (diálogo em `/staff`).
 - Listar servidores (`/staff`).
 - Cadastrar papel (`/roles/new`).
 - Garantir papel padrão `Professor` na lista.

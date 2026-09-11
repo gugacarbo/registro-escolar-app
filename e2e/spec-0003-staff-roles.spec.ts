@@ -14,13 +14,20 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 	test("cadastra e lista servidor pela UI", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/staff/new");
+		await page.goto("/staff");
+		await page.getByRole("button", { name: "Novo servidor" }).click();
+		await expect(page.getByRole("dialog")).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Novo servidor" }),
+		).toBeVisible();
+
 		const nameField = page.getByRole("textbox", { name: "Nome" });
 		await nameField.click();
 		await nameField.fill("Servidor E2E");
 		await expect(nameField).toHaveValue("Servidor E2E");
 		await page.getByRole("button", { name: "Salvar" }).click();
 
+		await expect(page.getByRole("dialog")).not.toBeVisible();
 		await expect.poll(async () => page.url()).toBe(`${baseURL}/staff`);
 		await expect(page.getByText("Servidor E2E")).toBeVisible();
 	});

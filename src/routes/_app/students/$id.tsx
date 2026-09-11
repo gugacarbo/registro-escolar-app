@@ -47,22 +47,13 @@ function formatDate(value: Date | string | null | undefined): string {
 	}
 	const iso = value instanceof Date ? value.toISOString() : value;
 	const [year, month, day] = iso.slice(0, 10).split("-").map(Number);
-	if (!year || !month || !day) {
-		return "";
-	}
 	return new Date(year, month - 1, day).toLocaleDateString("pt-BR", {
 		dateStyle: "short",
 	});
 }
 
-function formatDateTime(value: Date | string | null | undefined): string {
-	if (!value) {
-		return "";
-	}
+function formatDateTime(value: Date | string): string {
 	const date = value instanceof Date ? value : new Date(value);
-	if (Number.isNaN(date.getTime())) {
-		return "";
-	}
 	return date.toLocaleString("pt-BR", {
 		dateStyle: "short",
 		timeStyle: "short",
@@ -290,9 +281,8 @@ export default function StudentDetailPage() {
 							</dl>
 						)}
 						<p className="border-t pt-3 text-xs text-muted-foreground">
-							Registro em {formatDate(student.createdAt)}
-							{formatDateTime(student.updatedAt) &&
-								` · Atualizado em ${formatDateTime(student.updatedAt)}`}
+							Registro em {formatDate(student.createdAt)} · Atualizado em{" "}
+							{formatDateTime(student.updatedAt)}
 						</p>
 					</PageSection>
 

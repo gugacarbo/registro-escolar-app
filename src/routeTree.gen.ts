@@ -25,7 +25,6 @@ import { Route as AppRolesIndexRouteImport } from './routes/_app/roles/index'
 import { Route as AppRolesIdRouteImport } from './routes/_app/roles/$id'
 import { Route as AppStaffIndexRouteImport } from './routes/_app/staff/index'
 import { Route as AppStaffIdRouteImport } from './routes/_app/staff/$id'
-import { Route as AppStaffNewRouteImport } from './routes/_app/staff/new'
 import { Route as AppStudentsIndexRouteImport } from './routes/_app/students/index'
 import { Route as AppStudentsIdRouteImport } from './routes/_app/students/$id'
 import { Route as AppStudentsImportRouteImport } from './routes/_app/students/import'
@@ -154,11 +153,6 @@ const AppStaffIndexRoute = AppStaffIndexRouteImport.update({
 const AppStaffIdRoute = AppStaffIdRouteImport.update({
   id: '/staff/$id',
   path: '/staff/$id',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppStaffNewRoute = AppStaffNewRouteImport.update({
-  id: '/staff/new',
-  path: '/staff/new',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppStudentsIndexRoute = AppStudentsIndexRouteImport.update({
@@ -448,7 +442,6 @@ export interface FileRoutesByFullPath {
   '/minutes/templates': typeof AppMinutesTemplatesRouteWithChildren
   '/roles/$id': typeof AppRolesIdRoute
   '/staff/$id': typeof AppStaffIdRoute
-  '/staff/new': typeof AppStaffNewRoute
   '/students/$id': typeof AppStudentsIdRoute
   '/students/import': typeof AppStudentsImportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -515,7 +508,6 @@ export interface FileRoutesByTo {
   '/minutes/$meetingId': typeof AppMinutesMeetingIdRoute
   '/roles/$id': typeof AppRolesIdRoute
   '/staff/$id': typeof AppStaffIdRoute
-  '/staff/new': typeof AppStaffNewRoute
   '/students/$id': typeof AppStudentsIdRoute
   '/students/import': typeof AppStudentsImportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -585,7 +577,6 @@ export interface FileRoutesById {
   '/_app/minutes/templates': typeof AppMinutesTemplatesRouteWithChildren
   '/_app/roles/$id': typeof AppRolesIdRoute
   '/_app/staff/$id': typeof AppStaffIdRoute
-  '/_app/staff/new': typeof AppStaffNewRoute
   '/_app/students/$id': typeof AppStudentsIdRoute
   '/_app/students/import': typeof AppStudentsImportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -655,7 +646,6 @@ export interface FileRouteTypes {
     | '/minutes/templates'
     | '/roles/$id'
     | '/staff/$id'
-    | '/staff/new'
     | '/students/$id'
     | '/students/import'
     | '/api/auth/$'
@@ -722,7 +712,6 @@ export interface FileRouteTypes {
     | '/minutes/$meetingId'
     | '/roles/$id'
     | '/staff/$id'
-    | '/staff/new'
     | '/students/$id'
     | '/students/import'
     | '/api/auth/$'
@@ -791,7 +780,6 @@ export interface FileRouteTypes {
     | '/_app/minutes/templates'
     | '/_app/roles/$id'
     | '/_app/staff/$id'
-    | '/_app/staff/new'
     | '/_app/students/$id'
     | '/_app/students/import'
     | '/api/auth/$'
@@ -1006,13 +994,6 @@ declare module '@tanstack/react-router' {
       path: '/staff/$id'
       fullPath: '/staff/$id'
       preLoaderRoute: typeof AppStaffIdRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/staff/new': {
-      id: '/_app/staff/new'
-      path: '/staff/new'
-      fullPath: '/staff/new'
-      preLoaderRoute: typeof AppStaffNewRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/students/': {
@@ -1389,7 +1370,6 @@ interface AppRouteRouteChildren {
   AppMinutesTemplatesRoute: typeof AppMinutesTemplatesRouteWithChildren
   AppRolesIdRoute: typeof AppRolesIdRoute
   AppStaffIdRoute: typeof AppStaffIdRoute
-  AppStaffNewRoute: typeof AppStaffNewRoute
   AppStudentsIdRoute: typeof AppStudentsIdRoute
   AppStudentsImportRoute: typeof AppStudentsImportRoute
   AppClassesIndexRoute: typeof AppClassesIndexRoute
@@ -1415,7 +1395,6 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppMinutesTemplatesRoute: AppMinutesTemplatesRouteWithChildren,
   AppRolesIdRoute: AppRolesIdRoute,
   AppStaffIdRoute: AppStaffIdRoute,
-  AppStaffNewRoute: AppStaffNewRoute,
   AppStudentsIdRoute: AppStudentsIdRoute,
   AppStudentsImportRoute: AppStudentsImportRoute,
   AppClassesIndexRoute: AppClassesIndexRoute,

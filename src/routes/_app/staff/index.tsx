@@ -1,7 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { DataTable } from "#/components/data-table";
+import { CreateStaffDialog } from "#/components/staff/create-staff-dialog";
 import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
 import { SearchInput } from "#/components/ui/search-input";
@@ -51,11 +52,7 @@ export default function StaffPage() {
 				eyebrow="Equipe"
 				title="Servidores"
 				description="Professores, gestores e especialistas que participam das reuniões e atas do conselho."
-				actions={
-					<Button asChild>
-						<Link to="/staff/new">Novo servidor</Link>
-					</Button>
-				}
+				actions={<CreateStaffDialog trigger={<Button>Novo servidor</Button>} />}
 			/>
 			<PageToolbar>
 				<SearchInput

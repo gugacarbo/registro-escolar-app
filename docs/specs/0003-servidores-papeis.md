@@ -17,8 +17,8 @@ implemented-by:
   - src/lib/meetings/repository.ts
   - src/lib/meetings/schema.ts
   - src/routes/_app/staff/index.tsx
-  - src/routes/_app/staff/new.tsx
   - src/routes/_app/roles/index.tsx
+  - src/components/staff/create-staff-dialog.tsx
   - src/components/roles/create-role-dialog.tsx
   - src/routes/_app/meetings/$meetingId/participants.tsx
   - src/components/staff/staff-form.tsx
@@ -41,7 +41,7 @@ Permitir cadastrar servidores reutilizáveis e papéis de reunião, vinculando a
 
 ## Fluxo
 
-1. O operador cadastra servidores (professores, coordenadores, direção etc.).
+1. Na lista de servidores, o operador abre o diálogo **Novo servidor** e cadastra professores, coordenadores, direção etc., sem sair da lista.
 2. O sistema oferece papéis padrão (Professor, Coordenação pedagógica, Direção etc.) e permite criar novos.
 3. Na preparação de uma reunião, o operador seleciona servidores e define o papel de cada um naquela reunião.
 4. O mesmo servidor pode ter papéis diferentes em reuniões diferentes.

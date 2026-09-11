@@ -18,12 +18,25 @@ export function StudentHistoryPanel({ studentId }: { studentId: string }) {
 	const { data, isLoading, isError } = useStudentHistory(studentId, filters);
 
 	function handleSearch(values: HistorySearchValues) {
-		setFilters({
-			q: values.q || undefined,
-			turmaId: values.turmaId || undefined,
-			componenteId: values.componenteId || undefined,
-			periodo: values.periodo || undefined,
-		});
+		const filters: {
+			q?: string;
+			turmaId?: string;
+			componenteId?: string;
+			periodo?: string;
+		} = {};
+		if (values.q) {
+			filters.q = values.q;
+		}
+		if (values.turmaId) {
+			filters.turmaId = values.turmaId;
+		}
+		if (values.componenteId) {
+			filters.componenteId = values.componenteId;
+		}
+		if (values.periodo) {
+			filters.periodo = values.periodo;
+		}
+		setFilters(filters);
 	}
 
 	return (

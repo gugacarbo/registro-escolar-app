@@ -127,6 +127,92 @@ describe("StudentDetailPage", () => {
 		);
 	});
 
+	it("exibe mensagem genérica quando o erro não é instância de Error", () => {
+		mocks.useStudent.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+			error: "Falha inesperada" as unknown as Error,
+		});
+		renderPage();
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Falha ao carregar o estudante",
+		);
+	});
+
+	it("exibe traços quando os campos opcionais estão vazios", () => {
+		mocks.useStudent.mockReturnValue({
+			data: makeStudent({
+				document: null,
+				registrationNumber: null,
+				email: null,
+				phone: null,
+				birthDate: null,
+				notes: null,
+			}),
+			isLoading: false,
+			isError: false,
+			error: null,
+		});
+		renderPage();
+
+		// Documento, Matrícula, Email, Telefone e Nascimento sem valor.
+		expect(screen.getAllByText("—")).toHaveLength(5);
+		expect(screen.queryByText("Observações")).not.toBeInTheDocument();
+		// Sem resumo no header, "Nascimento" aparece só no detalhe.
+		expect(screen.getAllByText("Nascimento")).toHaveLength(1);
+	});
+
+	it("formata datas a partir de instâncias Date", () => {
+		mocks.useStudent.mockReturnValue({
+			data: makeStudent({
+				birthDate: new Date("2010-05-20T12:00:00Z"),
+				createdAt: new Date("2026-01-01T12:00:00Z"),
+				updatedAt: new Date("2026-01-02T15:30:00Z"),
+			}),
+			isLoading: false,
+			isError: false,
+			error: null,
+		});
+		renderPage();
+
+		expect(screen.getAllByText("20/05/2010")).toHaveLength(2);
+		expect(screen.getByText(/Registro em 01\/01\/2026/)).toBeInTheDocument();
+		expect(screen.getByText(/Atualizado em 02\/01\/2026/)).toBeInTheDocument();
+	});
+
+	it("submete campos vazios como nulos", async () => {
+		const user = userEvent.setup();
+		mocks.useStudent.mockReturnValue({
+			data: makeStudent({
+				document: null,
+				registrationNumber: null,
+				email: null,
+				phone: null,
+				birthDate: null,
+				notes: null,
+			}),
+			isLoading: false,
+			isError: false,
+			error: null,
+		});
+		renderPage();
+
+		await user.click(screen.getByRole("button", { name: "Editar" }));
+		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
+
+		expect(mocks.mutateAsync).toHaveBeenCalledWith({
+			name: "João da Silva",
+			document: null,
+			registrationNumber: null,
+			email: null,
+			phone: null,
+			birthDate: null,
+			notes: null,
+		});
+	});
+
 	it("exibe os dados do estudante em formato compacto", () => {
 		renderPage();
 

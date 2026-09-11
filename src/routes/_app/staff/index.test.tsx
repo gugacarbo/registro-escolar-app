@@ -197,11 +197,15 @@ describe("StaffPage", () => {
 		});
 	});
 
-	it("clicar no link do cabeçalho não dispara a navegação da linha", () => {
+	it("abre o diálogo de cadastro sem sair da lista", () => {
 		renderPage();
 
-		fireEvent.click(screen.getByRole("link", { name: "Novo servidor" }));
+		fireEvent.click(screen.getByRole("button", { name: "Novo servidor" }));
 
+		expect(screen.getByRole("dialog")).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { name: "Novo servidor" }),
+		).toBeVisible();
 		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });
