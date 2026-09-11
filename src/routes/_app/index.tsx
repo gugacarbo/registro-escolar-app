@@ -5,17 +5,16 @@ import {
 	CalendarDays,
 	FileText,
 	GraduationCap,
-	Users,
 	type LucideIcon,
+	Users,
 } from "lucide-react";
-
+import { Button } from "#/components/ui/button";
+import { PageHeader, PageShell } from "#/components/ui/page";
+import { Skeleton } from "#/components/ui/skeleton";
 import { useClasses } from "#/hooks/classes/use-classes";
 import { useMeetings } from "#/hooks/meetings/use-meetings";
 import { useMinutes } from "#/hooks/minutes/use-minutes";
 import { useStudents } from "#/hooks/students/use-students";
-import { Button } from "#/components/ui/button";
-import { PageHeader, PageShell } from "#/components/ui/page";
-import { Skeleton } from "#/components/ui/skeleton";
 
 export const Route = createFileRoute("/_app/")({
 	component: AppHome,
@@ -29,7 +28,12 @@ type Action = {
 };
 
 const ACTIONS: Action[] = [
-	{ title: "Preparar turmas", to: "/classes", icon: BookOpenText, primary: true },
+	{
+		title: "Preparar turmas",
+		to: "/classes",
+		icon: BookOpenText,
+		primary: true,
+	},
 	{ title: "Acompanhar estudantes", to: "/students", icon: GraduationCap },
 	{ title: "Abrir reunião", to: "/meetings", icon: CalendarDays },
 	{ title: "Emitir atas", to: "/minutes", icon: FileText },
