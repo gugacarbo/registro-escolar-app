@@ -191,6 +191,9 @@ export default function ImportStudentsPage() {
 						const file = e.target.files?.[0];
 						if (file) {
 							setFileName(file.name);
+							// reseta o campo nativo: sem isso, escolher o mesmo
+							// arquivo de novo nao dispara novo change
+							e.target.value = "";
 							void handleUpload(file);
 						}
 					}}
