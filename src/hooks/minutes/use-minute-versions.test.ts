@@ -48,6 +48,24 @@ describe("useMinuteVersions", () => {
 		expect(result.current.data).toEqual(versions);
 	});
 
+	it("retorna lista vazia quando a ata ainda não existe (404)", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue({
+				ok: false,
+				status: 404,
+				json: () => Promise.resolve({ error: "Ata não encontrada" }),
+			}),
+		);
+
+		const { result } = renderHook(() => useMinuteVersions("meeting-1"), {
+			wrapper: createWrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data).toEqual([]);
+	});
+
 	it("lança erro com mensagem do servidor", async () => {
 		vi.stubGlobal(
 			"fetch",

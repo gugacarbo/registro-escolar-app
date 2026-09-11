@@ -13,6 +13,9 @@ export function useMinuteVersions(meetingId: string | undefined) {
 			const response = await fetch(
 				`/api/meetings/${meetingId}/minutes/versions`,
 			);
+			if (response.status === 404) {
+				return [] as MinuteVersionJson[];
+			}
 			if (!response.ok) {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
