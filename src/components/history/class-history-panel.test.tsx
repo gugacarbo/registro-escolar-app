@@ -50,21 +50,42 @@ describe("ClassHistoryPanel", () => {
 
 	it("aplica filtros de histórico da turma", async () => {
 		const user = userEvent.setup();
-		mocks.useClassHistory.mockReturnValue({
-			data: {
-				turma: { id: "class-1", name: "Turma A" },
-				estudantes: [],
-				reunioes: [],
-				eventos: [],
-			},
-			isLoading: false,
-			isError: false,
-		});
-		renderPanel();
-		await user.type(screen.getByLabelText("Busca"), "conselho");
-		await user.type(screen.getByLabelText("Componente"), "component-1");
-		await user.type(screen.getByLabelText("Período"), "2026");
-		await user.click(screen.getByRole("button", { name: "Filtrar" }));
+		// Simula as páginas de componentes usadas pelo select do formulário.
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(
+				async () =>
+					({
+						ok: true,
+						json: async () => ({
+							data: [{ id: "component-1", name: "Matemática" }],
+							total: 1,
+						}),
+					}) as unknown as Response,
+			),
+		);
+		try {
+			mocks.useClassHistory.mockReturnValue({
+				data: {
+					turma: { id: "class-1", name: "Turma A" },
+					estudantes: [],
+					reunioes: [],
+					eventos: [],
+				},
+				isLoading: false,
+				isError: false,
+			});
+			renderPanel();
+			await user.type(screen.getByLabelText("Busca"), "conselho");
+			await user.click(screen.getByRole("combobox", { name: "Componente" }));
+			await user.click(
+				await screen.findByRole("option", { name: "Matemática" }),
+			);
+			await user.type(screen.getByLabelText("Período"), "2026");
+			await user.click(screen.getByRole("button", { name: "Filtrar" }));
+		} finally {
+			vi.unstubAllGlobals();
+		}
 		expect(mocks.useClassHistory).toHaveBeenLastCalledWith("class-1", {
 			q: "conselho",
 			componenteId: "component-1",

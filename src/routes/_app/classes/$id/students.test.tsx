@@ -23,6 +23,14 @@ vi.mock("@tanstack/react-router", () => ({
 	),
 }));
 
+vi.mock("#/hooks/entity-fetchers", () => ({
+	fetchClassesPage: async () => ({ data: [], total: 0 }),
+	fetchComponentsPage: async (params?: { search?: string }) =>
+		params?.search === undefined || params?.search === ""
+			? { data: [{ id: "comp-1", name: "Matemática" }], total: 1 }
+			: { data: [], total: 0 },
+}));
+
 vi.mock("#/hooks/history/use-history", () => ({
 	useClassHistory: mocks.useClassHistory,
 }));
@@ -206,7 +214,6 @@ describe("ClassStudentsPage", () => {
 		expect(
 			screen.getByText("Nenhuma reunião vinculada a esta turma."),
 		).toBeInTheDocument();
-		await user.click(screen.getByRole("tab", { name: "Linha do tempo (0)" }));
 		expect(
 			screen.getByText("Nenhum evento no histórico da turma."),
 		).toBeInTheDocument();
@@ -226,22 +233,33 @@ describe("ClassStudentsPage", () => {
 	});
 
 	it("envia filtros para a linha do tempo e limpa ao clicar em Limpar", async () => {
+		mocks.useClassHistory.mockImplementation(() => ({
+			data: makeHistory(),
+			isLoading: false,
+			isError: false,
+		}));
+		vi.stubGlobal("fetch", vi.fn());
 		const user = userEvent.setup();
-		renderPage();
-		await user.click(screen.getByRole("tab", { name: "Linha do tempo (1)" }));
+		const result = renderPage();
+		try {
+			await user.type(screen.getByLabelText("Busca"), "conselho");
+			await user.click(screen.getByRole("combobox", { name: "Componente" }));
+			const option = await screen.findByRole("option", { name: "Matemática" });
+			await user.click(option);
+			await user.type(screen.getByLabelText("Período"), "2026");
+			await user.click(screen.getByRole("button", { name: "Filtrar" }));
+			expect(mocks.useClassHistory).toHaveBeenLastCalledWith("class-1", {
+				q: "conselho",
+				componenteId: "comp-1",
+				periodo: "2026",
+			});
 
-		await user.type(screen.getByLabelText("Busca"), "conselho");
-		await user.type(screen.getByLabelText("Componente"), "comp-1");
-		await user.type(screen.getByLabelText("Período"), "2026");
-		await user.click(screen.getByRole("button", { name: "Filtrar" }));
-		expect(mocks.useClassHistory).toHaveBeenLastCalledWith("class-1", {
-			q: "conselho",
-			componenteId: "comp-1",
-			periodo: "2026",
-		});
-
-		await user.click(screen.getByRole("button", { name: "Limpar" }));
-		expect(mocks.useClassHistory).toHaveBeenLastCalledWith("class-1", {});
+			await user.click(screen.getByRole("button", { name: "Limpar" }));
+			expect(mocks.useClassHistory).toHaveBeenLastCalledWith("class-1", {});
+		} finally {
+			vi.unstubAllGlobals();
+			result.unmount();
+		}
 	});
 
 	it("exibe skeleton durante o carregamento", () => {

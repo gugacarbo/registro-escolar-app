@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "cn";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -14,6 +15,9 @@ import {
 	FormSubmit,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { SearchableSelect } from "#/components/ui/searchable-select";
+import { fetchClassesPage, fetchComponentsPage } from "#/hooks/entity-fetchers";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 
 const historySearchSchema = z.object({
 	q: z.string(),
@@ -39,6 +43,32 @@ export function HistorySearchForm({
 	/** Classes extras da grade do formulário (ex.: mais colunas). */
 	className?: string;
 }) {
+	const [turmaSearch, setTurmaSearch] = useState("");
+	const [componenteSearch, setComponenteSearch] = useState("");
+	const { data: classesResult, isLoading: isLoadingClasses } = useAsyncOptions({
+		queryKey: ["history-search-form", "classes"],
+		search: turmaSearch,
+		fetchPage: fetchClassesPage,
+		select: (class_) => ({ id: class_.id, name: class_.name }),
+	});
+	const classes = classesResult?.options ?? [];
+	const classesHint =
+		classesResult && !classesResult.loadedAll
+			? `Mostrando ${classes.length} de ${classesResult.total}. Refine a busca para ver mais.`
+			: undefined;
+	const { data: componentsResult, isLoading: isLoadingComponents } =
+		useAsyncOptions({
+			queryKey: ["history-search-form", "components"],
+			search: componenteSearch,
+			fetchPage: fetchComponentsPage,
+			select: (component) => ({ id: component.id, name: component.name }),
+		});
+	const components = componentsResult?.options ?? [];
+	const componentsHint =
+		componentsResult && !componentsResult.loadedAll
+			? `Mostrando ${components.length} de ${componentsResult.total}. Refine a busca para ver mais.`
+			: undefined;
+
 	const form = useForm<HistorySearchValues>({
 		resolver: zodResolver(historySearchSchema),
 		defaultValues: {
@@ -53,7 +83,7 @@ export function HistorySearchForm({
 	return (
 		<Form {...form}>
 			<FormNative
-				onSubmit={() => form.handleSubmit(onSubmit)()}
+				onSubmit={() => form.handleSubmit((values) => onSubmit(values))()}
 				className={cn("grid gap-3 md:grid-cols-2", className)}
 			>
 				<FormField
@@ -77,7 +107,17 @@ export function HistorySearchForm({
 							<FormItem>
 								<FormLabel>Turma</FormLabel>
 								<FormControl>
-									<Input {...field} placeholder="ID da turma" />
+									<SearchableSelect
+										label="Turma"
+										placeholder="Sem filtro"
+										value={field.value}
+										onChange={field.onChange}
+										options={classes}
+										isLoading={isLoadingClasses}
+										hint={classesHint}
+										search={turmaSearch}
+										onSearchChange={setTurmaSearch}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -91,7 +131,17 @@ export function HistorySearchForm({
 						<FormItem>
 							<FormLabel>Componente</FormLabel>
 							<FormControl>
-								<Input {...field} placeholder="ID do componente" />
+								<SearchableSelect
+									label="Componente"
+									placeholder="Sem filtro"
+									value={field.value}
+									onChange={field.onChange}
+									options={components}
+									isLoading={isLoadingComponents}
+									hint={componentsHint}
+									search={componenteSearch}
+									onSearchChange={setComponenteSearch}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
