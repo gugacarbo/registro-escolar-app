@@ -43,14 +43,16 @@ export function MinuteTemplateForm({
 	onSubmit,
 	submitLabel = "Salvar",
 	serverError,
+	defaultValues,
 }: {
 	onSubmit: (values: MinuteTemplateFormValues) => void | Promise<void>;
 	submitLabel?: string;
 	serverError?: string | null;
+	defaultValues?: MinuteTemplateFormValues;
 }) {
 	const form = useForm<MinuteTemplateFormValues>({
 		resolver: zodResolver(minuteTemplateFormSchema),
-		defaultValues: {
+		defaultValues: defaultValues ?? {
 			name: "",
 			headerText: "",
 			footerText: "",

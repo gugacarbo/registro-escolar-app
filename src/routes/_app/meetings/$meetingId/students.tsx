@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -69,6 +70,14 @@ function MeetingStudentsPage() {
 
 	return (
 		<PageShell>
+			<Link
+				to="/meetings/$meetingId"
+				params={{ meetingId }}
+				className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground mb-1"
+			>
+				<ArrowLeftIcon className="size-3.5" />
+				Voltar para detalhes da reunião
+			</Link>
 			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
 				Acompanhamento de estudantes
 			</h1>

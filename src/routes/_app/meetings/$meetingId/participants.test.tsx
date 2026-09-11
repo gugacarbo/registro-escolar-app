@@ -12,6 +12,15 @@ vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: () => () => ({
 		useParams: () => ({ meetingId: "meeting-1" }),
 	}),
+	Link: ({
+		children,
+		to,
+		...rest
+	}: { children: React.ReactNode; to: string } & Record<string, unknown>) => (
+		<a href={to} {...rest}>
+			{children}
+		</a>
+	),
 }));
 vi.mock("#/hooks/meetings/use-participants", () => ({
 	useParticipants: mocks.useParticipants,

@@ -243,7 +243,7 @@ describe("CreateMeetingDialog", () => {
 		);
 		await user.click(screen.getByRole("button", { name: "Abrir reunião" }));
 		expect(await screen.findByRole("dialog")).toBeInTheDocument();
-		await user.click(screen.getByRole("button", { name: "Close" }));
+		await user.click(screen.getByRole("button", { name: "Fechar" }));
 		await waitFor(() =>
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);

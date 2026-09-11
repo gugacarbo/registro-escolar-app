@@ -27,6 +27,7 @@ import {
 	generateMinuteVersion,
 	listMinuteVersions,
 	previewMinute,
+	updateMinuteTemplate,
 } from "./repository";
 
 const meetingDate = new Date("2025-06-10T12:00:00.000Z");
@@ -180,6 +181,29 @@ describe("minutes repository (specs 0009/0010)", () => {
 	beforeEach(async () => {
 		setup = createTestDb();
 		await seedBase(setup.db);
+	});
+
+	it("atualiza template existente", async () => {
+		const created = await createMinuteTemplate(setup.db, {
+			name: "Original",
+			headerText: "Cabeçalho original",
+			footerText: "Rodapé original",
+		});
+		const updated = await updateMinuteTemplate(setup.db, created.id, {
+			name: "Atualizado",
+			headerText: "Novo cabeçalho",
+			footerText: "Novo rodapé",
+			showMeeting: false,
+			showGeneralReports: true,
+		});
+		expect(updated).toMatchObject({
+			id: created.id,
+			name: "Atualizado",
+			headerText: "Novo cabeçalho",
+			footerText: "Novo rodapé",
+			showMeeting: false,
+			showGeneralReports: true,
+		});
 	});
 
 	it("cria template e lista ordenado por nome", async () => {

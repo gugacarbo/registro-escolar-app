@@ -25,7 +25,13 @@ function toDateInput(value: string | null | undefined) {
 	return `${year}-${month}-${day}`;
 }
 
-export function EditMeetingDialog({ meeting }: { meeting: Meeting }) {
+export function EditMeetingDialog({
+	meeting,
+	trigger,
+}: {
+	meeting: Meeting;
+	trigger?: React.ReactNode;
+}) {
 	const [open, setOpen] = useState(false);
 	const [serverError, setServerError] = useState<string | null>(null);
 	const updateMeeting = useUpdateMeeting(meeting.id);
@@ -47,9 +53,11 @@ export function EditMeetingDialog({ meeting }: { meeting: Meeting }) {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<button type="button" className="text-sm underline">
-					Editar dados
-				</button>
+				{trigger ?? (
+					<button type="button" className="text-sm underline">
+						Editar dados
+					</button>
+				)}
 			</DialogTrigger>
 			<DialogContent className="max-h-[90vh] overflow-y-auto">
 				<DialogHeader>

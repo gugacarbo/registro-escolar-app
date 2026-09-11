@@ -114,6 +114,25 @@ describe("MeetingsPage", () => {
 		expect(screen.getByTestId("transitions-meeting-1")).toBeInTheDocument();
 	});
 
+	it("mantém as ações visíveis no mobile e move o status para o título", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de reuniões" });
+		expect(
+			within(table).getByRole("columnheader", { name: "Status" }),
+		).toHaveClass("hidden", "sm:table-cell");
+		expect(
+			screen
+				.getAllByText("Rascunho")
+				.some((status) =>
+					status.parentElement?.classList.contains("sm:hidden"),
+				),
+		).toBe(true);
+		expect(
+			screen.getByTestId("transitions-meeting-1").closest("td"),
+		).not.toHaveClass("hidden");
+	});
+
 	it("exibe estado vazio quando não há reuniões", () => {
 		mocks.useMeetings.mockReturnValue({
 			data: makePage({ data: [], total: 0 }),
@@ -192,7 +211,7 @@ describe("MeetingsPage", () => {
 		renderPage();
 
 		const table = screen.getByRole("table", { name: "Tabela de reuniões" });
-		fireEvent.click(within(table).getByText("Rascunho"));
+		fireEvent.click(within(table).getAllByText("Rascunho")[0]);
 
 		expect(mocks.navigate).toHaveBeenCalledTimes(1);
 		expect(mocks.navigate).toHaveBeenCalledWith({

@@ -1,5 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { FileTextIcon, PlusIcon, SearchIcon } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+	ArrowLeftIcon,
+	FileTextIcon,
+	PlusIcon,
+	SearchIcon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { GeneralReportForm } from "#/components/meetings/general-report-form";
 import {
@@ -259,6 +264,14 @@ export default function CouncilPage() {
 			<header className="sticky top-0 z-10 -mx-2 border-b bg-background/95 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
 				<div className="flex flex-wrap items-center justify-between gap-2">
 					<div className="min-w-0">
+						<Link
+							to="/meetings/$meetingId"
+							params={{ meetingId }}
+							className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground mb-1"
+						>
+							<ArrowLeftIcon className="size-3.5" />
+							Voltar para detalhes da reunião
+						</Link>
 						<h1 className="truncate text-2xl font-bold">Conselho de classe</h1>
 						{isLoadingMeeting && (
 							<p className="text-sm text-muted-foreground">Carregando...</p>

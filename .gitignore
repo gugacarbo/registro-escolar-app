@@ -22,3 +22,4 @@ test-results
 storybook-static
 .wrangler/state/e2e
 .worktrees
+.playwright-mcp

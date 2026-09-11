@@ -77,6 +77,29 @@ export async function listMinuteTemplates(db: DB) {
 	});
 }
 
+export async function updateMinuteTemplate(
+	db: DB,
+	id: string,
+	input: {
+		name: string;
+		headerText?: string;
+		footerText?: string;
+		showMeeting?: boolean;
+		showClasses?: boolean;
+		showParticipants?: boolean;
+		showRecords?: boolean;
+		showGeneralReports?: boolean;
+		showSignatures?: boolean;
+	},
+) {
+	return db
+		.update(minuteTemplates)
+		.set(input)
+		.where(eq(minuteTemplates.id, id))
+		.returning()
+		.get();
+}
+
 // ---------------------------------------------------------------------------
 // Coleta de dados (bordas 4/5 da spec 0009: sem internos; agrupar por turma)
 // ---------------------------------------------------------------------------

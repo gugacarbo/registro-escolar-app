@@ -134,6 +134,41 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(secondPreview.content).not.toContain("CABEÇALHO A");
 	});
 
+	test("edita o template pela página e a próxima prévia reflete a alteração", async ({
+		apiContext,
+		authenticatedPage,
+	}) => {
+		const template = await createMinuteTemplate(apiContext, {
+			name: "Template editável",
+			headerText: "Cabeçalho original",
+		});
+		const meeting = await createMeeting(apiContext, {
+			title: "Ata com template editável",
+			heldAt: "2026-05-10",
+			participants: [],
+			templateId: template.id,
+		});
+
+		expect((await previewMinute(apiContext, meeting.id)).content).toContain(
+			"CABEÇALHO ORIGINAL",
+		);
+
+		await authenticatedPage.goto("/minutes/templates");
+		await authenticatedPage.getByRole("cell", { name: "Template editável" }).click();
+		await expect(authenticatedPage).toHaveURL(
+			new RegExp(`/minutes/templates/${template.id}$`),
+		);
+		await authenticatedPage.getByLabel("Cabeçalho").fill("Cabeçalho revisado");
+		await authenticatedPage.getByRole("button", { name: "Salvar alterações" }).click();
+		await expect(authenticatedPage.getByRole("status")).toHaveText(
+			"Modelo atualizado",
+		);
+
+		expect((await previewMinute(apiContext, meeting.id)).content).toContain(
+			"CABEÇALHO REVISADO",
+		);
+	});
+
 	test("omite internos e agrupa registros por turma e estudante", async ({
 		apiContext,
 	}) => {

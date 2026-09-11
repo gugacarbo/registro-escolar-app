@@ -108,6 +108,24 @@ describe("StudentsPage", () => {
 		).toBeInTheDocument();
 	});
 
+	it("oculta o documento no mobile sem ocultar a ação de detalhes", () => {
+		renderPage();
+
+		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
+		expect(
+			within(table).getByRole("columnheader", { name: "Documento" }),
+		).toHaveClass("hidden", "sm:table-cell");
+		expect(within(table).getByRole("cell", { name: "123" })).toHaveClass(
+			"hidden",
+			"sm:table-cell",
+		);
+		expect(
+			within(table)
+				.getByRole("link", { name: "Ver detalhes de João Silva" })
+				.closest("td"),
+		).not.toHaveClass("hidden");
+	});
+
 	it("exibe — quando o documento é nulo e o contador da página", () => {
 		mocks.useStudents.mockReturnValue({
 			data: makePage({

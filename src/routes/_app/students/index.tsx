@@ -64,6 +64,7 @@ const columns = [
 		key: "document",
 		header: "Documento",
 		align: "right" as const,
+		className: "hidden sm:table-cell",
 		skeletonClassName: "ml-auto h-4 w-24",
 		cell: (student: Student) =>
 			student.document ? (

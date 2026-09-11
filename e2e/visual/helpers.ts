@@ -5,6 +5,8 @@ export type RouteScreenshot = {
 	name: string;
 	/** Elemento que confirma que a rota terminou de renderizar. */
 	ready: Locator;
+	/** Elementos dinâmicos que não fazem parte do contrato visual da rota. */
+	mask?: Locator[];
 };
 
 /**
@@ -13,7 +15,7 @@ export type RouteScreenshot = {
  */
 export async function expectRouteScreenshot(
 	page: Page,
-	{ name, ready }: RouteScreenshot,
+	{ name, ready, mask }: RouteScreenshot,
 ) {
 	await expect(ready).toBeVisible();
 	await expect(page.locator("body")).toBeVisible();
@@ -22,6 +24,7 @@ export async function expectRouteScreenshot(
 	await expect(page).toHaveScreenshot(name, {
 		animations: "disabled",
 		fullPage: true,
+		mask,
 	});
 }
 

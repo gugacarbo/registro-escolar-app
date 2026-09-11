@@ -23,6 +23,8 @@ export const createMinuteTemplateSchema = createInsertSchema(minuteTemplates)
 		footerText: z.string().optional().default(""),
 	});
 
+export const updateMinuteTemplateSchema = createMinuteTemplateSchema;
+
 export const selectMinuteTemplateSchema = createSelectSchema(minuteTemplates);
 
 // POST /api/meetings/:id/minutes/generate — observação opcional da versão.
@@ -42,6 +44,9 @@ export const selectMinuteVersionSchema = createSelectSchema(minuteVersions);
 
 export type CreateMinuteTemplateInput = z.infer<
 	typeof createMinuteTemplateSchema
+>;
+export type UpdateMinuteTemplateInput = z.infer<
+	typeof updateMinuteTemplateSchema
 >;
 export type MinuteTemplate = z.infer<typeof selectMinuteTemplateSchema>;
 export type MinuteApprovalStatus = z.infer<typeof minuteApprovalStatusSchema>;

@@ -101,7 +101,7 @@ it("renderiza trigger e controla abertura não controlada", async () => {
 	await user.click(screen.getByRole("button", { name: "Abrir dialog" }));
 	expect(await screen.findByRole("dialog")).toBeInTheDocument();
 	expect(screen.getByText("Novo papel")).toBeVisible();
-	await user.click(screen.getByRole("button", { name: "Close" }));
+	await user.click(screen.getByRole("button", { name: "Fechar" }));
 	await waitFor(() =>
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 	);

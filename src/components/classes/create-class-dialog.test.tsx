@@ -138,7 +138,7 @@ describe("CreateClassDialog", () => {
 		await user.type(await screen.findByLabelText("Período letivo *"), "2026");
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 		expect(await screen.findByText("Turma já existe")).toBeVisible();
-		await user.click(screen.getByRole("button", { name: "Close" }));
+		await user.click(screen.getByRole("button", { name: "Fechar" }));
 		await waitFor(() =>
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);
@@ -174,7 +174,7 @@ it("renderiza trigger e controla abertura não controlada", async () => {
 	await user.click(screen.getByRole("button", { name: "Abrir dialog" }));
 	expect(await screen.findByRole("dialog")).toBeInTheDocument();
 	expect(screen.getByText("Nova turma")).toBeVisible();
-	await user.click(screen.getByRole("button", { name: "Close" }));
+	await user.click(screen.getByRole("button", { name: "Fechar" }));
 	await waitFor(() =>
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 	);

@@ -33,18 +33,24 @@ const STATUS_OPTIONS: Array<{ value: MeetingStatus; label: string }> = [
 const columns = [
 	{
 		header: "Status",
+		className: "hidden sm:table-cell",
 		cell: (meeting: Meeting) => <MeetingStatusBadge status={meeting.status} />,
 	},
 	{
 		header: "Título",
 		cell: (meeting: Meeting) => (
-			<Link
-				to="/meetings/$meetingId"
-				params={{ meetingId: meeting.id }}
-				className="underline"
-			>
-				{meeting.title}
-			</Link>
+			<div className="flex min-w-0 flex-col gap-1 sm:block">
+				<span className="sm:hidden">
+					<MeetingStatusBadge status={meeting.status} />
+				</span>
+				<Link
+					to="/meetings/$meetingId"
+					params={{ meetingId: meeting.id }}
+					className="block truncate underline"
+				>
+					{meeting.title}
+				</Link>
+			</div>
 		),
 	},
 	{

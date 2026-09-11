@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { SearchX, TriangleAlert } from "lucide-react";
 import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
 
@@ -42,6 +43,7 @@ export type DataTableColumn<TData> = {
 	cell: (row: TData) => ReactNode;
 	align?: "left" | "center" | "right";
 	key?: string;
+	className?: string;
 	skeletonClassName?: string;
 };
 
@@ -165,110 +167,108 @@ export function DataTable<TData>({
 
 	return (
 		<div className="overflow-hidden rounded-xl border bg-card shadow-xs">
-			<div className="overflow-x-auto">
-				<Table aria-label={ariaLabel}>
-					<TableHeader>
-						<TableRow className="bg-muted/60 hover:bg-muted/60">
-							{columns.map((column, index) => (
-								<TableHead
-									key={
-										column.key ??
-										(typeof column.header === "string"
-											? column.header
-											: `col-${index}`)
-									}
-									className={
-										column.align
-											? alignClassName[column.align]
-											: index === 0
-												? "pl-4 text-left sm:pl-5"
-												: index === columns.length - 1
-													? "pr-4 text-right sm:pr-5"
-													: "text-left"
-									}
-								>
-									{column.header}
-								</TableHead>
-							))}
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{isLoading &&
-							Array.from({ length: pageSize }, (_, i) => (
-								<TableRow
-									key={`skeleton-${i}`}
-									className="hover:bg-transparent"
-								>
-									{columns.map((column, index) => (
-										<TableCell
-											key={
-												column.key ??
-												(typeof column.header === "string"
-													? column.header
-													: `col-${index}`)
-											}
+			<Table aria-label={ariaLabel}>
+				<TableHeader>
+					<TableRow className="bg-muted/60 hover:bg-muted/60">
+						{columns.map((column, index) => (
+							<TableHead
+								key={
+									column.key ??
+									(typeof column.header === "string"
+										? column.header
+										: `col-${index}`)
+								}
+								className={cn(
+									column.className,
+									column.align
+										? alignClassName[column.align]
+										: index === 0
+											? "pl-4 text-left sm:pl-5"
+											: index === columns.length - 1
+												? "pr-4 text-right sm:pr-5"
+												: "text-left",
+								)}
+							>
+								{column.header}
+							</TableHead>
+						))}
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					{isLoading &&
+						Array.from({ length: pageSize }, (_, i) => (
+							<TableRow key={`skeleton-${i}`} className="hover:bg-transparent">
+								{columns.map((column, index) => (
+									<TableCell
+										key={
+											column.key ??
+											(typeof column.header === "string"
+												? column.header
+												: `col-${index}`)
+										}
+										className={cn(
+											column.className,
+											column.align
+												? alignClassName[column.align]
+												: index === 0
+													? "pl-4 sm:pl-5"
+													: index === columns.length - 1
+														? "pr-4 sm:pr-5"
+														: undefined,
+										)}
+									>
+										<Skeleton
 											className={
-												column.align
-													? alignClassName[column.align]
-													: index === 0
-														? "pl-4 sm:pl-5"
-														: index === columns.length - 1
-															? "pr-4 sm:pr-5"
-															: undefined
+												column.skeletonClassName ?? "h-4 w-full max-w-56"
 											}
-										>
-											<Skeleton
-												className={
-													column.skeletonClassName ?? "h-4 w-full max-w-56"
-												}
-											/>
-										</TableCell>
-									))}
-								</TableRow>
-							))}
-						{!isLoading &&
-							rows.map((row) => (
-								<TableRow
-									key={getRowKey(row)}
-									tabIndex={onRowClick ? 0 : undefined}
-									className={onRowClick ? CLICKABLE_ROW_CLASS_NAME : undefined}
-									onClick={
-										onRowClick
-											? (event) => handleRowClick(event, row, onRowClick)
-											: undefined
-									}
-									onKeyDown={
-										onRowClick
-											? (event) => handleRowKeyDown(event, row, onRowClick)
-											: undefined
-									}
-								>
-									{columns.map((column, index) => (
-										<TableCell
-											key={
-												column.key ??
-												(typeof column.header === "string"
-													? column.header
-													: `col-${index}`)
-											}
-											className={
-												column.align
-													? alignClassName[column.align]
-													: index === 0
-														? "pl-4 font-normal sm:pl-5"
-														: index === columns.length - 1
-															? "pr-4 sm:pr-5"
-															: undefined
-											}
-										>
-											{column.cell(row)}
-										</TableCell>
-									))}
-								</TableRow>
-							))}
-					</TableBody>
-				</Table>
-			</div>
+										/>
+									</TableCell>
+								))}
+							</TableRow>
+						))}
+					{!isLoading &&
+						rows.map((row) => (
+							<TableRow
+								key={getRowKey(row)}
+								tabIndex={onRowClick ? 0 : undefined}
+								className={onRowClick ? CLICKABLE_ROW_CLASS_NAME : undefined}
+								onClick={
+									onRowClick
+										? (event) => handleRowClick(event, row, onRowClick)
+										: undefined
+								}
+								onKeyDown={
+									onRowClick
+										? (event) => handleRowKeyDown(event, row, onRowClick)
+										: undefined
+								}
+							>
+								{columns.map((column, index) => (
+									<TableCell
+										key={
+											column.key ??
+											(typeof column.header === "string"
+												? column.header
+												: `col-${index}`)
+										}
+										className={cn(
+											column.className,
+											column.align
+												? alignClassName[column.align]
+												: index === 0
+													? "pl-4 font-normal sm:pl-5"
+													: index === columns.length - 1
+														? "pr-4 sm:pr-5"
+														: undefined,
+										)}
+									>
+										{column.cell(row)}
+									</TableCell>
+								))}
+							</TableRow>
+						))}
+				</TableBody>
+			</Table>
 
 			{!isLoading && isError && (
 				<div className="border-t p-4 sm:p-5">
