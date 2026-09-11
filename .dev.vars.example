@@ -11,3 +11,5 @@ BETTER_AUTH_TRUSTED_ORIGINS=
 
 # Optional public app title (client-side)
 VITE_APP_TITLE="Registro Escolar"
+
+RESEND_API_KEY=re_

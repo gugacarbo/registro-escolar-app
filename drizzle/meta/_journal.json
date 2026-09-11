@@ -71,6 +71,13 @@
       "when": 1789100178147,
       "tag": "0009_adiciona-papeis-de-acesso",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1789105367058,
+      "tag": "0010_cria-tabela-convites",
+      "breakpoints": true
     }
   ]
 }

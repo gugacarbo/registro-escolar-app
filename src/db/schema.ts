@@ -3,6 +3,7 @@ export * from "./classes-schema.ts";
 export * from "./components-schema.ts";
 export * from "./enrollments-schema.ts";
 export * from "./general-reports-schema.ts";
+export * from "./invitations-schema.ts";
 export * from "./meeting-student-status-schema.ts";
 export * from "./meetings-schema.ts";
 export * from "./minutes-schema.ts";

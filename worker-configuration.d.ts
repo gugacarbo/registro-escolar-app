@@ -7,6 +7,8 @@ interface __BaseEnv_Env {
 	BETTER_AUTH_SECRET: string;
 	/** Origens extras confiáveis do better-auth, separadas por vírgula. */
 	BETTER_AUTH_TRUSTED_ORIGINS?: string;
+	RESEND_API_KEY?: string;
+	EMAIL_FROM?: string;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
