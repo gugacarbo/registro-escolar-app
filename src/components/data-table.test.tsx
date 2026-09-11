@@ -89,7 +89,7 @@ describe("DataTable", () => {
 			/>,
 		);
 		expect(screen.getByRole("link", { name: "20" })).toBeInTheDocument();
-		expect(screen.getAllByText("More pages")).toHaveLength(1);
+		expect(screen.getAllByText("Mais páginas")).toHaveLength(1);
 	});
 
 	it("troca o pageSize pelo seletor", async () => {
