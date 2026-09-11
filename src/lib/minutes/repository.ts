@@ -347,6 +347,8 @@ export async function previewMinute(db: DB, meetingId: string) {
 		templateId: template?.id ?? null,
 		status: meeting.status,
 		approvalStatus: minute?.approvalStatus ?? "pendente_aprovacao",
+		approvedAt: minute?.approvedAt?.toISOString() ?? null,
+		approvalNotes: minute?.approvalNotes ?? null,
 		rendered,
 		content: renderedToPlainText(rendered),
 	};

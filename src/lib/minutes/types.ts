@@ -23,6 +23,8 @@ export type MinutePreviewJson = {
 	templateId: string | null;
 	status: string;
 	approvalStatus: string;
+	approvedAt: string | null;
+	approvalNotes: string | null;
 	content: string;
 };
 

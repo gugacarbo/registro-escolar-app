@@ -279,69 +279,95 @@ export default function MinuteDetailPage() {
 				)}
 			</PageSection>
 
-			<PageSection
-				title="Aprovar ata"
-				description="Registre a data e uma observação ao aprovar a versão atual."
-			>
-				<Form {...approveForm}>
-					<FormNative
-						className="space-y-3"
-						onSubmit={() => {
-							setSaved(false);
-							const values = approveForm.getValues();
-							approve.mutate(
-								{
-									data: values.data || undefined,
-									observacao: values.observacao || undefined,
-								},
-								{
-									onSuccess: () => setSaved(true),
-								},
-							);
-						}}
-					>
-						<FormField
-							control={approveForm.control}
-							name="data"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Data de aprovação</FormLabel>
-									<FormControl>
-										<Input type="date" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={approveForm.control}
-							name="observacao"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Observação</FormLabel>
-									<FormControl>
-										<Textarea {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormSubmit disabled={approve.isPending}>
-							{approve.isPending ? "Aprovando..." : "Aprovar ata"}
-						</FormSubmit>
-					</FormNative>
-				</Form>
-				{saved && (
-					<p role="status" className="text-sm text-muted-foreground">
-						Ata aprovada
-					</p>
-				)}
-				{approve.error && (
-					<p role="alert" className="text-sm text-destructive">
-						{approve.error.message || "Falha ao aprovar ata"}
-					</p>
-				)}
-			</PageSection>
+			{isApproved ? (
+				<PageSection
+					title="Aprovação"
+					description="Ata aprovada. Gere uma nova versão para reabrir a aprovação."
+				>
+					<dl className="grid gap-3 text-sm sm:grid-cols-2">
+						<div>
+							<dt className="text-muted-foreground">Data de aprovação</dt>
+							<dd className="font-medium">
+								{preview.data?.approvedAt
+									? new Date(preview.data.approvedAt).toLocaleDateString(
+											"pt-BR",
+										)
+									: "—"}
+							</dd>
+						</div>
+						<div>
+							<dt className="text-muted-foreground">Observação</dt>
+							<dd className="font-medium">
+								{preview.data?.approvalNotes ?? "—"}
+							</dd>
+						</div>
+					</dl>
+				</PageSection>
+			) : (
+				<PageSection
+					title="Aprovar ata"
+					description="Registre a data e uma observação ao aprovar a versão atual."
+				>
+					<Form {...approveForm}>
+						<FormNative
+							className="space-y-3"
+							onSubmit={() => {
+								setSaved(false);
+								const values = approveForm.getValues();
+								approve.mutate(
+									{
+										data: values.data || undefined,
+										observacao: values.observacao || undefined,
+									},
+									{
+										onSuccess: () => setSaved(true),
+									},
+								);
+							}}
+						>
+							<FormField
+								control={approveForm.control}
+								name="data"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Data de aprovação</FormLabel>
+										<FormControl>
+											<Input type="date" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={approveForm.control}
+								name="observacao"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Observação</FormLabel>
+										<FormControl>
+											<Textarea {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormSubmit disabled={approve.isPending}>
+								{approve.isPending ? "Aprovando..." : "Aprovar ata"}
+							</FormSubmit>
+						</FormNative>
+					</Form>
+					{saved && (
+						<p role="status" className="text-sm text-muted-foreground">
+							Ata aprovada
+						</p>
+					)}
+					{approve.error && (
+						<p role="alert" className="text-sm text-destructive">
+							{approve.error.message || "Falha ao aprovar ata"}
+						</p>
+					)}
+				</PageSection>
+			)}
 
 			<PageSection
 				title="Versões"
