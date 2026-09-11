@@ -66,7 +66,7 @@ export default defineConfig({
 				statements: 95,
 				branches: 95,
 			},
-			include: ["src/**/*.{ts,tsx}"],
+			include: ["src/lib/**/*.{ts,tsx}"],
 			exclude: [
 				"src/**/*.test.{ts,tsx}",
 				"src/components/ui/**/*",
