@@ -172,7 +172,7 @@ describe("ClassStudentsPage", () => {
 		await user.click(screen.getByRole("tab", { name: "Reuniões (1)" }));
 
 		expect(
-			screen.getByText("Realizada em 10/05/2026, 18:00"),
+			screen.getByText("Realizada em 10/05/2026, 21:00"),
 		).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "Conselho 2026" })).toHaveAttribute(
 			"href",
