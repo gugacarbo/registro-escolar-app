@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { mkdirSync, readdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const defaultE2EDirectory =
@@ -32,9 +32,12 @@ function ensureParentDir(path: string) {
 export function resetDatabase() {
 	ensureParentDir(E2E_DB_PATH);
 	const sqlite = new Database(E2E_DB_PATH);
+	sqlite.pragma("busy_timeout = 30000");
+	sqlite.pragma("journal_mode = WAL");
 	sqlite.pragma("foreign_keys = OFF");
 	try {
-		// Drop all application tables. Order matters due to FKs.
+		// Clear application data without removing the schema that the running
+		// Miniflare D1 instance keeps open between requests.
 		const tables = [
 			"invitation",
 			"verification",
@@ -61,26 +64,17 @@ export function resetDatabase() {
 			"staff",
 		];
 		for (const table of tables) {
-			sqlite.exec(`DROP TABLE IF EXISTS "${table}"`);
-		}
-
-		// Reapply migrations from drizzle/*.sql in lexical order.
-		const migrationsDir = join(process.cwd(), "drizzle");
-		const files = readdirSync(migrationsDir)
-			.filter((f) => f.endsWith(".sql"))
-			.sort();
-
-		for (const file of files) {
-			const sql = readFileSync(join(migrationsDir, file), "utf-8");
-			// Split on statement-breakpoint comments to run each statement separately.
-			const statements = sql
-				.split(/-->\s*statement-breakpoint/)
-				.map((s) => s.trim())
-				.filter(Boolean);
-			for (const statement of statements) {
-				// Skip Drizzle metadata statements that may reference missing tables.
-				if (statement.includes("__drizzle_migrations")) continue;
-				sqlite.exec(statement);
+			if (table === "user") {
+				sqlite.exec("DROP TRIGGER user_permanent_admin_delete_check");
+			}
+			sqlite.exec(`DELETE FROM "${table}"`);
+			if (table === "user") {
+				sqlite.exec(`CREATE TRIGGER user_permanent_admin_delete_check
+BEFORE DELETE ON user
+WHEN OLD.is_permanent_admin = 1
+BEGIN
+	SELECT RAISE(ABORT, 'permanent administrator cannot be deleted');
+END`);
 			}
 		}
 	} finally {
@@ -90,6 +84,7 @@ export function resetDatabase() {
 
 export function restoreEnrollmentAsActive(enrollmentId: string) {
 	const sqlite = new Database(E2E_DB_PATH);
+	sqlite.pragma("busy_timeout = 30000");
 	try {
 		const result = sqlite
 			.prepare(
