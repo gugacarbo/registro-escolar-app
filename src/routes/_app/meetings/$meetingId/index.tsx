@@ -376,18 +376,20 @@ export default function MeetingDetailPage() {
 				className="space-y-4"
 			>
 				<div className="flex flex-wrap items-center justify-between gap-2 border-b pb-2">
-					<TabsList>
-						<TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
-						<TabsTrigger value="turmas">
-							Turmas ({meetingClasses.length})
-						</TabsTrigger>
-						<TabsTrigger value="participantes">
-							Participantes ({participants.length})
-						</TabsTrigger>
-						<TabsTrigger value="ata">Ata e Documentos</TabsTrigger>
-					</TabsList>
+					<div className="min-w-0 max-w-full overflow-x-auto">
+						<TabsList>
+							<TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
+							<TabsTrigger value="turmas">
+								Turmas ({meetingClasses.length})
+							</TabsTrigger>
+							<TabsTrigger value="participantes">
+								Participantes ({participants.length})
+							</TabsTrigger>
+							<TabsTrigger value="ata">Ata e Documentos</TabsTrigger>
+						</TabsList>
+					</div>
 
-					<div className="flex items-center gap-2">
+					<div className="flex flex-wrap items-center gap-2">
 						<Link to="/meetings/$meetingId/council" params={{ meetingId }}>
 							<Button variant="secondary" size="sm">
 								Conselho
