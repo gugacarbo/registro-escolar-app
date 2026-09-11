@@ -17,7 +17,9 @@ export function AppHeader({ userName, userEmail, onSignOut }: AppHeaderProps) {
 			<div className="min-w-0 flex-1">
 				{userName && <p className="truncate text-sm font-medium">{userName}</p>}
 				{userEmail && (
-					<p className="truncate text-xs text-muted-foreground">{userEmail}</p>
+					<p className="hidden truncate text-xs text-muted-foreground sm:block">
+						{userEmail}
+					</p>
 				)}
 			</div>
 			<ModeToggle />

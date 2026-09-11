@@ -34,8 +34,9 @@ export function StaffRowActions({ member }: { member: StaffMember }) {
 			<AlertDialog>
 				<AlertDialogTrigger asChild>
 					<Button
-						variant="destructive"
+						variant="ghost"
 						size="sm"
+						className="text-destructive hover:text-destructive"
 						disabled={deleteMember.isPending}
 						aria-label={`Remover ${member.name}`}
 					>

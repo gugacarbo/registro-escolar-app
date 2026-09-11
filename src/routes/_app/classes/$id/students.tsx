@@ -120,13 +120,10 @@ export default function ClassStudentsPage() {
 
 			<PageHeader
 				eyebrow="Estrutura escolar"
-				title="Estudantes da turma"
+				title={data ? data.turma.name : "Estudantes da turma"}
 				description={
 					data ? (
 						<div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-							<span className="font-medium text-foreground">
-								{data.turma.name}
-							</span>
 							<span className="flex items-center gap-1.5 text-muted-foreground">
 								<CalendarIcon className="size-4 shrink-0 text-primary/70" />
 								Período letivo{" "}

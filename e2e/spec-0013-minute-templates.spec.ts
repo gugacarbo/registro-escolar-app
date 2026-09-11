@@ -59,9 +59,7 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		authenticatedPage: page,
 		apiContext,
 	}) => {
-		const template = await createMinuteTemplate(apiContext, {
-			name: "Modelo Teclado",
-		});
+		await createMinuteTemplate(apiContext, { name: "Modelo Teclado" });
 
 		await page.goto("/minutes/templates");
 		const row = page

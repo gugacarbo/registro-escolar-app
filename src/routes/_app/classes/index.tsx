@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { PackageOpenIcon } from "lucide-react";
 import { useState } from "react";
 
 import { CreateClassDialog } from "#/components/classes/create-class-dialog";
@@ -39,8 +40,9 @@ const columns = [
 	{
 		header: "Ofertas",
 		cell: (classRow: ClassListItem) => (
-			<Button asChild variant="ghost" size="sm">
+			<Button asChild variant="outline" size="sm">
 				<Link to="/classes/$id/offers" params={{ id: classRow.id }}>
+					<PackageOpenIcon className="mr-1.5 size-3.5" />
 					Ofertas
 				</Link>
 			</Button>

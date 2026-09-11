@@ -91,8 +91,14 @@ export function InvitationDialog() {
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
-				<Button type="button" variant="outline" size="sm" className="gap-2">
-					<Mail className="size-4" />
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					className="gap-2"
+					aria-label="Convidar usuário"
+				>
+					<Mail className="size-4" aria-hidden />
 					<span className="hidden sm:inline">Convidar</span>
 				</Button>
 			</DialogTrigger>

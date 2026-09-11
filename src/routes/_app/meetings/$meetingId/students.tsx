@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { EntitySelect } from "#/components/ui/entity-select";
@@ -8,6 +8,7 @@ import { PageShell } from "#/components/ui/page";
 import { Skeleton } from "#/components/ui/skeleton";
 import { fetchClassesPage } from "#/hooks/entity-fetchers";
 import { useMeetingClassStudents } from "#/hooks/meetings/use-meeting-class-students";
+import { useMeetingClasses } from "#/hooks/meetings/use-meeting-classes";
 import { useUpdateStudentStatus } from "#/hooks/meetings/use-update-student-status";
 import { useAsyncOptions } from "#/hooks/use-async-options";
 import type { TrackingStatus } from "#/lib/meeting-student-status/schema";
@@ -46,6 +47,15 @@ function MeetingStudentsPage() {
 		isLoading: isLoadingStudents,
 		isError,
 	} = useMeetingClassStudents(meetingId, classId);
+	const { data: meetingClasses = [] } = useMeetingClasses(meetingId);
+
+	useEffect(() => {
+		if (classId || meetingClasses.length !== 1) return;
+		const only = meetingClasses[0];
+		if (only?.classId) {
+			setClassId(only.classId);
+		}
+	}, [meetingClasses, classId]);
 	const updateStatus = useUpdateStudentStatus(meetingId);
 	const [serverError, setServerError] = useState<string | null>(null);
 

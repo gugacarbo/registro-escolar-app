@@ -40,7 +40,7 @@ export async function countPendingInvitationsByUser(
  * enquanto uma base legada ainda não recebeu as colunas de papéis.
  */
 export async function hasPermanentAdmin(db: DB): Promise<boolean> {
-	const anyUser = await db.select({ id: user.id }).from(user).limit(1).get();
+	const anyUser = await db.query.user.findFirst({ columns: { id: true } });
 
 	return Boolean(anyUser);
 }

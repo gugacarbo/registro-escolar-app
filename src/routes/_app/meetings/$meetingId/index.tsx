@@ -402,11 +402,6 @@ export default function MeetingDetailPage() {
 					</div>
 
 					<div className="flex flex-wrap items-center gap-2">
-						<Link to="/meetings/$meetingId/council" params={{ meetingId }}>
-							<Button variant="secondary" size="sm">
-								Conselho
-							</Button>
-						</Link>
 						<Link to="/meetings/$meetingId/participants" params={{ meetingId }}>
 							<Button variant="secondary" size="sm">
 								Participantes
@@ -510,11 +505,6 @@ export default function MeetingDetailPage() {
 									Turmas que fazem parte da pauta de deliberação.
 								</CardDescription>
 							</div>
-							<Link to="/meetings/$meetingId/council" params={{ meetingId }}>
-								<Button variant="outline" size="sm">
-									Iniciar pelo Conselho
-								</Button>
-							</Link>
 						</CardHeader>
 						<CardContent>
 							{isLoadingClasses && <Skeleton className="h-16 w-full" />}

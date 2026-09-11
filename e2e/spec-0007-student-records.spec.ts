@@ -60,7 +60,7 @@ async function listRecords(
 
 test.describe("SPEC-0007 registros de estudante", () => {
 	test("rejeita texto vazio nos dois fluxos", async ({ apiContext }) => {
-		const student = await createStudent(apiContext, "Estudante Texto Vazio");
+		const student = await createStudent(apiContext, "Estudante Texto Vazio A");
 		const independent = await fetch(`${baseURL}/api/students/${student.id}/records`, {
 			method: "POST",
 			headers: { Cookie: apiContext.cookies, "Content-Type": "application/json" },

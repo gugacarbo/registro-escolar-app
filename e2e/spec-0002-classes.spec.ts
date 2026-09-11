@@ -60,7 +60,7 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 			new RegExp(`/classes/${klass.id}/students`),
 		);
 		await expect(
-			page.getByRole("heading", { name: "Estudantes da turma" }),
+			page.getByRole("heading", { name: "Turma Linha Clicável" }),
 		).toBeVisible();
 	});
 

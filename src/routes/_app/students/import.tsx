@@ -16,6 +16,11 @@ const STEP_UPLOAD = 0;
 const STEP_PREVIEW = 1;
 const STEP_RESULT = 2;
 
+const CSV_TEMPLATE = [
+	"nome;documento;matricula;email;telefone;data_nascimento;observacoes",
+	"Estudante Exemplo, Maria da Silva;123.456.789-01;20260001;maria.exemplo@escola.br;(11) 99999-0000;2015-03-10;Observação de exemplo",
+].join("\n");
+
 export default function ImportStudentsPage() {
 	const navigate = useNavigate();
 	const importPreview = useImportPreview();
@@ -177,6 +182,23 @@ export default function ImportStudentsPage() {
 					onClick={() => inputRef.current?.click()}
 				>
 					Selecionar arquivo
+				</Button>
+				<Button
+					variant="ghost"
+					type="button"
+					onClick={() => {
+						const blob = new Blob([`\ufeff${CSV_TEMPLATE}`], {
+							type: "text/csv;charset=utf-8",
+						});
+						const url = URL.createObjectURL(blob);
+						const anchor = document.createElement("a");
+						anchor.href = url;
+						anchor.download = "modelo-importacao-estudantes.csv";
+						anchor.click();
+						URL.revokeObjectURL(url);
+					}}
+				>
+					Baixar modelo CSV
 				</Button>
 				{fileName && (
 					<span className="text-sm text-muted-foreground">{fileName}</span>

@@ -133,7 +133,7 @@ describe("ClassStudentsPage", () => {
 		renderPage();
 
 		expect(
-			screen.getByRole("heading", { name: "Estudantes da turma" }),
+			screen.getByRole("heading", { name: "Turma A" }),
 		).toBeInTheDocument();
 		expect(
 			within(
