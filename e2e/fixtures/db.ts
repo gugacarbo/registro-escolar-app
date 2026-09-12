@@ -29,53 +29,98 @@ function ensureParentDir(path: string) {
 	mkdirSync(parent, { recursive: true });
 }
 
-export function resetDatabase() {
-	ensureParentDir(E2E_DB_PATH);
-	const sqlite = new Database(E2E_DB_PATH);
-	sqlite.pragma("busy_timeout = 30000");
-	sqlite.pragma("journal_mode = WAL");
-	sqlite.pragma("foreign_keys = OFF");
-	try {
-		// Clear application data without removing the schema that the running
-		// Miniflare D1 instance keeps open between requests.
-		const tables = [
-			"invitation",
-			"verification",
-			"account",
-			"session",
-			"user",
-			"minute_versions",
-			"minutes",
-			"minute_templates",
-			"general_reports",
-			"record_meeting_inclusions",
-			"student_records",
-			"meeting_student_status",
-			"meeting_participants",
-			"meeting_classes",
-			"meetings",
-			"offer_professors",
-			"class_offers",
-			"components",
-			"enrollments",
-			"classes",
-			"students",
-			"roles",
-			"staff",
-		];
-		for (const table of tables) {
-			if (table === "user") {
-				sqlite.exec("DROP TRIGGER user_permanent_admin_delete_check");
-			}
-			sqlite.exec(`DELETE FROM "${table}"`);
-			if (table === "user") {
-				sqlite.exec(`CREATE TRIGGER user_permanent_admin_delete_check
+// Tables in delete order (children before parents is not required here
+// because foreign_keys are OFF during the reset).
+const RESET_TABLES = [
+	"invitation",
+	"verification",
+	"account",
+	"session",
+	"user",
+	"minute_versions",
+	"minutes",
+	"minute_templates",
+	"general_reports",
+	"record_meeting_inclusions",
+	"student_records",
+	"meeting_student_status",
+	"meeting_participants",
+	"meeting_classes",
+	"meetings",
+	"offer_professors",
+	"class_offers",
+	"components",
+	"enrollments",
+	"classes",
+	"students",
+	"roles",
+	"staff",
+];
+
+const USER_DELETE_TRIGGER = `CREATE TRIGGER user_permanent_admin_delete_check
 BEFORE DELETE ON user
 WHEN OLD.is_permanent_admin = 1
 BEGIN
 	SELECT RAISE(ABORT, 'permanent administrator cannot be deleted');
-END`);
+END`;
+
+function sleepSync(ms: number) {
+	Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+export function resetDatabase() {
+	ensureParentDir(E2E_DB_PATH);
+	// The Miniflare D1 instance keeps the same sqlite file open while the
+	// preview server handles requests, so a reset can hit SQLITE_BUSY. Retry
+	// with backoff instead of blocking a single statement for 30s (which
+	// stalls the server and surfaces in Playwright as page.goto ERR_ABORTED).
+	const maxAttempts = 5;
+	let lastError: unknown;
+	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+		try {
+			resetDatabaseOnce();
+			return;
+		} catch (err) {
+			lastError = err;
+			const message = err instanceof Error ? err.message : String(err);
+			const busy = /busy|locked/i.test(message);
+			if (!busy || attempt === maxAttempts) throw err;
+			sleepSync(200 * attempt);
+		}
+	}
+	throw lastError;
+}
+
+function resetDatabaseOnce() {
+	const sqlite = new Database(E2E_DB_PATH);
+	// Fail fast per statement so the retry loop above can back off; holding a
+	// 30s busy_timeout here blocks the server behind the same lock.
+	sqlite.pragma("busy_timeout = 5000");
+	sqlite.pragma("journal_mode = WAL");
+	sqlite.pragma("foreign_keys = OFF");
+	try {
+		// Clear application data without removing the schema that the running
+		// Miniflare D1 instance keeps open between requests. A single
+		// transaction holds the RESERVED lock once instead of once per table.
+		sqlite.exec("BEGIN IMMEDIATE");
+		try {
+			for (const table of RESET_TABLES) {
+				if (table === "user") {
+					sqlite.exec("DROP TRIGGER user_permanent_admin_delete_check");
+				}
+				sqlite.exec(`DELETE FROM "${table}"`);
+				if (table === "user") {
+					sqlite.exec(USER_DELETE_TRIGGER);
+				}
 			}
+			sqlite.exec("COMMIT");
+		} catch (err) {
+			try {
+				sqlite.exec("ROLLBACK");
+			} catch {
+				// Ignore rollback errors; rethrow the original failure.
+			}
+			throw err;
 		}
 	} finally {
 		sqlite.close();

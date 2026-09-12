@@ -4,7 +4,11 @@ export class ClassesPage {
 	constructor(private page: Page) {}
 
 	async goto() {
-		await this.page.goto("/classes");
+		// domcontentloaded returns once the document is parsed; the explicit
+		// assertions after each navigation wait for the hydrated UI. Waiting
+		// for full "load" here stalls on slow API responses (e.g. a D1 WAL
+		// lock held by the test setup) and flakes with ERR_ABORTED.
+		await this.page.goto("/classes", { waitUntil: "domcontentloaded" });
 	}
 
 	async clickNew() {

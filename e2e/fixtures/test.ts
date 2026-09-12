@@ -18,7 +18,7 @@ export const test = base.extend<{
 	},
 
 	authenticatedPage: async ({ page, apiContext }, use) => {
-		await page.goto("/login");
+		await page.goto("/login", { waitUntil: "domcontentloaded" });
 		await page.getByRole("textbox", { name: "Email" }).fill(apiContext.user.email);
 		await page.getByRole("textbox", { name: "Senha" }).fill(apiContext.user.password);
 		await page.getByRole("button", { name: "Entrar" }).click();

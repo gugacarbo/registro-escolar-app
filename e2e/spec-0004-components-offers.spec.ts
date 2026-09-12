@@ -13,7 +13,7 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 	test("cadastra e lista componente pela UI", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/components");
+		await page.goto("/components", { waitUntil: "domcontentloaded" });
 		await page.getByRole("button", { name: "Novo componente" }).click();
 		const dialog = page.getByRole("dialog");
 		const nameField = dialog.getByRole("textbox", { name: "Nome" });
