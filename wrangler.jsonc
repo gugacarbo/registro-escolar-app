@@ -11,7 +11,7 @@
 	],
 	"main": "src/default-entry.ts",
 	"observability": {
-		"enabled": "true",
+		"enabled": true,
     "logs": {
       "enabled": true,
       "invocation_logs": true
