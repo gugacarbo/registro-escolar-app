@@ -7,10 +7,11 @@ import {
 	createStudent,
 } from "./fixtures/api";
 import { StudentsPage } from "./pages/students-page";
+import { gotoReady } from "./pages/navigation";
 
 test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 	test("exige autenticação para acessar estudantes", async ({ page }) => {
-		await page.goto("/students");
+		await gotoReady(page,"/students");
 		await expect(
 			page.getByText("Acesse o Registro Escolar com sua conta."),
 		).toBeVisible();
@@ -134,7 +135,7 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 			dataInicio: "2026-02-01",
 		});
 
-		await page.goto(`/students/${student.id}`);
+		await gotoReady(page,`/students/${student.id}`);
 		await expect(
 			page.getByRole("heading", { name: "Dados do estudante" }),
 		).toBeVisible();
@@ -174,7 +175,7 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 		authenticatedPage: page,
 		apiContext,
 	}) => {
-		await page.goto("/students/import");
+		await gotoReady(page,"/students/import");
 		const csv = "nome,documento\nAlice Import,1234567\nBob Import,7654321\n";
 		await page.setInputFiles("input[type=file]", {
 			name: "estudantes.csv",
@@ -215,7 +216,7 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 			})
 		).json()) as { id: string; name: string };
 
-		await page.goto("/students/import");
+		await gotoReady(page,"/students/import");
 		const csv = "nome,documento\nConflito E2E,9990001\n";
 		await page.setInputFiles("input[type=file]", {
 			name: "conflito.csv",
@@ -246,7 +247,7 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 	test("rejeita arquivo com formato inválido", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/students/import");
+		await gotoReady(page,"/students/import");
 		await page.setInputFiles("input[type=file]", {
 			name: "arquivo.txt",
 			mimeType: "text/plain",
@@ -293,7 +294,7 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 	test("lista linhas inválidas na pré-visualização", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/students/import");
+		await gotoReady(page,"/students/import");
 		const csv = "nome,documento\nAlice Válida,1001\n,1002\nNome Obrigatório,\n";
 		await page.setInputFiles("input[type=file]", {
 			name: "invalidas.csv",

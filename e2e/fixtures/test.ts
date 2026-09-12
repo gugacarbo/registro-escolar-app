@@ -2,6 +2,7 @@ import { test as base, expect, type Page } from "@playwright/test";
 
 import { createAuthenticatedContext, type ApiContext } from "./api";
 import { resetDatabase } from "./db";
+import { gotoReady } from "../pages/navigation";
 
 export type { ApiContext };
 
@@ -18,7 +19,7 @@ export const test = base.extend<{
 	},
 
 	authenticatedPage: async ({ page, apiContext }, use) => {
-		await page.goto("/login", { waitUntil: "domcontentloaded" });
+		await gotoReady(page, "/login");
 		await page.getByRole("textbox", { name: "Email" }).fill(apiContext.user.email);
 		await page.getByRole("textbox", { name: "Senha" }).fill(apiContext.user.password);
 		await page.getByRole("button", { name: "Entrar" }).click();

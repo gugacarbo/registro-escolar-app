@@ -6,6 +6,7 @@ import {
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
 import { ClassesPage } from "./pages/classes-page";
+import { gotoReady } from "./pages/navigation";
 
 test.describe("SPEC-0002 turmas e matrículas", () => {
 	test("cria e lista turmas pela UI", async ({
@@ -89,7 +90,7 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		const student = await createStudent(apiContext, "Estudante Matrícula");
 		const klass = await createClass(apiContext, "Turma Matrícula", "2026");
 
-		await page.goto("/classes/enroll");
+		await gotoReady(page,"/classes/enroll");
 		await page.getByRole("combobox").first().click();
 		const studentOption = page.locator('[data-slot="select-item"]').filter({ hasText: student.name });
 		await expect(studentOption).toBeAttached();

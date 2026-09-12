@@ -1,10 +1,12 @@
 import { expect, type Page } from "@playwright/test";
 
+import { gotoReady } from "./navigation";
+
 export class MeetingsPage {
 	constructor(private page: Page) {}
 
 	async goto() {
-		await this.page.goto("/meetings");
+		await gotoReady(this.page, "/meetings");
 	}
 
 	async clickNew() {

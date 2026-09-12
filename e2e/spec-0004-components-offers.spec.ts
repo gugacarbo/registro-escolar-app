@@ -8,12 +8,13 @@ import {
 	softDeleteStaff,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
+import { gotoReady } from "./pages/navigation";
 
 test.describe("SPEC-0004 componentes e ofertas", () => {
 	test("cadastra e lista componente pela UI", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/components", { waitUntil: "domcontentloaded" });
+		await gotoReady(page, "/components");
 		await page.getByRole("button", { name: "Novo componente" }).click();
 		const dialog = page.getByRole("dialog");
 		const nameField = dialog.getByRole("textbox", { name: "Nome" });
@@ -35,7 +36,7 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 			"Componente Linha Clicável",
 		);
 
-		await page.goto("/components");
+		await gotoReady(page, "/components");
 		const cell = page.getByRole("cell", {
 			name: "Componente Linha Clicável",
 		});
@@ -64,7 +65,7 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 		const klass = await createClass(apiContext, "Turma Oferta", "2026");
 		const component = await createComponent(apiContext, "Biologia E2E");
 
-		await page.goto(`/classes/${klass.id}/offers`);
+		await gotoReady(page, `/classes/${klass.id}/offers`);
 		await page.getByRole("button", { name: "Nova oferta" }).click();
 		const dialog = page.getByRole("dialog");
 		const componentTrigger = dialog.getByRole("combobox", {

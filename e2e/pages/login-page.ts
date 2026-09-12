@@ -1,10 +1,12 @@
 import type { Page } from "@playwright/test";
 
+import { gotoReady } from "./navigation";
+
 export class LoginPage {
 	constructor(private page: Page) {}
 
 	async goto() {
-		await this.page.goto("/login");
+		await gotoReady(this.page, "/login");
 	}
 
 	async fill(email: string, password: string) {

@@ -9,12 +9,13 @@ import {
 	softDeleteStaff,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
+import { gotoReady } from "./pages/navigation";
 
 test.describe("SPEC-0003 servidores e papéis", () => {
 	test("cadastra e lista servidor pela UI", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/staff");
+		await gotoReady(page,"/staff");
 		await page.getByRole("button", { name: "Novo servidor" }).click();
 		await expect(page.getByRole("dialog")).toBeVisible();
 		await expect(
@@ -38,7 +39,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 	}) => {
 		const staff = await createStaff(apiContext, "Servidor Linha Clicável");
 
-		await page.goto("/staff");
+		await gotoReady(page,"/staff");
 		const cell = page.getByRole("cell", {
 			name: "Servidor Linha Clicável",
 			exact: true,
@@ -57,7 +58,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 	}) => {
 		const role = await createRole(apiContext, "Papel Linha Clicável");
 
-		await page.goto("/roles");
+		await gotoReady(page,"/roles");
 		const cell = page.getByRole("cell", { name: "Papel Linha Clicável" });
 		await expect(cell).toBeVisible();
 		await cell.click();
@@ -127,7 +128,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		);
 		expect(participant).toMatchObject({ staffId: staff.id, roleId: role.id });
 
-		await page.goto(`/meetings/${meeting.id}/participants`);
+		await gotoReady(page,`/meetings/${meeting.id}/participants`);
 		await expect(page.getByText(`${staff.name} — Professor`)).toBeVisible();
 	});
 

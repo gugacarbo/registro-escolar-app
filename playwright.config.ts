@@ -4,14 +4,23 @@ const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3001";
 
 export default defineConfig({
 	testDir: "./e2e",
+	// CI runners stall the preview server for tens of seconds under load
+	// (observed as page.goto ERR_ABORTED after 30s). The per-test budget
+	// lets a test ride out a transient stall instead of burning retries.
+	timeout: 90_000,
 	fullyParallel: false,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
 	workers: 1,
 	reporter: "list",
+	expect: {
+		timeout: 15_000,
+	},
 	use: {
 		baseURL,
 		trace: "on-first-retry",
+		actionTimeout: 15_000,
+		navigationTimeout: 15_000,
 	},
 	projects: [
 		{
