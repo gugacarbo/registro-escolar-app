@@ -40,7 +40,17 @@ npm run e2e              # tudo verde (CI)
 
 ## Como deployar
 
-<!-- Ferramenta/script oficial, ordem, e o que NÃO fazer. -->
+Ordem oficial (deploy é manual; o CI **não** publica):
+
+```bash
+CI=true bun run db:remote:migrate   # só se houver migrações novas em drizzle/
+bun run deploy                      # = vite build + wrangler deploy
+wrangler deployments list           # confirma 100% na nova versão
+```
+
+NÃO fazer: commitar secrets; confiar em "CI verde" como prova de publicação;
+editar `wrangler.jsonc` com booleanos entre aspas (quebra o deploy no fim).
+URL de produção: https://registro-escolar-app.gugacarbo.workers.dev
 
 ## Git & PRs
 
@@ -55,6 +65,28 @@ npm run e2e              # tudo verde (CI)
   `.wrangler/state/v3/d1/miniflare-D1DatabaseObject/*.sqlite`; se existirem
   múltiplos `.sqlite` lá, apague o diretório `.wrangler/state/v3/d1` e rode
   `pre-dev`.
+- `wrangler.jsonc` é JSONC, mas a API do Cloudflare é estrita com tipos:
+  booleano escrito como string (`"enabled": "true"`) faz o `wrangler deploy`
+  subir os assets e **falhar só no fim** (`code: 10021`,
+  `Settings.observability.enabled of type bool`). O Worker segue na versão
+  anterior — deploy silenciosamente não publicado. Sempre `true`/`false` sem
+  aspas.
+- NUNCA rodar `prettier --write wrangler.jsonc`: o prettier não tem parser
+  JSONC e reescreve o arquivo como se fosse markdown (destrói o comentário de
+  cabeçalho e a indentação). O `prettier --check` sempre acusa esse arquivo; é
+  falso positivo.
+- Deploy é manual (`bun run deploy`) e **não** roda no CI: `ci.yml` só tem
+  check/e2e/visual. CI verde ≠ publicado. Para conferir o que está no ar:
+  `wrangler deployments list` e `wrangler versions list`.
+- Migração remota: `CI=true bun run db:remote:migrate` (o `CI=true` pula o
+  prompt de confirmação; o wrangler ainda captura backup). Rodar **antes** do
+  deploy quando houver migrações novas em `drizzle/`.
+- O Worker de produção precisa dos secrets `BETTER_AUTH_SECRET`,
+  `RESEND_API_KEY` e `EMAIL_FROM` (`wrangler secret put`). Sem
+  `BETTER_AUTH_SECRET`, o Better Auth usa em silêncio o fallback público
+  `better-auth-secret-12345678901234567890` (o `validateSecret` só aborta com
+  `NODE_ENV=production`, que não existe no workerd) — qualquer um consegue
+  forjar cookie de sessão. Trocar o secret invalida as sessões existentes.
 
 ## Mapa de contexto
 
@@ -64,7 +96,7 @@ npm run e2e              # tudo verde (CI)
 | Capítulo                      | Quando carregar                                                                          |
 | ----------------------------- | ---------------------------------------------------------------------------------------- |
 | `docs/context/CONVENTIONS.md` | ao alterar contratos de API, estado cliente, formulários, componentes UI ou persistência |
-| `docs/context/TESTS.md` | ao alterar teste, DoD, bugfix ou comportamento crítico |
+| `docs/context/TESTS.md`       | ao alterar teste, DoD, bugfix ou comportamento crítico                                   |
 
 ## Mapa de docs
 
