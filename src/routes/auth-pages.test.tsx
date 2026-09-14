@@ -125,6 +125,19 @@ describe("LoginPage", () => {
 		expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" });
 	});
 
+	it("permite mostrar e ocultar a senha", async () => {
+		render(<LoginPage />);
+
+		const password = await screen.findByLabelText("Senha");
+		expect(password).toHaveAttribute("type", "password");
+
+		fireEvent.click(screen.getByRole("button", { name: "Mostrar senha" }));
+		expect(password).toHaveAttribute("type", "text");
+
+		fireEvent.click(screen.getByRole("button", { name: "Ocultar senha" }));
+		expect(password).toHaveAttribute("type", "password");
+	});
+
 	it("não navega após desmontar durante a checagem de sessão", async () => {
 		let resolveSession: (value: { data: typeof session }) => void = () => {};
 		mocks.getSession.mockReturnValue(
@@ -142,6 +155,19 @@ describe("LoginPage", () => {
 });
 
 describe("RegisterPage", () => {
+	it("permite mostrar e ocultar a senha", async () => {
+		render(<RegisterPage />);
+
+		const password = await screen.findByLabelText("Senha");
+		expect(password).toHaveAttribute("type", "password");
+
+		fireEvent.click(screen.getByRole("button", { name: "Mostrar senha" }));
+		expect(password).toHaveAttribute("type", "text");
+
+		fireEvent.click(screen.getByRole("button", { name: "Ocultar senha" }));
+		expect(password).toHaveAttribute("type", "password");
+	});
+
 	it("direciona usuários autenticados para a área privada", async () => {
 		mocks.getSession.mockResolvedValue({ data: session });
 

@@ -4,7 +4,7 @@ import { CheckCircle2, GraduationCap, Lock, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { PasswordInput } from "#/components/password-input";
 import { Alert, AlertDescription } from "#/components/ui/alert";
 import { Button } from "#/components/ui/button";
 import {
@@ -318,11 +318,7 @@ export default function RegisterPage() {
 									<FormItem>
 										<FormLabel>Senha</FormLabel>
 										<FormControl>
-											<Input
-												{...field}
-												type="password"
-												autoComplete="new-password"
-											/>
+											<PasswordInput {...field} autoComplete="new-password" />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
