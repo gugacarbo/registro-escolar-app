@@ -34,6 +34,7 @@ function renderPage() {
 }
 
 beforeEach(() => {
+	vi.unstubAllGlobals();
 	mocks.mutateAsync.mockReset();
 	mocks.mutateAsync.mockResolvedValue({
 		rows: [],
@@ -84,6 +85,25 @@ describe("ImportStudentsPage", () => {
 		spy.mockRestore();
 	});
 
+	it("baixa um modelo CSV com a coluna referencia", async () => {
+		const createObjectURL = vi.fn<(blob: Blob) => string>(
+			() => "blob:template",
+		);
+		vi.stubGlobal("URL", {
+			createObjectURL,
+			revokeObjectURL: vi.fn(),
+		});
+		vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+		renderPage();
+
+		await userEvent
+			.setup()
+			.click(screen.getByRole("button", { name: "Baixar modelo CSV" }));
+
+		const blob = createObjectURL.mock.calls[0]?.[0] as Blob;
+		expect(await blob.text()).toContain("nome;referencia;documento");
+	});
+
 	it("submete o arquivo selecionado e exibe o nome dele", async () => {
 		renderPage();
 
@@ -107,6 +127,7 @@ describe("ImportStudentsPage", () => {
 				{
 					index: 2,
 					name: "Estudante já cadastrado",
+					reference: "REF-2026-001",
 					document: "123456789",
 					status: "conflict",
 					errors: [],
@@ -136,6 +157,12 @@ describe("ImportStudentsPage", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await screen.findByText("Revisar importação");
+		expect(
+			screen.getByRole("columnheader", { name: "Referência" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("cell", { name: "REF-2026-001" }),
+		).toBeInTheDocument();
 		expect(screen.getByLabelText("Ação de importação")).toHaveValue("skip");
 	});
 

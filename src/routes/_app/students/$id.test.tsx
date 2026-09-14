@@ -66,6 +66,7 @@ function makeStudent(overrides: Partial<StudentDetail> = {}): StudentDetail {
 	return {
 		id: "student-1",
 		name: "João da Silva",
+		reference: "REF-2026-001",
 		document: "123.456.789-00",
 		registrationNumber: "MAT-001",
 		email: "joao@example.com",
@@ -187,6 +188,7 @@ describe("StudentDetailPage", () => {
 	it("exibe traços quando os campos opcionais estão vazios", () => {
 		mocks.useStudent.mockReturnValue({
 			data: makeStudent({
+				reference: null,
 				document: null,
 				registrationNumber: null,
 				email: null,
@@ -200,8 +202,8 @@ describe("StudentDetailPage", () => {
 		});
 		renderPage();
 
-		// Documento, Matrícula, Email, Telefone e Nascimento sem valor.
-		expect(screen.getAllByText("—")).toHaveLength(5);
+		// Referência, Documento, Matrícula, Email, Telefone e Nascimento sem valor.
+		expect(screen.getAllByText("—")).toHaveLength(6);
 		expect(screen.queryByText("Observações")).not.toBeInTheDocument();
 		// Sem resumo no header, "Nascimento" aparece só no detalhe.
 		expect(screen.getAllByText("Nascimento")).toHaveLength(1);
@@ -229,6 +231,7 @@ describe("StudentDetailPage", () => {
 		const user = userEvent.setup();
 		mocks.useStudent.mockReturnValue({
 			data: makeStudent({
+				reference: null,
 				document: null,
 				registrationNumber: null,
 				email: null,
@@ -247,6 +250,7 @@ describe("StudentDetailPage", () => {
 
 		expect(mocks.mutateAsync).toHaveBeenCalledWith({
 			name: "João da Silva",
+			reference: null,
 			document: null,
 			registrationNumber: null,
 			email: null,
@@ -266,6 +270,7 @@ describe("StudentDetailPage", () => {
 		// detalhe da seção de dados, por isso getAllByText.
 		expect(screen.getAllByText("Documento")).toHaveLength(2);
 		expect(screen.getAllByText("123.456.789-00")).toHaveLength(2);
+		expect(screen.getByText("REF-2026-001")).toBeInTheDocument();
 		expect(screen.getAllByText("MAT-001")).toHaveLength(2);
 		expect(screen.getAllByText("20/05/2010")).toHaveLength(2);
 		expect(screen.getByText("joao@example.com")).toBeInTheDocument();
@@ -332,6 +337,7 @@ describe("StudentDetailPage", () => {
 		await user.click(screen.getByRole("button", { name: "Editar" }));
 
 		expect(screen.getByLabelText("Nome *")).toHaveValue("João da Silva");
+		expect(screen.getByLabelText("Referência")).toHaveValue("REF-2026-001");
 		expect(screen.getByLabelText("Documento")).toHaveValue("123.456.789-00");
 		expect(screen.getByLabelText("Email")).toHaveValue("joao@example.com");
 		expect(screen.getByLabelText("Telefone")).toHaveValue("11 99999-0000");
@@ -355,6 +361,7 @@ describe("StudentDetailPage", () => {
 
 		expect(mocks.mutateAsync).toHaveBeenCalledWith({
 			name: "João Souza",
+			reference: "REF-2026-001",
 			document: "123.456.789-00",
 			registrationNumber: "MAT-001",
 			email: "joao@example.com",

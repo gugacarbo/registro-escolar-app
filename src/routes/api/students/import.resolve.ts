@@ -20,6 +20,7 @@ type ResolutionRow = {
 	action: Action;
 	data?: {
 		name: string;
+		reference?: string;
 		document?: string;
 		registrationNumber?: string;
 		email?: string;
@@ -48,6 +49,7 @@ function badRequest(message: string) {
 
 type CreateInput = {
 	name: string;
+	reference?: string;
 	document?: string;
 	registrationNumber?: string;
 	email?: string;

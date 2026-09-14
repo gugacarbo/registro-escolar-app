@@ -83,6 +83,7 @@ function formatBirthDate(value: Date | string | null | undefined): string {
 function toStudentFormValues(student: StudentDetail): StudentFormValues {
 	return {
 		name: student.name,
+		reference: student.reference ?? "",
 		document: student.document ?? "",
 		registrationNumber: student.registrationNumber ?? "",
 		email: student.email ?? "",
@@ -125,6 +126,7 @@ export default function StudentDetailPage() {
 		try {
 			await updateStudent.mutateAsync({
 				name: values.name,
+				reference: values.reference || null,
 				document: values.document || null,
 				registrationNumber: values.registrationNumber || null,
 				email: values.email || null,
@@ -290,6 +292,7 @@ export default function StudentDetailPage() {
 							/>
 						) : (
 							<dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+								<InfoField label="Referência" value={student.reference} />
 								<InfoField label="Documento" value={student.document} />
 								<InfoField
 									label="Matrícula"

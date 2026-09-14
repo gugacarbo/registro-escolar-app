@@ -7,6 +7,7 @@ import { getStudentsQueryKey } from "./use-students";
 
 export type UpdateStudentValues = {
 	name?: string;
+	reference?: string | null;
 	document?: string | null;
 	registrationNumber?: string | null;
 	email?: string | null;

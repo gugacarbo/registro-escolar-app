@@ -98,7 +98,7 @@ function createTestDb() {
 			FOREIGN KEY (class_id) REFERENCES classes(id)
 		);
 		CREATE TABLE students (
-			id TEXT PRIMARY KEY, name TEXT NOT NULL, document TEXT, registration_number TEXT,
+			id TEXT PRIMARY KEY, name TEXT NOT NULL, reference TEXT, document TEXT, registration_number TEXT,
 			email TEXT, phone TEXT, birth_date INTEGER, notes TEXT,
 			created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
 		);

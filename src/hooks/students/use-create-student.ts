@@ -12,6 +12,7 @@ export function useCreateStudent() {
 		Error,
 		{
 			name: string;
+			reference?: string;
 			document?: string;
 			registrationNumber?: string;
 			email?: string;

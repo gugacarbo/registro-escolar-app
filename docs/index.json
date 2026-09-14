@@ -270,6 +270,8 @@
       "src/components/students/create-student-dialog.tsx",
       "src/routes/_app/students/import.tsx",
       "src/components/students/student-form.tsx",
+      "src/routes/_app/students/$id.tsx",
+      "src/hooks/students/use-update-student.ts",
       "src/components/students/import-preview-table.tsx",
       "src/hooks/students/use-students.ts",
       "src/hooks/students/use-create-student.ts",

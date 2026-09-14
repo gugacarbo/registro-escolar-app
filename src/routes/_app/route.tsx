@@ -87,7 +87,7 @@ export default function AppLayout() {
 						onSignOut={handleSignOut}
 					/>
 					<main
-						className="mx-auto w-full max-w-6xl flex-1 p-4 pb-10 sm:p-6 sm:pb-14 lg:p-8"
+						className="mx-auto w-full max-w-7xl flex-1 p-4 pb-10 sm:p-6 sm:pb-14 lg:p-8"
 						id="conteudo-principal"
 					>
 						<Outlet />

@@ -15,7 +15,10 @@ export type PaginatedFetcher<TItem extends { id: string }> = (params: {
  * silenciosamente listas grandes nos selects de formulário. A API limita
  * `pageSize` a 100 linhas, por isso percorre até `maxPages` páginas.
  */
-export function useAsyncOptions<TItem extends { id: string }>({
+export function useAsyncOptions<
+	TItem extends { id: string },
+	TOption extends EntityOption = EntityOption,
+>({
 	queryKey,
 	search,
 	pageSize = 100,
@@ -31,14 +34,14 @@ export function useAsyncOptions<TItem extends { id: string }>({
 	pageSize?: number;
 	maxPages?: number;
 	fetchPage: PaginatedFetcher<TItem>;
-	select: (item: TItem) => EntityOption;
+	select: (item: TItem) => TOption;
 	staleTime?: number;
 	gcTime?: number;
 	enabled?: boolean;
 }) {
 	const debouncedSearch = useDebouncedValue(search ?? "", 300);
 	return useQuery<{
-		options: EntityOption[];
+		options: TOption[];
 		total: number;
 		loadedAll: boolean;
 		isSearching: boolean;
@@ -46,7 +49,7 @@ export function useAsyncOptions<TItem extends { id: string }>({
 		queryKey: [...queryKey, { search: debouncedSearch, pageSize, maxPages }],
 		enabled,
 		queryFn: async () => {
-			const options: EntityOption[] = [];
+			const options: TOption[] = [];
 			let page = 1;
 			let total = 0;
 			let loadedAll = false;

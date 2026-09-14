@@ -69,6 +69,18 @@ const columns = [
 		),
 	},
 	{
+		key: "reference",
+		header: "Referência",
+		className: "hidden md:table-cell",
+		skeletonClassName: "h-4 w-24",
+		cell: (student: StudentWithTurmas) =>
+			student.reference ? (
+				<span className="font-mono text-sm">{student.reference}</span>
+			) : (
+				<span className="text-muted-foreground">—</span>
+			),
+	},
+	{
 		key: "turmas",
 		header: "Turmas",
 		skeletonClassName: "h-5 w-28",

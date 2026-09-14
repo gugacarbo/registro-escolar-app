@@ -22,10 +22,14 @@ describe("StudentForm", () => {
 		render(<StudentForm onSubmit={onSubmit} />);
 
 		await user.type(screen.getByLabelText("Nome *"), "João Silva");
+		await user.type(screen.getByLabelText("Referência"), "REF-2026-001");
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 
 		expect(onSubmit).toHaveBeenCalledWith(
-			expect.objectContaining({ name: "João Silva" }),
+			expect.objectContaining({
+				name: "João Silva",
+				reference: "REF-2026-001",
+			}),
 			undefined,
 		);
 	});

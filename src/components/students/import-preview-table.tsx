@@ -10,6 +10,7 @@ import {
 type PreviewRow = {
 	index: number;
 	name: string;
+	reference: string;
 	document: string;
 	status: "valid" | "conflict" | "invalid";
 	existingStudentId?: string;
@@ -42,6 +43,7 @@ export function ImportPreviewTable({
 				<TableRow>
 					<TableHead>Linha</TableHead>
 					<TableHead>Nome</TableHead>
+					<TableHead>Referência</TableHead>
 					<TableHead>Documento</TableHead>
 					<TableHead>Status</TableHead>
 					<TableHead>Ação</TableHead>
@@ -52,6 +54,7 @@ export function ImportPreviewTable({
 					<TableRow key={row.index}>
 						<TableCell>{row.index}</TableCell>
 						<TableCell>{row.name || "-"}</TableCell>
+						<TableCell>{row.reference || "—"}</TableCell>
 						<TableCell>{row.document}</TableCell>
 						<TableCell>{statusLabel(row.status)}</TableCell>
 						<TableCell>

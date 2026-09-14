@@ -109,14 +109,15 @@ describe("parseStudentImportFile", () => {
 
 	it("maps optional columns from a complete CSV", async () => {
 		const csv = [
-			"Nome,Documento,Matricula,Email,Telefone,Data_Nascimento,Observacoes",
-			"João Silva,123.456,2026001,joao@escola.test,11999999999,2010-05-20,Atendimento",
+			"Nome,Referencia,Documento,Matricula,Email,Telefone,Data_Nascimento,Observacoes",
+			"João Silva,REF-2026-001,123.456,2026001,joao@escola.test,11999999999,2010-05-20,Atendimento",
 		].join("\n");
 		const file = new File([csv], "estudantes.csv", { type: "text/csv" });
 		const { rows, errors } = await parseStudentImportFile(file);
 		expect(errors).toEqual([]);
 		expect(rows[0]).toMatchObject({
 			name: "João Silva",
+			reference: "REF-2026-001",
 			document: "123.456",
 			registrationNumber: "2026001",
 			email: "joao@escola.test",
@@ -286,6 +287,7 @@ describe("matchImportRows", () => {
 		{
 			id: "s1",
 			name: "João Silva",
+			reference: null,
 			document: "123456",
 			registrationNumber: null,
 			email: null,

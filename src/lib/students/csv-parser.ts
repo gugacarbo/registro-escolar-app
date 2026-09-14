@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 export type ParsedImportRow = {
 	index: number;
 	name: string;
+	reference?: string;
 	document?: string;
 	registrationNumber?: string;
 	email?: string;
@@ -20,6 +21,8 @@ const COLUMN_ALIASES: Record<
 	keyof Omit<ParsedImportRow, "index" | "errors">
 > = {
 	nome: "name",
+	referencia: "reference",
+	reference: "reference",
 	documento: "document",
 	matricula: "registrationNumber",
 	email: "email",

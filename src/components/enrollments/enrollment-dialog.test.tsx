@@ -49,8 +49,8 @@ beforeEach(() => {
 		const url = typeof input === "string" ? input : String(input);
 		if (url.startsWith("/api/students")) {
 			return fetchJson([
-				{ id: "student-1", name: "Ana" },
-				{ id: "student-2", name: "Bruno" },
+				{ id: "student-1", name: "Ana", reference: "REF-001" },
+				{ id: "student-2", name: "Bruno", reference: "REF-002" },
 			]);
 		}
 		return fetchJson([
@@ -152,5 +152,109 @@ describe("EnrollmentDialog", () => {
 		expect(
 			await screen.findByRole("checkbox", { name: "Bruno" }),
 		).toBeInTheDocument();
+	});
+
+	it("exibe a coluna de referência e permite filtrar por referência", async () => {
+		const user = userEvent.setup();
+		renderDialog({
+			defaultTurmaId: "class-1",
+			turmaName: "Turma A",
+			trigger: <button type="button">Matricular alunos</button>,
+		});
+
+		await user.click(screen.getByRole("button", { name: "Matricular alunos" }));
+
+		// Tabela renderiza o cabeçalho "Referência" e os valores de cada estudante
+		expect(await screen.findByText("Referência")).toBeInTheDocument();
+		expect(await screen.findByText("REF-001")).toBeInTheDocument();
+		expect(await screen.findByText("REF-002")).toBeInTheDocument();
+
+		// Filtra por referência
+		const searchInput = screen.getByLabelText("Buscar estudante");
+		await user.type(searchInput, "REF-002");
+
+		expect(screen.queryByText("Ana")).not.toBeInTheDocument();
+		expect(screen.getByText("Bruno")).toBeInTheDocument();
+	});
+
+	it("seleciona e desseleciona todos os estudantes pelo checkbox do cabeçalho", async () => {
+		const user = userEvent.setup();
+		renderDialog({
+			defaultTurmaId: "class-1",
+			turmaName: "Turma A",
+			trigger: <button type="button">Matricular alunos</button>,
+		});
+
+		await user.click(screen.getByRole("button", { name: "Matricular alunos" }));
+		await screen.findByText("Ana");
+
+		const selectAll = screen.getByRole("checkbox", {
+			name: "Selecionar todos os estudantes",
+		});
+
+		// Clica para selecionar todos
+		await user.click(selectAll);
+		expect(
+			screen.getByRole("button", { name: "Matricular 2 estudantes" }),
+		).toBeEnabled();
+
+		// Clica novamente para desmarcar todos
+		await user.click(selectAll);
+		expect(
+			screen.getByRole("button", { name: "Matricular estudantes" }),
+		).toBeDisabled();
+	});
+
+	it("suporta paginação e auto-load dinâmico ao carregar mais páginas", async () => {
+		const user = userEvent.setup();
+		vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+			const url = typeof input === "string" ? input : String(input);
+			if (url.startsWith("/api/students")) {
+				const searchParams = new URL(url, "http://localhost").searchParams;
+				const page = Number(searchParams.get("page") ?? "1");
+				if (page === 1) {
+					return new Response(
+						JSON.stringify({
+							data: [{ id: "student-1", name: "Ana", reference: "REF-001" }],
+							total: 2,
+							page: 1,
+							pageSize: 1,
+						}),
+						{ status: 200 },
+					);
+				}
+				return new Response(
+					JSON.stringify({
+						data: [{ id: "student-2", name: "Bruno", reference: "REF-002" }],
+						total: 2,
+						page: 2,
+						pageSize: 1,
+					}),
+					{ status: 200 },
+				);
+			}
+			return fetchJson([
+				{ id: "class-1", name: "Turma A", academicPeriod: "2026" },
+			]);
+		});
+
+		renderDialog({
+			defaultTurmaId: "class-1",
+			turmaName: "Turma A",
+			trigger: <button type="button">Matricular alunos</button>,
+		});
+
+		await user.click(screen.getByRole("button", { name: "Matricular alunos" }));
+		expect(await screen.findByText("Ana")).toBeInTheDocument();
+		expect(screen.queryByText("Bruno")).not.toBeInTheDocument();
+
+		// Carrega próxima página
+		const loadMoreBtn = await screen.findByRole("button", {
+			name: "Carregar mais",
+		});
+		await user.click(loadMoreBtn);
+
+		expect(await screen.findByText("Bruno")).toBeInTheDocument();
+		expect(screen.getByText("Ana")).toBeInTheDocument();
 	});
 });

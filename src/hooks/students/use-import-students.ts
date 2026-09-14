@@ -6,6 +6,7 @@ type ImportPreviewResponse = {
 	rows: Array<{
 		index: number;
 		name: string;
+		reference: string;
 		document: string;
 		registrationNumber: string;
 		email: string;
@@ -52,6 +53,7 @@ type Resolution = {
 	action: "create" | "link" | "skip";
 	data?: {
 		name: string;
+		reference?: string;
 		document?: string;
 		registrationNumber?: string;
 		email?: string;

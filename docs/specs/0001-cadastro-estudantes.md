@@ -20,6 +20,8 @@ implemented-by:
   - src/components/students/create-student-dialog.tsx
   - src/routes/_app/students/import.tsx
   - src/components/students/student-form.tsx
+  - src/routes/_app/students/$id.tsx
+  - src/hooks/students/use-update-student.ts
   - src/components/students/import-preview-table.tsx
   - src/hooks/students/use-students.ts
   - src/hooks/students/use-create-student.ts
@@ -54,12 +56,15 @@ Permitir que o operador cadastre estudantes individualmente e importe estudantes
 - Cada item da listagem inclui `turmas: { id, name }[]` com as matrículas
   ativas do estudante, ordenadas pela data de início; está vazio quando o
   estudante não tem matrícula ativa.
-- Payload mínimo manual: `nome`.
-- Payload de importação: arquivo CSV ou planilha com coluna `nome` e colunas opcionais.
+- Payload mínimo manual: `nome`; `reference` é um campo textual opcional, configurável no cadastro e na edição.
+- Payload de importação: arquivo CSV ou planilha com coluna `nome` e colunas opcionais, incluindo `referencia` (mapeada para `reference`). O modelo CSV baixável contém essa coluna.
 - Tela de estudantes: header com apenas o título e as ações "Importar" e
   "Novo estudante" à direita na mesma linha; toolbar com busca e filtro por
-  turma (selecionar turma volta para a página 1); coluna "Turmas" exibe as
-  matrículas ativas como badges e "—" quando não há.
+  turma (selecionar turma volta para a página 1); colunas "Referência" e
+  "Turmas" exibem, respectivamente, a referência cadastral e as matrículas
+  ativas como badges ("—" quando não há valor).
+- A prévia de confirmação da importação exibe a coluna "Referência" para cada
+  linha importada.
 
 ## Casos de borda
 
@@ -124,3 +129,13 @@ cobertura global de branches (94,27%) ficou abaixo do teto por módulos
 pré-existentes fora do escopo desta spec (`csv-parser.ts`,
 `meeting-form.tsx`, `offer-form.tsx`); os arquivos desta entrega estão
 ≥ 94% em branches (100% em statements/lines).
+
+Em 2026-09-14, o campo opcional `reference` foi disponibilizado no cadastro,
+edição e detalhe do estudante, assim como na importação e no modelo CSV
+(`referencia`). `bun run typecheck`, `bun run check` e `scripts/docs-check`
+terminaram com exit 0; os testes direcionados de formulário, criação, detalhe,
+parser, APIs de importação e modelo CSV passaram (81 testes).
+
+Na mesma data, as tabelas da listagem de estudantes e da confirmação de
+importação passaram a exibir a coluna "Referência". Os testes direcionados
+dessas tabelas e do parser passaram (50 testes).

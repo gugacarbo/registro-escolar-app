@@ -16,6 +16,7 @@ import { Input } from "#/components/ui/input";
 
 const studentFormSchema = z.object({
 	name: z.string().trim().min(1, "Nome é obrigatório"),
+	reference: z.string().optional(),
 	document: z.string().optional(),
 	registrationNumber: z.string().optional(),
 	email: z
@@ -46,6 +47,7 @@ export function StudentForm({
 		resolver: zodResolver(studentFormSchema),
 		defaultValues: {
 			name: "",
+			reference: "",
 			document: "",
 			registrationNumber: "",
 			email: "",
@@ -68,6 +70,19 @@ export function StudentForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Nome *</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
+					name="reference"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Referência</FormLabel>
 							<FormControl>
 								<Input {...field} />
 							</FormControl>

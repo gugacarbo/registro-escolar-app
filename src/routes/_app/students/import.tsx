@@ -17,8 +17,8 @@ const STEP_PREVIEW = 1;
 const STEP_RESULT = 2;
 
 const CSV_TEMPLATE = [
-	"nome;documento;matricula;email;telefone;data_nascimento;observacoes",
-	"Estudante Exemplo, Maria da Silva;123.456.789-01;20260001;maria.exemplo@escola.br;(11) 99999-0000;2015-03-10;Observação de exemplo",
+	"nome;referencia;documento;matricula;email;telefone;data_nascimento;observacoes",
+	"Maria da Silva;REF-2026-001;123.456.789-01;20260001;maria.exemplo@escola.br;(11) 99999-0000;2015-03-10;Observação de exemplo",
 ].join("\n");
 
 export default function ImportStudentsPage() {
@@ -78,6 +78,7 @@ export default function ImportStudentsPage() {
 						resolution.action === "create" || resolution.action === "link"
 							? {
 									name: row.name,
+									reference: row.reference,
 									document: row.document,
 									registrationNumber: row.registrationNumber,
 									email: row.email,

@@ -74,6 +74,7 @@ export async function importPreviewHandler({
 	const responseRows = matched.map((row) => ({
 		index: row.index,
 		name: row.name,
+		reference: row.reference ?? "",
 		document: row.document ?? "",
 		registrationNumber: row.registrationNumber ?? "",
 		email: row.email ?? "",

@@ -46,6 +46,7 @@ export function CreateStudentDialog({
 		try {
 			await createStudent.mutateAsync({
 				...values,
+				reference: values.reference || undefined,
 				document: values.document || undefined,
 				registrationNumber: values.registrationNumber || undefined,
 				email: values.email || undefined,

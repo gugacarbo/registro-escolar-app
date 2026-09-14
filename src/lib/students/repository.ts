@@ -98,6 +98,7 @@ function buildStudentsWhere(search?: string, classId?: string) {
 			or(
 				like(students.name, sql`'%' || ${term} || '%'`),
 				like(students.document, sql`'%' || ${term} || '%'`),
+				like(students.reference, sql`'%' || ${term} || '%'`),
 			),
 		);
 	}

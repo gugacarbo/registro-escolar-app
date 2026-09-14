@@ -136,6 +136,7 @@ describe("POST /api/students/import", () => {
 			rows: Array<Record<string, string>>;
 		};
 		expect(body.rows[0]).toMatchObject({
+			reference: "",
 			document: "",
 			registrationNumber: "",
 			email: "",
@@ -230,6 +231,7 @@ describe("POST /api/students/import", () => {
 		createMock.mockResolvedValueOnce({
 			id: "new-1",
 			name: "Maria Souza",
+			reference: "REF-2026-001",
 			document: "123456",
 			registrationNumber: "2026001",
 			email: "maria@escola.test",
@@ -255,6 +257,7 @@ describe("POST /api/students/import", () => {
 							action: "create",
 							data: {
 								name: "Maria Souza",
+								reference: "REF-2026-001",
 								document: "123456",
 								registrationNumber: "2026001",
 								email: "maria@escola.test",
@@ -271,6 +274,7 @@ describe("POST /api/students/import", () => {
 		expect(response.status).toBe(200);
 		expect(createMock).toHaveBeenCalledWith(expect.anything(), {
 			name: "Maria Souza",
+			reference: "REF-2026-001",
 			document: "123456",
 			registrationNumber: "2026001",
 			email: "maria@escola.test",
@@ -489,6 +493,7 @@ describe("POST /api/students/import/resolve", () => {
 		createMock.mockResolvedValueOnce({
 			id: "new-1",
 			name: "Maria Souza",
+			reference: "REF-2026-001",
 			document: "123456",
 			registrationNumber: "2026001",
 			email: "maria@escola.test",
@@ -514,6 +519,7 @@ describe("POST /api/students/import/resolve", () => {
 							action: "create",
 							data: {
 								name: "Maria Souza",
+								reference: "REF-2026-001",
 								document: "123456",
 								registrationNumber: "2026001",
 								email: "maria@escola.test",
@@ -530,6 +536,7 @@ describe("POST /api/students/import/resolve", () => {
 		expect(response.status).toBe(200);
 		expect(createMock).toHaveBeenCalledWith(expect.anything(), {
 			name: "Maria Souza",
+			reference: "REF-2026-001",
 			document: "123456",
 			registrationNumber: "2026001",
 			email: "maria@escola.test",

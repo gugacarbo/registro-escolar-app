@@ -49,6 +49,7 @@ function makeStudent(
 	return {
 		id: "student-1",
 		name: "João Silva",
+		reference: "REF-2026-001",
 		document: "123",
 		registrationNumber: null,
 		email: null,
@@ -105,7 +106,7 @@ afterEach(() => {
 });
 
 describe("StudentsPage", () => {
-	it("renderiza a tabela com nome linkado e documento", () => {
+	it("renderiza a tabela com nome linkado, referência e documento", () => {
 		renderPage();
 
 		const table = screen.getByRole("table", { name: "Tabela de estudantes" });
@@ -116,12 +117,18 @@ describe("StudentsPage", () => {
 			within(table).getByRole("columnheader", { name: "Documento" }),
 		).toBeInTheDocument();
 		expect(
+			within(table).getByRole("columnheader", { name: "Referência" }),
+		).toBeInTheDocument();
+		expect(
 			within(table).getByRole("columnheader", { name: "Turmas" }),
 		).toBeInTheDocument();
 		const link = within(table).getByRole("link", { name: "João Silva" });
 		expect(link).toHaveAttribute("href", "/students/$id");
 		expect(
 			within(table).getByRole("cell", { name: "123" }),
+		).toBeInTheDocument();
+		expect(
+			within(table).getByRole("cell", { name: "REF-2026-001" }),
 		).toBeInTheDocument();
 	});
 

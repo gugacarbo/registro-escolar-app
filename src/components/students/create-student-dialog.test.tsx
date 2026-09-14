@@ -70,6 +70,7 @@ describe("CreateStudentDialog", () => {
 		render(<Controlled />, { wrapper: createWrapper() });
 
 		await user.type(await screen.findByLabelText("Nome *"), "João Silva");
+		await user.type(screen.getByLabelText("Referência"), "REF-2026-001");
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 
 		await waitFor(() =>
@@ -78,6 +79,10 @@ describe("CreateStudentDialog", () => {
 				expect.objectContaining({ method: "POST" }),
 			),
 		);
+		const requestInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
+		expect(JSON.parse(requestInit.body as string)).toMatchObject({
+			reference: "REF-2026-001",
+		});
 		await waitFor(() =>
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);

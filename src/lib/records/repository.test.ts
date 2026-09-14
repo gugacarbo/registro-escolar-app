@@ -57,6 +57,7 @@ function createTestDb() {
 		CREATE TABLE students (
 			id TEXT PRIMARY KEY,
 			name TEXT NOT NULL,
+			reference TEXT,
 			document TEXT,
 			registration_number TEXT,
 			email TEXT,
