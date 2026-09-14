@@ -393,6 +393,7 @@ describe("CouncilPage", () => {
 		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
 		expect(screen.getByText("Relato geral")).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: "Novo relato geral" }));
 		await user.type(screen.getAllByLabelText("Texto *")[0], "Novo relato");
 		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
 		await waitFor(() => expect(createReport).toHaveBeenCalled());
@@ -780,6 +781,7 @@ describe("CouncilPage erros de mutação", () => {
 		renderPage();
 		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		await user.click(screen.getByRole("button", { name: "Novo relato geral" }));
 		await user.type(screen.getAllByLabelText("Texto *")[0], "Relato com erro");
 		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
 		await waitFor(() => expect(createReport).toHaveBeenCalled());
@@ -820,6 +822,7 @@ describe("CouncilPage mutações de relato bem-sucedidas", () => {
 		renderPage();
 		await selectStudent(user);
 		await user.click(screen.getByRole("tab", { name: /Relatos gerais/ }));
+		await user.click(screen.getByRole("button", { name: "Novo relato geral" }));
 		await user.type(screen.getAllByLabelText("Texto *")[0], "Relato novo");
 		await user.click(screen.getByRole("button", { name: "Adicionar relato" }));
 		await waitFor(() => expect(createReport).toHaveBeenCalled());

@@ -61,7 +61,7 @@ export function GeneralReportForm({
 		texto: string;
 		origemId: string | null;
 		incluirNaAta: boolean;
-	}) => void | Promise<void>;
+	}) => void | boolean | Promise<void | boolean>;
 	submitLabel: string;
 	defaultValues?: Partial<GeneralReportFormValues>;
 	disabled?: boolean;

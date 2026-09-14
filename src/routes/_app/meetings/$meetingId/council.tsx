@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { GeneralReportDialog } from "#/components/meetings/general-report-dialog";
 import { GeneralReportForm } from "#/components/meetings/general-report-form";
 import {
 	RecordForm,
@@ -228,6 +229,7 @@ export default function CouncilPage() {
 			toast.success("Relato criado");
 		} catch (error) {
 			if (error instanceof Error) setServerError(error.message);
+			return false;
 		}
 	}
 
@@ -723,15 +725,14 @@ export default function CouncilPage() {
 									))}
 								</ul>
 								<div className="border-t pt-3">
-									<h3 className="mb-2 text-sm font-semibold">
-										Novo relato geral
-									</h3>
-									<GeneralReportForm
+									<GeneralReportDialog
 										meetingId={meetingId}
 										onSubmit={handleCreateReport}
-										submitLabel="Adicionar relato"
 										disabled={!canEdit || createGeneralReport.isPending}
 										draftKey={meetingId}
+										onOpenChange={(open) => {
+											if (open) setServerError(null);
+										}}
 									/>
 								</div>
 							</CardContent>
