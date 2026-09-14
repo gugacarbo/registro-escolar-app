@@ -119,7 +119,8 @@ function activeTurmasCondition() {
 	return isNull(enrollments.endDate);
 }
 
-const MAX_D1_BOUND_PARAMETERS = 100;
+// The nested `class` relation adds a bound parameter for its `limit`.
+const MAX_D1_STUDENT_IDS_PER_QUERY = 99;
 
 export async function fetchTurmasByStudent(
 	db: DB,
@@ -133,11 +134,11 @@ export async function fetchTurmasByStudent(
 	for (
 		let offset = 0;
 		offset < studentIds.length;
-		offset += MAX_D1_BOUND_PARAMETERS
+		offset += MAX_D1_STUDENT_IDS_PER_QUERY
 	) {
 		const studentIdBatch = studentIds.slice(
 			offset,
-			offset + MAX_D1_BOUND_PARAMETERS,
+			offset + MAX_D1_STUDENT_IDS_PER_QUERY,
 		);
 		const rows = await db.query.enrollments.findMany({
 			where: and(

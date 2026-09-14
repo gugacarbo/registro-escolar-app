@@ -127,13 +127,13 @@ describe("students repository", () => {
 		expect(all[1].name).toBe("Primeiro");
 	});
 
-	it("divide a busca de turmas em lotes de até 100 estudantes", async () => {
+	it("divide a busca de turmas em lotes de até 99 estudantes", async () => {
 		const findMany = vi.fn().mockResolvedValue([]);
 		const db = {
 			query: { enrollments: { findMany } },
 		} as unknown as DB;
 		const studentIds = Array.from(
-			{ length: 101 },
+			{ length: 100 },
 			(_, index) => `student-${index}`,
 		);
 
