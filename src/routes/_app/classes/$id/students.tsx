@@ -9,6 +9,7 @@ import {
 	Users2Icon,
 } from "lucide-react";
 import { useState } from "react";
+import { EnrollmentDialog } from "#/components/enrollments/enrollment-dialog";
 import { EnrollmentStatusBadge } from "#/components/enrollments/enrollment-status-badge";
 import { HistoryEventList } from "#/components/history/history-event-list";
 import {
@@ -164,9 +165,14 @@ export default function ClassStudentsPage() {
 					) : undefined
 				}
 				actions={
-					<Button asChild variant="secondary">
-						<Link to="/classes/enroll">Matricular estudante</Link>
-					</Button>
+					<EnrollmentDialog
+						defaultTurmaId={id}
+						turmaName={data?.turma.name}
+						excludedStudentIds={students
+							.filter((student) => student.status === "ativa")
+							.map((student) => student.studentId)}
+						trigger={<Button variant="secondary">Matricular alunos</Button>}
+					/>
 				}
 			/>
 
@@ -289,9 +295,15 @@ export default function ClassStudentsPage() {
 									</EmptyDescription>
 								</EmptyHeader>
 								<EmptyContent>
-									<Button asChild variant="outline" size="sm">
-										<Link to="/classes/enroll">Matricular estudante</Link>
-									</Button>
+									<EnrollmentDialog
+										defaultTurmaId={id}
+										turmaName={data?.turma.name}
+										trigger={
+											<Button variant="outline" size="sm">
+												Matricular estudantes
+											</Button>
+										}
+									/>
 								</EmptyContent>
 							</Empty>
 						) : (

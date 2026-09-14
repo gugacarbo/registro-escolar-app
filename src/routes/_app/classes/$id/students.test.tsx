@@ -39,6 +39,12 @@ vi.mock("#/hooks/offers/use-offers", () => ({
 	useOffers: mocks.useOffers,
 }));
 
+vi.mock("#/components/enrollments/enrollment-dialog", () => ({
+	EnrollmentDialog: ({ trigger }: { trigger?: React.ReactNode }) => (
+		<>{trigger}</>
+	),
+}));
+
 vi.mock("#/components/offers/class-offers-panel", () => ({
 	ClassOffersPanel: ({ classId }: { classId: string; turmaName?: string }) => (
 		<div>ofertas da turma {classId}</div>
@@ -155,6 +161,14 @@ describe("ClassStudentsPage", () => {
 		expect(screen.getByText("Transferida")).toBeInTheDocument();
 		expect(
 			screen.getByText("Início 01/01/2026 · Em andamento"),
+		).toBeInTheDocument();
+	});
+
+	it("oferece matrícula em lote diretamente na visualização da turma", () => {
+		renderPage();
+
+		expect(
+			screen.getByRole("button", { name: "Matricular alunos" }),
 		).toBeInTheDocument();
 	});
 

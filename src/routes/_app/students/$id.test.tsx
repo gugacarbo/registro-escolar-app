@@ -47,6 +47,12 @@ vi.mock("#/components/students/create-independent-record-dialog", () => ({
 	}) => <>{trigger}</>,
 }));
 
+vi.mock("#/components/enrollments/enrollment-dialog", () => ({
+	EnrollmentDialog: ({ trigger }: { trigger?: React.ReactNode }) => (
+		<>{trigger}</>
+	),
+}));
+
 import StudentDetailPage from "./$id";
 
 // A API serializa datas como string (JSON); o type do Drizzle diz Date.
@@ -126,6 +132,14 @@ describe("StudentDetailPage", () => {
 		renderPage();
 		expect(
 			screen.getByRole("button", { name: "Novo registro" }),
+		).toBeInTheDocument();
+	});
+
+	it("oferece matrícula direta na visualização do estudante", () => {
+		renderPage();
+
+		expect(
+			screen.getByRole("button", { name: "Matricular na turma" }),
 		).toBeInTheDocument();
 	});
 

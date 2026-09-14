@@ -36,6 +36,7 @@ export function useCreateEnrollment() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["enrollments"] });
 			queryClient.invalidateQueries({ queryKey: getClassesQueryKey() });
+			queryClient.invalidateQueries({ queryKey: ["students"] });
 		},
 	});
 }

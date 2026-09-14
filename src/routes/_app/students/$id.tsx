@@ -8,6 +8,7 @@ import {
 	Users2Icon,
 } from "lucide-react";
 import { useState } from "react";
+import { EnrollmentDialog } from "#/components/enrollments/enrollment-dialog";
 import { EnrollmentStatusBadge } from "#/components/enrollments/enrollment-status-badge";
 import { StudentHistoryPanel } from "#/components/history/student-history-panel";
 import { CreateIndependentRecordDialog } from "#/components/students/create-independent-record-dialog";
@@ -202,15 +203,29 @@ export default function StudentDetailPage() {
 				}
 				actions={
 					student ? (
-						<CreateIndependentRecordDialog
-							studentId={student.id}
-							trigger={
-								<Button variant="outline" size="sm">
-									<PlusIcon className="mr-1.5 size-3.5" />
-									Novo registro
-								</Button>
-							}
-						/>
+						<div className="flex flex-wrap gap-2">
+							<EnrollmentDialog
+								defaultEstudanteId={student.id}
+								estudanteName={student.name}
+								excludedTurmaIds={student.matriculas
+									.filter((matricula) => matricula.status === "ativa")
+									.map((matricula) => matricula.id)}
+								trigger={
+									<Button variant="secondary" size="sm">
+										Matricular na turma
+									</Button>
+								}
+							/>
+							<CreateIndependentRecordDialog
+								studentId={student.id}
+								trigger={
+									<Button variant="outline" size="sm">
+										<PlusIcon className="mr-1.5 size-3.5" />
+										Novo registro
+									</Button>
+								}
+							/>
+						</div>
 					) : undefined
 				}
 			/>

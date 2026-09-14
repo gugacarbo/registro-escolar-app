@@ -299,6 +299,7 @@
       "src/routes/api/classes/$id/students.ts",
       "src/components/classes/class-form.tsx",
       "src/components/enrollments/enrollment-form.tsx",
+      "src/components/enrollments/enrollment-dialog.tsx",
       "src/hooks/classes/use-classes.ts",
       "src/hooks/classes/use-create-class.ts",
       "src/hooks/enrollments/use-class-students.ts",
