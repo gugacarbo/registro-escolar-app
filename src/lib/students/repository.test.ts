@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { DB } from "#/db";
 import * as schema from "#/db/schema";
@@ -11,6 +11,7 @@ import { dateStringToTimestamp } from "#/lib/enrollments/dates";
 import {
 	countStudents,
 	createStudent,
+	fetchTurmasByStudent,
 	findStudentById,
 	findStudentDetail,
 	findStudentsByNameOrDocument,
@@ -124,6 +125,21 @@ describe("students repository", () => {
 		expect(all).toHaveLength(2);
 		expect(all[0].name).toBe("Segundo");
 		expect(all[1].name).toBe("Primeiro");
+	});
+
+	it("divide a busca de turmas em lotes de até 100 estudantes", async () => {
+		const findMany = vi.fn().mockResolvedValue([]);
+		const db = {
+			query: { enrollments: { findMany } },
+		} as unknown as DB;
+		const studentIds = Array.from(
+			{ length: 101 },
+			(_, index) => `student-${index}`,
+		);
+
+		await fetchTurmasByStudent(db, studentIds);
+
+		expect(findMany).toHaveBeenCalledTimes(2);
 	});
 
 	it("updates a student", async () => {

@@ -119,7 +119,9 @@ function activeTurmasCondition() {
 	return isNull(enrollments.endDate);
 }
 
-async function fetchTurmasByStudent(
+const MAX_D1_BOUND_PARAMETERS = 100;
+
+export async function fetchTurmasByStudent(
 	db: DB,
 	studentIds: string[],
 ): Promise<Map<string, { id: string; name: string }[]>> {
@@ -127,18 +129,29 @@ async function fetchTurmasByStudent(
 	if (studentIds.length === 0) {
 		return map;
 	}
-	const rows = await db.query.enrollments.findMany({
-		where: and(
-			inArray(enrollments.studentId, studentIds),
-			activeTurmasCondition(),
-		),
-		orderBy: (enrollment, { asc }) => [asc(enrollment.startDate)],
-		with: { class: true },
-	});
-	for (const row of rows) {
-		const list = map.get(row.studentId) ?? [];
-		list.push({ id: row.classId, name: row.class.name });
-		map.set(row.studentId, list);
+
+	for (
+		let offset = 0;
+		offset < studentIds.length;
+		offset += MAX_D1_BOUND_PARAMETERS
+	) {
+		const studentIdBatch = studentIds.slice(
+			offset,
+			offset + MAX_D1_BOUND_PARAMETERS,
+		);
+		const rows = await db.query.enrollments.findMany({
+			where: and(
+				inArray(enrollments.studentId, studentIdBatch),
+				activeTurmasCondition(),
+			),
+			orderBy: (enrollment, { asc }) => [asc(enrollment.startDate)],
+			with: { class: true },
+		});
+		for (const row of rows) {
+			const list = map.get(row.studentId) ?? [];
+			list.push({ id: row.classId, name: row.class.name });
+			map.set(row.studentId, list);
+		}
 	}
 	return map;
 }
