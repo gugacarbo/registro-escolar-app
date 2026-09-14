@@ -50,10 +50,7 @@ export default function ImportStudentsPage() {
 			const initialResolutions: typeof resolutions = {};
 			for (const row of data.rows) {
 				if (row.status === "conflict") {
-					initialResolutions[row.index] = {
-						action: "link",
-						existingStudentId: row.candidates?.[0]?.id,
-					};
+					initialResolutions[row.index] = { action: "skip" };
 				} else if (row.status === "valid") {
 					initialResolutions[row.index] = { action: "create" };
 				} else {
@@ -123,7 +120,8 @@ export default function ImportStudentsPage() {
 	if (step === STEP_PREVIEW && preview) {
 		const unresolvedConflicts = preview.rows.filter(
 			(row) =>
-				row.status === "conflict" && resolutions[row.index]?.action !== "link",
+				row.status === "conflict" &&
+				!["link", "skip"].includes(resolutions[row.index]?.action ?? ""),
 		);
 		return (
 			<PageShell>

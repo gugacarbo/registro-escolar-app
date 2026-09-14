@@ -226,6 +226,8 @@ test.describe("SPEC-0001 cadastro e importação de estudantes", () => {
 
 		await expect(page.getByText("Revisar importação")).toBeVisible();
 		await expect(page.getByRole("cell", { name: "Conflito", exact: true })).toBeVisible();
+		await expect(page.getByLabel("Ação de importação")).toHaveValue("skip");
+		await page.getByLabel("Ação de importação").selectOption("link");
 		await expect(page.getByLabel("Estudante existente")).toBeVisible();
 		await page.getByRole("button", { name: "Confirmar importação" }).click();
 		await expect(page.getByText(/Vinculados: 1/)).toBeVisible();

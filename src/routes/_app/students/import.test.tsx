@@ -101,6 +101,44 @@ describe("ImportStudentsPage", () => {
 		expect(mocks.mutateAsync).toHaveBeenCalledWith(file);
 	});
 
+	it("seleciona ignorar por padrão quando o estudante já existe", async () => {
+		mocks.mutateAsync.mockResolvedValueOnce({
+			rows: [
+				{
+					index: 2,
+					name: "Estudante já cadastrado",
+					document: "123456789",
+					status: "conflict",
+					errors: [],
+					candidates: [
+						{
+							id: "student-1",
+							name: "Estudante já cadastrado",
+							reason: "document",
+						},
+					],
+				},
+			],
+			summary: { total: 1, valid: 0, conflicts: 1, invalid: 0 },
+		});
+		renderPage();
+
+		const input = screen.getByLabelText(
+			"Selecionar arquivo para importar",
+		) as HTMLInputElement;
+		const file = new File(
+			["nome,documento\nEstudante já cadastrado,123456789"],
+			"estudantes.csv",
+			{
+				type: "text/csv",
+			},
+		);
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await screen.findByText("Revisar importação");
+		expect(screen.getByLabelText("Ação de importação")).toHaveValue("skip");
+	});
+
 	it("mantém o título do passo de upload", () => {
 		renderPage();
 

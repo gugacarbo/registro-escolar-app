@@ -103,7 +103,7 @@ function ConflictResolver({
 	}
 
 	const action =
-		resolution?.action ?? (row.status === "conflict" ? undefined : "create");
+		resolution?.action ?? (row.status === "conflict" ? "skip" : "create");
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -111,7 +111,11 @@ function ConflictResolver({
 				value={action ?? ""}
 				onChange={(e) => {
 					const value = e.target.value as "create" | "link" | "skip";
-					onChange({ action: value });
+					onChange({
+						action: value,
+						existingStudentId:
+							value === "link" ? row.candidates?.[0]?.id : undefined,
+					});
 				}}
 				className="rounded border px-2 py-1"
 				aria-label="Ação de importação"
