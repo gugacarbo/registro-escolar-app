@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { DataTable, type DataTableColumn } from "../components/data-table.tsx";
 import { Button } from "../components/ui/button.tsx";
@@ -110,7 +111,7 @@ export const ListPageExample: Story = {
 				actions={<Button size="sm">Novo componente</Button>}
 			/>
 			<PageToolbar>
-				<SearchInput placeholder="Buscar componente" className="w-64" />
+				<ToolbarSearchInput />
 				<Button size="sm">Filtrar</Button>
 			</PageToolbar>
 			<DataTable
@@ -150,3 +151,16 @@ export const DetailFormExample: Story = {
 		</PageShell>
 	),
 };
+
+function ToolbarSearchInput() {
+	const [value, setValue] = useState("");
+	return (
+		<SearchInput
+			value={value}
+			onChange={setValue}
+			placeholder="Buscar componente"
+			ariaLabel="Buscar"
+			className="w-64"
+		/>
+	);
+}

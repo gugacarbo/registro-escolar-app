@@ -5,13 +5,13 @@ import {
 	SearchableSelect,
 } from "./searchable-select.tsx";
 
-const meta = {
+const meta: Meta = {
 	title: "UI/SearchableSelect",
 	component: SearchableSelect,
 	parameters: {
 		layout: "centered",
 	},
-} satisfies Meta<typeof SearchableSelect>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

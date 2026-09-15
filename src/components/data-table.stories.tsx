@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { DataTableColumn } from "./data-table.tsx";
 import { DataTable } from "./data-table.tsx";
 
-const meta = {
+const meta: Meta = {
 	title: "UI/DataTable",
 	component: DataTable,
 	parameters: {
 		layout: "padded",
 	},
-} satisfies Meta<typeof DataTable>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -59,6 +59,7 @@ export const Padrao: Story = {
 		<DataTable
 			{...baseProps}
 			rows={usuarios.slice(0, 8)}
+			emptyTitle="Usuários"
 			ariaLabel="Usuários"
 		/>
 	),
@@ -67,7 +68,13 @@ export const Padrao: Story = {
 export const Carregando: Story = {
 	name: "Carregando",
 	render: () => (
-		<DataTable {...baseProps} rows={[]} isLoading ariaLabel="Usuários" />
+		<DataTable
+			{...baseProps}
+			rows={[]}
+			isLoading
+			emptyTitle="Usuários"
+			ariaLabel="Usuários"
+		/>
 	),
 };
 
@@ -81,6 +88,7 @@ export const Erro: Story = {
 			errorMessage="Não foi possível listar os usuários. Tente novamente em instantes."
 			onRetry={() => {}}
 			retryLabel="Recarregar"
+			emptyTitle="Usuários"
 			ariaLabel="Usuários"
 		/>
 	),
@@ -110,6 +118,7 @@ export const ComPaginacao: Story = {
 			pageSize={8}
 			onPageChange={(p) => console.log("page", p)}
 			onPageSizeChange={(s) => console.log("pageSize", s)}
+			emptyTitle="Usuários"
 			ariaLabel="Usuários"
 		/>
 	),

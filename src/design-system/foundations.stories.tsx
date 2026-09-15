@@ -131,7 +131,6 @@ const PageDecorator: Decorator = (Story) => (
 
 const meta = {
 	title: "Design System/Foundations",
-	component: null,
 	decorators: [PageDecorator],
 	parameters: { layout: "centered" },
 } satisfies Meta;

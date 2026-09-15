@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { type EntityOption, EntitySelect } from "./entity-select.tsx";
 
-const meta = {
+const meta: Meta = {
 	title: "UI/EntitySelect",
 	component: EntitySelect,
 	parameters: {
 		layout: "centered",
 	},
-} satisfies Meta<typeof EntitySelect>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

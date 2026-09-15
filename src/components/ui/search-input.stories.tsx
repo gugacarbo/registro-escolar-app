@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { SearchInput } from "./search-input.tsx";
 
-const meta = {
+const meta: Meta = {
 	title: "UI/SearchInput",
 	component: SearchInput,
 	parameters: {
 		layout: "centered",
 	},
-} satisfies Meta<typeof SearchInput>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

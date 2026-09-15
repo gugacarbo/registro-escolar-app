@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 import { Button } from "./button.tsx";
 import { PageHeader, PageSection, PageShell, PageToolbar } from "./page.tsx";
 import { SearchInput } from "./search-input.tsx";
@@ -55,7 +56,7 @@ export const PageToolbarComControles: Story = {
 	name: "PageToolbar ComControles",
 	render: () => (
 		<PageToolbar>
-			<SearchInput placeholder="Buscar por nome ou email" className="w-64" />
+			<ToolbarSearchInput />
 			<Select defaultValue="todos">
 				<SelectTrigger className="w-44" aria-label="Papel">
 					<SelectValue />
@@ -91,3 +92,16 @@ export const PageSectionCompleta: Story = {
 		</PageSection>
 	),
 };
+
+function ToolbarSearchInput() {
+	const [value, setValue] = useState("");
+	return (
+		<SearchInput
+			value={value}
+			onChange={setValue}
+			placeholder="Buscar por nome ou email"
+			ariaLabel="Buscar"
+			className="w-64"
+		/>
+	);
+}

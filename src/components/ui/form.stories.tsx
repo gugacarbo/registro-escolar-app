@@ -12,13 +12,13 @@ import {
 import { Input } from "./input.tsx";
 import { Textarea } from "./textarea.tsx";
 
-const meta = {
+const meta: Meta = {
 	title: "UI/Form",
 	component: Form,
 	parameters: {
 		layout: "centered",
 	},
-} satisfies Meta<typeof Form>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
