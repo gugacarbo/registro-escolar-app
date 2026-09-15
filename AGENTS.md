@@ -38,6 +38,12 @@ npm run test:coverage    # ≥ 95%
 npm run e2e              # tudo verde (CI)
 ```
 
+## UI
+
+- Catálogo canônico de UI no Storybook: `bun run storybook` (porta 6006).
+- Foundations em Design System/Foundations; primitives em UI/*; patterns em UI/Page e UI/DataTable; composições em Design System/Compositions.
+- Consulte o catálogo antes de criar componente novo.
+
 ## Como deployar
 
 Ordem oficial (deploy é manual; o CI **não** publica):
