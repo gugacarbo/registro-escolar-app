@@ -21,6 +21,7 @@ function createTestDb() {
 			title TEXT NOT NULL,
 			status TEXT NOT NULL DEFAULT 'draft',
 			held_at INTEGER,
+			location TEXT,
 			template_id TEXT,
 			created_at INTEGER NOT NULL,
 			updated_at INTEGER NOT NULL

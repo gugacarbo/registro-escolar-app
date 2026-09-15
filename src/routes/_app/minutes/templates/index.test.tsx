@@ -41,8 +41,14 @@ function makeTemplate(overrides: Partial<MinuteTemplate> = {}): MinuteTemplate {
 	return {
 		id: "template-1",
 		name: "Modelo padrão",
-		headerText: "",
-		footerText: "",
+		headerContent: JSON.stringify({
+			type: "doc",
+			content: [{ type: "paragraph" }],
+		}),
+		footerContent: JSON.stringify({
+			type: "doc",
+			content: [{ type: "paragraph" }],
+		}),
 		showMeeting: true,
 		showClasses: true,
 		showParticipants: true,

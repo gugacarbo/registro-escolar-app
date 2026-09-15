@@ -18,8 +18,12 @@ export const minuteTemplates = sqliteTable(
 	{
 		id: text("id").primaryKey(),
 		name: text("name").notNull(),
-		headerText: text("header_text").notNull().default(""),
-		footerText: text("footer_text").notNull().default(""),
+		headerContent: text("header_content")
+			.notNull()
+			.default('{"type":"doc","content":[{"type":"paragraph"}]}'),
+		footerContent: text("footer_content")
+			.notNull()
+			.default('{"type":"doc","content":[{"type":"paragraph"}]}'),
 		showMeeting: integer("show_meeting", { mode: "boolean" })
 			.notNull()
 			.default(true),

@@ -1,6 +1,14 @@
 import type { Meeting } from "#/lib/meetings/schema";
 
 import type { MinuteTemplate } from "./schema";
+import {
+	emptyDoc,
+	type MinuteElement,
+	plainTextToTipTap,
+	type RenderContext,
+	tipTapToMinuteElements,
+	tipTapToPlainText,
+} from "./tiptap/serializer";
 import type { MinuteVersionRow } from "./types";
 
 export type MDBMeeting = Meeting;
@@ -8,10 +16,17 @@ export type MDBMeeting = Meeting;
 /** Linha de texto de ata pronta para prévia (JSON) e PDF. */
 export type MinuteLine = { text: string; level: 1 | 2 | 3 };
 
+export type RenderedMinuteElement =
+	| { kind: "line"; text: string; level: 1 | 2 | 3 }
+	| { kind: "image"; src: string; alt: string };
+
 export type RenderedMinute = {
 	title: string;
 	lines: MinuteLine[];
+	elements: RenderedMinuteElement[];
 };
+
+export type { MinuteElement, RenderContext };
 
 type ParticipantLike = { staffName: string; roleName: string };
 type ClassLike = { className: string };
@@ -31,16 +46,60 @@ export type RenderInput = {
 	generalReports: ReportLike[];
 };
 
+function parseTemplateContent(
+	value: string | object | null | undefined,
+): ReturnType<typeof plainTextToTipTap> {
+	if (!value) {
+		return emptyDoc();
+	}
+	if (typeof value === "string") {
+		try {
+			const parsed = JSON.parse(value);
+			if (parsed && typeof parsed === "object" && parsed.type === "doc") {
+				return parsed;
+			}
+		} catch {
+			return plainTextToTipTap(value);
+		}
+		return plainTextToTipTap(value);
+	}
+	return value as ReturnType<typeof plainTextToTipTap>;
+}
+
 export function renderMinute(input: RenderInput): RenderedMinute {
 	const t = input.template;
+	const context: RenderContext = {
+		meeting: input.meeting,
+		data: {
+			classes: input.classes,
+			participants: input.participants,
+			records: input.records,
+			generalReports: input.generalReports,
+		},
+	};
 	const lines: MinuteLine[] = [];
+	const elements: RenderedMinuteElement[] = [];
 	const push = (text: string, level: MinuteLine["level"] = 3) => {
 		if (text.trim() !== "") {
 			lines.push({ text, level });
+			elements.push({ kind: "line", text, level });
 		}
 	};
 
-	push(t?.headerText ?? "", 1);
+	const headerDoc = parseTemplateContent(t?.headerContent);
+	const headerText = tipTapToPlainText(headerDoc, context);
+	const headerElements = tipTapToMinuteElements(headerDoc, context);
+	if (headerText.trim()) {
+		push(headerText, 1);
+		for (const el of headerElements) {
+			if (el.kind === "text") {
+				elements.push({ kind: "line", text: el.text, level: 1 });
+			} else {
+				elements.push(el);
+			}
+		}
+	}
+
 	push(`Ata — ${input.meeting.title}`, 1);
 
 	if (!t || t.showMeeting) {
@@ -101,9 +160,21 @@ export function renderMinute(input: RenderInput): RenderedMinute {
 		}
 	}
 
-	push(t?.footerText ?? "", 1);
+	const footerDoc = parseTemplateContent(t?.footerContent);
+	const footerText = tipTapToPlainText(footerDoc, context);
+	const footerElements = tipTapToMinuteElements(footerDoc, context);
+	if (footerText.trim()) {
+		push(footerText, 1);
+		for (const el of footerElements) {
+			if (el.kind === "text") {
+				elements.push({ kind: "line", text: el.text, level: 1 });
+			} else {
+				elements.push(el);
+			}
+		}
+	}
 
-	return { title: `Ata — ${input.meeting.title}`, lines };
+	return { title: `Ata — ${input.meeting.title}`, lines, elements };
 }
 
 export function renderedToPlainText(rendered: RenderedMinute): string {

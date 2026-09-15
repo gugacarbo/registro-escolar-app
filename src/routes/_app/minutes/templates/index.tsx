@@ -12,6 +12,30 @@ export const Route = createFileRoute("/_app/minutes/templates/")({
 	component: MinuteTemplatesPage,
 });
 
+function hasRichContent(
+	value: string | Record<string, unknown> | null | undefined,
+): boolean {
+	if (!value) return false;
+	if (typeof value === "string") {
+		try {
+			const parsed = JSON.parse(value) as Record<string, unknown>;
+			return hasRichContent(parsed);
+		} catch {
+			return value.trim().length > 0;
+		}
+	}
+	const content = value.content;
+	if (!Array.isArray(content)) return false;
+	return content.some((node: unknown) => {
+		if (typeof node !== "object" || node === null) return false;
+		const n = node as { type?: string; content?: unknown[]; text?: string };
+		if (n.text) return true;
+		if (Array.isArray(n.content))
+			return hasRichContent(n as Record<string, unknown>);
+		return false;
+	});
+}
+
 const columns = [
 	{
 		header: "Nome",
@@ -30,6 +54,16 @@ const columns = [
 			]
 				.filter(Boolean)
 				.join(" · ") || "Nenhum bloco",
+	},
+	{
+		header: "Personalização",
+		cell: (template: MinuteTemplate) =>
+			[
+				hasRichContent(template.headerContent) && "Cabeçalho",
+				hasRichContent(template.footerContent) && "Rodapé",
+			]
+				.filter(Boolean)
+				.join(" · ") || "Padrão",
 	},
 ];
 

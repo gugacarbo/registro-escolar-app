@@ -224,6 +224,8 @@ export async function createMinuteTemplate(
 		name: string;
 		headerText?: string;
 		footerText?: string;
+		headerContent?: string | Record<string, unknown>;
+		footerContent?: string | Record<string, unknown>;
 		showMeeting?: boolean;
 		showClasses?: boolean;
 		showParticipants?: boolean;
@@ -232,7 +234,42 @@ export async function createMinuteTemplate(
 		showSignatures?: boolean;
 	},
 ): Promise<{ id: string; name: string }> {
-	const res = await api("POST", "/api/minute-templates", ctx.cookies, input);
+	const body = {
+		name: input.name,
+		headerContent:
+			input.headerContent ??
+			(input.headerText
+				? JSON.stringify({
+						type: "doc",
+						content: [
+							{
+								type: "paragraph",
+								content: [{ type: "text", text: input.headerText }],
+							},
+						],
+					})
+				: undefined),
+		footerContent:
+			input.footerContent ??
+			(input.footerText
+				? JSON.stringify({
+						type: "doc",
+						content: [
+							{
+								type: "paragraph",
+								content: [{ type: "text", text: input.footerText }],
+							},
+						],
+					})
+				: undefined),
+		showMeeting: input.showMeeting,
+		showClasses: input.showClasses,
+		showParticipants: input.showParticipants,
+		showRecords: input.showRecords,
+		showGeneralReports: input.showGeneralReports,
+		showSignatures: input.showSignatures,
+	};
+	const res = await api("POST", "/api/minute-templates", ctx.cookies, body);
 	if (!res.ok) throw new Error(`createMinuteTemplate failed: ${res.status}`);
 	return res.json();
 }

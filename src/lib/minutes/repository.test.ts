@@ -31,6 +31,7 @@ import {
 	previewMinute,
 	updateMinuteTemplate,
 } from "./repository";
+import { textDoc } from "./tiptap/serializer";
 
 const meetingDate = new Date("2025-06-10T12:00:00.000Z");
 
@@ -42,6 +43,7 @@ function createTestDb() {
 			title TEXT NOT NULL,
 			status TEXT NOT NULL DEFAULT 'draft',
 			held_at INTEGER,
+			location TEXT,
 			template_id TEXT,
 			created_at INTEGER NOT NULL,
 			updated_at INTEGER NOT NULL
@@ -49,8 +51,8 @@ function createTestDb() {
 		CREATE TABLE minute_templates (
 			id TEXT PRIMARY KEY,
 			name TEXT NOT NULL,
-			header_text TEXT DEFAULT '' NOT NULL,
-			footer_text TEXT DEFAULT '' NOT NULL,
+			header_content TEXT DEFAULT '{"type":"doc","content":[{"type":"paragraph"}]}' NOT NULL,
+			footer_content TEXT DEFAULT '{"type":"doc","content":[{"type":"paragraph"}]}' NOT NULL,
 			show_meeting INTEGER DEFAULT 1 NOT NULL,
 			show_classes INTEGER DEFAULT 1 NOT NULL,
 			show_participants INTEGER DEFAULT 1 NOT NULL,
@@ -188,24 +190,28 @@ describe("minutes repository (specs 0009/0010)", () => {
 	it("atualiza template existente", async () => {
 		const created = await createMinuteTemplate(setup.db, {
 			name: "Original",
-			headerText: "Cabeçalho original",
-			footerText: "Rodapé original",
+			headerContent: textDoc("Cabeçalho original"),
+			footerContent: textDoc("Rodapé original"),
 		});
 		const updated = await updateMinuteTemplate(setup.db, created.id, {
 			name: "Atualizado",
-			headerText: "Novo cabeçalho",
-			footerText: "Novo rodapé",
+			headerContent: textDoc("Novo cabeçalho"),
+			footerContent: textDoc("Novo rodapé"),
 			showMeeting: false,
 			showGeneralReports: true,
 		});
 		expect(updated).toMatchObject({
 			id: created.id,
 			name: "Atualizado",
-			headerText: "Novo cabeçalho",
-			footerText: "Novo rodapé",
 			showMeeting: false,
 			showGeneralReports: true,
 		});
+		expect(
+			JSON.parse(updated.headerContent as string).content[0].content[0].text,
+		).toBe("Novo cabeçalho");
+		expect(
+			JSON.parse(updated.footerContent as string).content[0].content[0].text,
+		).toBe("Novo rodapé");
 	});
 
 	it("cria template e lista ordenado por nome", async () => {
@@ -213,7 +219,7 @@ describe("minutes repository (specs 0009/0010)", () => {
 		const b = await createMinuteTemplate(setup.db, {
 			name: "Sem assinaturas",
 			showSignatures: false,
-			headerText: "COLÉGIO X",
+			headerContent: textDoc("COLÉGIO X"),
 		});
 		expect(b.showSignatures).toBe(false);
 		const list = await import("./repository").then((m) =>
@@ -258,8 +264,8 @@ describe("minutes repository (specs 0009/0010)", () => {
 		// renderMinimal/maximal e saída em texto plano.
 		const template = await createMinuteTemplate(setup.db, {
 			name: "Completo",
-			headerText: "Cabeçalho",
-			footerText: "Rodapé",
+			headerContent: textDoc("Cabeçalho"),
+			footerContent: textDoc("Rodapé"),
 		});
 		await setup.db
 			.update(schema.meetings)
@@ -278,6 +284,7 @@ describe("minutes repository (specs 0009/0010)", () => {
 				title: "Título",
 				status: "in_progress",
 				heldAt: null,
+				location: null,
 				templateId: null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -314,6 +321,7 @@ describe("minutes repository (specs 0009/0010)", () => {
 				title: "Título",
 				status: "draft",
 				heldAt: null,
+				location: null,
 				templateId: null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -408,6 +416,11 @@ describe("minutes repository (specs 0009/0010)", () => {
 				{ text: longWord, level: 3 },
 				{ text: longText, level: 3 },
 				{ text: "", level: 3 },
+			],
+			elements: [
+				{ kind: "line", text: "Seção", level: 2 },
+				{ kind: "line", text: longWord, level: 3 },
+				{ kind: "line", text: longText, level: 3 },
 			],
 		});
 		expect(bytes.byteLength).toBeGreaterThan(1000);

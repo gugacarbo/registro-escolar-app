@@ -2,14 +2,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
+import { textDoc } from "#/lib/minutes/tiptap/serializer";
 import { useUpdateMinuteTemplate } from "./use-update-minute-template";
 
 const template = {
 	id: "template-1",
 	name: "Modelo atualizado",
-	headerText: "Cabeçalho",
-	footerText: "Rodapé",
+	headerContent: JSON.stringify(textDoc("Cabeçalho")),
+	footerContent: JSON.stringify(textDoc("Rodapé")),
 	showMeeting: true,
 	showClasses: true,
 	showParticipants: true,
@@ -48,8 +48,8 @@ describe("useUpdateMinuteTemplate", () => {
 
 		result.current.mutate({
 			name: "Modelo atualizado",
-			headerText: "Cabeçalho",
-			footerText: "Rodapé",
+			headerContent: textDoc("Cabeçalho"),
+			footerContent: textDoc("Rodapé"),
 			showMeeting: true,
 			showClasses: true,
 			showParticipants: true,
@@ -64,8 +64,8 @@ describe("useUpdateMinuteTemplate", () => {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
 				name: "Modelo atualizado",
-				headerText: "Cabeçalho",
-				footerText: "Rodapé",
+				headerContent: textDoc("Cabeçalho"),
+				footerContent: textDoc("Rodapé"),
 				showMeeting: true,
 				showClasses: true,
 				showParticipants: true,
@@ -106,8 +106,8 @@ describe("useUpdateMinuteTemplate", () => {
 
 		result.current.mutate({
 			name: "Nome",
-			headerText: "",
-			footerText: "",
+			headerContent: textDoc(""),
+			footerContent: textDoc(""),
 			showMeeting: true,
 			showClasses: true,
 			showParticipants: true,
@@ -144,8 +144,8 @@ describe("useUpdateMinuteTemplate", () => {
 
 		result.current.mutate({
 			name: "Nome",
-			headerText: "",
-			footerText: "",
+			headerContent: textDoc(""),
+			footerContent: textDoc(""),
 			showMeeting: true,
 			showClasses: true,
 			showParticipants: true,

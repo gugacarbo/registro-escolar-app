@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,7 +16,8 @@ import {
 	FormSubmit,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
-import { Textarea } from "#/components/ui/textarea";
+import { RichTextEditor } from "#/components/ui/rich-text-editor";
+import { emptyDoc } from "#/lib/minutes/tiptap/serializer";
 
 const BLOCKS = [
 	{ name: "showMeeting", label: "Reunião" },
@@ -25,10 +28,16 @@ const BLOCKS = [
 	{ name: "showSignatures", label: "Assinaturas" },
 ] as const;
 
+const tiptapContentSchema = z.custom<Record<string, unknown>>((val) => {
+	if (typeof val !== "object" || val === null) return false;
+	const record = val as Record<string, unknown>;
+	return typeof record.type === "string";
+}, "Conteúdo inválido");
+
 const minuteTemplateFormSchema = z.object({
 	name: z.string().trim().min(1, "Nome é obrigatório"),
-	headerText: z.string(),
-	footerText: z.string(),
+	headerContent: tiptapContentSchema,
+	footerContent: tiptapContentSchema,
 	showMeeting: z.boolean(),
 	showClasses: z.boolean(),
 	showParticipants: z.boolean(),
@@ -54,8 +63,8 @@ export function MinuteTemplateForm({
 		resolver: zodResolver(minuteTemplateFormSchema),
 		defaultValues: defaultValues ?? {
 			name: "",
-			headerText: "",
-			footerText: "",
+			headerContent: emptyDoc() as Record<string, unknown>,
+			footerContent: emptyDoc() as Record<string, unknown>,
 			showMeeting: true,
 			showClasses: true,
 			showParticipants: true,
@@ -86,12 +95,17 @@ export function MinuteTemplateForm({
 				/>
 				<FormField
 					control={form.control}
-					name="headerText"
+					name="headerContent"
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Cabeçalho</FormLabel>
 							<FormControl>
-								<Textarea {...field} />
+								<RichTextEditor
+									aria-label="Cabeçalho"
+									value={field.value as Record<string, unknown>}
+									onChange={field.onChange}
+									placeholder="Cabeçalho do template..."
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -99,12 +113,17 @@ export function MinuteTemplateForm({
 				/>
 				<FormField
 					control={form.control}
-					name="footerText"
+					name="footerContent"
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Rodapé</FormLabel>
 							<FormControl>
-								<Textarea {...field} />
+								<RichTextEditor
+									aria-label="Rodapé"
+									value={field.value as Record<string, unknown>}
+									onChange={field.onChange}
+									placeholder="Rodapé do template..."
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

@@ -158,7 +158,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 		await expect(authenticatedPage).toHaveURL(
 			new RegExp(`/minutes/templates/${template.id}$`),
 		);
-		await authenticatedPage.getByLabel("Cabeçalho").fill("Cabeçalho revisado");
+		await authenticatedPage.getByRole("textbox", { name: "Cabeçalho" }).fill("Cabeçalho revisado");
 		await authenticatedPage.getByRole("button", { name: "Salvar alterações" }).click();
 		await expect(authenticatedPage.getByRole("status")).toHaveText(
 			"Modelo atualizado",

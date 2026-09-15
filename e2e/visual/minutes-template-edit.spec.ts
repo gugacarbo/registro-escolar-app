@@ -32,6 +32,6 @@ test("@visual mantém a tela de edição do modelo de ata", async ({
 				.filter({ hasText: apiContext.user.email }),
 		],
 	});
-	await expect(headerField).toHaveValue("Cabeçalho da ata editado");
-	await expect(footerField).toHaveValue("Rodapé da ata editado");
+	await expect(headerField).toHaveText("Cabeçalho da ata editado");
+	await expect(footerField).toHaveText("Rodapé da ata editado");
 });

@@ -597,8 +597,34 @@ async function main() {
 			.values({
 				id: id(),
 				name: `Modelo ${meeting.title.split("—")[0]?.trim() ?? "padrão"}`,
-				headerText: "Prefeitura Municipal — Secretaria de Educação",
-				footerText: "Documento gerado automaticamente (dados fictícios de desenvolvimento).",
+				headerContent: JSON.stringify({
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [
+								{
+									type: "text",
+									text: "Prefeitura Municipal — Secretaria de Educação",
+								},
+							],
+						},
+					],
+				}),
+				footerContent: JSON.stringify({
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [
+								{
+									type: "text",
+									text: "Documento gerado automaticamente (dados fictícios de desenvolvimento).",
+								},
+							],
+						},
+					],
+				}),
 				showMeeting: true,
 				showClasses: true,
 				showParticipants: true,

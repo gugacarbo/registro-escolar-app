@@ -18,6 +18,7 @@ export const meetings = sqliteTable(
 		title: text("title").notNull(),
 		status: text("status").notNull().default("draft"),
 		heldAt: integer("held_at", { mode: "timestamp_ms" }),
+		location: text("location"),
 		templateId: text("template_id"),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)

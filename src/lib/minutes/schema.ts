@@ -19,8 +19,24 @@ export const createMinuteTemplateSchema = createInsertSchema(minuteTemplates)
 	})
 	.extend({
 		name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
-		headerText: z.string().optional().default(""),
-		footerText: z.string().optional().default(""),
+		headerContent: z
+			.union([
+				z.string(),
+				z.custom<Record<string, unknown>>((val) => {
+					if (typeof val !== "object" || val === null) return false;
+					return typeof (val as Record<string, unknown>).type === "string";
+				}, "Conteúdo do cabeçalho inválido"),
+			])
+			.optional(),
+		footerContent: z
+			.union([
+				z.string(),
+				z.custom<Record<string, unknown>>((val) => {
+					if (typeof val !== "object" || val === null) return false;
+					return typeof (val as Record<string, unknown>).type === "string";
+				}, "Conteúdo do rodapé inválido"),
+			])
+			.optional(),
 	});
 
 export const updateMinuteTemplateSchema = createMinuteTemplateSchema;

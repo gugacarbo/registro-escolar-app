@@ -48,6 +48,7 @@ function makeMeeting(overrides: Partial<Meeting> = {}): Meeting {
 		title: "Conselho de classe",
 		status: "draft",
 		heldAt: null,
+		location: null,
 		templateId: null,
 		createdAt: now,
 		updatedAt: now,

@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
+import { textDoc } from "#/lib/minutes/tiptap/serializer";
 import {
 	getMinuteTemplateQueryKey,
 	useMinuteTemplate,
@@ -20,8 +20,8 @@ function createWrapper() {
 const template = {
 	id: "template-1",
 	name: "Modelo padrão",
-	headerText: "Cabeçalho",
-	footerText: "Rodapé",
+	headerContent: JSON.stringify(textDoc("Cabeçalho")),
+	footerContent: JSON.stringify(textDoc("Rodapé")),
 	showMeeting: true,
 	showClasses: true,
 	showParticipants: true,

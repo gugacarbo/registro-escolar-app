@@ -85,6 +85,20 @@
       "when": 1789423560630,
       "tag": "0011_adiciona-reference-estudantes",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1789481400000,
+      "tag": "0012_migra-templates-para-conteudo-rico",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1789482400000,
+      "tag": "0013_adiciona-local-reuniao",
+      "breakpoints": true
     }
   ]
 }

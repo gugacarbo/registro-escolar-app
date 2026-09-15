@@ -134,6 +134,34 @@ export async function buildMinutePdf(
 		cursorY -= spacerAfter;
 	};
 
+	const writeImage = async (src: string, alt: string) => {
+		const parsed = src.match(/^data:image\/(\w+);base64,(.+)$/);
+		if (!parsed) {
+			writeLine(`[imagem: ${alt}]`, regular, BODY_SIZE, 2);
+			return;
+		}
+		const [, mime, base64] = parsed;
+		try {
+			const bytes = Buffer.from(base64, "base64");
+			const embed =
+				mime === "png" ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
+			const maxWidth = PAGE_W - 2 * MARGIN;
+			const scale = Math.min(1, maxWidth / embed.width);
+			const width = embed.width * scale;
+			const height = embed.height * scale;
+			ensureSpace(height + 4);
+			page.drawImage(embed, {
+				x: MARGIN,
+				y: cursorY - height,
+				width,
+				height,
+			});
+			cursorY -= height + 4;
+		} catch {
+			writeLine(`[imagem: ${alt}]`, regular, BODY_SIZE, 2);
+		}
+	};
+
 	// Título do documento
 	writeLine(rendered.title, bold, 16, 2);
 	if (options.generatedAt) {
@@ -145,15 +173,19 @@ export async function buildMinutePdf(
 		);
 	}
 
-	for (const line of rendered.lines) {
-		const style = styleFor(line.level);
+	for (const element of rendered.elements) {
+		if (element.kind === "image") {
+			await writeImage(element.src, element.alt);
+			continue;
+		}
+		const style = styleFor(element.level);
 		writeLine(
-			line.text,
+			element.text,
 			style.bold ? bold : regular,
 			style.size,
 			style.spacerAfter,
 		);
-		if (line.level === 2) {
+		if (element.level === 2) {
 			// filete sob títulos de seção
 			ensureSpace(8);
 			page.drawLine({

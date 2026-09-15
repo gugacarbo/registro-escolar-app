@@ -5,6 +5,7 @@ import {
 	findMinuteTemplateById,
 	updateMinuteTemplate,
 } from "#/lib/minutes/repository";
+import { textDoc } from "#/lib/minutes/tiptap/serializer";
 
 import { getMinuteTemplateHandler, updateMinuteTemplateHandler } from "./index";
 
@@ -55,11 +56,24 @@ function createEnv() {
 }
 
 function makeTemplate(overrides: Record<string, unknown> = {}) {
+	const headerContent =
+		overrides.headerContent !== undefined
+			? typeof overrides.headerContent === "object" &&
+				overrides.headerContent !== null
+				? JSON.stringify(overrides.headerContent)
+				: String(overrides.headerContent)
+			: JSON.stringify(textDoc("Cabeçalho"));
+	const footerContent =
+		overrides.footerContent !== undefined
+			? typeof overrides.footerContent === "object" &&
+				overrides.footerContent !== null
+				? JSON.stringify(overrides.footerContent)
+				: String(overrides.footerContent)
+			: JSON.stringify(textDoc("Rodapé"));
+
 	return {
 		id: "template-1",
 		name: "Modelo padrão",
-		headerText: "Cabeçalho",
-		footerText: "Rodapé",
 		showMeeting: true,
 		showClasses: true,
 		showParticipants: true,
@@ -69,14 +83,16 @@ function makeTemplate(overrides: Record<string, unknown> = {}) {
 		createdAt: new Date("2026-01-01T00:00:00Z"),
 		updatedAt: new Date("2026-01-01T00:00:00Z"),
 		...overrides,
+		headerContent,
+		footerContent,
 	};
 }
 
 function updatePayload() {
 	return {
 		name: "Modelo revisado",
-		headerText: "Novo cabeçalho",
-		footerText: "Novo rodapé",
+		headerContent: textDoc("Novo cabeçalho"),
+		footerContent: textDoc("Novo rodapé"),
 		showMeeting: true,
 		showClasses: false,
 		showParticipants: true,
@@ -236,10 +252,16 @@ describe("PATCH /api/minute-templates/:id", () => {
 		});
 
 		expect(response.status).toBe(200);
-		expect(await response.json()).toMatchObject({
+		const json = (await response.json()) as {
+			name: string;
+			headerContent: string;
+		};
+		expect(json).toMatchObject({
 			name: "Modelo revisado",
-			headerText: "Novo cabeçalho",
 		});
+		expect(JSON.parse(json.headerContent).content[0].content[0].text).toBe(
+			"Novo cabeçalho",
+		);
 		expect(updateMinuteTemplate).toHaveBeenCalledWith(
 			expect.anything(),
 			"template-1",

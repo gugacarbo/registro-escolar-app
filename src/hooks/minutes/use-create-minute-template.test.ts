@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
+import { emptyDoc } from "#/lib/minutes/tiptap/serializer";
 import { useCreateMinuteTemplate } from "./use-create-minute-template";
 
 function createWrapper() {
@@ -17,8 +17,8 @@ function createWrapper() {
 const created = {
 	id: "template-1",
 	name: "Modelo padrão",
-	headerText: "",
-	footerText: "",
+	headerContent: JSON.stringify(emptyDoc()),
+	footerContent: JSON.stringify(emptyDoc()),
 	showMeeting: true,
 	showClasses: true,
 	showParticipants: true,
@@ -47,8 +47,8 @@ describe("useCreateMinuteTemplate", () => {
 
 		result.current.mutate({
 			name: "Modelo padrão",
-			headerText: "",
-			footerText: "",
+			headerContent: emptyDoc(),
+			footerContent: emptyDoc(),
 		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -58,8 +58,8 @@ describe("useCreateMinuteTemplate", () => {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
 				name: "Modelo padrão",
-				headerText: "",
-				footerText: "",
+				headerContent: emptyDoc(),
+				footerContent: emptyDoc(),
 			}),
 		});
 	});
@@ -77,7 +77,11 @@ describe("useCreateMinuteTemplate", () => {
 			wrapper: createWrapper(),
 		});
 
-		result.current.mutate({ name: "", headerText: "", footerText: "" });
+		result.current.mutate({
+			name: "",
+			headerContent: emptyDoc(),
+			footerContent: emptyDoc(),
+		});
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(result.current.error?.message).toBe("Nome do modelo é obrigatório");

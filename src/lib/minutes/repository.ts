@@ -50,8 +50,8 @@ export async function createMinuteTemplate(
 	db: DB,
 	input: {
 		name: string;
-		headerText?: string;
-		footerText?: string;
+		headerContent?: string | object;
+		footerContent?: string | object;
 		showMeeting?: boolean;
 		showClasses?: boolean;
 		showParticipants?: boolean;
@@ -62,7 +62,24 @@ export async function createMinuteTemplate(
 ) {
 	return db
 		.insert(minuteTemplates)
-		.values({ id: crypto.randomUUID(), ...input })
+		.values({
+			id: crypto.randomUUID(),
+			name: input.name,
+			headerContent:
+				typeof input.headerContent === "object" && input.headerContent != null
+					? JSON.stringify(input.headerContent)
+					: input.headerContent,
+			footerContent:
+				typeof input.footerContent === "object" && input.footerContent != null
+					? JSON.stringify(input.footerContent)
+					: input.footerContent,
+			showMeeting: input.showMeeting,
+			showClasses: input.showClasses,
+			showParticipants: input.showParticipants,
+			showRecords: input.showRecords,
+			showGeneralReports: input.showGeneralReports,
+			showSignatures: input.showSignatures,
+		})
 		.returning()
 		.get();
 }
@@ -84,8 +101,8 @@ export async function updateMinuteTemplate(
 	id: string,
 	input: {
 		name: string;
-		headerText?: string;
-		footerText?: string;
+		headerContent?: string | object;
+		footerContent?: string | object;
 		showMeeting?: boolean;
 		showClasses?: boolean;
 		showParticipants?: boolean;
@@ -96,7 +113,23 @@ export async function updateMinuteTemplate(
 ) {
 	return db
 		.update(minuteTemplates)
-		.set(input)
+		.set({
+			name: input.name,
+			headerContent:
+				typeof input.headerContent === "object" && input.headerContent != null
+					? JSON.stringify(input.headerContent)
+					: input.headerContent,
+			footerContent:
+				typeof input.footerContent === "object" && input.footerContent != null
+					? JSON.stringify(input.footerContent)
+					: input.footerContent,
+			showMeeting: input.showMeeting,
+			showClasses: input.showClasses,
+			showParticipants: input.showParticipants,
+			showRecords: input.showRecords,
+			showGeneralReports: input.showGeneralReports,
+			showSignatures: input.showSignatures,
+		})
 		.where(eq(minuteTemplates.id, id))
 		.returning()
 		.get();

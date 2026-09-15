@@ -114,7 +114,7 @@ test.describe("SPEC-0013 modelos de ata", () => {
 
 		await page.goto(`/minutes/templates/${template.id}`);
 		const headerField = page.getByRole("textbox", { name: "Cabeçalho" });
-		await expect(headerField).toHaveValue("Cabeçalho original");
+		await expect(headerField).toHaveText("Cabeçalho original");
 		await headerField.fill("Cabeçalho revisado no e2e");
 		await page.getByRole("button", { name: "Salvar alterações" }).click();
 
@@ -126,5 +126,28 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		expect(preview.templateId).toBe(template.id);
 		expect(preview.content).toContain("CABEÇALHO REVISADO NO E2E");
 		expect(preview.content).not.toContain("CABEÇALHO ORIGINAL");
+	});
+
+	test("cria modelo com formatação rica e placeholder dinâmico", async ({
+		authenticatedPage: page,
+	}) => {
+		await page.goto("/minutes/templates");
+		await page.getByRole("button", { name: "Novo modelo" }).last().click();
+
+		await page.getByRole("textbox", { name: "Nome *" }).fill("Modelo Rico e Placeholder");
+
+		const headerField = page.getByRole("textbox", { name: "Cabeçalho" });
+		await headerField.click();
+		await headerField.fill("Ata de Reunião: ");
+
+		await page.getByRole("button", { name: "Inserir variável" }).first().click();
+		await page.getByRole("button", { name: "Título da reunião" }).click();
+
+		await page.getByRole("button", { name: "Criar modelo" }).click();
+
+		await expect(page).toHaveURL(/\/minutes\/templates\/.+/);
+		await expect(
+			page.getByRole("heading", { name: "Modelo Rico e Placeholder" }),
+		).toBeVisible();
 	});
 });

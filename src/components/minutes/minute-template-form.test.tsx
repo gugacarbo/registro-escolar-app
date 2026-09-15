@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
+import { textDoc } from "#/lib/minutes/tiptap/serializer";
 import { MinuteTemplateForm } from "./minute-template-form";
 
 describe("MinuteTemplateForm", () => {
@@ -26,8 +26,14 @@ describe("MinuteTemplateForm", () => {
 				onSubmit={vi.fn()}
 				defaultValues={{
 					name: "Modelo de reunião",
-					headerText: "Cabeçalho",
-					footerText: "Rodapé",
+					headerContent: textDoc("Cabeçalho") as unknown as Record<
+						string,
+						unknown
+					>,
+					footerContent: textDoc("Rodapé") as unknown as Record<
+						string,
+						unknown
+					>,
 					showMeeting: true,
 					showClasses: false,
 					showParticipants: true,
@@ -39,8 +45,8 @@ describe("MinuteTemplateForm", () => {
 		);
 
 		expect(screen.getByLabelText(/nome/i)).toHaveValue("Modelo de reunião");
-		expect(screen.getByLabelText("Cabeçalho")).toHaveValue("Cabeçalho");
-		expect(screen.getByLabelText("Rodapé")).toHaveValue("Rodapé");
+		expect(screen.getAllByText("Cabeçalho")).toHaveLength(2);
+		expect(screen.getAllByText("Rodapé")).toHaveLength(2);
 		expect(screen.getByRole("checkbox", { name: "Turmas" })).not.toBeChecked();
 	});
 

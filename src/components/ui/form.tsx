@@ -162,8 +162,8 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 	);
 }
 
-type FormNativeProps = React.ComponentProps<"form"> & {
-	onSubmit: () => void;
+type FormNativeProps = Omit<React.ComponentProps<"form">, "onSubmit"> & {
+	onSubmit?: () => void;
 };
 
 const FormNative = React.forwardRef<HTMLFormElement, FormNativeProps>(
@@ -173,7 +173,7 @@ const FormNative = React.forwardRef<HTMLFormElement, FormNativeProps>(
 		return (
 			<form
 				ref={ref}
-				onSubmit={handleSubmit(onSubmit)}
+				onSubmit={onSubmit ? handleSubmit(onSubmit) : undefined}
 				onReset={() => reset()}
 				{...props}
 			/>

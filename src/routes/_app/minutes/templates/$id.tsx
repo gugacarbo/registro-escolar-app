@@ -9,10 +9,25 @@ import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell } from "#/components/ui/page";
 import { useMinuteTemplate } from "#/hooks/minutes/use-minute-template";
 import { useUpdateMinuteTemplate } from "#/hooks/minutes/use-update-minute-template";
+import { emptyDoc } from "#/lib/minutes/tiptap/serializer";
 
 export const Route = createFileRoute("/_app/minutes/templates/$id")({
 	component: MinuteTemplateDetailPage,
 });
+
+function parseTemplateContent(
+	value: string | object | null | undefined,
+): Record<string, unknown> {
+	if (!value) return emptyDoc() as Record<string, unknown>;
+	if (typeof value === "string") {
+		try {
+			return JSON.parse(value) as Record<string, unknown>;
+		} catch {
+			return emptyDoc() as Record<string, unknown>;
+		}
+	}
+	return value as Record<string, unknown>;
+}
 
 export default function MinuteTemplateDetailPage() {
 	const { id } = Route.useParams();
@@ -66,8 +81,8 @@ export default function MinuteTemplateDetailPage() {
 						key={template.id + String(template.updatedAt)}
 						defaultValues={{
 							name: template.name,
-							headerText: template.headerText,
-							footerText: template.footerText,
+							headerContent: parseTemplateContent(template.headerContent),
+							footerContent: parseTemplateContent(template.footerContent),
 							showMeeting: template.showMeeting,
 							showClasses: template.showClasses,
 							showParticipants: template.showParticipants,
