@@ -124,10 +124,10 @@ Checklist canônica do visual review:
 
 Telas canônicas — copie a estrutura, não o conteúdo:
 
-| Rota | Archetype | Componentes-chave | Por que é canônica |
-| --- | --- | --- | --- |
-| `#/admin/users` (`admin/users.tsx`) | List / Admin | PageShell, PageHeader, PageToolbar, SearchInput, DataTable | ListPage completa: busca + filtros + tabela + estados |
-| `#/minutes` (`minutes/index.tsx`) | List | PageShell, PageHeader, PageToolbar, filtros Select, DataTable | List com filtros múltiplos bem ordenados |
-| `#/components` e `#/components/$id` (`components/index.tsx`, `components/$id.tsx`) | List + Detail | PageShell, PageHeader/PageSection, DataTable | Par List→Detail navegável; composição limpa de seções |
-| `#/classes/enroll` (`classes/enroll.tsx`) | Form | PageShell, PageHeader, PageSection, RHF + Field*, EntitySelect | Form com patterns, RHF e confirmação |
-| `#/meetings` (`meetings/index.tsx`) | Dialog-heavy | PageShell, PageHeader, PageToolbar, DataTable, dialogs de domínio | Página hospedando dialogs de domínio |
+| Rota                                                                               | Archetype     | Componentes-chave                                                 | Por que é canônica                                    |
+| ---------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| `#/admin/users` (`admin/users.tsx`)                                                | List / Admin  | PageShell, PageHeader, PageToolbar, SearchInput, DataTable        | ListPage completa: busca + filtros + tabela + estados |
+| `#/minutes` (`minutes/index.tsx`)                                                  | List          | PageShell, PageHeader, PageToolbar, filtros Select, DataTable     | List com filtros múltiplos bem ordenados              |
+| `#/components` e `#/components/$id` (`components/index.tsx`, `components/$id.tsx`) | List + Detail | PageShell, PageHeader/PageSection, DataTable                      | Par List→Detail navegável; composição limpa de seções |
+| `#/classes/enroll` (`classes/enroll.tsx`)                                          | Form          | PageShell, PageHeader, PageSection, RHF + Field*, EntitySelect    | Form com patterns, RHF e confirmação                  |
+| `#/meetings` (`meetings/index.tsx`)                                                | Dialog-heavy  | PageShell, PageHeader, PageToolbar, DataTable, dialogs de domínio | Página hospedando dialogs de domínio                  |

@@ -100,11 +100,11 @@ URL de produção: https://registro-escolar-app.gugacarbo.workers.dev
 <!-- Índice dos capítulos (docs/context/), cada um com QUANDO carregar.
      Capítulo = estado atual, imperativo, atemporal. Decisão datada = ADR. -->
 
-| Capítulo                      | Quando carregar                                                                          |
-| ----------------------------- | ---------------------------------------------------------------------------------------- |
-| `docs/context/CONVENTIONS.md` | ao alterar contratos de API, estado cliente, formulários, componentes UI ou persistência |
-| `docs/context/TESTS.md`       | ao alterar teste, DoD, bugfix ou comportamento crítico                                   |
-| `docs/context/DESIGN_SYSTEM.md` | ao criar/alterar UI, componentes, recipes ou páginas                                    |
+| Capítulo                        | Quando carregar                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| `docs/context/CONVENTIONS.md`   | ao alterar contratos de API, estado cliente, formulários, componentes UI ou persistência |
+| `docs/context/TESTS.md`         | ao alterar teste, DoD, bugfix ou comportamento crítico                                   |
+| `docs/context/DESIGN_SYSTEM.md` | ao criar/alterar UI, componentes, recipes ou páginas                                     |
 
 ## Mapa de docs
 
