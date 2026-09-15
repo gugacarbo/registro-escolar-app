@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "./button.tsx";
 import {
-	Button,
 	Dialog,
 	DialogContent,
 	DialogDescription,
