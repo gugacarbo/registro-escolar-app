@@ -43,6 +43,7 @@ npm run e2e              # tudo verde (CI)
 - Catálogo canônico de UI no Storybook: `bun run storybook` (porta 6006).
 - Foundations em Design System/Foundations; primitives em UI/*; patterns em UI/Page e UI/DataTable; composições em Design System/Compositions.
 - Consulte o catálogo antes de criar componente novo.
+- Fluxo de UI: identifique a surface → o archetype → consulte o catálogo (Storybook) → use recipe se houver → componha com patterns → crie componente/primitive só por último (política e detalhes em `docs/context/DESIGN_SYSTEM.md`; skill: `.agents/skills/frontend-ui/SKILL.md`).
 
 ## Como deployar
 
@@ -103,6 +104,7 @@ URL de produção: https://registro-escolar-app.gugacarbo.workers.dev
 | ----------------------------- | ---------------------------------------------------------------------------------------- |
 | `docs/context/CONVENTIONS.md` | ao alterar contratos de API, estado cliente, formulários, componentes UI ou persistência |
 | `docs/context/TESTS.md`       | ao alterar teste, DoD, bugfix ou comportamento crítico                                   |
+| `docs/context/DESIGN_SYSTEM.md` | ao criar/alterar UI, componentes, recipes ou páginas                                    |
 
 ## Mapa de docs
 
