@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useForm } from "react-hook-form";
-import { Button } from "./button.tsx";
 import {
 	Form,
 	FormControl,
