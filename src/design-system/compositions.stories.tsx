@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { ListPage } from "#/components/ui/page-recipes";
 import { DataTable, type DataTableColumn } from "../components/data-table.tsx";
 import { Button } from "../components/ui/button.tsx";
 import {
@@ -104,16 +105,17 @@ const columns: DataTableColumn<Componente>[] = [
 export const ListPageExample: Story = {
 	name: "ListPage Example",
 	render: () => (
-		<PageShell>
-			<PageHeader
-				title="Componentes"
-				description="Catálogo de componentes do design system."
-				actions={<Button size="sm">Novo componente</Button>}
-			/>
-			<PageToolbar>
-				<ToolbarSearchInput />
-				<Button size="sm">Filtrar</Button>
-			</PageToolbar>
+		<ListPage
+			title="Componentes"
+			description="Catálogo de componentes do design system."
+			actions={<Button size="sm">Novo componente</Button>}
+			toolbar={
+				<PageToolbar>
+					<ToolbarSearchInput />
+					<Button size="sm">Filtrar</Button>
+				</PageToolbar>
+			}
+		>
 			<DataTable
 				columns={columns}
 				rows={componentes}
@@ -126,7 +128,7 @@ export const ListPageExample: Story = {
 				emptyTitle="Nenhum componente encontrado"
 				ariaLabel="Componentes"
 			/>
-		</PageShell>
+		</ListPage>
 	),
 };
 
