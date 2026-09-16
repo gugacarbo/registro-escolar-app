@@ -1,11 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { EnrollmentFormValues } from "#/components/enrollments/enrollment-form";
 import { EnrollmentForm } from "#/components/enrollments/enrollment-form";
-import { Button } from "#/components/ui/button";
-import { PageShell } from "#/components/ui/page";
+import { FormPage } from "#/components/ui/page-recipes";
 import { useCreateEnrollment } from "#/hooks/enrollments/use-create-enrollment";
 
 export const Route = createFileRoute("/_app/classes/enroll")({
@@ -40,18 +38,12 @@ export function EnrollPage() {
 	}
 
 	return (
-		<PageShell className="mx-auto max-w-2xl">
-			<Link to="/classes">
-				<Button variant="ghost" size="sm">
-					<ArrowLeft className="size-4" aria-hidden />
-					Voltar
-				</Button>
-			</Link>
-			<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
-				Matricular estudante
-			</h1>
+		<FormPage
+			title="Matricular estudante"
+			backTo={{ to: "/classes", label: "Voltar" }}
+		>
 			<EnrollmentForm onSubmit={handleSubmit} serverError={serverError} />
-		</PageShell>
+		</FormPage>
 	);
 }
 
