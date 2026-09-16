@@ -1,12 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import {
 	ComponentForm,
 	type ComponentFormValues,
 } from "#/components/components/component-form";
-import { Button } from "#/components/ui/button";
-import { PageShell } from "#/components/ui/page";
+import { DetailPage } from "#/components/ui/page-recipes";
 import { useComponent } from "#/hooks/components/use-component";
 import { useUpdateComponent } from "#/hooks/components/use-update-component";
 
@@ -37,23 +36,18 @@ export default function ComponentDetailPage() {
 	}
 
 	return (
-		<PageShell>
-			<div className="flex items-center justify-between gap-2">
-				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
-					{component?.name ?? "Dados do componente"}
-				</h1>
-				<Link to="/components">
-					<Button variant="secondary">Voltar para a lista</Button>
-				</Link>
-			</div>
-			{isLoading && <p>Carregando...</p>}
-			{isError && (
-				<p className="text-sm text-destructive">
-					{error instanceof Error
+		<DetailPage
+			title={component?.name ?? "Dados do componente"}
+			backTo={{ to: "/components", label: "Voltar para a lista" }}
+			isLoading={isLoading}
+			error={
+				isError
+					? error instanceof Error
 						? error.message
-						: "Falha ao carregar componente"}
-				</p>
-			)}
+						: "Falha ao carregar componente"
+					: null
+			}
+		>
 			{component && (
 				<>
 					{saved && (
@@ -70,6 +64,6 @@ export default function ComponentDetailPage() {
 					/>
 				</>
 			)}
-		</PageShell>
+		</DetailPage>
 	);
 }
