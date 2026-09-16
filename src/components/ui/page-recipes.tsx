@@ -48,9 +48,11 @@ function BackLink({ backTo }: { backTo: { to: string; label: string } }) {
 	return (
 		<div>
 			<a href={backTo.to} className="inline-flex">
-				<Button variant="ghost" size="sm">
-					<ArrowLeft className="size-4" aria-hidden />
-					{backTo.label}
+				<Button variant="ghost" size="sm" asChild>
+					<span>
+						<ArrowLeft className="size-4" aria-hidden />
+						{backTo.label}
+					</span>
 				</Button>
 			</a>
 		</div>
