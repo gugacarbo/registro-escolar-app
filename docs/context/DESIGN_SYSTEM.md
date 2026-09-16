@@ -95,6 +95,25 @@ Destinos, em ordem de preferência:
 
 Antes de criar: 1) confira no Storybook (Foundations, UI/*, UI/Page, UI/DataTable, Compositions); 2) confira esta gramática; 3) só então escreva, com `data-slot` e story quando for primitive/pattern.
 
+## 12.1. Recipes finais de página
+
+As recipes finais são `ListPage`, `DetailPage` e `FormPage`, importadas de
+`#/components/ui/page-recipes` (fonte canônica; stories em
+`src/components/ui/page-recipes.stories.tsx`). Prefira a recipe ao montar
+`PageShell` + `PageHeader` + `PageToolbar` + `DataTable` manualmente.
+
+- **Contrato `backTo: { to, label }`** (`DetailPage`/`FormPage`): renderiza um
+  `BackLink` interno com âncora nativa (`<a href>`) — trade-off conhecido
+  (sem navegação client-side do router).
+- **Exceção narrow**: `FormPage` aplica `mx-auto max-w-2xl` no `PageShell` —
+  única contenção canônica permitida no shell (§3).
+- **Assimetria honesta**: `DetailPage` não tem `description`/`eyebrow`;
+  `ListPage` delega loading/error ao `DataTable` via slots (não tem
+  `isLoading`/`error` próprios).
+- **Non-goals**: `DashboardPage`, `WizardPage`, `ActionGroup` e `PageContent`
+  foram avaliados e deliberadamente não criados — sem archetype repetível;
+  revisitar se N≥2 casos.
+
 ## 13. className não é escape hatch primário
 
 - `className` serve para ajuste fino pontual (largura, margem local) — NÃO para redefinir recipes/patterns.

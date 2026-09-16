@@ -12,7 +12,7 @@ Aplicável quando a tarefa cria ou altera página, componente, recipe ou fluxo d
 1. **Identify surface** — Auth, App ou Admin (DESIGN_SYSTEM.md §1). Determina densidade e comportamento.
 2. **Identify archetype** — List, Detail, Form, Dashboard, Settings, Wizard, Dialog-heavy ou Specialized (§2). Define a estrutura da tela.
 3. **Storybook** — abra `Design System/*`, `UI/*`, `UI/Page`, `UI/DataTable` (`bun run storybook`). Confira o que já existe antes de escrever qualquer coisa.
-4. **Recipe** — se existe recipe para o archetype, use-a e personalize só props/dados.
+4. **Recipe** — se existe recipe para o archetype, use-a e personalize só props/dados. Recipes finais: `ListPage`, `DetailPage`, `FormPage` de `#/components/ui/page-recipes` (canônicas; ver DESIGN_SYSTEM.md §12.1). Prefira a recipe à montagem manual de PageShell/Header/Toolbar.
 5. **Pattern** — componha com PageShell/PageHeader/PageToolbar/PageSection/DataTable/SearchInput etc.
 6. **Component** — só crie componente novo se não há equivalente, composição não atende e o caso é genérico/repetido (§12). Destino: primitive → `ui/`, pattern → `components/`, product → `components/<domínio>/`.
 7. **Primitive** — se precisar de primitive nova, escreva em `src/components/ui/` com `data-slot` e story.
