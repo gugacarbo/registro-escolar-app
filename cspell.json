@@ -108,6 +108,10 @@
 		"defval",
 		"indep",
 		"Progr",
-		"sarif"
+		"sarif",
+		"worktree",
+		"worktrees",
+		"uiux",
+		"ui:check"
 	]
 }
