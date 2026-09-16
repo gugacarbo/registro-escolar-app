@@ -39,6 +39,9 @@ jobs:
       - name: Run Biome
         run: bun run check
 
+      - name: Run ui:check
+        run: bun run ui:check
+
       - name: Type check
         run: bunx tsc --noEmit --skipLibCheck
 
