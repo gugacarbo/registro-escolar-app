@@ -22,10 +22,7 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		await page.getByRole("button", { name: "Novo modelo" }).last().click();
 
 		await expect(
-			page.getByRole("textbox", { name: "Nome *" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("textbox", { name: "Cabeçalho" }),
+			page.getByRole("dialog").getByRole("textbox", { name: "Nome *" }),
 		).toBeVisible();
 		await expect(
 			page.getByRole("button", { name: "Criar modelo" }),
@@ -128,13 +125,30 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		expect(preview.content).not.toContain("CABEÇALHO ORIGINAL");
 	});
 
-	test("cria modelo com formatação rica e placeholder dinâmico", async ({
+	test("cria modelo pelo popup e personaliza na página de edição", async ({
 		authenticatedPage: page,
 	}) => {
 		await page.goto("/minutes/templates");
 		await page.getByRole("button", { name: "Novo modelo" }).last().click();
 
-		await page.getByRole("textbox", { name: "Nome *" }).fill("Modelo Rico e Placeholder");
+		const dialog = page.getByRole("dialog");
+		await dialog
+			.getByRole("textbox", { name: "Nome *" })
+			.fill("Modelo Rico e Placeholder");
+		await dialog.getByRole("button", { name: "Criar modelo" }).click();
+
+		// O popup cria apenas o nome, fecha e o modelo aparece na listagem.
+		await expect(dialog).toBeHidden({ timeout: 20_000 });
+		const createdCell = page.getByRole("cell", {
+			name: "Modelo Rico e Placeholder",
+		});
+		await expect(createdCell).toBeVisible();
+
+		// A personalização rica acontece na página de edição.
+		await createdCell.click();
+		await expect(page).toHaveURL(/\/minutes\/templates\/[^/]+$/, {
+			timeout: 20_000,
+		});
 
 		const headerField = page.getByRole("textbox", { name: "Cabeçalho" });
 		await headerField.click();
@@ -143,11 +157,9 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		await page.getByRole("button", { name: "Inserir variável" }).first().click();
 		await page.getByRole("button", { name: "Título da reunião" }).click();
 
-		await page.getByRole("button", { name: "Criar modelo" }).click();
-
-		await expect(page).toHaveURL(/\/minutes\/templates\/.+/);
+		await page.getByRole("button", { name: "Salvar alterações" }).click();
 		await expect(
-			page.getByRole("heading", { name: "Modelo Rico e Placeholder" }),
-		).toBeVisible();
+			page.getByText("Modelo atualizado", { exact: true }),
+		).toBeVisible({ timeout: 20_000 });
 	});
 });

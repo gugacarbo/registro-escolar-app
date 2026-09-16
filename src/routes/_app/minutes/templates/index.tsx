@@ -1,8 +1,29 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { DataTable } from "#/components/data-table";
-import { MinuteTemplateForm } from "#/components/minutes/minute-template-form";
 import { Button } from "#/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "#/components/ui/dialog";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	FormNative,
+	FormSubmit,
+} from "#/components/ui/form";
+import { Input } from "#/components/ui/input";
 import { PageHeader, PageShell } from "#/components/ui/page";
 import { useCreateMinuteTemplate } from "#/hooks/minutes/use-create-minute-template";
 import { useMinuteTemplates } from "#/hooks/minutes/use-minute-templates";
@@ -67,8 +88,56 @@ const columns = [
 	},
 ];
 
+const newTemplateSchema = z.object({
+	name: z.string().trim().min(1, "Nome é obrigatório"),
+});
+
+type NewTemplateValues = z.infer<typeof newTemplateSchema>;
+
+function NewTemplateDialogForm({
+	onSubmit,
+	submitLabel,
+	serverError,
+}: {
+	onSubmit: (values: NewTemplateValues) => void | Promise<void>;
+	submitLabel: string;
+	serverError?: string | null;
+}) {
+	const form = useForm<NewTemplateValues>({
+		resolver: zodResolver(newTemplateSchema),
+		defaultValues: { name: "" },
+	});
+
+	return (
+		<Form {...form}>
+			<FormNative
+				onSubmit={() => form.handleSubmit(onSubmit)()}
+				className="space-y-4"
+			>
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nome *</FormLabel>
+							<FormControl>
+								<Input {...field} autoFocus placeholder="Modelo padrão" />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				{serverError && (
+					<p className="text-sm text-destructive">{serverError}</p>
+				)}
+				<FormSubmit className="w-full">{submitLabel}</FormSubmit>
+			</FormNative>
+		</Form>
+	);
+}
+
 function MinuteTemplatesPage() {
-	const [showForm, setShowForm] = useState(false);
+	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const {
@@ -89,26 +158,32 @@ function MinuteTemplatesPage() {
 				title="Modelos de ata"
 				description="Cadastre e mantenha os modelos usados para gerar atas."
 				actions={
-					<Button
-						variant="secondary"
-						onClick={() => setShowForm((value) => !value)}
-					>
-						{showForm ? "Fechar" : "Novo modelo"}
+					<Button variant="secondary" onClick={() => setShowCreateDialog(true)}>
+						Novo modelo
 					</Button>
 				}
 			/>
 
-			{showForm && (
-				<div className="max-w-lg rounded border p-3">
-					<MinuteTemplateForm
+			<Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Novo modelo de ata</DialogTitle>
+						<DialogDescription>
+							Dê um nome ao modelo. Cabeçalho, rodapé e blocos são configurados
+							na edição, após a criação.
+						</DialogDescription>
+					</DialogHeader>
+					<NewTemplateDialogForm
 						submitLabel={create.isPending ? "Salvando..." : "Criar modelo"}
 						serverError={create.error?.message ?? null}
 						onSubmit={(values) =>
-							create.mutate(values, { onSuccess: () => setShowForm(false) })
+							create.mutate(values, {
+								onSuccess: () => setShowCreateDialog(false),
+							})
 						}
 					/>
-				</div>
-			)}
+				</DialogContent>
+			</Dialog>
 
 			<DataTable
 				columns={columns}
@@ -136,7 +211,7 @@ function MinuteTemplatesPage() {
 				emptyTitle="Nenhum modelo cadastrado"
 				emptyDescription="Cadastre um modelo para usar na geração das atas."
 				emptyAction={
-					<Button size="sm" onClick={() => setShowForm(true)}>
+					<Button size="sm" onClick={() => setShowCreateDialog(true)}>
 						Novo modelo
 					</Button>
 				}

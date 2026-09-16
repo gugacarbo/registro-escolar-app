@@ -13,16 +13,17 @@ import {
 } from "./serializer";
 
 describe("TipTap serializer & utils", () => {
+	const timestamp = 1713139200000; // 15/04/2024
 	const mockContext = {
 		meeting: {
 			id: "m-1",
 			title: "Conselho de Classe 3º Ano",
-			heldAt: 1713139200000, // 15/04/2024
+			heldAt: new Date(timestamp),
 			location: "Sala dos Professores",
 			templateId: null,
 			status: "draft" as const,
-			createdAt: 1713139200000,
-			updatedAt: 1713139200000,
+			createdAt: new Date(timestamp),
+			updatedAt: new Date(timestamp),
 		},
 		data: {
 			classes: [{ classId: "c-1", className: "Turma 3A" }],
