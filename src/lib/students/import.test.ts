@@ -354,4 +354,15 @@ describe("matchImportRows", () => {
 		const { rows } = await parseStudentImportFile(file);
 		expect(rows[0]?.birthDate).toBe(String(Number.MAX_SAFE_INTEGER));
 	});
+
+	it("retorna erro fatal se a leitura da planilha falhar", async () => {
+		const corruptedFile = new File(
+			[new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0x00, 0x00])],
+			"arquivo.xlsx",
+		);
+		const { rows, errors, fatal } = await parseStudentImportFile(corruptedFile);
+		expect(fatal).toBe(true);
+		expect(rows).toEqual([]);
+		expect(errors[0]).toContain("Não foi possível ler a planilha");
+	});
 });

@@ -7,6 +7,7 @@ import {
 import {
 	emptyDoc,
 	plainTextToTipTap,
+	type RenderContext,
 	textDoc,
 	tipTapToMinuteElements,
 	tipTapToPlainText,
@@ -78,6 +79,45 @@ describe("TipTap serializer & utils", () => {
 	it("converte TipTap para texto plano e resolve placeholders", () => {
 		expect(tipTapToPlainText(null)).toBe("");
 		expect(tipTapToPlainText(emptyDoc())).toBe("");
+		expect(tipTapToPlainText(textDoc("olá"), undefined)).toBe("olá");
+		expect(tipTapToMinuteElements(undefined, undefined as never)).toEqual([]);
+		expect(tipTapToMinuteElements(emptyDoc(), undefined as never)).toEqual([]);
+
+		// nós especiais dentro de parágrafo: hardBreak, imagem, nó sem conteúdo
+		const mixed = tipTapToPlainText(
+			{
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [
+							{ type: "text", text: "a" },
+							{ type: "hardBreak" },
+							{ type: "text", text: "b" },
+							{ type: "image", attrs: { src: "data:image/png;base64,QQ==" } },
+							{ type: "unknownNode" },
+						],
+					},
+				],
+			},
+			mockContext,
+		);
+		expect(mixed).toContain("a\nb");
+
+		// placeholder sem tipo (attrs ausentes) não quebra
+		const noType = tipTapToPlainText(
+			{
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [{ type: "minutePlaceholder" }],
+					},
+				],
+			},
+			mockContext,
+		);
+		expect(noType).toBe("");
 
 		const doc = {
 			type: "doc",
@@ -183,6 +223,131 @@ describe("TipTap serializer & utils", () => {
 		expect(plainText).toContain("João Santos (Turma 3A): Bom desempenho");
 		expect(plainText).toContain("Reunião iniciada às 14h.");
 		expect(plainText).toContain("Maria Silva\n_____________________________");
+	});
+
+	it("lida com fallbacks de placeholders e nós aninhados desconhecidos no plainText", () => {
+		const fallbackContext: RenderContext = {
+			meeting: {
+				id: "m-2",
+				title: "Reunião Sem Local e Data",
+				heldAt: null as never,
+				location: null as never,
+				templateId: null,
+				status: "draft" as const,
+				createdAt: new Date(timestamp),
+				updatedAt: new Date(timestamp),
+			},
+			data: {
+				classes: [],
+				participants: [],
+				records: [
+					{
+						studentName: "Aluno Sem Turma",
+						className: null,
+						texto: "Observação sem turma",
+					},
+				],
+				generalReports: [],
+			},
+		};
+
+		const doc = {
+			type: "doc",
+			content: [
+				{
+					type: "blockquote",
+					content: [
+						{ type: "text", text: "Citação: " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "meeting-date" },
+						},
+						{ type: "text", text: " em " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "meeting-location" },
+						},
+					],
+				},
+				{
+					type: "paragraph",
+					content: [
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "records-list" },
+						},
+					],
+				},
+				{
+					type: "paragraph",
+					content: [
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "placeholder-inexistente" },
+						},
+					],
+				},
+			],
+		};
+
+		const text = tipTapToPlainText(doc, fallbackContext);
+		expect(text).toContain("data não informada");
+		expect(text).toContain("local não informado");
+		expect(text).toContain("Aluno Sem Turma: Observação sem turma");
+	});
+
+	it("resolve placeholders sem contexto e com dados variados", () => {
+		const doc = {
+			type: "doc",
+			content: [
+				{
+					type: "paragraph",
+					content: [
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "school-name" },
+						},
+						{ type: "text", text: " " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "classes-list" },
+						},
+						{ type: "text", text: " " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "participants-list" },
+						},
+						{ type: "text", text: " " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "records-list" },
+						},
+						{ type: "text", text: " " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "general-reports-list" },
+						},
+						{ type: "text", text: " " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "signatures-list" },
+						},
+						{ type: "text", text: " " },
+						{
+							type: "minutePlaceholder",
+							attrs: { "data-type": "unknown-type" },
+						},
+					],
+				},
+			],
+		};
+		const text = tipTapToPlainText(doc, mockContext);
+		expect(text).toContain("Escola");
+		expect(text).toContain("Turma 3A");
+		expect(text).toContain("Maria Silva");
+		expect(text).toContain("João Santos");
+		expect(text).toContain("Reunião iniciada às 14h.");
+		expect(text).toContain("_____________________________");
 	});
 
 	it("converte TipTap para elementos do PDF (texto e imagem)", () => {

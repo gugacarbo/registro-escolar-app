@@ -315,4 +315,14 @@ describe("meeting lifecycle", () => {
 			MeetingNotFoundError,
 		);
 	});
+
+	it("erro ao vincular/remover turma de reunião inexistente", async () => {
+		const { db } = createTestDb();
+		await expect(addMeetingClass(db, "inexistente", "class-x")).rejects.toThrow(
+			MeetingNotFoundError,
+		);
+		await expect(
+			removeMeetingClass(db, "inexistente", "class-x"),
+		).rejects.toThrow(MeetingNotFoundError);
+	});
 });

@@ -322,4 +322,30 @@ describe("invitations repository", () => {
 		expect(list1).toHaveLength(1);
 		expect(list1[0].email).toBe("convite-u1@escola.test");
 	});
+
+	it("lança erro ao revogar convite inexistente ou que não está pendente", async () => {
+		const { db, sqlite } = createTestDb();
+		sqlite.exec(`
+			INSERT INTO user (id, name, email, role, is_permanent_admin, created_at, updated_at)
+			VALUES ('u1', 'User 1', 'u1@escola.test', 'user', 0, ${Date.now()}, ${Date.now()});
+		`);
+
+		await expect(revokeInvitation(db, "inexistente", "u1")).rejects.toThrow(
+			"Convite não encontrado.",
+		);
+
+		const inv = await createInvitation(db, {
+			email: "status-test@escola.test",
+			invitedById: "u1",
+			inviterName: "User 1",
+		});
+
+		// Revoga uma vez com sucesso
+		await revokeInvitation(db, inv.id, "u1");
+
+		// Tentativa de revogar convite já revogado
+		await expect(revokeInvitation(db, inv.id, "u1")).rejects.toThrow(
+			"Apenas convites pendentes podem ser cancelados.",
+		);
+	});
 });

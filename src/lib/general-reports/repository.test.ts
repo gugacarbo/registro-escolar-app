@@ -130,6 +130,19 @@ describe("general reports repository", () => {
 		expect(report.includeInMinutes).toBe(true);
 		expect(report.texto).toBe("Acolhimento inicial realizado");
 		expect(await listGeneralReportsByMeeting(db, "meeting-1")).toHaveLength(1);
+
+		// Atualização parcial sem alterar o texto
+		const updatedWithoutText = await updateGeneralReport(
+			db,
+			"meeting-1",
+			report.id,
+			{
+				texto: "Acolhimento inicial realizado",
+				includeInMinutes: false,
+			},
+		);
+		expect(updatedWithoutText.texto).toBe("Acolhimento inicial realizado");
+		expect(updatedWithoutText.includeInMinutes).toBe(false);
 	});
 
 	it("permite reunião reaberta e relato interno (borda 2)", async () => {

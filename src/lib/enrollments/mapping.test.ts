@@ -54,4 +54,16 @@ describe("enrollment mapping PT->EN", () => {
 		});
 		expect(row.endDate).toBeUndefined();
 	});
+
+	it("mantém dataInicio não-string como está e dataTermino nulo ignorado", () => {
+		const row = mapEnrollmentRequestToRow({
+			estudanteId: "a1",
+			turmaId: "t1",
+			dataInicio: new Date("2026-02-01T00:00:00Z"),
+			dataTermino: null,
+		});
+		expect(row.startDate).toEqual(new Date("2026-02-01T00:00:00Z"));
+		expect(row.endDate).toBeUndefined();
+		expect(row.status).toBeUndefined();
+	});
 });

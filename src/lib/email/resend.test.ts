@@ -18,6 +18,21 @@ describe("resend email service", () => {
 		mockSend.mockReset();
 	});
 
+	it("obtém o cliente a partir de process.env.RESEND_API_KEY", () => {
+		const originalEnv = process.env.RESEND_API_KEY;
+		process.env.RESEND_API_KEY = "re_env_key_123";
+		try {
+			const client = getResendClient();
+			expect(client).toBeDefined();
+		} finally {
+			if (originalEnv !== undefined) {
+				process.env.RESEND_API_KEY = originalEnv;
+			} else {
+				delete process.env.RESEND_API_KEY;
+			}
+		}
+	});
+
 	it("lança erro se a chave da API não estiver disponível", () => {
 		const originalEnv = process.env.RESEND_API_KEY;
 		delete process.env.RESEND_API_KEY;

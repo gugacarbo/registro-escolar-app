@@ -72,6 +72,11 @@ describe("staff repository", () => {
 		expect(normalizeStaffName(found[0].name)).toBe(
 			normalizeStaffName("jose  santos "),
 		);
+
+		// Busca por nome não idêntico (ex.: sem acento e minúsculo) cai no fallback normalizado
+		const foundNormalized = await findStaffByName(db, "jose santos");
+		expect(foundNormalized).toHaveLength(1);
+		expect(foundNormalized[0].name).toBe("José Santos");
 	});
 
 	it("atualiza os dados do servidor", async () => {

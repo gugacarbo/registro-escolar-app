@@ -14,7 +14,7 @@ import {
 	NoCurrentVersionError,
 	PdfNotAvailableError,
 } from "./errors";
-import { buildMinutePdf } from "./pdf";
+import { buildMinutePdf, pdfBytesToBuffer } from "./pdf";
 import {
 	renderedToPlainText,
 	renderMinute,
@@ -427,6 +427,31 @@ describe("minutes repository (specs 0009/0010)", () => {
 		expect(Buffer.from(bytes).toString("latin1").startsWith("%PDF-")).toBe(
 			true,
 		);
+	});
+
+	it("sanitiza título com caracteres especiais e gera com título custom", async () => {
+		const bytes = await buildMinutePdf(
+			{
+				title: "Ata — \u201cAspas\u201d e \u2026 elipse \t tab",
+				lines: [{ text: "Olá — mundo", level: 1 }],
+				elements: [{ kind: "line", text: "Olá — mundo", level: 1 }],
+			},
+			{
+				title: "Título customizado \u201ccom aspas\u201d \u2026",
+				generatedAt: "2024-01-01",
+			},
+		);
+		expect(bytes.byteLength).toBeGreaterThan(500);
+	});
+
+	it("pdfBytesToBuffer converte Uint8Array com offset", () => {
+		const buf = pdfBytesToBuffer(new Uint8Array([1, 2, 3]));
+		expect(Buffer.isBuffer(buf)).toBe(true);
+		expect(buf.byteLength).toBe(3);
+		const withOffset = pdfBytesToBuffer(
+			new Uint8Array([9, 9, 1, 2, 3]).subarray(2),
+		);
+		expect(withOffset.byteLength).toBe(3);
 	});
 
 	it("mapeia entidades ausentes", async () => {

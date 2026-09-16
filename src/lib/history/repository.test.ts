@@ -540,5 +540,18 @@ describe("histórico variações de dados", () => {
 			reuniaoId: "missing",
 		});
 		expect(meetingLess?.eventos).toEqual([]);
+
+		// Estudante sem nenhum registro nem reuniões vinculadas
+		await setup.db.insert(schema.students).values({
+			id: "student-isolated",
+			name: "Estudante Isolado",
+		});
+		const isolatedHistory = await getStudentHistory(
+			setup.db,
+			"student-isolated",
+			{},
+		);
+		expect(isolatedHistory?.estudante.id).toBe("student-isolated");
+		expect(isolatedHistory?.eventos).toEqual([]);
 	});
 });
