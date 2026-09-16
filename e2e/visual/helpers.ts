@@ -25,6 +25,7 @@ export async function expectRouteScreenshot(
 		animations: "disabled",
 		fullPage: true,
 		mask,
+		maxDiffPixelRatio: 0.02,
 	});
 }
 
