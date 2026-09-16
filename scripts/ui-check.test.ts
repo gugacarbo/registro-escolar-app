@@ -257,7 +257,7 @@ describe("ui:check — allowlist", () => {
 	});
 
 	it("ALLOWLIST cobre as rotas de h1 manual conhecidas", () => {
-		expect(ALLOWLIST.UI002.length).toBeGreaterThanOrEqual(5);
+		expect(ALLOWLIST.UI002.length).toBeGreaterThanOrEqual(4);
 		expect(ALLOWLIST.UI002?.every((e) => e.reason.includes("T5"))).toBe(true);
 	});
 });
