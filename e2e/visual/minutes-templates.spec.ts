@@ -24,7 +24,7 @@ test("@visual mantém a lista de modelos de ata no padrão de tabela", async ({
 				.filter({ hasText: apiContext.user.email }),
 		],
 	});
-	expect(
+	await expect(
 		authenticatedPage.getByRole("cell", { name: "Modelo visual de ata" }),
 	).toBeVisible();
 });

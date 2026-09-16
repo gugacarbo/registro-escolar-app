@@ -41,7 +41,7 @@ test("@visual mantém a tela de visualização/edição da ata", async ({
 			authenticatedPage.getByText(/\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2}/),
 		],
 	});
-	expect(
+	await expect(
 		authenticatedPage.getByText("Prévia da ata"),
 	).toBeVisible();
 });

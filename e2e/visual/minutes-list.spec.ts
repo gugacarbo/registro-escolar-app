@@ -43,7 +43,7 @@ test("@visual mantém a lista de atas no padrão de tabela", async ({
 				.filter({ hasText: /^\d{2}\/\d{2}\/\d{4}$/ }),
 		],
 	});
-	expect(
+	await expect(
 		authenticatedPage
 			.getByRole("cell", { name: "Conselho visual de classe" }),
 	).toBeVisible();
