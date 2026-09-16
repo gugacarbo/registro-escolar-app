@@ -20,7 +20,7 @@ const projects = [
 			environment: "happy-dom",
 			setupFiles: ["./src/test/setup.ts"],
 			globals: true,
-			include: ["src/**/*.test.{ts,tsx}"],
+			include: ["src/**/*.test.{ts,tsx}", "scripts/ui-check.test.ts"],
 		},
 	},
 ]

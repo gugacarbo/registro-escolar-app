@@ -12,6 +12,8 @@
 			"**/.vscode/**/*",
 			"**/index.html",
 			"**/vite.config.ts",
+			"**/scripts/ui-check.ts",
+			"**/scripts/ui-check.test.ts",
 			"!**/src/routeTree.gen.ts",
 			"!**/src/styles.css",
 			"!**/coverage",

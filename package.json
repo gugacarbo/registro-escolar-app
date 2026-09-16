@@ -25,6 +25,7 @@
 		"format": "biome format",
 		"lint": "biome lint",
 		"check": "biome check",
+		"ui:check": "bun scripts/ui-check.ts",
 		"deploy": "bun run build && wrangler deploy",
 		"db:generate": "scripts/db-generate",
 		"db:migrate": "scripts/db-migrate",
@@ -40,7 +41,7 @@
 		"db:seed": "bun scripts/db-seed.ts",
 		"db:remote:migrate": "wrangler d1 migrations apply registro-escolar-app-db --remote",
 		"db:create": "wrangler d1 create registro-escolar-app-db",
-		"pre-push": "bun run secrets:check && bun run check && bun run typecheck && bun run test && bun run build && bun run spellcheck && scripts/docs-check",
+		"pre-push": "bun run secrets:check && bun run check && bun run ui:check && bun run typecheck && bun run test && bun run build && bun run spellcheck && scripts/docs-check",
 		"e2e:setup": "scripts/e2e-setup"
 	},
 	"dependencies": {
