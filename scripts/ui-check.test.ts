@@ -223,10 +223,10 @@ describe("ui:check — falso positivo conhecido", () => {
 });
 
 describe("ui:check — allowlist", () => {
-	it("respeita allowlist por arquivo (UI002 de classes/enroll.tsx)", () => {
+	it("respeita allowlist por arquivo (UI002 de meetings council)", () => {
 		const v = scanFile(
 			f(
-				"src/routes/_app/classes/enroll.tsx",
+				"src/routes/_app/meetings/$meetingId/council.tsx",
 				'const x = <h1 className="font-display">Título</h1>;',
 			),
 			PRIMITIVES,

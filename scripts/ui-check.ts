@@ -133,13 +133,9 @@ export const ALLOWLIST: Record<string, AllowEntry[]> = {
 			reason: "pendente migração T5",
 		},
 	],
-	// UI002 — 8 rotas com <h1> manual (warning); migração T5 substitui por
+	// UI002 — rotas com <h1> manual (warning); migração T5 substitui por
 	// PageHeader/DetailPage e remove estas entradas.
 	UI002: [
-		{
-			file: "src/routes/_app/classes/enroll.tsx",
-			reason: "pendente migração T5",
-		},
 		{
 			file: "src/routes/_app/meetings/$meetingId/council.tsx",
 			reason: "pendente migração T5",
