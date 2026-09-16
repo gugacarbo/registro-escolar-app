@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { StaffForm, type StaffFormValues } from "#/components/staff/staff-form";
@@ -14,7 +14,7 @@ import {
 	AlertDialogTrigger,
 } from "#/components/ui/alert-dialog";
 import { Button } from "#/components/ui/button";
-import { PageShell } from "#/components/ui/page";
+import { DetailPage } from "#/components/ui/page-recipes";
 import { useDeleteStaffMember } from "#/hooks/staff/use-delete-staff-member";
 import { useStaffMember } from "#/hooks/staff/use-staff-member";
 import { useUpdateStaffMember } from "#/hooks/staff/use-update-staff-member";
@@ -61,23 +61,18 @@ export default function StaffDetailPage() {
 	}
 
 	return (
-		<PageShell>
-			<div className="flex items-center justify-between gap-2">
-				<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[2rem]">
-					{member?.name ?? "Dados do servidor"}
-				</h1>
-				<Link to="/staff">
-					<Button variant="secondary">Voltar para a lista</Button>
-				</Link>
-			</div>
-			{isLoading && <p>Carregando...</p>}
-			{isError && (
-				<p className="text-sm text-destructive">
-					{error instanceof Error
+		<DetailPage
+			title={member?.name ?? "Dados do servidor"}
+			backTo={{ to: "/staff", label: "Voltar para a lista" }}
+			isLoading={isLoading}
+			error={
+				isError
+					? error instanceof Error
 						? error.message
-						: "Falha ao carregar servidor"}
-				</p>
-			)}
+						: "Falha ao carregar servidor"
+					: null
+			}
+		>
 			{member && (
 				<>
 					{saved && (
@@ -121,6 +116,6 @@ export default function StaffDetailPage() {
 					</AlertDialog>
 				</>
 			)}
-		</PageShell>
+		</DetailPage>
 	);
 }
