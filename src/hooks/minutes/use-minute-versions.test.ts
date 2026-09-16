@@ -71,6 +71,7 @@ describe("useMinuteVersions", () => {
 			"fetch",
 			vi.fn().mockResolvedValue({
 				ok: false,
+				status: 500,
 				json: () => Promise.resolve({ error: "Ata não encontrada" }),
 			}),
 		);
@@ -81,5 +82,24 @@ describe("useMinuteVersions", () => {
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(result.current.error?.message).toBe("Ata não encontrada");
+	});
+
+	it("retorna lista vazia quando a reunião ainda não tem ata (404)", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue({
+				ok: false,
+				status: 404,
+				json: () => Promise.resolve({ error: "Ata não encontrada" }),
+			}),
+		);
+
+		const { result } = renderHook(() => useMinuteVersions("meeting-1"), {
+			wrapper: createWrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data).toEqual([]);
+		expect(result.current.isError).toBe(false);
 	});
 });

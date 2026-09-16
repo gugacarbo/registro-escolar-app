@@ -14,7 +14,8 @@ export function useMinuteVersions(meetingId: string | undefined) {
 				`/api/meetings/${meetingId}/minutes/versions`,
 			);
 			if (response.status === 404) {
-				return [] as MinuteVersionJson[];
+				// Sem ata ainda para a reunião: tratar como lista vazia.
+				return [];
 			}
 			if (!response.ok) {
 				const body = (await response.json().catch(() => ({}))) as {
