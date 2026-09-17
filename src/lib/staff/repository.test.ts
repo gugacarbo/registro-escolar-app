@@ -26,6 +26,7 @@ function createTestDb() {
 			email TEXT,
 			phone TEXT,
 			notes TEXT,
+			default_role_id TEXT,
 			deleted_at INTEGER,
 			created_at INTEGER NOT NULL,
 			updated_at INTEGER NOT NULL

@@ -81,7 +81,11 @@ export function MeetingForm({
 		queryKey: ["meeting-form", "staff"],
 		search: staffSearch,
 		fetchPage: fetchStaffPage,
-		select: (member) => ({ id: member.id, name: member.name }),
+		select: (member) => ({
+			id: member.id,
+			name: member.name,
+			defaultRoleId: member.defaultRoleId,
+		}),
 	});
 	const staffOptions = staffResult?.options ?? [];
 	const staffById = new Map(
@@ -265,10 +269,22 @@ export function MeetingForm({
 										name={`participantes.${index}.servidorId`}
 										render={({ field }) => (
 											<EntitySelect
-												label="Servidor"
-												placeholder="Servidor"
-												value={field.value}
-												onChange={field.onChange}
+														label="Servidor"
+														placeholder="Servidor"
+														value={field.value}
+														onChange={(value) => {
+															field.onChange(value);
+															const selectedStaff = staffOptions.find(
+																(member) => member.id === value,
+															);
+															form.setValue(
+																`participantes.${index}.papelIds`,
+																selectedStaff?.defaultRoleId
+																	? [selectedStaff.defaultRoleId]
+																	: [],
+																{ shouldDirty: true },
+															);
+															}}
 												options={[
 													...staffOptions,
 													...(field.value && !staffById.has(field.value)

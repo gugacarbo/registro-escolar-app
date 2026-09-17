@@ -52,6 +52,7 @@ function createTestDb() {
 			id TEXT PRIMARY KEY,
 			name TEXT NOT NULL,
 			header_content TEXT DEFAULT '{"type":"doc","content":[{"type":"paragraph"}]}' NOT NULL,
+			body_content TEXT,
 			footer_content TEXT DEFAULT '{"type":"doc","content":[{"type":"paragraph"}]}' NOT NULL,
 			show_meeting INTEGER DEFAULT 1 NOT NULL,
 			show_classes INTEGER DEFAULT 1 NOT NULL,
@@ -105,7 +106,7 @@ function createTestDb() {
 			created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
 		);
 		CREATE TABLE staff (
-			id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT, phone TEXT, notes TEXT,
+			id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT, phone TEXT, notes TEXT, default_role_id TEXT,
 			deleted_at INTEGER, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
 		);
 		CREATE TABLE roles (

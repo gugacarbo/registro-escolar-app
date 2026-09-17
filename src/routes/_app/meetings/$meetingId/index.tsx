@@ -124,7 +124,11 @@ export default function MeetingDetailPage() {
 		queryKey: ["meeting-detail-participants", "staff"],
 		search: staffSearch,
 		fetchPage: fetchStaffPage,
-		select: (member) => ({ id: member.id, name: member.name }),
+		select: (member) => ({
+			id: member.id,
+			name: member.name,
+			defaultRoleId: member.defaultRoleId,
+		}),
 	});
 	const staff = staffResult?.options ?? [];
 	const staffById = useMemo(
@@ -635,10 +639,20 @@ export default function MeetingDetailPage() {
 									</h4>
 									<div className="flex flex-wrap items-end gap-2">
 										<EntitySelect
-											label="Servidor"
-											placeholder="Selecione o servidor"
-											value={staffId}
-											onChange={setStaffId}
+										label="Servidor"
+										placeholder="Selecione o servidor"
+										value={staffId}
+										onChange={(value) => {
+											setStaffId(value);
+											const selectedStaff = staff.find(
+												(member) => member.id === value,
+											);
+											setRoleIds(
+												selectedStaff?.defaultRoleId
+													? [selectedStaff.defaultRoleId]
+													: [],
+											);
+										}}
 											options={staff}
 											isLoading={isLoadingStaff}
 											total={staffResult?.total ?? 0}

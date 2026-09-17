@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
+import { findRoleById } from "#/lib/roles/repository";
 import { parsePageParams } from "#/lib/pagination";
 import {
 	countStaff,
@@ -85,6 +86,15 @@ export async function createStaffHandler({
 	}
 
 	const db = createDb(requireD1(env));
+	if (
+		parsed.data.defaultRoleId &&
+		!(await findRoleById(db, parsed.data.defaultRoleId))
+	) {
+		return new Response(JSON.stringify({ error: "Papel não encontrado" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
 	const normalizedName = normalizeStaffName(parsed.data.name);
 	const existing = await findStaffByName(db, parsed.data.name);
 	const duplicate = existing.find(

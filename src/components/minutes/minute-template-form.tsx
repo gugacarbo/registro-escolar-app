@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Checkbox } from "#/components/ui/checkbox";
 import {
 	Form,
 	FormControl,
@@ -17,16 +16,10 @@ import {
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
 import { RichTextEditor } from "#/components/ui/rich-text-editor";
-import { emptyDoc } from "#/lib/minutes/tiptap/serializer";
-
-const BLOCKS = [
-	{ name: "showMeeting", label: "Reunião" },
-	{ name: "showClasses", label: "Turmas" },
-	{ name: "showParticipants", label: "Participantes" },
-	{ name: "showRecords", label: "Registros por estudante" },
-	{ name: "showGeneralReports", label: "Relatos gerais" },
-	{ name: "showSignatures", label: "Assinaturas" },
-] as const;
+import {
+	defaultMinuteBodyContent,
+	emptyDoc,
+} from "#/lib/minutes/tiptap/serializer";
 
 const tiptapContentSchema = z.custom<Record<string, unknown>>((val) => {
 	if (typeof val !== "object" || val === null) return false;
@@ -37,13 +30,8 @@ const tiptapContentSchema = z.custom<Record<string, unknown>>((val) => {
 const minuteTemplateFormSchema = z.object({
 	name: z.string().trim().min(1, "Nome é obrigatório"),
 	headerContent: tiptapContentSchema,
+	bodyContent: tiptapContentSchema,
 	footerContent: tiptapContentSchema,
-	showMeeting: z.boolean(),
-	showClasses: z.boolean(),
-	showParticipants: z.boolean(),
-	showRecords: z.boolean(),
-	showGeneralReports: z.boolean(),
-	showSignatures: z.boolean(),
 });
 
 export type MinuteTemplateFormValues = z.infer<typeof minuteTemplateFormSchema>;
@@ -64,13 +52,8 @@ export function MinuteTemplateForm({
 		defaultValues: defaultValues ?? {
 			name: "",
 			headerContent: emptyDoc() as Record<string, unknown>,
+			bodyContent: defaultMinuteBodyContent() as Record<string, unknown>,
 			footerContent: emptyDoc() as Record<string, unknown>,
-			showMeeting: true,
-			showClasses: true,
-			showParticipants: true,
-			showRecords: true,
-			showGeneralReports: true,
-			showSignatures: true,
 		},
 	});
 
@@ -113,6 +96,24 @@ export function MinuteTemplateForm({
 				/>
 				<FormField
 					control={form.control}
+					name="bodyContent"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Conteúdo</FormLabel>
+							<FormControl>
+								<RichTextEditor
+									aria-label="Conteúdo"
+									value={field.value as Record<string, unknown>}
+									onChange={field.onChange}
+									placeholder="Conteúdo principal da ata..."
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
 					name="footerContent"
 					render={({ field }) => (
 						<FormItem>
@@ -129,27 +130,6 @@ export function MinuteTemplateForm({
 						</FormItem>
 					)}
 				/>
-				<fieldset className="space-y-2">
-					<legend className="text-sm font-medium">Blocos da ata</legend>
-					{BLOCKS.map((block) => (
-						<FormField
-							key={block.name}
-							control={form.control}
-							name={block.name}
-							render={({ field }) => (
-								<FormItem className="flex flex-row items-center gap-2 space-y-0">
-									<FormControl>
-										<Checkbox
-											checked={field.value}
-											onCheckedChange={field.onChange}
-										/>
-									</FormControl>
-									<FormLabel className="font-normal">{block.label}</FormLabel>
-								</FormItem>
-							)}
-						/>
-					))}
-				</fieldset>
 				{serverError && (
 					<p className="text-sm text-destructive">{serverError}</p>
 				)}

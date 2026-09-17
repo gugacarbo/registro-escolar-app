@@ -63,24 +63,11 @@ const columns = [
 		cell: (template: MinuteTemplate) => template.name,
 	},
 	{
-		header: "Blocos",
-		cell: (template: MinuteTemplate) =>
-			[
-				template.showMeeting && "Reunião",
-				template.showClasses && "Turmas",
-				template.showParticipants && "Participantes",
-				template.showRecords && "Registros",
-				template.showGeneralReports && "Relatos",
-				template.showSignatures && "Assinaturas",
-			]
-				.filter(Boolean)
-				.join(" · ") || "Nenhum bloco",
-	},
-	{
 		header: "Personalização",
 		cell: (template: MinuteTemplate) =>
 			[
 				hasRichContent(template.headerContent) && "Cabeçalho",
+				hasRichContent(template.bodyContent) && "Conteúdo",
 				hasRichContent(template.footerContent) && "Rodapé",
 			]
 				.filter(Boolean)
@@ -169,8 +156,8 @@ function MinuteTemplatesPage() {
 					<DialogHeader>
 						<DialogTitle>Novo modelo de ata</DialogTitle>
 						<DialogDescription>
-							Dê um nome ao modelo. Cabeçalho, rodapé e blocos são configurados
-							na edição, após a criação.
+							Dê um nome ao modelo. Cabeçalho, conteúdo e rodapé são
+							configurados na edição, após a criação.
 						</DialogDescription>
 					</DialogHeader>
 					<NewTemplateDialogForm

@@ -110,12 +110,7 @@ export function defaultMinuteBodyContent(
 		"general-reports-list",
 		"Relatos gerais",
 	);
-	addSection(
-		"showSignatures",
-		"Assinaturas",
-		"signatures-list",
-		"Assinaturas",
-	);
+	addSection("showSignatures", "Assinaturas", "signatures-list", "Assinaturas");
 
 	return { type: "doc", content };
 }

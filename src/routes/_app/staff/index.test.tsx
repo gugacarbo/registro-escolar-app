@@ -53,6 +53,7 @@ function makeMember(overrides: Partial<StaffMember> = {}): StaffMember {
 		createdAt: now,
 		updatedAt: now,
 		...overrides,
+		defaultRoleId: overrides.defaultRoleId ?? null,
 	};
 }
 

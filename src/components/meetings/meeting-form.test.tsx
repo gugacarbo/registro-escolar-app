@@ -32,7 +32,10 @@ beforeEach(() => {
 			);
 		}
 		if (url.startsWith("/api/staff")) {
-			return fetchJson([{ id: "staff-1", name: "Maria" }], 1);
+			return fetchJson(
+				[{ id: "staff-1", name: "Maria", defaultRoleId: "role-1" }],
+				1,
+			);
 		}
 		if (url.startsWith("/api/roles")) {
 			return fetchJson(
@@ -85,7 +88,7 @@ describe("MeetingForm", () => {
 		);
 		await user.click(screen.getByLabelText("Servidor"));
 		await user.click(await screen.findByRole("option", { name: "Maria" }));
-		await user.click(screen.getByRole("checkbox", { name: "Coordenador" }));
+		expect(screen.getByRole("checkbox", { name: "Coordenador" })).toBeChecked();
 		await user.click(screen.getByRole("checkbox", { name: "Secretário" }));
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 		expect(onSubmit).toHaveBeenCalledWith(

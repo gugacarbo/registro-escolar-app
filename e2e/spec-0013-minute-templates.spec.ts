@@ -113,6 +113,8 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		const headerField = page.getByRole("textbox", { name: "Cabeçalho" });
 		await expect(headerField).toHaveText("Cabeçalho original");
 		await headerField.fill("Cabeçalho revisado no e2e");
+		const bodyField = page.getByRole("textbox", { name: "Conteúdo" });
+		await bodyField.fill("Conteúdo revisado no e2e");
 		await page.getByRole("button", { name: "Salvar alterações" }).click();
 
 		await expect(
@@ -123,6 +125,8 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		expect(preview.templateId).toBe(template.id);
 		expect(preview.content).toContain("CABEÇALHO REVISADO NO E2E");
 		expect(preview.content).not.toContain("CABEÇALHO ORIGINAL");
+		expect(preview.content).toContain("Conteúdo revisado no e2e");
+		expect(preview.content).not.toContain("DATA DA REUNIÃO");
 	});
 
 	test("cria modelo pelo popup e personaliza na página de edição", async ({

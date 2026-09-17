@@ -10,6 +10,7 @@ export type UpdateStaffMemberValues = {
 	email?: string | null;
 	phone?: string | null;
 	notes?: string | null;
+	defaultRoleId?: string | null;
 };
 
 export function useUpdateStaffMember(id: string) {

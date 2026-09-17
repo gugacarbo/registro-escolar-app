@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
+import { findRoleById } from "#/lib/roles/repository";
 import {
 	findStaffById,
 	softDeleteStaff,
@@ -80,6 +81,12 @@ export async function updateStaffHandler({
 	const staff = await findStaffById(db, params.id);
 	if (!staff || staff.deletedAt) {
 		return json({ error: "Servidor não encontrado" }, 404);
+	}
+	if (
+		parsed.data.defaultRoleId &&
+		!(await findRoleById(db, parsed.data.defaultRoleId))
+	) {
+		return json({ error: "Papel não encontrado" }, 400);
 	}
 
 	const updated = await updateStaff(db, params.id, parsed.data);

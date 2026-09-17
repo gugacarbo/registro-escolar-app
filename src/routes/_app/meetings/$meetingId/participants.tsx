@@ -24,7 +24,11 @@ export default function ParticipantsPage() {
 		queryKey: ["meeting-participants", "staff"],
 		search: staffSearch,
 		fetchPage: fetchStaffPage,
-		select: (member) => ({ id: member.id, name: member.name }),
+		select: (member) => ({
+			id: member.id,
+			name: member.name,
+			defaultRoleId: member.defaultRoleId,
+		}),
 	});
 	const staff = staffResult?.options ?? [];
 	const staffById = new Map(staff.map((member) => [member.id, member.name]));
@@ -76,7 +80,15 @@ export default function ParticipantsPage() {
 					label="Servidor"
 					placeholder="Servidor"
 					value={staffId}
-					onChange={setStaffId}
+					onChange={(value) => {
+						setStaffId(value);
+						const selectedStaff = staff.find((member) => member.id === value);
+						setRoleIds(
+							selectedStaff?.defaultRoleId
+								? [selectedStaff.defaultRoleId]
+								: [],
+						);
+					}}
 					options={staff}
 					isLoading={isLoadingStaff}
 					total={staffResult?.total ?? 0}

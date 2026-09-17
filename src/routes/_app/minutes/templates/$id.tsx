@@ -9,7 +9,10 @@ import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell } from "#/components/ui/page";
 import { useMinuteTemplate } from "#/hooks/minutes/use-minute-template";
 import { useUpdateMinuteTemplate } from "#/hooks/minutes/use-update-minute-template";
-import { emptyDoc } from "#/lib/minutes/tiptap/serializer";
+import {
+	defaultMinuteBodyContent,
+	emptyDoc,
+} from "#/lib/minutes/tiptap/serializer";
 
 export const Route = createFileRoute("/_app/minutes/templates/$id")({
 	component: MinuteTemplateDetailPage,
@@ -82,13 +85,18 @@ export default function MinuteTemplateDetailPage() {
 						defaultValues={{
 							name: template.name,
 							headerContent: parseTemplateContent(template.headerContent),
+							bodyContent:
+								template.bodyContent != null
+									? parseTemplateContent(template.bodyContent)
+									: defaultMinuteBodyContent({
+											showMeeting: template.showMeeting,
+											showClasses: template.showClasses,
+											showParticipants: template.showParticipants,
+											showRecords: template.showRecords,
+											showGeneralReports: template.showGeneralReports,
+											showSignatures: template.showSignatures,
+										}),
 							footerContent: parseTemplateContent(template.footerContent),
-							showMeeting: template.showMeeting,
-							showClasses: template.showClasses,
-							showParticipants: template.showParticipants,
-							showRecords: template.showRecords,
-							showGeneralReports: template.showGeneralReports,
-							showSignatures: template.showSignatures,
 						}}
 						onSubmit={handleSubmit}
 						submitLabel={update.isPending ? "Salvando..." : "Salvar alterações"}

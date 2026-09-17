@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getSession } from "#/lib/auth/session";
+import { findRoleById } from "#/lib/roles/repository";
 import {
 	findStaffById,
 	softDeleteStaff,
@@ -21,6 +22,10 @@ vi.mock("#/lib/staff/repository", () => ({
 	findStaffById: vi.fn(),
 	updateStaff: vi.fn(),
 	softDeleteStaff: vi.fn(),
+}));
+
+vi.mock("#/lib/roles/repository", () => ({
+	findRoleById: vi.fn(),
 }));
 
 vi.mock("#/lib/cloudflare-env", () => ({
@@ -62,6 +67,7 @@ beforeEach(() => {
 	vi.clearAllMocks();
 	(findStaffById as ReturnType<typeof vi.fn>).mockReset();
 	(updateStaff as ReturnType<typeof vi.fn>).mockReset();
+	(findRoleById as ReturnType<typeof vi.fn>).mockReset();
 	(getSession as ReturnType<typeof vi.fn>).mockReset();
 });
 
@@ -208,6 +214,40 @@ describe("PATCH /api/staff/:id", () => {
 			expect.anything(),
 			"staff-1",
 			expect.objectContaining({ name: "João Souza" }),
+		);
+	});
+
+	it("atualiza o papel padrão do servidor", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		vi.mocked(findStaffById).mockResolvedValueOnce({
+			id: "staff-1",
+			name: "João Silva",
+			deletedAt: null,
+		} as never);
+		vi.mocked(findRoleById).mockResolvedValueOnce({
+			id: "role-1",
+			name: "Coordenador",
+		} as never);
+		vi.mocked(updateStaff).mockResolvedValueOnce({
+			id: "staff-1",
+			defaultRoleId: "role-1",
+		} as never);
+
+		const response = await updateStaffHandler({
+			request: new Request("http://localhost/api/staff/staff-1/", {
+				method: "PATCH",
+				body: JSON.stringify({ defaultRoleId: "role-1" }),
+			}),
+			context: { env: createEnv() },
+			params: { id: "staff-1" },
+		});
+
+		expect(response.status).toBe(200);
+		expect(updateStaff).toHaveBeenCalledWith(
+			expect.anything(),
+			"staff-1",
+			expect.objectContaining({ defaultRoleId: "role-1" }),
 		);
 	});
 });

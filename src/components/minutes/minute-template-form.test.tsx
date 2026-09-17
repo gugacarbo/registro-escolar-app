@@ -30,16 +30,14 @@ describe("MinuteTemplateForm", () => {
 						string,
 						unknown
 					>,
+					bodyContent: textDoc("Conteúdo") as unknown as Record<
+						string,
+						unknown
+					>,
 					footerContent: textDoc("Rodapé") as unknown as Record<
 						string,
 						unknown
 					>,
-					showMeeting: true,
-					showClasses: false,
-					showParticipants: true,
-					showRecords: true,
-					showGeneralReports: false,
-					showSignatures: true,
 				}}
 			/>,
 		);

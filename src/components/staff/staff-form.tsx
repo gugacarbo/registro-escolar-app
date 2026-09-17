@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { Button } from "#/components/ui/button";
+import { EntitySelect } from "#/components/ui/entity-select";
 import {
 	Form,
 	FormControl,
@@ -11,12 +14,15 @@ import {
 	FormSubmit,
 } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { fetchRolesPage } from "#/hooks/entity-fetchers";
+import { useAsyncOptions } from "#/hooks/use-async-options";
 
 export type StaffFormValues = {
 	name: string;
 	email?: string;
 	phone?: string;
 	notes?: string;
+	defaultRoleId?: string | null;
 };
 
 export function StaffForm({
@@ -30,12 +36,21 @@ export function StaffForm({
 	defaultValues?: Partial<StaffFormValues>;
 	serverError?: string | null;
 }) {
+	const [roleSearch, setRoleSearch] = useState("");
+	const { data: rolesResult, isLoading: isLoadingRoles } = useAsyncOptions({
+		queryKey: ["staff-form", "roles"],
+		search: roleSearch,
+		fetchPage: fetchRolesPage,
+		select: (role) => ({ id: role.id, name: role.name }),
+	});
+	const roleOptions = rolesResult?.options ?? [];
 	const form = useForm<StaffFormValues>({
 		defaultValues: {
 			name: "",
 			email: "",
 			phone: "",
 			notes: "",
+			defaultRoleId: null,
 			...defaultValues,
 		},
 	});
@@ -46,6 +61,44 @@ export function StaffForm({
 				onSubmit={() => form.handleSubmit(onSubmit)()}
 				className="space-y-4"
 			>
+				<FormField
+					control={form.control}
+					name="defaultRoleId"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Papel padrão</FormLabel>
+							<EntitySelect
+								label="Papel padrão"
+								placeholder="Selecione um papel"
+								value={field.value ?? ""}
+								onChange={field.onChange}
+								options={[
+									...roleOptions,
+									...(field.value &&
+									!roleOptions.some((role) => role.id === field.value)
+										? [{ id: field.value, name: field.value }]
+										: []),
+								]}
+								isLoading={isLoadingRoles}
+								total={rolesResult?.total ?? 0}
+								loadedAll={rolesResult?.loadedAll ?? true}
+								search={roleSearch}
+								onSearchChange={setRoleSearch}
+							/>
+							{field.value && (
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									onClick={() => field.onChange(null)}
+								>
+									Remover papel padrão
+								</Button>
+							)}
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 				<FormField
 					control={form.control}
 					name="name"

@@ -41,6 +41,7 @@ export default function StaffDetailPage() {
 				email: values.email || null,
 				phone: values.phone || null,
 				notes: values.notes || null,
+				defaultRoleId: values.defaultRoleId || null,
 			});
 			setSaved(true);
 		} catch (submitError) {
@@ -87,6 +88,7 @@ export default function StaffDetailPage() {
 							email: member.email ?? "",
 							phone: member.phone ?? "",
 							notes: member.notes ?? "",
+							defaultRoleId: member.defaultRoleId ?? null,
 						}}
 						onSubmit={handleSubmit}
 						submitLabel="Salvar alterações"

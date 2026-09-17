@@ -215,7 +215,7 @@ describe("renderMinute", () => {
 		);
 		const text = renderedToPlainText(rendered);
 
-		expect(text).toContain("CORPO PERSONALIZADO");
+		expect(text).toContain("Corpo personalizado");
 		expect(text).not.toContain("Data da reunião");
 		expect(text).not.toContain("Turmas");
 		expect(text).not.toContain("Participantes");

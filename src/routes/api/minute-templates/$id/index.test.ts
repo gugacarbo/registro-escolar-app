@@ -80,6 +80,7 @@ function makeTemplate(overrides: Record<string, unknown> = {}) {
 		showRecords: true,
 		showGeneralReports: true,
 		showSignatures: true,
+		bodyContent: JSON.stringify(textDoc("Conteúdo")),
 		createdAt: new Date("2026-01-01T00:00:00Z"),
 		updatedAt: new Date("2026-01-01T00:00:00Z"),
 		...overrides,

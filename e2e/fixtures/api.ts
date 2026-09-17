@@ -225,6 +225,7 @@ export async function createMinuteTemplate(
 		headerText?: string;
 		footerText?: string;
 		headerContent?: string | Record<string, unknown>;
+		bodyContent?: string | Record<string, unknown>;
 		footerContent?: string | Record<string, unknown>;
 		showMeeting?: boolean;
 		showClasses?: boolean;
@@ -262,6 +263,7 @@ export async function createMinuteTemplate(
 						],
 					})
 				: undefined),
+		bodyContent: input.bodyContent,
 		showMeeting: input.showMeeting,
 		showClasses: input.showClasses,
 		showParticipants: input.showParticipants,

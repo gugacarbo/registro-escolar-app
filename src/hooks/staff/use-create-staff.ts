@@ -10,7 +10,13 @@ export function useCreateStaff() {
 	return useMutation<
 		StaffMember,
 		Error,
-		{ name: string; email?: string; phone?: string; notes?: string }
+		{
+			name: string;
+			email?: string;
+			phone?: string;
+			notes?: string;
+			defaultRoleId?: string | null;
+		}
 	>({
 		mutationFn: async (data) => {
 			const response = await fetch("/api/staff", {

@@ -55,6 +55,7 @@ function makeMember(overrides: Partial<StaffMember> = {}): StaffMember {
 		createdAt: now,
 		updatedAt: now,
 		...overrides,
+		defaultRoleId: overrides.defaultRoleId ?? null,
 	};
 }
 
@@ -70,6 +71,7 @@ function renderPage() {
 }
 
 beforeEach(() => {
+	vi.restoreAllMocks();
 	mocks.mutateAsync.mockReset();
 	mocks.mutateAsync.mockResolvedValue(makeMember());
 	mocks.deleteAsync.mockReset();
@@ -79,6 +81,18 @@ beforeEach(() => {
 		isLoading: false,
 		isError: false,
 		error: null,
+	});
+	vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+		if (String(input).startsWith("/api/roles")) {
+			return new Response(
+				JSON.stringify({
+					data: [{ id: "role-1", name: "Coordenador" }],
+					total: 1,
+				}),
+				{ status: 200 },
+			);
+		}
+		return new Response(JSON.stringify({}), { status: 200 });
 	});
 });
 
@@ -112,6 +126,7 @@ describe("StaffDetailPage", () => {
 
 		expect(screen.getByLabelText("Nome *")).toHaveValue("João Silva");
 		expect(screen.getByLabelText("Email")).toHaveValue("joao@example.com");
+		expect(screen.getByLabelText("Papel padrão")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Salvar alterações" }),
 		).toBeInTheDocument();
@@ -130,8 +145,27 @@ describe("StaffDetailPage", () => {
 			email: "joao@example.com",
 			phone: null,
 			notes: null,
+			defaultRoleId: null,
 		});
 		expect(await screen.findByText("Servidor atualizado")).toBeInTheDocument();
+	});
+
+	it("define e remove o papel padrão", async () => {
+		const user = userEvent.setup();
+		renderPage();
+
+		await user.click(screen.getByLabelText("Papel padrão"));
+		await user.click(await screen.findByRole("option", { name: "Coordenador" }));
+		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
+
+		expect(mocks.mutateAsync).toHaveBeenLastCalledWith(
+			expect.objectContaining({ defaultRoleId: "role-1" }),
+		);
+		await user.click(screen.getByRole("button", { name: "Remover papel padrão" }));
+		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
+		expect(mocks.mutateAsync).toHaveBeenLastCalledWith(
+			expect.objectContaining({ defaultRoleId: null }),
+		);
 	});
 
 	it("exibe erro do servidor quando a atualização falha", async () => {

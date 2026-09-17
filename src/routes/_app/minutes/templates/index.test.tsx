@@ -45,6 +45,10 @@ function makeTemplate(overrides: Partial<MinuteTemplate> = {}): MinuteTemplate {
 			type: "doc",
 			content: [{ type: "paragraph" }],
 		}),
+		bodyContent: JSON.stringify({
+			type: "doc",
+			content: [{ type: "paragraph" }],
+		}),
 		footerContent: JSON.stringify({
 			type: "doc",
 			content: [{ type: "paragraph" }],
@@ -88,7 +92,7 @@ describe("MinuteTemplatesPage", () => {
 			within(table).getByRole("columnheader", { name: "Nome" }),
 		).toBeInTheDocument();
 		expect(
-			within(table).getByRole("columnheader", { name: "Blocos" }),
+			within(table).getByRole("columnheader", { name: "Personalização" }),
 		).toBeInTheDocument();
 
 		fireEvent.click(within(table).getByRole("cell", { name: "Modelo padrão" }));
@@ -145,28 +149,16 @@ describe("MinuteTemplatesPage", () => {
 		expect(screen.queryByLabelText("Nome *")).not.toBeInTheDocument();
 	});
 
-	it("exibe relatos e informa quando não há blocos habilitados", () => {
+	it("exibe a personalização disponível no modelo", () => {
 		mocks.useMinuteTemplates.mockReturnValue({
 			data: [
 				makeTemplate({
-					id: "template-relatos",
-					name: "Modelo com relatos",
-					showMeeting: false,
-					showClasses: false,
-					showParticipants: false,
-					showRecords: false,
-					showGeneralReports: true,
-					showSignatures: false,
-				}),
-				makeTemplate({
-					id: "template-vazio",
-					name: "Modelo sem blocos",
-					showMeeting: false,
-					showClasses: false,
-					showParticipants: false,
-					showRecords: false,
-					showGeneralReports: false,
-					showSignatures: false,
+					bodyContent: JSON.stringify({
+						type: "doc",
+						content: [
+							{ type: "paragraph", content: [{ type: "text", text: "Corpo" }] },
+						],
+					}),
 				}),
 			],
 			isLoading: false,
@@ -177,10 +169,7 @@ describe("MinuteTemplatesPage", () => {
 
 		render(<MinuteTemplatesPage />);
 
-		expect(screen.getByRole("cell", { name: "Relatos" })).toBeInTheDocument();
-		expect(
-			screen.getByRole("cell", { name: "Nenhum bloco" }),
-		).toBeInTheDocument();
+		expect(screen.getByRole("cell", { name: "Conteúdo" })).toBeInTheDocument();
 	});
 
 	it("reinicia a paginação ao alterar a quantidade de itens por página", async () => {

@@ -85,6 +85,17 @@ export function renderMinute(input: RenderInput): RenderedMinute {
 			elements.push({ kind: "line", text, level });
 		}
 	};
+	const appendTemplateBody = (doc: ReturnType<typeof parseTemplateContent>) => {
+		for (const node of doc.content ?? []) {
+			const nodeDoc = { type: "doc" as const, content: [node] };
+			const text = tipTapToPlainText(nodeDoc, context);
+			const level = node.type?.startsWith("heading") ? 2 : 3;
+			if (text.trim()) push(text, level);
+			for (const element of tipTapToMinuteElements(nodeDoc, context)) {
+				if (element.kind === "image") elements.push(element);
+			}
+		}
+	};
 
 	const headerDoc = parseTemplateContent(t?.headerContent);
 	const headerText = tipTapToPlainText(headerDoc, context);
@@ -102,61 +113,65 @@ export function renderMinute(input: RenderInput): RenderedMinute {
 
 	push(`Ata — ${input.meeting.title}`, 1);
 
-	if (!t || t.showMeeting) {
-		const held = input.meeting.heldAt
-			? new Date(input.meeting.heldAt).toLocaleDateString("pt-BR")
-			: "data não informada";
-		push(`Data da reunião: ${held}`, 2);
-	}
-
-	if ((!t || t.showClasses) && input.classes.length > 0) {
-		push("Turmas", 2);
-		for (const c of input.classes) {
-			push(c.className);
+	if (t?.bodyContent != null) {
+		appendTemplateBody(parseTemplateContent(t.bodyContent));
+	} else {
+		if (!t || t.showMeeting) {
+			const held = input.meeting.heldAt
+				? new Date(input.meeting.heldAt).toLocaleDateString("pt-BR")
+				: "data não informada";
+			push(`Data da reunião: ${held}`, 2);
 		}
-	}
 
-	if ((!t || t.showParticipants) && input.participants.length > 0) {
-		push("Participantes", 2);
-		for (const p of input.participants) {
-			push(`${p.staffName} — ${p.roleName}`);
-		}
-	}
-
-	// Borda 5 (spec 0009): agrupar registros por turma e por estudante.
-	if ((!t || t.showRecords) && input.records.length > 0) {
-		push("Registros por estudante", 2);
-		const byClass = new Map<string, RecordLike[]>();
-		for (const r of input.records) {
-			const key = r.className ?? "Sem turma";
-			const bucket = byClass.get(key);
-			if (bucket) {
-				bucket.push(r);
-			} else {
-				byClass.set(key, [r]);
+		if ((!t || t.showClasses) && input.classes.length > 0) {
+			push("Turmas", 2);
+			for (const c of input.classes) {
+				push(c.className);
 			}
 		}
-		for (const [className, records] of byClass) {
-			push(className, 3);
-			for (const r of records) {
-				push(`${r.studentName}: ${r.texto}`);
+
+		if ((!t || t.showParticipants) && input.participants.length > 0) {
+			push("Participantes", 2);
+			for (const p of input.participants) {
+				push(`${p.staffName} — ${p.roleName}`);
 			}
 		}
-	}
 
-	// Borda 1 (spec 0009): sem registros, ata mínima com cabeçalho e relatos.
-	if ((!t || t.showGeneralReports) && input.generalReports.length > 0) {
-		push("Relatos gerais", 2);
-		for (const g of input.generalReports) {
-			push(g.texto);
+		// Borda 5 (spec 0009): agrupar registros por turma e por estudante.
+		if ((!t || t.showRecords) && input.records.length > 0) {
+			push("Registros por estudante", 2);
+			const byClass = new Map<string, RecordLike[]>();
+			for (const r of input.records) {
+				const key = r.className ?? "Sem turma";
+				const bucket = byClass.get(key);
+				if (bucket) {
+					bucket.push(r);
+				} else {
+					byClass.set(key, [r]);
+				}
+			}
+			for (const [className, records] of byClass) {
+				push(className, 3);
+				for (const r of records) {
+					push(`${r.studentName}: ${r.texto}`);
+				}
+			}
 		}
-	}
 
-	if (!t || t.showSignatures) {
-		push("Assinaturas", 2);
-		for (const p of input.participants) {
-			push("_____________________________");
-			push(p.staffName);
+		// Borda 1 (spec 0009): sem registros, ata mínima com cabeçalho e relatos.
+		if ((!t || t.showGeneralReports) && input.generalReports.length > 0) {
+			push("Relatos gerais", 2);
+			for (const g of input.generalReports) {
+				push(g.texto);
+			}
+		}
+
+		if (!t || t.showSignatures) {
+			push("Assinaturas", 2);
+			for (const p of input.participants) {
+				push("_____________________________");
+				push(p.staffName);
+			}
 		}
 	}
 
