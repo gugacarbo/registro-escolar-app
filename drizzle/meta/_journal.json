@@ -99,6 +99,13 @@
       "when": 1789482400000,
       "tag": "0013_adiciona-local-reuniao",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1789682784242,
+      "tag": "0014_permite_multiplos_papeis_na_reuniao",
+      "breakpoints": true
     }
   ]
 }

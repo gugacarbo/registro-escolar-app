@@ -110,7 +110,10 @@ describe("AppSidebar", () => {
 			"href",
 			"/minutes",
 		);
-		expect(screen.getAllByRole("link")).toHaveLength(8);
+		expect(
+			screen.getByRole("link", { name: "Modelos de ata" }),
+		).toHaveAttribute("href", "/minutes/templates");
+		expect(screen.getAllByRole("link")).toHaveLength(9);
 	});
 
 	it("exibe Usuários apenas para sessão admin", () => {
@@ -120,7 +123,7 @@ describe("AppSidebar", () => {
 			"href",
 			"/admin/users",
 		);
-		expect(screen.getAllByRole("link")).toHaveLength(9);
+		expect(screen.getAllByRole("link")).toHaveLength(10);
 	});
 
 	it("oculta Usuários para sessão de user comum", () => {
@@ -129,7 +132,7 @@ describe("AppSidebar", () => {
 		expect(
 			screen.queryByRole("link", { name: "Usuários" }),
 		).not.toBeInTheDocument();
-		expect(screen.getAllByRole("link")).toHaveLength(8);
+		expect(screen.getAllByRole("link")).toHaveLength(9);
 	});
 
 	it("marca Estudantes como ativo na lista e nas subrotas", () => {
@@ -151,6 +154,18 @@ describe("AppSidebar", () => {
 		renderSidebar("/");
 
 		expect(screen.getByRole("link", { name: "Estudantes" })).toHaveAttribute(
+			"data-active",
+			"false",
+		);
+	});
+
+	it("marca apenas Modelos de ata como ativo na página de templates", () => {
+		renderSidebar("/minutes/templates");
+
+		expect(
+			screen.getByRole("link", { name: "Modelos de ata" }),
+		).toHaveAttribute("data-active", "true");
+		expect(screen.getByRole("link", { name: "Atas" })).toHaveAttribute(
 			"data-active",
 			"false",
 		);

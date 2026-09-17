@@ -35,7 +35,13 @@ beforeEach(() => {
 			return fetchJson([{ id: "staff-1", name: "Maria" }], 1);
 		}
 		if (url.startsWith("/api/roles")) {
-			return fetchJson([{ id: "role-1", name: "Coordenador" }], 1);
+			return fetchJson(
+				[
+					{ id: "role-1", name: "Coordenador" },
+					{ id: "role-2", name: "Secretário" },
+				],
+				2,
+			);
 		}
 		return new Response(JSON.stringify([]), { status: 200 });
 	});
@@ -79,16 +85,16 @@ describe("MeetingForm", () => {
 		);
 		await user.click(screen.getByLabelText("Servidor"));
 		await user.click(await screen.findByRole("option", { name: "Maria" }));
-		await user.click(screen.getByLabelText("Papel"));
-		await user.click(
-			await screen.findByRole("option", { name: "Coordenador" }),
-		);
+		await user.click(screen.getByRole("checkbox", { name: "Coordenador" }));
+		await user.click(screen.getByRole("checkbox", { name: "Secretário" }));
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 		expect(onSubmit).toHaveBeenCalledWith(
 			expect.objectContaining({
 				nome: "Conselho",
 				turmaIds: ["class-1"],
-				participantes: [{ servidorId: "staff-1", papelId: "role-1" }],
+				participantes: [
+					{ servidorId: "staff-1", papelIds: ["role-1", "role-2"] },
+				],
 			}),
 			undefined,
 		);

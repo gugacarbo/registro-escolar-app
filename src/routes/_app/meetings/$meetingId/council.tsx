@@ -280,7 +280,9 @@ export default function CouncilPage() {
 							<ArrowLeftIcon className="size-3.5" />
 							Voltar para detalhes da reunião
 						</Link>
-						<h1 className="truncate text-2xl font-bold">Conselho de classe</h1>
+						<h1 className="truncate text-2xl font-bold">
+							Participação na reunião
+						</h1>
 						{isLoadingMeeting && (
 							<p className="text-sm text-muted-foreground">Carregando...</p>
 						)}
@@ -406,7 +408,8 @@ export default function CouncilPage() {
 											student.studentId;
 										return (
 											<li key={student.studentId}>
-												<button
+												<Button
+													variant="ghost"
 													type="button"
 													onClick={() => selectStudent(student.studentId)}
 													aria-pressed={isActive}
@@ -434,7 +437,7 @@ export default function CouncilPage() {
 														)}
 													</span>
 													{isActive && <Badge variant="default">Ativo</Badge>}
-												</button>
+												</Button>
 											</li>
 										);
 									})}
@@ -474,7 +477,7 @@ export default function CouncilPage() {
 
 			{selectedStudent && (
 				<Tabs value={tab} onValueChange={setTab}>
-					<TabsList aria-label="Conteúdo do conselho">
+					<TabsList aria-label="Conteúdo da reunião">
 						<TabsTrigger value="registros">
 							Registros de {selectedStudent.name} ({records.length})
 						</TabsTrigger>
@@ -554,7 +557,7 @@ export default function CouncilPage() {
 												Nenhum registro para este estudante
 											</EmptyTitle>
 											<EmptyDescription>
-												Registre observações feitas no conselho para compor o
+												Registre observações feitas na reunião para compor o
 												histórico e a ata.
 											</EmptyDescription>
 										</EmptyHeader>
@@ -585,7 +588,7 @@ export default function CouncilPage() {
 															}
 														>
 															{record.scope === "vinculado"
-																? "Do conselho"
+																? "Da reunião"
 																: "Histórico"}
 														</Badge>
 														<span className="inline-flex items-center gap-2 text-xs text-muted-foreground">

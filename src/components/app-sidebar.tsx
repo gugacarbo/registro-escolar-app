@@ -4,6 +4,7 @@ import {
 	BookOpenText,
 	Briefcase,
 	CalendarDays,
+	Files,
 	FileText,
 	GraduationCap,
 	LayoutGrid,
@@ -33,6 +34,7 @@ type AppRoute =
 	| "/components"
 	| "/meetings"
 	| "/minutes"
+	| "/minutes/templates"
 	| "/admin/users";
 
 interface NavItem {
@@ -50,6 +52,7 @@ const NAV_ITEMS: NavItem[] = [
 	{ title: "Componentes", to: "/components", icon: BookOpenText },
 	{ title: "Reuniões", to: "/meetings", icon: CalendarDays },
 	{ title: "Atas", to: "/minutes", icon: FileText },
+	{ title: "Modelos de ata", to: "/minutes/templates", icon: Files },
 ];
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
@@ -66,12 +69,21 @@ function isActivePath(pathname: string, to: AppRoute): boolean {
 	return current === target || current.startsWith(`${target}/`);
 }
 
+function getActivePath(pathname: string, items: NavItem[]): AppRoute | null {
+	return (
+		items
+			.filter((item) => isActivePath(pathname, item.to))
+			.sort((a, b) => b.to.length - a.to.length)[0]?.to ?? null
+	);
+}
+
 export function AppSidebar() {
 	const pathname = useLocation({ select: (s) => s.pathname });
 	const session = useAuthSession();
 	const role = (session?.user as { role?: string } | undefined)?.role;
 	const navItems =
 		role === "admin" ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS;
+	const activePath = getActivePath(pathname, navItems);
 
 	return (
 		<Sidebar collapsible="icon" variant="floating">
@@ -98,7 +110,7 @@ export function AppSidebar() {
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton
 										asChild
-										isActive={isActivePath(pathname, item.to)}
+										isActive={activePath === item.to}
 										tooltip={item.title}
 									>
 										<Link to={item.to}>

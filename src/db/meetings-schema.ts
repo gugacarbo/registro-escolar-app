@@ -53,9 +53,10 @@ export const meetingParticipants = sqliteTable(
 			.notNull(),
 	},
 	(table) => [
-		uniqueIndex("meeting_participants_meeting_staff_uidx").on(
+		uniqueIndex("meeting_participants_meeting_staff_role_uidx").on(
 			table.meetingId,
 			table.staffId,
+			table.roleId,
 		),
 		index("meeting_participants_meeting_idx").on(table.meetingId),
 		index("meeting_participants_staff_idx").on(table.staffId),

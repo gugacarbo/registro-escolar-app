@@ -90,7 +90,9 @@ export type CreateMeetingWithRelationsInput = {
 	heldAt?: Date | null;
 	templateId?: string | null;
 	classIds?: string[];
-	participants?: Array<{ staffId: string; roleId: string }>;
+	participants?: Array<
+		{ staffId: string; roleIds: string[] } | { staffId: string; roleId: string }
+	>;
 };
 
 export async function createMeetingWithRelations(
@@ -125,16 +127,20 @@ export async function createMeetingWithRelations(
 			.get();
 	}
 	for (const participant of input.participants ?? []) {
-		await db
-			.insert(meetingParticipants)
-			.values({
-				id: crypto.randomUUID(),
-				meetingId: meeting.id,
-				staffId: participant.staffId,
-				roleId: participant.roleId,
-			})
-			.returning()
-			.get();
+		for (const roleId of "roleIds" in participant
+			? participant.roleIds
+			: [participant.roleId]) {
+			await db
+				.insert(meetingParticipants)
+				.values({
+					id: crypto.randomUUID(),
+					meetingId: meeting.id,
+					staffId: participant.staffId,
+					roleId,
+				})
+				.returning()
+				.get();
+		}
 	}
 	return meeting;
 }
@@ -245,11 +251,13 @@ export async function findParticipant(
 	db: DB,
 	meetingId: string,
 	staffId: string,
+	roleId?: string,
 ) {
 	return db.query.meetingParticipants.findFirst({
 		where: and(
 			eq(meetingParticipants.meetingId, meetingId),
 			eq(meetingParticipants.staffId, staffId),
+			roleId ? eq(meetingParticipants.roleId, roleId) : undefined,
 		),
 	});
 }

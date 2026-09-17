@@ -6,9 +6,9 @@ export function useAddParticipant(meetingId: string) {
 	const queryClient = useQueryClient();
 
 	return useMutation<
-		MeetingParticipant,
+		MeetingParticipant | { participants: MeetingParticipant[] },
 		Error,
-		{ staffId: string; roleId: string }
+		{ staffId: string; roleIds: string[] } | { staffId: string; roleId: string }
 	>({
 		mutationFn: async (data) => {
 			const response = await fetch(`/api/meetings/${meetingId}/participants`, {

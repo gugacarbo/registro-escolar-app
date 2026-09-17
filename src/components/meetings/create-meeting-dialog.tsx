@@ -53,11 +53,12 @@ export function CreateMeetingDialog({
 				classIds: values.turmaIds,
 				participants: values.participantes
 					.filter(
-						(participant) => participant.servidorId && participant.papelId,
+						(participant) =>
+							participant.servidorId && participant.papelIds.length > 0,
 					)
 					.map((participant) => ({
 						staffId: participant.servidorId,
-						roleId: participant.papelId,
+						roleIds: participant.papelIds,
 					})),
 			});
 			handleOpenChange(false);

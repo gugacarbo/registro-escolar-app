@@ -120,7 +120,10 @@ describe("AppLayout", () => {
 			"href",
 			"/minutes",
 		);
-		expect(screen.getAllByRole("link")).toHaveLength(9);
+		expect(
+			screen.getByRole("link", { name: "Modelos de ata" }),
+		).toHaveAttribute("href", "/minutes/templates");
+		expect(screen.getAllByRole("link")).toHaveLength(10);
 	});
 
 	it("exibe um skip-link para o conteúdo principal", async () => {

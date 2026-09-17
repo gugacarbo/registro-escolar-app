@@ -40,7 +40,7 @@ const meetingFormSchema = z.object({
 	participantes: z.array(
 		z.object({
 			servidorId: z.string(),
-			papelId: z.string(),
+			papelIds: z.array(z.string()),
 		}),
 	),
 	templateId: z.string().optional(),
@@ -285,25 +285,56 @@ export function MeetingForm({
 									/>
 									<FormField
 										control={form.control}
-										name={`participantes.${index}.papelId`}
+										name={`participantes.${index}.papelIds`}
 										render={({ field }) => (
-											<EntitySelect
-												label="Papel"
-												placeholder="Papel"
-												value={field.value}
-												onChange={field.onChange}
-												options={[
-													...roleOptions,
-													...(field.value && !roleById.has(field.value)
-														? [{ id: field.value, name: field.value }]
-														: []),
-												]}
-												isLoading={isLoadingRoles}
-												total={rolesResult?.total ?? 0}
-												loadedAll={rolesResult?.loadedAll ?? true}
-												search={roleSearch}
-												onSearchChange={setRoleSearch}
-											/>
+											<div className="grid min-w-48 gap-2">
+												<Label>Papéis</Label>
+												<div className="grid gap-2 rounded-md border p-2">
+													{roleOptions.map((role) => (
+														<label
+															key={role.id}
+															className="flex items-center gap-2 text-sm"
+														>
+															<Checkbox
+																checked={field.value.includes(role.id)}
+																onCheckedChange={(checked) =>
+																	field.onChange(
+																		checked
+																			? [...field.value, role.id]
+																			: field.value.filter(
+																					(id) => id !== role.id,
+																				),
+																	)
+																}
+															/>
+															{role.name}
+														</label>
+													))}
+													{isLoadingRoles && (
+														<p className="text-xs text-muted-foreground">
+															Carregando papéis...
+														</p>
+													)}
+													{field.value.map((id) => {
+														if (roleById.has(id)) return null;
+														return (
+															<label
+																key={id}
+																className="flex items-center gap-2 text-sm"
+															>
+																<Checkbox checked disabled />
+																{id}
+															</label>
+														);
+													})}
+												</div>
+												<p className="text-xs text-muted-foreground">
+													{field.value.length === 0
+														? "Selecione um ou mais papéis."
+														: `${field.value.length} papel(is) selecionado(s)`}
+												</p>
+												<FormMessage />
+											</div>
 										)}
 									/>
 									<Button
@@ -318,7 +349,7 @@ export function MeetingForm({
 							<Button
 								type="button"
 								variant="secondary"
-								onClick={() => append({ servidorId: "", papelId: "" })}
+								onClick={() => append({ servidorId: "", papelIds: [] })}
 							>
 								Adicionar participante
 							</Button>

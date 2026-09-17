@@ -155,8 +155,11 @@ describe("CreateMeetingDialog", () => {
 				if (url.startsWith("/api/roles")) {
 					return new Response(
 						JSON.stringify({
-							data: [{ id: "role-1", name: "Coordenador" }],
-							total: 1,
+							data: [
+								{ id: "role-1", name: "Coordenador" },
+								{ id: "role-2", name: "Secretário" },
+							],
+							total: 2,
 							page: 1,
 							pageSize: 100,
 						}),
@@ -183,10 +186,8 @@ describe("CreateMeetingDialog", () => {
 		);
 		await user.click(screen.getByLabelText("Servidor"));
 		await user.click(await screen.findByRole("option", { name: "Maria" }));
-		await user.click(screen.getByLabelText("Papel"));
-		await user.click(
-			await screen.findByRole("option", { name: "Coordenador" }),
-		);
+		await user.click(screen.getByRole("checkbox", { name: "Coordenador" }));
+		await user.click(screen.getByRole("checkbox", { name: "Secretário" }));
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 		await waitFor(() => expect(onSuccess).toHaveBeenCalledWith("meeting-1"));
 		const call = fetchMock.mock.calls.find(
@@ -197,7 +198,7 @@ describe("CreateMeetingDialog", () => {
 			title: "Conselho UI",
 			heldAt: "2026-03-01",
 			classIds: ["class-1"],
-			participants: [{ staffId: "staff-1", roleId: "role-1" }],
+			participants: [{ staffId: "staff-1", roleIds: ["role-1", "role-2"] }],
 		});
 	});
 

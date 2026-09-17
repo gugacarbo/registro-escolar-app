@@ -9,7 +9,7 @@ import {
 	findParticipant,
 	listParticipantsByMeeting,
 } from "#/lib/meetings/repository";
-import { createMeetingParticipantSchema } from "#/lib/meetings/schema";
+import { createMeetingParticipantApiSchema } from "#/lib/meetings/schema";
 import { findRoleById } from "#/lib/roles/repository";
 import { findActiveStaffById } from "#/lib/staff/repository";
 import { d1Middleware } from "#/middleware/d1";
@@ -74,13 +74,15 @@ export async function createParticipantHandler({
 	const body = (await request.json()) as {
 		staffId?: unknown;
 		roleId?: unknown;
+		roleIds?: unknown;
 	};
-	const parsed = createMeetingParticipantSchema.safeParse({
+	const parsed = createMeetingParticipantApiSchema.safeParse({
 		staffId: body.staffId,
 		roleId: body.roleId,
+		roleIds: body.roleIds,
 		meetingId: params.meetingId,
 	});
-	if (!parsed.success || !parsed.data.staffId || !parsed.data.roleId) {
+	if (!parsed.success || !parsed.data.staffId) {
 		return json(
 			{
 				error: "Dados inválidos",
@@ -101,20 +103,42 @@ export async function createParticipantHandler({
 		return json({ error: "Servidor não encontrado" }, 404);
 	}
 
-	const role = await findRoleById(db, parsed.data.roleId);
-	if (!role) {
-		return json({ error: "Papel não encontrado" }, 404);
+	const roles = [];
+	for (const roleId of parsed.data.roleIds) {
+		const role = await findRoleById(db, roleId);
+		if (!role) {
+			return json({ error: "Papel não encontrado" }, 404);
+		}
+		roles.push(role);
 	}
 
-	const existing = await findParticipant(db, params.meetingId, staffMember.id);
-	if (existing) {
-		return json({ error: "Participante já adicionado", existing }, 409);
+	const existing = [];
+	for (const role of roles) {
+		const participant = await findParticipant(
+			db,
+			params.meetingId,
+			staffMember.id,
+			role.id,
+		);
+		if (participant) existing.push(participant);
+	}
+	if (existing.length > 0) {
+		return json(
+			{ error: "Participante já adicionado", existing: existing[0] },
+			409,
+		);
 	}
 
-	const participant = await createParticipant(db, {
-		meetingId: params.meetingId,
-		staffId: staffMember.id,
-		roleId: role.id,
-	});
-	return json({ ...participant, staff: staffMember, role }, 201);
+	const participants = [];
+	for (const role of roles) {
+		const participant = await createParticipant(db, {
+			meetingId: params.meetingId,
+			staffId: staffMember.id,
+			roleId: role.id,
+		});
+		participants.push({ ...participant, staff: staffMember, role });
+	}
+
+	if (body.roleIds === undefined) return json(participants[0], 201);
+	return json({ participants }, 201);
 }

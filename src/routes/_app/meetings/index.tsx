@@ -94,9 +94,9 @@ export default function MeetingsPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Conselho de classe"
+				eyebrow="Gestão de reuniões"
 				title="Reuniões"
-				description="Acompanhe cada reunião do rascunho à finalização e entre diretamente na sala do conselho."
+				description="Acompanhe cada reunião do rascunho à finalização e participe diretamente da reunião."
 				actions={
 					<Button onClick={() => setDialogOpen(true)}>Nova reunião</Button>
 				}

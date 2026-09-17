@@ -64,6 +64,15 @@ describe("meetings schema", () => {
 		expect(invalid.success).toBe(false);
 	});
 
+	it("createMeetingApiSchema aceita vários papéis para o mesmo servidor", () => {
+		const parsed = createMeetingApiSchema.safeParse({
+			title: "Reunião",
+			participants: [{ staffId: "staff-1", roleIds: ["role-1", "role-2"] }],
+		});
+
+		expect(parsed.success).toBe(true);
+	});
+
 	it("createMeetingApiSchema converte data ISO da UI para Date", () => {
 		const parsed = createMeetingApiSchema.safeParse({
 			title: "Conselho",

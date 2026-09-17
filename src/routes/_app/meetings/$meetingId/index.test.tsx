@@ -149,6 +149,16 @@ describe("MeetingDetailPage (header em 375px)", () => {
 		expect(screen.getByText("Ata e Documentos")).toBeInTheDocument();
 	});
 
+	it("usa linguagem de participação na reunião para abrir o espaço de trabalho", () => {
+		renderPage();
+
+		expect(
+			screen.getAllByRole("link", { name: /Participar da reunião/ }),
+		).toHaveLength(2);
+		expect(screen.queryByText("Entrar no Conselho")).not.toBeInTheDocument();
+		expect(screen.queryByText("Sala do Conselho")).not.toBeInTheDocument();
+	});
+
 	it("permite rolagem horizontal nas abas (overflow-x-auto)", () => {
 		renderPage();
 		const scrollWrapper = document.querySelector(

@@ -79,7 +79,7 @@ function createTestDb() {
 			role_id TEXT NOT NULL,
 			created_at INTEGER NOT NULL,
 			updated_at INTEGER NOT NULL,
-			UNIQUE (meeting_id, staff_id)
+			UNIQUE (meeting_id, staff_id, role_id)
 		);
 		CREATE TABLE meeting_classes (
 			id TEXT PRIMARY KEY,
@@ -187,6 +187,29 @@ describe("meetings repository", () => {
 				roleId: role.id,
 			}),
 		).rejects.toThrow();
+	});
+
+	it("permite mais de um papel para o mesmo servidor na reunião", async () => {
+		const { db } = createTestDb();
+		const meeting = await createMeeting(db, { title: "Reunião 1" });
+		const member = await createStaff(db, { name: "João Silva" });
+		const professor = await createRole(db, { name: "Professor" });
+		const coordenador = await createRole(db, { name: "Coordenador" });
+
+		await createParticipant(db, {
+			meetingId: meeting.id,
+			staffId: member.id,
+			roleId: professor.id,
+		});
+		await expect(
+			createParticipant(db, {
+				meetingId: meeting.id,
+				staffId: member.id,
+				roleId: coordenador.id,
+			}),
+		).resolves.toMatchObject({ staffId: member.id, roleId: coordenador.id });
+
+		expect(await listParticipantsByMeeting(db, meeting.id)).toHaveLength(2);
 	});
 
 	it("permite o mesmo servidor com papéis diferentes em reuniões diferentes", async () => {

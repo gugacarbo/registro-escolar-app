@@ -52,7 +52,13 @@ beforeEach(() => {
 			return fetchJson([{ id: "staff-1", name: "Maria Silva" }], 1);
 		}
 		if (url.startsWith("/api/roles")) {
-			return fetchJson([{ id: "role-1", name: "Coordenador" }], 1);
+			return fetchJson(
+				[
+					{ id: "role-1", name: "Coordenador" },
+					{ id: "role-2", name: "Secretário" },
+				],
+				2,
+			);
 		}
 		return new Response(JSON.stringify({ error: "x" }), { status: 500 });
 	});
@@ -93,10 +99,7 @@ describe("ParticipantsPage", () => {
 		await user.click(
 			await screen.findByRole("option", { name: "Maria Silva" }),
 		);
-		await user.click(screen.getByLabelText("Papel"));
-		await user.click(
-			await screen.findByRole("option", { name: "Coordenador" }),
-		);
+		await user.click(screen.getByRole("checkbox", { name: "Coordenador" }));
 		await user.click(screen.getByRole("button", { name: "Adicionar" }));
 		expect(
 			await screen.findByText("Participante duplicado"),
@@ -111,17 +114,15 @@ describe("ParticipantsPage", () => {
 		await user.click(
 			await screen.findByRole("option", { name: "Maria Silva" }),
 		);
-		await user.click(screen.getByLabelText("Papel"));
-		await user.click(
-			await screen.findByRole("option", { name: "Coordenador" }),
-		);
+		await user.click(screen.getByRole("checkbox", { name: "Coordenador" }));
+		await user.click(screen.getByRole("checkbox", { name: "Secretário" }));
 		await user.click(screen.getByRole("button", { name: "Adicionar" }));
 		expect(
 			await screen.findByText(/Maria Silva — Coordenador/),
 		).toBeInTheDocument();
 		expect(mocks.addAsync).toHaveBeenCalledWith({
 			staffId: "staff-1",
-			roleId: "role-1",
+			roleIds: ["role-1", "role-2"],
 		});
 	});
 

@@ -16,6 +16,25 @@ export const meetingStatusSchema = z.enum([
 
 export const transitionMeetingSchema = z.enum(["start", "finalize", "reopen"]);
 
+const meetingParticipantApiInputSchema = z
+	.object({
+		staffId: z.string().min(1),
+		roleId: z.string().min(1).optional(),
+		roleIds: z.array(z.string().min(1)).optional(),
+	})
+	.transform(({ staffId, roleId, roleIds }) => ({
+		staffId,
+		roleIds: roleIds ?? (roleId ? [roleId] : []),
+	}))
+	.refine((value) => value.roleIds.length > 0, {
+		message: "Selecione ao menos um papel",
+		path: ["roleIds"],
+	})
+	.refine((value) => new Set(value.roleIds).size === value.roleIds.length, {
+		message: "Não repita o mesmo papel",
+		path: ["roleIds"],
+	});
+
 export const createMeetingSchema = createInsertSchema(meetings)
 	.omit({
 		id: true,
@@ -43,14 +62,7 @@ export const createMeetingApiSchema = createMeetingSchema.extend({
 		createInsertSchema(meetings).shape.heldAt,
 	),
 	classIds: z.array(z.string().min(1)).default([]),
-	participants: z
-		.array(
-			z.object({
-				staffId: z.string().min(1),
-				roleId: z.string().min(1),
-			}),
-		)
-		.default([]),
+	participants: z.array(meetingParticipantApiInputSchema).default([]),
 });
 
 export const updateMeetingSchema = createUpdateSchema(meetings).omit({
@@ -73,6 +85,9 @@ export const createMeetingParticipantSchema = createInsertSchema(
 		meetingId:
 			createInsertSchema(meetingParticipants).shape.meetingId.optional(),
 	});
+
+export const createMeetingParticipantApiSchema =
+	meetingParticipantApiInputSchema;
 
 export const selectMeetingParticipantSchema =
 	createSelectSchema(meetingParticipants);

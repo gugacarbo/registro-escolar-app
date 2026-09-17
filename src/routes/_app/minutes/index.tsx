@@ -3,7 +3,6 @@ import { useState } from "react";
 
 import { DataTable, type DataTableColumn } from "#/components/data-table";
 import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
 import { PageHeader, PageShell, PageToolbar } from "#/components/ui/page";
 import { SearchInput } from "#/components/ui/search-input";
 import {
@@ -107,11 +106,6 @@ export default function MinutesPage() {
 				eyebrow="Conselho de classe"
 				title="Atas"
 				description="Todas as atas das reuniões, com status de aprovação e versões geradas."
-				actions={
-					<Link to="/minutes/templates">
-						<Button variant="secondary">Modelos de ata</Button>
-					</Link>
-				}
 			/>
 			<PageToolbar className="sm:justify-between">
 				<SearchInput

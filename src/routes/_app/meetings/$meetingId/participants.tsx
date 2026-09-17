@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "#/components/ui/button";
+import { Checkbox } from "#/components/ui/checkbox";
 import { EntitySelect } from "#/components/ui/entity-select";
+import { Input } from "#/components/ui/input";
 import { PageShell } from "#/components/ui/page";
 import { fetchRolesPage, fetchStaffPage } from "#/hooks/entity-fetchers";
 import { useAddParticipant } from "#/hooks/meetings/use-add-participant";
@@ -36,19 +38,19 @@ export default function ParticipantsPage() {
 	const roleById = new Map(roles.map((role) => [role.id, role.name]));
 	const addParticipant = useAddParticipant(meetingId);
 	const [staffId, setStaffId] = useState("");
-	const [roleId, setRoleId] = useState("");
+	const [roleIds, setRoleIds] = useState<string[]>([]);
 	const [serverError, setServerError] = useState<string | null>(null);
 
 	async function handleAdd() {
 		setServerError(null);
-		if (!staffId || !roleId) {
+		if (!staffId || roleIds.length === 0) {
 			setServerError("Selecione o servidor e o papel");
 			return;
 		}
 		try {
-			await addParticipant.mutateAsync({ staffId, roleId });
+			await addParticipant.mutateAsync({ staffId, roleIds });
 			setStaffId("");
-			setRoleId("");
+			setRoleIds([]);
 		} catch (error) {
 			if (error instanceof Error) {
 				setServerError(error.message);
@@ -82,18 +84,42 @@ export default function ParticipantsPage() {
 					search={staffSearch}
 					onSearchChange={setStaffSearch}
 				/>
-				<EntitySelect
-					label="Papel"
-					placeholder="Papel"
-					value={roleId}
-					onChange={setRoleId}
-					options={roles}
-					isLoading={isLoadingRoles}
-					total={rolesResult?.total ?? 0}
-					loadedAll={rolesResult?.loadedAll ?? true}
-					search={roleSearch}
-					onSearchChange={setRoleSearch}
-				/>
+				<fieldset className="grid min-w-48 gap-2">
+					<legend className="text-sm font-medium">Papéis</legend>
+					<Input
+						value={roleSearch}
+						onChange={(event) => setRoleSearch(event.target.value)}
+						placeholder="Buscar papel"
+						aria-label="Buscar papel"
+					/>
+					<div className="grid gap-2 rounded-md border p-2">
+						{roles.map((role) => (
+							<label key={role.id} className="flex items-center gap-2 text-sm">
+								<Checkbox
+									checked={roleIds.includes(role.id)}
+									onCheckedChange={(checked) =>
+										setRoleIds((current) =>
+											checked
+												? [...current, role.id]
+												: current.filter((id) => id !== role.id),
+										)
+									}
+								/>
+								{role.name}
+							</label>
+						))}
+						{isLoadingRoles && (
+							<p className="text-xs text-muted-foreground">
+								Carregando papéis...
+							</p>
+						)}
+					</div>
+					<p className="text-xs text-muted-foreground">
+						{roleIds.length === 0
+							? "Selecione um ou mais papéis."
+							: `${roleIds.length} papel(is) selecionado(s)`}
+					</p>
+				</fieldset>
 				<Button
 					onClick={() => void handleAdd()}
 					disabled={addParticipant.isPending}

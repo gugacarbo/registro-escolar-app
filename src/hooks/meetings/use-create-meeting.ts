@@ -9,7 +9,7 @@ export type CreateMeetingValues = {
 	heldAt?: string;
 	templateId?: string | null;
 	classIds?: string[];
-	participants?: Array<{ staffId: string; roleId: string }>;
+	participants?: Array<{ staffId: string; roleIds: string[] }>;
 };
 
 export function useCreateMeeting() {

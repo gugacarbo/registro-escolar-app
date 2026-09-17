@@ -48,6 +48,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
+import { Checkbox } from "#/components/ui/checkbox";
 import {
 	Empty,
 	EmptyContent,
@@ -57,6 +58,7 @@ import {
 	EmptyTitle,
 } from "#/components/ui/empty";
 import { EntitySelect } from "#/components/ui/entity-select";
+import { Input } from "#/components/ui/input";
 import { PageHeader, PageShell } from "#/components/ui/page";
 import { Skeleton } from "#/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -143,7 +145,7 @@ export default function MeetingDetailPage() {
 	);
 
 	const [staffId, setStaffId] = useState("");
-	const [roleId, setRoleId] = useState("");
+	const [roleIds, setRoleIds] = useState<string[]>([]);
 	const [participantError, setParticipantError] = useState<string | null>(null);
 
 	const canEdit =
@@ -154,14 +156,14 @@ export default function MeetingDetailPage() {
 
 	async function handleAddParticipant() {
 		setParticipantError(null);
-		if (!staffId || !roleId) {
+		if (!staffId || roleIds.length === 0) {
 			setParticipantError("Selecione o servidor e o papel");
 			return;
 		}
 		try {
-			await addParticipant.mutateAsync({ staffId, roleId });
+			await addParticipant.mutateAsync({ staffId, roleIds });
 			setStaffId("");
-			setRoleId("");
+			setRoleIds([]);
 		} catch (error) {
 			if (error instanceof Error) {
 				setParticipantError(error.message);
@@ -226,7 +228,7 @@ export default function MeetingDetailPage() {
 			</Breadcrumb>
 
 			<PageHeader
-				eyebrow="Conselho de classe"
+				eyebrow="Reunião"
 				title={meeting.title}
 				description={
 					<div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
@@ -266,7 +268,7 @@ export default function MeetingDetailPage() {
 						<Link to="/meetings/$meetingId/council" params={{ meetingId }}>
 							<Button className="gap-2 shadow-xs">
 								<UsersIcon className="size-4" />
-								Conselho
+								Participar da reunião
 								<ArrowRightIcon className="size-4" />
 							</Button>
 						</Link>
@@ -289,7 +291,7 @@ export default function MeetingDetailPage() {
 					<ClockIcon className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
 					<span>
 						Reunião em rascunho. Revise as turmas e a equipe de participantes
-						antes de iniciar os trabalhos do conselho.
+						antes de iniciar a reunião.
 					</span>
 				</div>
 			)}
@@ -363,7 +365,7 @@ export default function MeetingDetailPage() {
 				<Card>
 					<CardHeader className="pb-2">
 						<CardDescription className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider">
-							Ata do conselho
+							Ata da reunião
 							<FileTextIcon className="size-4 text-primary/60" />
 						</CardDescription>
 						<CardTitle className="text-2xl font-bold">
@@ -423,7 +425,7 @@ export default function MeetingDetailPage() {
 									<div className="rounded-lg bg-primary/10 p-2 text-primary">
 										<UsersIcon className="size-5" />
 									</div>
-									<CardTitle className="text-lg">Sala do Conselho</CardTitle>
+									<CardTitle className="text-lg">Sala da reunião</CardTitle>
 								</div>
 								<CardDescription>
 									Painel interativo para debater caso a caso os estudantes,
@@ -437,7 +439,7 @@ export default function MeetingDetailPage() {
 									className="w-full"
 								>
 									<Button className="w-full justify-between">
-										Entrar no Conselho
+										Participar da reunião
 										<ArrowRightIcon className="size-4" />
 									</Button>
 								</Link>
@@ -549,7 +551,7 @@ export default function MeetingDetailPage() {
 						<CardHeader>
 							<CardTitle>Turmas Participantes</CardTitle>
 							<CardDescription>
-								Todas as turmas vinculadas a este conselho de classe.
+								Todas as turmas vinculadas a esta reunião.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -595,7 +597,7 @@ export default function MeetingDetailPage() {
 												to="/meetings/$meetingId/council"
 												params={{ meetingId }}
 											>
-												<Button size="sm">Abrir no Conselho</Button>
+												<Button size="sm">Participar da reunião</Button>
 											</Link>
 										</div>
 									</div>
@@ -644,18 +646,45 @@ export default function MeetingDetailPage() {
 											search={staffSearch}
 											onSearchChange={setStaffSearch}
 										/>
-										<EntitySelect
-											label="Papel"
-											placeholder="Selecione o papel"
-											value={roleId}
-											onChange={setRoleId}
-											options={roles}
-											isLoading={isLoadingRoles}
-											total={rolesResult?.total ?? 0}
-											loadedAll={rolesResult?.loadedAll ?? true}
-											search={roleSearch}
-											onSearchChange={setRoleSearch}
-										/>
+										<fieldset className="grid min-w-48 gap-2">
+											<legend className="text-sm font-medium">Papéis</legend>
+											<Input
+												value={roleSearch}
+												onChange={(event) => setRoleSearch(event.target.value)}
+												placeholder="Buscar papel"
+												aria-label="Buscar papel"
+											/>
+											<div className="grid gap-2 rounded-md border p-2">
+												{roles.map((role) => (
+													<label
+														key={role.id}
+														className="flex items-center gap-2 text-sm"
+													>
+														<Checkbox
+															checked={roleIds.includes(role.id)}
+															onCheckedChange={(checked) =>
+																setRoleIds((current) =>
+																	checked
+																		? [...current, role.id]
+																		: current.filter((id) => id !== role.id),
+																)
+															}
+														/>
+														{role.name}
+													</label>
+												))}
+												{isLoadingRoles && (
+													<p className="text-xs text-muted-foreground">
+														Carregando papéis...
+													</p>
+												)}
+											</div>
+											<p className="text-xs text-muted-foreground">
+												{roleIds.length === 0
+													? "Selecione um ou mais papéis."
+													: `${roleIds.length} papel(is) selecionado(s)`}
+											</p>
+										</fieldset>
 										<Button
 											type="button"
 											onClick={() => void handleAddParticipant()}
@@ -723,7 +752,7 @@ export default function MeetingDetailPage() {
 								<div>
 									<CardTitle>Ata da Reunião</CardTitle>
 									<CardDescription>
-										Status, prévia e versões emitidas da ata do conselho.
+										Status, prévia e versões emitidas da ata da reunião.
 									</CardDescription>
 								</div>
 								<div className="flex items-center gap-2">

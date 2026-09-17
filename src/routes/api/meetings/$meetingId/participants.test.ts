@@ -342,4 +342,60 @@ describe("POST /api/meetings/:id/participants", () => {
 		expect(response.status).toBe(201);
 		expect(listParticipantsByMeeting).toBeDefined();
 	});
+
+	it("retorna 201 e cria todos os papéis selecionados para o servidor", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+		});
+		(findActiveStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "staff-1",
+			name: "João Silva",
+		});
+		(findRoleById as ReturnType<typeof vi.fn>)
+			.mockResolvedValueOnce({ id: "role-1", name: "Professor" })
+			.mockResolvedValueOnce({ id: "role-2", name: "Coordenador" });
+		(createParticipant as ReturnType<typeof vi.fn>)
+			.mockResolvedValueOnce({
+				id: "participant-1",
+				meetingId: "meeting-1",
+				staffId: "staff-1",
+				roleId: "role-1",
+			})
+			.mockResolvedValueOnce({
+				id: "participant-2",
+				meetingId: "meeting-1",
+				staffId: "staff-1",
+				roleId: "role-2",
+			});
+
+		const request = new Request(
+			"http://localhost/api/meetings/meeting-1/participants",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					staffId: "staff-1",
+					roleIds: ["role-1", "role-2"],
+				}),
+			},
+		);
+		const response = await createParticipantHandler({
+			request,
+			context: { env: createEnv() },
+			params: { meetingId: "meeting-1" },
+		});
+
+		expect(response.status).toBe(201);
+		expect(createParticipant).toHaveBeenLastCalledWith(
+			expect.anything(),
+			expect.objectContaining({ roleId: "role-2" }),
+		);
+		await expect(response.json()).resolves.toMatchObject({
+			participants: expect.arrayContaining([
+				expect.objectContaining({ roleId: "role-1" }),
+				expect.objectContaining({ roleId: "role-2" }),
+			]),
+		});
+	});
 });

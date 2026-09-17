@@ -207,7 +207,7 @@ describe("CouncilPage", () => {
 		renderPage();
 		await selectStudent(user);
 		expect(
-			screen.getByRole("heading", { name: "Conselho de classe" }),
+			screen.getByRole("heading", { name: "Participação na reunião" }),
 		).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Turma A" })).toBeInTheDocument();
 		expect(

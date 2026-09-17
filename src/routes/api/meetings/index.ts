@@ -104,9 +104,11 @@ export async function createMeetingHandler({
 		if (!staffMember) {
 			return json({ error: "Servidor não encontrado" }, 404);
 		}
-		const role = await findRoleById(db, participant.roleId);
-		if (!role) {
-			return json({ error: "Papel não encontrado" }, 404);
+		for (const roleId of participant.roleIds) {
+			const role = await findRoleById(db, roleId);
+			if (!role) {
+				return json({ error: "Papel não encontrado" }, 404);
+			}
 		}
 	}
 
