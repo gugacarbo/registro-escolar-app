@@ -281,16 +281,9 @@ export default function CouncilPage() {
 							Voltar para detalhes da reunião
 						</Link>
 						<h1 className="truncate text-2xl font-bold">
-							Participação na reunião
+							{meeting?.title ??
+								(isLoadingMeeting ? "Carregando..." : "Reunião")}
 						</h1>
-						{isLoadingMeeting && (
-							<p className="text-sm text-muted-foreground">Carregando...</p>
-						)}
-						{meeting && (
-							<p className="truncate text-sm text-muted-foreground">
-								{meeting.title}
-							</p>
-						)}
 					</div>
 					{meeting && (
 						<TransitionButtons meetingId={meeting.id} status={meeting.status} />

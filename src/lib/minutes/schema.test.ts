@@ -10,9 +10,13 @@ describe("minute schemas", () => {
 		const validString = createMinuteTemplateSchema.safeParse({
 			name: "Modelo Teste",
 			headerContent: "Cabeçalho texto",
+			bodyContent: "Conteúdo da ata",
 			footerContent: "Rodapé texto",
 		});
 		expect(validString.success).toBe(true);
+		if (validString.success) {
+			expect(validString.data.bodyContent).toBe("Conteúdo da ata");
+		}
 
 		const validObject = createMinuteTemplateSchema.safeParse({
 			name: "Modelo JSON",

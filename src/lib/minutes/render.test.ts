@@ -187,6 +187,42 @@ describe("renderMinute", () => {
 		const rendered = renderMinute(baseInput({ template }));
 		expect(rendered.elements.some((el) => el.kind === "image")).toBe(true);
 	});
+
+	it("usa o conteúdo editável do corpo no lugar dos blocos legados", () => {
+		const template = {
+			id: "t-body",
+			name: "Modelo com corpo",
+			headerContent: textDoc("Cabeçalho"),
+			bodyContent: textDoc("Corpo personalizado"),
+			footerContent: textDoc("Rodapé"),
+			showMeeting: true,
+			showClasses: true,
+			showParticipants: true,
+			showRecords: true,
+			showGeneralReports: true,
+			showSignatures: true,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as unknown as RenderInput["template"];
+		const rendered = renderMinute(
+			baseInput({
+				template,
+				classes: [{ className: "3A" }],
+				participants: [{ staffName: "Ana", roleName: "Diretora" }],
+				records: [{ className: "3A", studentName: "João", texto: "Bom" }],
+				generalReports: [{ texto: "Relato" }],
+			}),
+		);
+		const text = renderedToPlainText(rendered);
+
+		expect(text).toContain("CORPO PERSONALIZADO");
+		expect(text).not.toContain("Data da reunião");
+		expect(text).not.toContain("Turmas");
+		expect(text).not.toContain("Participantes");
+		expect(text).not.toContain("Registros por estudante");
+		expect(text).not.toContain("Relatos gerais");
+		expect(text).not.toContain("Assinaturas");
+	});
 });
 
 describe("serializeVersionRow", () => {

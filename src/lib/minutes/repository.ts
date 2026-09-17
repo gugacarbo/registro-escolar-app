@@ -51,6 +51,7 @@ export async function createMinuteTemplate(
 	input: {
 		name: string;
 		headerContent?: string | object;
+		bodyContent?: string | object;
 		footerContent?: string | object;
 		showMeeting?: boolean;
 		showClasses?: boolean;
@@ -69,6 +70,10 @@ export async function createMinuteTemplate(
 				typeof input.headerContent === "object" && input.headerContent != null
 					? JSON.stringify(input.headerContent)
 					: input.headerContent,
+			bodyContent:
+				typeof input.bodyContent === "object" && input.bodyContent != null
+					? JSON.stringify(input.bodyContent)
+					: input.bodyContent,
 			footerContent:
 				typeof input.footerContent === "object" && input.footerContent != null
 					? JSON.stringify(input.footerContent)
@@ -102,6 +107,7 @@ export async function updateMinuteTemplate(
 	input: {
 		name: string;
 		headerContent?: string | object;
+		bodyContent?: string | object;
 		footerContent?: string | object;
 		showMeeting?: boolean;
 		showClasses?: boolean;
@@ -119,6 +125,10 @@ export async function updateMinuteTemplate(
 				typeof input.headerContent === "object" && input.headerContent != null
 					? JSON.stringify(input.headerContent)
 					: input.headerContent,
+			bodyContent:
+				typeof input.bodyContent === "object" && input.bodyContent != null
+					? JSON.stringify(input.bodyContent)
+					: input.bodyContent,
 			footerContent:
 				typeof input.footerContent === "object" && input.footerContent != null
 					? JSON.stringify(input.footerContent)

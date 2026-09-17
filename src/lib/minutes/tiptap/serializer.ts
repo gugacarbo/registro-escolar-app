@@ -41,6 +41,85 @@ export function textDoc(text: string): JSONContent {
 	};
 }
 
+type MinuteBodyBlock =
+	| "showMeeting"
+	| "showClasses"
+	| "showParticipants"
+	| "showRecords"
+	| "showGeneralReports"
+	| "showSignatures";
+
+type MinuteBodyOptions = Partial<Record<MinuteBodyBlock, boolean>>;
+
+function placeholder(type: PlaceholderType, label: string): JSONContent {
+	return {
+		type: PLACEHOLDER_NODE_NAME,
+		attrs: { "data-type": type, label },
+	};
+}
+
+/** Cria o corpo inicial editável com as variáveis dinâmicas da ata. */
+export function defaultMinuteBodyContent(
+	options: MinuteBodyOptions = {},
+): JSONContent {
+	const content: JSONContent[] = [];
+	const enabled = (block: MinuteBodyBlock) => options[block] ?? true;
+	const addSection = (
+		block: MinuteBodyBlock,
+		title: string,
+		type: PlaceholderType,
+		label: string,
+	) => {
+		if (!enabled(block)) return;
+		content.push({
+			type: "heading",
+			attrs: { level: 2 },
+			content: [{ type: "text", text: title }],
+		});
+		content.push({
+			type: "paragraph",
+			content: [placeholder(type, label)],
+		});
+	};
+
+	if (enabled("showMeeting")) {
+		content.push({
+			type: "paragraph",
+			content: [
+				{ type: "text", text: "Data da reunião: " },
+				placeholder("meeting-date", "Data da reunião"),
+			],
+		});
+	}
+	addSection("showClasses", "Turmas", "classes-list", "Lista de turmas");
+	addSection(
+		"showParticipants",
+		"Participantes",
+		"participants-list",
+		"Lista de participantes",
+	);
+	addSection(
+		"showRecords",
+		"Registros por estudante",
+		"records-list",
+		"Registros por estudante",
+	);
+	addSection(
+		"showGeneralReports",
+		"Relatos gerais",
+		"general-reports-list",
+		"Relatos gerais",
+	);
+	addSection(
+		"showSignatures",
+		"Assinaturas",
+		"signatures-list",
+		"Assinaturas",
+	);
+
+	return { type: "doc", content };
+}
+
 function isEmptyDoc(doc: JSONContent | null | undefined): boolean {
 	if (!doc?.content) {
 		return true;

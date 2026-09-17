@@ -47,7 +47,8 @@ describe("MinuteTemplateForm", () => {
 		expect(screen.getByLabelText(/nome/i)).toHaveValue("Modelo de reunião");
 		expect(screen.getAllByText("Cabeçalho")).toHaveLength(2);
 		expect(screen.getAllByText("Rodapé")).toHaveLength(2);
-		expect(screen.getByRole("checkbox", { name: "Turmas" })).not.toBeChecked();
+		expect(screen.getAllByText("Conteúdo")).toHaveLength(2);
+		expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
 	});
 
 	it("exibe erro quando o nome está vazio", async () => {

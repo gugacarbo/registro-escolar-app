@@ -9,8 +9,8 @@ export const minuteApprovalStatusSchema = z.enum([
 ]);
 
 // POST /api/minute-templates (spec 0009): campos derivados do Drizzle;
-// blocos booleanos com padrão true (cabeçalho/reunião/turmas/participantes/
-// registros/relatos/assinaturas/rodapé).
+// blocos booleanos permanecem aceitos para compatibilidade, enquanto o corpo
+// editável é persistido em bodyContent.
 export const createMinuteTemplateSchema = createInsertSchema(minuteTemplates)
 	.omit({
 		id: true,
@@ -19,16 +19,25 @@ export const createMinuteTemplateSchema = createInsertSchema(minuteTemplates)
 	})
 	.extend({
 		name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
-		headerContent: z
-			.union([
+			headerContent: z
+				.union([
 				z.string(),
 				z.custom<Record<string, unknown>>((val) => {
 					if (typeof val !== "object" || val === null) return false;
 					return typeof (val as Record<string, unknown>).type === "string";
 				}, "Conteúdo do cabeçalho inválido"),
-			])
-			.optional(),
-		footerContent: z
+				])
+				.optional(),
+			bodyContent: z
+				.union([
+					z.string(),
+					z.custom<Record<string, unknown>>((val) => {
+						if (typeof val !== "object" || val === null) return false;
+						return typeof (val as Record<string, unknown>).type === "string";
+					}, "Conteúdo do corpo inválido"),
+				])
+				.optional(),
+			footerContent: z
 			.union([
 				z.string(),
 				z.custom<Record<string, unknown>>((val) => {

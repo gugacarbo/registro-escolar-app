@@ -21,6 +21,7 @@ export const minuteTemplates = sqliteTable(
 		headerContent: text("header_content")
 			.notNull()
 			.default('{"type":"doc","content":[{"type":"paragraph"}]}'),
+		bodyContent: text("body_content"),
 		footerContent: text("footer_content")
 			.notNull()
 			.default('{"type":"doc","content":[{"type":"paragraph"}]}'),
