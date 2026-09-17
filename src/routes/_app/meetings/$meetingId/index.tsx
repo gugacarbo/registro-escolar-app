@@ -639,20 +639,20 @@ export default function MeetingDetailPage() {
 									</h4>
 									<div className="flex flex-wrap items-end gap-2">
 										<EntitySelect
-										label="Servidor"
-										placeholder="Selecione o servidor"
-										value={staffId}
-										onChange={(value) => {
-											setStaffId(value);
-											const selectedStaff = staff.find(
-												(member) => member.id === value,
-											);
-											setRoleIds(
-												selectedStaff?.defaultRoleId
-													? [selectedStaff.defaultRoleId]
-													: [],
-											);
-										}}
+											label="Servidor"
+											placeholder="Selecione o servidor"
+											value={staffId}
+											onChange={(value) => {
+												setStaffId(value);
+												const selectedStaff = staff.find(
+													(member) => member.id === value,
+												);
+												setRoleIds(
+													selectedStaff?.defaultRoleId
+														? [selectedStaff.defaultRoleId]
+														: [],
+												);
+											}}
 											options={staff}
 											isLoading={isLoadingStaff}
 											total={staffResult?.total ?? 0}

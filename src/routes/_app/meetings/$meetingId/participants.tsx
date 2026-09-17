@@ -84,9 +84,7 @@ export default function ParticipantsPage() {
 						setStaffId(value);
 						const selectedStaff = staff.find((member) => member.id === value);
 						setRoleIds(
-							selectedStaff?.defaultRoleId
-								? [selectedStaff.defaultRoleId]
-								: [],
+							selectedStaff?.defaultRoleId ? [selectedStaff.defaultRoleId] : [],
 						);
 					}}
 					options={staff}

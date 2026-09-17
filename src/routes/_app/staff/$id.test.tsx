@@ -155,13 +155,17 @@ describe("StaffDetailPage", () => {
 		renderPage();
 
 		await user.click(screen.getByLabelText("Papel padrão"));
-		await user.click(await screen.findByRole("option", { name: "Coordenador" }));
+		await user.click(
+			await screen.findByRole("option", { name: "Coordenador" }),
+		);
 		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
 
 		expect(mocks.mutateAsync).toHaveBeenLastCalledWith(
 			expect.objectContaining({ defaultRoleId: "role-1" }),
 		);
-		await user.click(screen.getByRole("button", { name: "Remover papel padrão" }));
+		await user.click(
+			screen.getByRole("button", { name: "Remover papel padrão" }),
+		);
 		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
 		expect(mocks.mutateAsync).toHaveBeenLastCalledWith(
 			expect.objectContaining({ defaultRoleId: null }),

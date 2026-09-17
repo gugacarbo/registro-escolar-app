@@ -229,6 +229,19 @@ describe("CouncilPage", () => {
 		expect(screen.queryByText(/spec 0007/i)).not.toBeInTheDocument();
 	});
 
+	it("organiza estudantes à esquerda e registros à direita", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await selectStudent(user);
+
+		expect(screen.getByTestId("council-students-panel")).toContainElement(
+			screen.getByRole("button", { name: "Selecionar João" }),
+		);
+		expect(screen.getByTestId("council-records-panel")).toContainElement(
+			screen.getByText("Registro vinculado"),
+		);
+	});
+
 	it("exibe progresso da turma e próximo pendente", () => {
 		renderPage();
 		expect(screen.getByText("Próximo pendente")).toBeInTheDocument();

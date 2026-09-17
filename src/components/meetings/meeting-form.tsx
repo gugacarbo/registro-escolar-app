@@ -269,22 +269,22 @@ export function MeetingForm({
 										name={`participantes.${index}.servidorId`}
 										render={({ field }) => (
 											<EntitySelect
-														label="Servidor"
-														placeholder="Servidor"
-														value={field.value}
-														onChange={(value) => {
-															field.onChange(value);
-															const selectedStaff = staffOptions.find(
-																(member) => member.id === value,
-															);
-															form.setValue(
-																`participantes.${index}.papelIds`,
-																selectedStaff?.defaultRoleId
-																	? [selectedStaff.defaultRoleId]
-																	: [],
-																{ shouldDirty: true },
-															);
-															}}
+												label="Servidor"
+												placeholder="Servidor"
+												value={field.value}
+												onChange={(value) => {
+													field.onChange(value);
+													const selectedStaff = staffOptions.find(
+														(member) => member.id === value,
+													);
+													form.setValue(
+														`participantes.${index}.papelIds`,
+														selectedStaff?.defaultRoleId
+															? [selectedStaff.defaultRoleId]
+															: [],
+														{ shouldDirty: true },
+													);
+												}}
 												options={[
 													...staffOptions,
 													...(field.value && !staffById.has(field.value)

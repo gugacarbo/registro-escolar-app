@@ -63,6 +63,19 @@ export function StaffForm({
 			>
 				<FormField
 					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nome *</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
 					name="defaultRoleId"
 					render={({ field }) => (
 						<FormItem>
@@ -95,19 +108,6 @@ export function StaffForm({
 									Remover papel padrão
 								</Button>
 							)}
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Nome *</FormLabel>
-							<FormControl>
-								<Input {...field} />
-							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}

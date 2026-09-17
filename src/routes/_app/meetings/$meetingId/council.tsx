@@ -53,6 +53,7 @@ import {
 	EmptyTitle,
 } from "#/components/ui/empty";
 import { Input } from "#/components/ui/input";
+import { PageHeader, PageShell } from "#/components/ui/page";
 import { Skeleton } from "#/components/ui/skeleton";
 import { Switch } from "#/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -268,504 +269,536 @@ export default function CouncilPage() {
 	}
 
 	return (
-		<div className="space-y-4">
-			<header className="sticky top-0 z-10 -mx-2 border-b bg-background/95 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-				<div className="flex flex-wrap items-center justify-between gap-2">
-					<div className="min-w-0">
-						<Link
-							to="/meetings/$meetingId"
-							params={{ meetingId }}
-							className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground mb-1"
-						>
-							<ArrowLeftIcon className="size-3.5" />
-							Voltar para detalhes da reunião
-						</Link>
-						<h1 className="truncate text-2xl font-bold">
-							{meeting?.title ??
-								(isLoadingMeeting ? "Carregando..." : "Reunião")}
-						</h1>
-					</div>
-					{meeting && (
-						<TransitionButtons meetingId={meeting.id} status={meeting.status} />
-					)}
-				</div>
-			</header>
+		<PageShell className="space-y-4">
+			<div className="sticky top-0 z-10 -mx-2 border-b bg-background/95 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+				<Link
+					to="/meetings/$meetingId"
+					params={{ meetingId }}
+					className="mb-1 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+				>
+					<ArrowLeftIcon className="size-3.5" />
+					Voltar para detalhes da reunião
+				</Link>
+				<PageHeader
+					className="border-0 pb-0"
+					title={
+						meeting?.title ?? (isLoadingMeeting ? "Carregando..." : "Reunião")
+					}
+					actions={
+						meeting && (
+							<TransitionButtons
+								meetingId={meeting.id}
+								status={meeting.status}
+							/>
+						)
+					}
+				/>
+			</div>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Turmas</CardTitle>
-					<CardDescription>
-						Escolha a turma e depois o estudante para registrar.
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					{isLoadingClasses && <Skeleton className="h-10 w-full" />}
-					{!isLoadingClasses && meetingClasses.length === 0 && (
-						<p className="text-sm text-muted-foreground">
-							Nenhuma turma vinculada a esta reunião.
-						</p>
-					)}
-					{meetingClasses.length > 0 && (
-						<div
-							className="flex flex-wrap gap-2"
-							role="group"
-							aria-label="Turmas da reunião"
-						>
-							{meetingClasses.map((link) => (
-								<Button
-									key={link.id}
-									type="button"
-									variant={
-										activeClassId === link.classId ? "default" : "outline"
-									}
-									onClick={() => selectClass(link.classId)}
-								>
-									{link.class?.name ?? link.classId}
-								</Button>
-							))}
-						</div>
-					)}
-
-					{activeClassId && (
-						<div className="space-y-2 border-t pt-4">
-							<div className="flex flex-wrap items-center justify-between gap-2">
-								<h3 className="text-sm font-semibold">
-									Estudantes da turma {activeClassName}
-								</h3>
-								{recordCounts && recordCounts.total > 0 && (
-									<p className="text-xs text-muted-foreground" role="status">
-										{recordCounts.concluido} de {recordCounts.total} concluídos
-										(
-										{Math.round(
-											(recordCounts.concluido / recordCounts.total) * 100,
-										)}
-										%)
-									</p>
-								)}
-							</div>
-							{recordCounts && recordCounts.total > 0 && (
+			<div className="grid items-start gap-4 md:grid-cols-[minmax(18rem,0.34fr)_minmax(0,1fr)]">
+				<div data-testid="council-students-panel" className="min-w-0">
+					<Card className="md:sticky md:top-4">
+						<CardHeader>
+							<CardTitle>Turmas</CardTitle>
+							<CardDescription>
+								Escolha a turma e depois o estudante para registrar.
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							{isLoadingClasses && <Skeleton className="h-10 w-full" />}
+							{!isLoadingClasses && meetingClasses.length === 0 && (
+								<p className="text-sm text-muted-foreground">
+									Nenhuma turma vinculada a esta reunião.
+								</p>
+							)}
+							{meetingClasses.length > 0 && (
 								<div
-									role="progressbar"
-									aria-valuenow={Math.round(
-										(recordCounts.concluido / recordCounts.total) * 100,
-									)}
-									aria-valuemin={0}
-									aria-valuemax={100}
-									aria-label={`Progresso da turma ${activeClassName}`}
-									className="h-2 w-full rounded bg-muted"
+									className="flex flex-wrap gap-2"
+									role="group"
+									aria-label="Turmas da reunião"
 								>
-									<div
-										className="h-2 rounded bg-primary transition-all"
-										style={{
-											width: `${Math.round((recordCounts.concluido / recordCounts.total) * 100)}%`,
-										}}
-									/>
+									{meetingClasses.map((link) => (
+										<Button
+											key={link.id}
+											type="button"
+											variant={
+												activeClassId === link.classId ? "default" : "outline"
+											}
+											onClick={() => selectClass(link.classId)}
+										>
+											{link.class?.name ?? link.classId}
+										</Button>
+									))}
 								</div>
 							)}
-							{students.length > 5 && (
-								<div className="relative">
-									<SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-									<Input
-										value={studentSearch}
-										onChange={(event) => setStudentSearch(event.target.value)}
-										placeholder="Buscar estudante por nome ou matrícula..."
-										aria-label="Buscar estudante"
-										className="pl-9"
-									/>
-								</div>
-							)}
-							{activeClassId && isLoadingStudents && (
-								<p>Carregando estudantes...</p>
-							)}
-							{activeClassId && isErrorStudents && (
-								<p role="alert" className="text-sm text-muted-foreground">
-									Não foi possível carregar os estudantes desta turma.
-								</p>
-							)}
-							{students.length > 0 && filteredStudents.length === 0 && (
-								<p className="text-sm text-muted-foreground">
-									Nenhum estudante encontrado para “{studentSearch}”.
-								</p>
-							)}
-							{filteredStudents.length > 0 && (
-								<ul
-									className="grid gap-2 sm:grid-cols-2"
-									aria-label="Estudantes da turma"
-								>
-									{filteredStudents.map((student: StudentOption) => {
-										const isActive =
-											selectedStudent?.studentId === student.studentId;
-										const isNextPending =
-											(pendingStudentId ??
-												classStudents?.nextPendingStudentId) ===
-											student.studentId;
-										return (
-											<li key={student.studentId}>
-												<Button
-													variant="ghost"
-													type="button"
-													onClick={() => selectStudent(student.studentId)}
-													aria-pressed={isActive}
-													aria-label={`Selecionar ${student.name}`}
-													className={`flex w-full items-center gap-3 rounded-lg border p-2 text-left transition-colors hover:bg-accent ${isActive ? "border-primary ring-1 ring-primary" : ""}`}
-												>
-													<Avatar className="size-9 shrink-0">
-														<AvatarFallback>
-															{initials(student.name)}
-														</AvatarFallback>
-													</Avatar>
-													<span className="min-w-0 flex-1">
-														<span className="block truncate text-sm font-medium">
-															{student.name}
-														</span>
-														{student.registrationNumber && (
-															<span className="block text-xs text-muted-foreground">
-																Matrícula {student.registrationNumber}
-															</span>
-														)}
-														{isNextPending && (
-															<span className="block text-xs font-medium text-primary">
-																Próximo pendente
-															</span>
-														)}
-													</span>
-													{isActive && <Badge variant="default">Ativo</Badge>}
-												</Button>
-											</li>
-										);
-									})}
-								</ul>
-							)}
-							{activeClassId && students.length === 0 && !isLoadingStudents && (
-								<p className="text-sm text-muted-foreground">
-									Nenhum estudante vinculado a esta turma na data da reunião.
-								</p>
-							)}
-						</div>
-					)}
-				</CardContent>
-			</Card>
 
-			{activeClassId &&
-				!isLoadingStudents &&
-				students.length > 0 &&
-				!selectedStudent && (
-					<Card>
-						<CardContent className="p-10">
-							<Empty className="border-0">
-								<EmptyHeader>
-									<EmptyMedia variant="icon">
-										<Users2Icon />
-									</EmptyMedia>
-									<EmptyTitle>Nenhum estudante selecionado</EmptyTitle>
-									<EmptyDescription>
-										Escolha um estudante na lista acima para ver os registros e
-										relatos.
-									</EmptyDescription>
-								</EmptyHeader>
-							</Empty>
+							{activeClassId && (
+								<div className="space-y-2 border-t pt-4">
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<h3 className="text-sm font-semibold">
+											Estudantes da turma {activeClassName}
+										</h3>
+										{recordCounts && recordCounts.total > 0 && (
+											<p
+												className="text-xs text-muted-foreground"
+												role="status"
+											>
+												{recordCounts.concluido} de {recordCounts.total}{" "}
+												concluídos (
+												{Math.round(
+													(recordCounts.concluido / recordCounts.total) * 100,
+												)}
+												%)
+											</p>
+										)}
+									</div>
+									{recordCounts && recordCounts.total > 0 && (
+										<div
+											role="progressbar"
+											aria-valuenow={Math.round(
+												(recordCounts.concluido / recordCounts.total) * 100,
+											)}
+											aria-valuemin={0}
+											aria-valuemax={100}
+											aria-label={`Progresso da turma ${activeClassName}`}
+											className="h-2 w-full rounded bg-muted"
+										>
+											<div
+												className="h-2 rounded bg-primary transition-all"
+												style={{
+													width: `${Math.round((recordCounts.concluido / recordCounts.total) * 100)}%`,
+												}}
+											/>
+										</div>
+									)}
+									{students.length > 5 && (
+										<div className="relative">
+											<SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+											<Input
+												value={studentSearch}
+												onChange={(event) =>
+													setStudentSearch(event.target.value)
+												}
+												placeholder="Buscar estudante por nome ou matrícula..."
+												aria-label="Buscar estudante"
+												className="pl-9"
+											/>
+										</div>
+									)}
+									{activeClassId && isLoadingStudents && (
+										<p>Carregando estudantes...</p>
+									)}
+									{activeClassId && isErrorStudents && (
+										<p role="alert" className="text-sm text-muted-foreground">
+											Não foi possível carregar os estudantes desta turma.
+										</p>
+									)}
+									{students.length > 0 && filteredStudents.length === 0 && (
+										<p className="text-sm text-muted-foreground">
+											Nenhum estudante encontrado para “{studentSearch}”.
+										</p>
+									)}
+									{filteredStudents.length > 0 && (
+										<ul className="grid gap-2" aria-label="Estudantes da turma">
+											{filteredStudents.map((student: StudentOption) => {
+												const isActive =
+													selectedStudent?.studentId === student.studentId;
+												const isNextPending =
+													(pendingStudentId ??
+														classStudents?.nextPendingStudentId) ===
+													student.studentId;
+												return (
+													<li key={student.studentId}>
+														<Button
+															variant="ghost"
+															type="button"
+															onClick={() => selectStudent(student.studentId)}
+															aria-pressed={isActive}
+															aria-label={`Selecionar ${student.name}`}
+															className={`flex w-full items-center gap-3 rounded-lg border p-2 text-left transition-colors hover:bg-accent ${isActive ? "border-primary ring-1 ring-primary" : ""}`}
+														>
+															<Avatar className="size-9 shrink-0">
+																<AvatarFallback>
+																	{initials(student.name)}
+																</AvatarFallback>
+															</Avatar>
+															<span className="min-w-0 flex-1">
+																<span className="block truncate text-sm font-medium">
+																	{student.name}
+																</span>
+																{student.registrationNumber && (
+																	<span className="block text-xs text-muted-foreground">
+																		Matrícula {student.registrationNumber}
+																	</span>
+																)}
+																{isNextPending && (
+																	<span className="block text-xs font-medium text-primary">
+																		Próximo pendente
+																	</span>
+																)}
+															</span>
+															{isActive && (
+																<Badge variant="default">Ativo</Badge>
+															)}
+														</Button>
+													</li>
+												);
+											})}
+										</ul>
+									)}
+									{activeClassId &&
+										students.length === 0 &&
+										!isLoadingStudents && (
+											<p className="text-sm text-muted-foreground">
+												Nenhum estudante vinculado a esta turma na data da
+												reunião.
+											</p>
+										)}
+								</div>
+							)}
 						</CardContent>
 					</Card>
-				)}
+				</div>
 
-			{selectedStudent && (
-				<Tabs value={tab} onValueChange={setTab}>
-					<TabsList aria-label="Conteúdo da reunião">
-						<TabsTrigger value="registros">
-							Registros de {selectedStudent.name} ({records.length})
-						</TabsTrigger>
-						<TabsTrigger value="relatos">
-							Relatos gerais ({generalReports.length})
-						</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="registros">
-						<Card>
-							<CardHeader>
-								<div className="flex flex-wrap items-center justify-between gap-2">
-									<div>
-										<CardTitle id="records-title">
-											Registros de {selectedStudent.name}
-										</CardTitle>
-										<CardDescription>
-											{selectedStudent.registrationNumber
-												? `Matrícula ${selectedStudent.registrationNumber} · `
-												: ""}
-											{records.length} registro(s) · {recordsInMinutes} na ata
-										</CardDescription>
-									</div>
-									{!canEdit ? (
-										<p className="text-sm text-muted-foreground" role="status">
-											{meeting && meeting.status === "draft"
-												? "Inicie a reunião para criar registros vinculados."
-												: "Reunião finalizada — reabra para editar registros vinculados."}
-										</p>
-									) : (
-										<Dialog
-											open={recordDialogOpen}
-											onOpenChange={setRecordDialogOpen}
-										>
-											<DialogTrigger asChild>
-												<Button type="button">
-													<PlusIcon className="size-4" />
-													Novo registro
-												</Button>
-											</DialogTrigger>
-											<DialogContent className="max-h-[90vh] overflow-y-auto">
-												<DialogHeader>
-													<DialogTitle>
-														Novo registro de {selectedStudent.name}
-													</DialogTitle>
-													<DialogDescription>
-														Descreva o fato observado. O rascunho é salvo
-														automaticamente neste dispositivo.
-													</DialogDescription>
-												</DialogHeader>
-												<RecordForm
-													meetingId={meetingId}
-													onSubmit={handleCreate}
-													submitLabel="Adicionar registro"
-													disabled={!canEdit || createRecord.isPending}
-													draftKey={`${meetingId}:${selectedStudent.studentId}`}
-												/>
-											</DialogContent>
-										</Dialog>
-									)}
-								</div>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								{isLoadingRecords && <Skeleton className="h-20 w-full" />}
-								{isErrorRecords && (
-									<p role="alert" className="text-sm text-muted-foreground">
-										Não foi possível carregar os registros.
-									</p>
-								)}
-								{recordsResult && records.length === 0 && (
-									<Empty>
+				<div data-testid="council-records-panel" className="min-w-0">
+					{activeClassId &&
+						!isLoadingStudents &&
+						students.length > 0 &&
+						!selectedStudent && (
+							<Card>
+								<CardContent className="p-10">
+									<Empty className="border-0">
 										<EmptyHeader>
 											<EmptyMedia variant="icon">
-												<FileTextIcon />
+												<Users2Icon />
 											</EmptyMedia>
-											<EmptyTitle>
-												Nenhum registro para este estudante
-											</EmptyTitle>
+											<EmptyTitle>Nenhum estudante selecionado</EmptyTitle>
 											<EmptyDescription>
-												Registre observações feitas na reunião para compor o
-												histórico e a ata.
+												Escolha um estudante na lista acima para ver os
+												registros e relatos.
 											</EmptyDescription>
 										</EmptyHeader>
-										{canEdit && (
-											<EmptyContent>
-												<Button
-													type="button"
-													onClick={() => setRecordDialogOpen(true)}
-												>
-													<PlusIcon className="size-4" />
-													Adicionar o primeiro registro
-												</Button>
-											</EmptyContent>
-										)}
 									</Empty>
-								)}
-								<ul className="space-y-2">
-									{records.map((record) => (
-										<li key={record.id} className="rounded border p-3">
-											<div className="flex flex-wrap items-center justify-between gap-2">
-												<div className="min-w-0 flex-1 space-y-1">
-													<div className="flex flex-wrap items-center gap-2">
-														<Badge
-															variant={
-																record.scope === "vinculado"
-																	? "default"
-																	: "secondary"
-															}
+								</CardContent>
+							</Card>
+						)}
+
+					{selectedStudent && (
+						<Tabs value={tab} onValueChange={setTab}>
+							<TabsList aria-label="Conteúdo da reunião">
+								<TabsTrigger value="registros">
+									Registros de {selectedStudent.name} ({records.length})
+								</TabsTrigger>
+								<TabsTrigger value="relatos">
+									Relatos gerais ({generalReports.length})
+								</TabsTrigger>
+							</TabsList>
+
+							<TabsContent value="registros">
+								<Card>
+									<CardHeader>
+										<div className="flex flex-wrap items-center justify-between gap-2">
+											<div>
+												<CardTitle id="records-title">
+													Registros de {selectedStudent.name}
+												</CardTitle>
+												<CardDescription>
+													{selectedStudent.registrationNumber
+														? `Matrícula ${selectedStudent.registrationNumber} · `
+														: ""}
+													{records.length} registro(s) · {recordsInMinutes} na
+													ata
+												</CardDescription>
+											</div>
+											{!canEdit ? (
+												<p
+													className="text-sm text-muted-foreground"
+													role="status"
+												>
+													{meeting && meeting.status === "draft"
+														? "Inicie a reunião para criar registros vinculados."
+														: "Reunião finalizada — reabra para editar registros vinculados."}
+												</p>
+											) : (
+												<Dialog
+													open={recordDialogOpen}
+													onOpenChange={setRecordDialogOpen}
+												>
+													<DialogTrigger asChild>
+														<Button type="button">
+															<PlusIcon className="size-4" />
+															Novo registro
+														</Button>
+													</DialogTrigger>
+													<DialogContent className="max-h-[90vh] overflow-y-auto">
+														<DialogHeader>
+															<DialogTitle>
+																Novo registro de {selectedStudent.name}
+															</DialogTitle>
+															<DialogDescription>
+																Descreva o fato observado. O rascunho é salvo
+																automaticamente neste dispositivo.
+															</DialogDescription>
+														</DialogHeader>
+														<RecordForm
+															meetingId={meetingId}
+															onSubmit={handleCreate}
+															submitLabel="Adicionar registro"
+															disabled={!canEdit || createRecord.isPending}
+															draftKey={`${meetingId}:${selectedStudent.studentId}`}
+														/>
+													</DialogContent>
+												</Dialog>
+											)}
+										</div>
+									</CardHeader>
+									<CardContent className="space-y-3">
+										{isLoadingRecords && <Skeleton className="h-20 w-full" />}
+										{isErrorRecords && (
+											<p role="alert" className="text-sm text-muted-foreground">
+												Não foi possível carregar os registros.
+											</p>
+										)}
+										{recordsResult && records.length === 0 && (
+											<Empty>
+												<EmptyHeader>
+													<EmptyMedia variant="icon">
+														<FileTextIcon />
+													</EmptyMedia>
+													<EmptyTitle>
+														Nenhum registro para este estudante
+													</EmptyTitle>
+													<EmptyDescription>
+														Registre observações feitas na reunião para compor o
+														histórico e a ata.
+													</EmptyDescription>
+												</EmptyHeader>
+												{canEdit && (
+													<EmptyContent>
+														<Button
+															type="button"
+															onClick={() => setRecordDialogOpen(true)}
 														>
-															{record.scope === "vinculado"
-																? "Da reunião"
-																: "Histórico"}
-														</Badge>
-														<span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-															<Switch
-																checked={record.includeInMinutes}
-																disabled={
-																	!canEdit ||
-																	record.scope !== "contexto" ||
-																	setInclusion.isPending
-																}
-																onCheckedChange={(checked) =>
-																	void handleInclusion(record, !!checked)
-																}
-																aria-label={`${record.includeInMinutes ? "Remover" : "Incluir"} registro "${record.texto}" na ata`}
-															/>
-															{record.includeInMinutes ? "Na ata" : "Interno"}
-														</span>
+															<PlusIcon className="size-4" />
+															Adicionar o primeiro registro
+														</Button>
+													</EmptyContent>
+												)}
+											</Empty>
+										)}
+										<ul className="space-y-2">
+											{records.map((record) => (
+												<li key={record.id} className="rounded border p-3">
+													<div className="flex flex-wrap items-center justify-between gap-2">
+														<div className="min-w-0 flex-1 space-y-1">
+															<div className="flex flex-wrap items-center gap-2">
+																<Badge
+																	variant={
+																		record.scope === "vinculado"
+																			? "default"
+																			: "secondary"
+																	}
+																>
+																	{record.scope === "vinculado"
+																		? "Da reunião"
+																		: "Histórico"}
+																</Badge>
+																<span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+																	<Switch
+																		checked={record.includeInMinutes}
+																		disabled={
+																			!canEdit ||
+																			record.scope !== "contexto" ||
+																			setInclusion.isPending
+																		}
+																		onCheckedChange={(checked) =>
+																			void handleInclusion(record, !!checked)
+																		}
+																		aria-label={`${record.includeInMinutes ? "Remover" : "Incluir"} registro "${record.texto}" na ata`}
+																	/>
+																	{record.includeInMinutes
+																		? "Na ata"
+																		: "Interno"}
+																</span>
+															</div>
+															<p>{record.texto}</p>
+															<p className="text-xs text-muted-foreground">
+																{formatDate(record.createdAt)}
+															</p>
+														</div>
+														<div className="flex flex-wrap gap-2">
+															{record.scope === "vinculado" && (
+																<Button
+																	type="button"
+																	size="sm"
+																	variant="outline"
+																	disabled={!canEdit || updateRecord.isPending}
+																	onClick={() => setEditingRecord(record.id)}
+																>
+																	{editingRecord === record.id
+																		? "Editando"
+																		: "Editar"}
+																</Button>
+															)}
+														</div>
 													</div>
-													<p>{record.texto}</p>
-													<p className="text-xs text-muted-foreground">
-														{formatDate(record.createdAt)}
-													</p>
-												</div>
-												<div className="flex flex-wrap gap-2">
-													{record.scope === "vinculado" && (
+													{editingRecord === record.id &&
+														record.scope === "vinculado" && (
+															<div className="mt-3 border-t pt-3">
+																<RecordForm
+																	meetingId={meetingId}
+																	defaultValues={{
+																		texto: record.texto,
+																		categoriaId: record.categoriaId ?? "",
+																		componenteId: record.componentId ?? "",
+																		origemId: record.originId ?? "",
+																		incluirNaAta: record.includeInMinutes,
+																	}}
+																	onSubmit={handleUpdate}
+																	submitLabel="Salvar registro"
+																	disabled={!canEdit || updateRecord.isPending}
+																/>
+															</div>
+														)}
+												</li>
+											))}
+										</ul>
+										{serverError && (
+											<p className="text-sm text-destructive">{serverError}</p>
+										)}
+									</CardContent>
+								</Card>
+							</TabsContent>
+
+							<TabsContent value="relatos">
+								<Card>
+									<CardHeader>
+										<CardTitle id="general-reports-title">
+											Relatos gerais
+										</CardTitle>
+										<CardDescription>
+											Observações sobre a turma ou a reunião como um todo ·{" "}
+											{generalReports.length} relato(s)
+										</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-3">
+										{isLoadingReports && <p>Carregando relatos...</p>}
+										{isErrorReports && (
+											<p role="alert" className="text-sm text-muted-foreground">
+												Não foi possível carregar os relatos gerais.
+											</p>
+										)}
+										{!isLoadingReports && generalReports.length === 0 && (
+											<Empty>
+												<EmptyHeader>
+													<EmptyMedia variant="icon">
+														<FileTextIcon />
+													</EmptyMedia>
+													<EmptyTitle>Nenhum relato geral</EmptyTitle>
+													<EmptyDescription>
+														Use relatos gerais para observações que não
+														pertencem a um estudante específico.
+													</EmptyDescription>
+												</EmptyHeader>
+											</Empty>
+										)}
+										<ul className="space-y-2">
+											{generalReports.map((report) => (
+												<li key={report.id} className="rounded border p-3">
+													<div className="flex flex-wrap items-center justify-between gap-2">
+														<div className="min-w-0 flex-1">
+															<p>{report.texto}</p>
+															<p className="text-xs text-muted-foreground">
+																{new Date(report.createdAt).toLocaleString(
+																	"pt-BR",
+																)}
+																{report.includeInMinutes
+																	? " · Na ata"
+																	: " · Interno"}
+															</p>
+														</div>
 														<Button
 															type="button"
 															size="sm"
 															variant="outline"
-															disabled={!canEdit || updateRecord.isPending}
-															onClick={() => setEditingRecord(record.id)}
+															disabled={
+																!canEdit || updateGeneralReport.isPending
+															}
+															onClick={() => setEditingReport(report.id)}
 														>
-															{editingRecord === record.id
-																? "Editando"
-																: "Editar"}
+															Editar
 														</Button>
-													)}
-												</div>
-											</div>
-											{editingRecord === record.id &&
-												record.scope === "vinculado" && (
-													<div className="mt-3 border-t pt-3">
-														<RecordForm
-															meetingId={meetingId}
-															defaultValues={{
-																texto: record.texto,
-																categoriaId: record.categoriaId ?? "",
-																componenteId: record.componentId ?? "",
-																origemId: record.originId ?? "",
-																incluirNaAta: record.includeInMinutes,
-															}}
-															onSubmit={handleUpdate}
-															submitLabel="Salvar registro"
-															disabled={!canEdit || updateRecord.isPending}
-														/>
 													</div>
-												)}
-										</li>
-									))}
-								</ul>
-								{serverError && (
-									<p className="text-sm text-destructive">{serverError}</p>
-								)}
-							</CardContent>
-						</Card>
-					</TabsContent>
+													{editingReport === report.id && (
+														<div className="mt-3 border-t pt-3">
+															<GeneralReportForm
+																meetingId={meetingId}
+																defaultValues={{
+																	texto: report.texto,
+																	origemId: report.originId ?? "",
+																	incluirNaAta: report.includeInMinutes,
+																}}
+																onSubmit={handleUpdateReport}
+																submitLabel="Salvar relato"
+																disabled={
+																	!canEdit || updateGeneralReport.isPending
+																}
+															/>
+														</div>
+													)}
+												</li>
+											))}
+										</ul>
+										<div className="border-t pt-3">
+											<GeneralReportDialog
+												meetingId={meetingId}
+												onSubmit={handleCreateReport}
+												disabled={!canEdit || createGeneralReport.isPending}
+												draftKey={meetingId}
+												onOpenChange={(open) => {
+													if (open) setServerError(null);
+												}}
+											/>
+										</div>
+									</CardContent>
+								</Card>
+							</TabsContent>
+						</Tabs>
+					)}
 
-					<TabsContent value="relatos">
-						<Card>
-							<CardHeader>
-								<CardTitle id="general-reports-title">Relatos gerais</CardTitle>
-								<CardDescription>
-									Observações sobre a turma ou a reunião como um todo ·{" "}
-									{generalReports.length} relato(s)
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								{isLoadingReports && <p>Carregando relatos...</p>}
-								{isErrorReports && (
-									<p role="alert" className="text-sm text-muted-foreground">
-										Não foi possível carregar os relatos gerais.
-									</p>
-								)}
-								{!isLoadingReports && generalReports.length === 0 && (
-									<Empty>
-										<EmptyHeader>
-											<EmptyMedia variant="icon">
-												<FileTextIcon />
-											</EmptyMedia>
-											<EmptyTitle>Nenhum relato geral</EmptyTitle>
-											<EmptyDescription>
-												Use relatos gerais para observações que não pertencem a
-												um estudante específico.
-											</EmptyDescription>
-										</EmptyHeader>
-									</Empty>
-								)}
-								<ul className="space-y-2">
-									{generalReports.map((report) => (
-										<li key={report.id} className="rounded border p-3">
-											<div className="flex flex-wrap items-center justify-between gap-2">
-												<div className="min-w-0 flex-1">
-													<p>{report.texto}</p>
-													<p className="text-xs text-muted-foreground">
-														{new Date(report.createdAt).toLocaleString("pt-BR")}
-														{report.includeInMinutes
-															? " · Na ata"
-															: " · Interno"}
-													</p>
-												</div>
-												<Button
-													type="button"
-													size="sm"
-													variant="outline"
-													disabled={!canEdit || updateGeneralReport.isPending}
-													onClick={() => setEditingReport(report.id)}
-												>
-													Editar
-												</Button>
-											</div>
-											{editingReport === report.id && (
-												<div className="mt-3 border-t pt-3">
-													<GeneralReportForm
-														meetingId={meetingId}
-														defaultValues={{
-															texto: report.texto,
-															origemId: report.originId ?? "",
-															incluirNaAta: report.includeInMinutes,
-														}}
-														onSubmit={handleUpdateReport}
-														submitLabel="Salvar relato"
-														disabled={!canEdit || updateGeneralReport.isPending}
-													/>
-												</div>
-											)}
-										</li>
-									))}
-								</ul>
-								<div className="border-t pt-3">
-									<GeneralReportDialog
-										meetingId={meetingId}
-										onSubmit={handleCreateReport}
-										disabled={!canEdit || createGeneralReport.isPending}
-										draftKey={meetingId}
-										onOpenChange={(open) => {
-											if (open) setServerError(null);
-										}}
-									/>
-								</div>
-							</CardContent>
-						</Card>
-					</TabsContent>
-				</Tabs>
-			)}
+					{selectedStudent && serverError && tab !== "registros" && (
+						<p className="text-sm text-destructive">{serverError}</p>
+					)}
 
-			{selectedStudent && serverError && tab !== "registros" && (
-				<p className="text-sm text-destructive">{serverError}</p>
-			)}
-
-			{selectedStudent && !canEdit && (
-				<AlertDialog>
-					<AlertDialogTrigger asChild>
-						<Button type="button" variant="outline">
-							Por que não consigo editar?
-						</Button>
-					</AlertDialogTrigger>
-					<AlertDialogContent>
-						<AlertDialogHeader>
-							<AlertDialogTitle>Edição bloqueada pelo status</AlertDialogTitle>
-							<AlertDialogDescription>
-								{meeting && meeting.status === "draft"
-									? "Inicie a reunião para criar registros vinculados."
-									: "Reunião finalizada — reabra para editar registros vinculados."}
-							</AlertDialogDescription>
-						</AlertDialogHeader>
-						<AlertDialogFooter>
-							<AlertDialogCancel>Entendi</AlertDialogCancel>
-							<AlertDialogAction asChild>
-								<span>OK</span>
-							</AlertDialogAction>
-						</AlertDialogFooter>
-					</AlertDialogContent>
-				</AlertDialog>
-			)}
-		</div>
+					{selectedStudent && !canEdit && (
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button type="button" variant="outline">
+									Por que não consigo editar?
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>
+										Edição bloqueada pelo status
+									</AlertDialogTitle>
+									<AlertDialogDescription>
+										{meeting && meeting.status === "draft"
+											? "Inicie a reunião para criar registros vinculados."
+											: "Reunião finalizada — reabra para editar registros vinculados."}
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogFooter>
+									<AlertDialogCancel>Entendi</AlertDialogCancel>
+									<AlertDialogAction asChild>
+										<span>OK</span>
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
+					)}
+				</div>
+			</div>
+		</PageShell>
 	);
 }
