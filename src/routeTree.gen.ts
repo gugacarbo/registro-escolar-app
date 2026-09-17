@@ -76,6 +76,7 @@ import { Route as ApiMeetingsMeetingIdGeneralReportsIndexRouteImport } from './r
 import { Route as ApiMeetingsMeetingIdGeneralReportsReportIdRouteImport } from './routes/api/meetings/$meetingId/general-reports/$reportId'
 import { Route as ApiMeetingsMeetingIdMinutesIndexRouteImport } from './routes/api/meetings/$meetingId/minutes/index'
 import { Route as ApiMeetingsMeetingIdMinutesApproveRouteImport } from './routes/api/meetings/$meetingId/minutes/approve'
+import { Route as ApiMeetingsMeetingIdMinutesContentRouteImport } from './routes/api/meetings/$meetingId/minutes/content'
 import { Route as ApiMeetingsMeetingIdRecordsRecordIdRouteImport } from './routes/api/meetings/$meetingId/records/$recordId'
 import { Route as ApiMeetingsMeetingIdClassesClassIdStudentsRouteImport } from './routes/api/meetings/$meetingId/classes/$classId/students'
 import { Route as ApiMeetingsMeetingIdMinutesVersionsIndexRouteImport } from './routes/api/meetings/$meetingId/minutes/versions/index'
@@ -435,6 +436,12 @@ const ApiMeetingsMeetingIdMinutesApproveRoute =
     path: '/api/meetings/$meetingId/minutes/approve',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiMeetingsMeetingIdMinutesContentRoute =
+  ApiMeetingsMeetingIdMinutesContentRouteImport.update({
+    id: '/api/meetings/$meetingId/minutes/content',
+    path: '/api/meetings/$meetingId/minutes/content',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiMeetingsMeetingIdRecordsRecordIdRoute =
   ApiMeetingsMeetingIdRecordsRecordIdRouteImport.update({
     id: '/api/meetings/$meetingId/records/$recordId',
@@ -543,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/api/students/$id/': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
+  '/api/meetings/$meetingId/minutes/content': typeof ApiMeetingsMeetingIdMinutesContentRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   '/api/admin/users/$id/': typeof ApiAdminUsersIdIndexRoute
   '/api/meetings/$meetingId/classes/': typeof ApiMeetingsMeetingIdClassesIndexRoute
@@ -617,6 +625,7 @@ export interface FileRoutesByTo {
   '/api/students/$id': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
+  '/api/meetings/$meetingId/minutes/content': typeof ApiMeetingsMeetingIdMinutesContentRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   '/api/admin/users/$id': typeof ApiAdminUsersIdIndexRoute
   '/api/meetings/$meetingId/classes': typeof ApiMeetingsMeetingIdClassesIndexRoute
@@ -694,6 +703,7 @@ export interface FileRoutesById {
   '/api/students/$id/': typeof ApiStudentsIdIndexRoute
   '/api/meetings/$meetingId/general-reports/$reportId': typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   '/api/meetings/$meetingId/minutes/approve': typeof ApiMeetingsMeetingIdMinutesApproveRoute
+  '/api/meetings/$meetingId/minutes/content': typeof ApiMeetingsMeetingIdMinutesContentRoute
   '/api/meetings/$meetingId/records/$recordId': typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   '/api/admin/users/$id/': typeof ApiAdminUsersIdIndexRoute
   '/api/meetings/$meetingId/classes/': typeof ApiMeetingsMeetingIdClassesIndexRoute
@@ -771,6 +781,7 @@ export interface FileRouteTypes {
     | '/api/students/$id/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
+    | '/api/meetings/$meetingId/minutes/content'
     | '/api/meetings/$meetingId/records/$recordId'
     | '/api/admin/users/$id/'
     | '/api/meetings/$meetingId/classes/'
@@ -845,6 +856,7 @@ export interface FileRouteTypes {
     | '/api/students/$id'
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
+    | '/api/meetings/$meetingId/minutes/content'
     | '/api/meetings/$meetingId/records/$recordId'
     | '/api/admin/users/$id'
     | '/api/meetings/$meetingId/classes'
@@ -921,6 +933,7 @@ export interface FileRouteTypes {
     | '/api/students/$id/'
     | '/api/meetings/$meetingId/general-reports/$reportId'
     | '/api/meetings/$meetingId/minutes/approve'
+    | '/api/meetings/$meetingId/minutes/content'
     | '/api/meetings/$meetingId/records/$recordId'
     | '/api/admin/users/$id/'
     | '/api/meetings/$meetingId/classes/'
@@ -971,6 +984,7 @@ export interface RootRouteChildren {
   ApiStudentsIdIndexRoute: typeof ApiStudentsIdIndexRoute
   ApiMeetingsMeetingIdGeneralReportsReportIdRoute: typeof ApiMeetingsMeetingIdGeneralReportsReportIdRoute
   ApiMeetingsMeetingIdMinutesApproveRoute: typeof ApiMeetingsMeetingIdMinutesApproveRoute
+  ApiMeetingsMeetingIdMinutesContentRoute: typeof ApiMeetingsMeetingIdMinutesContentRoute
   ApiMeetingsMeetingIdRecordsRecordIdRoute: typeof ApiMeetingsMeetingIdRecordsRecordIdRoute
   ApiAdminUsersIdIndexRoute: typeof ApiAdminUsersIdIndexRoute
   ApiMeetingsMeetingIdClassesIndexRoute: typeof ApiMeetingsMeetingIdClassesIndexRoute
@@ -1455,6 +1469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMeetingsMeetingIdMinutesApproveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/meetings/$meetingId/minutes/content': {
+      id: '/api/meetings/$meetingId/minutes/content'
+      path: '/api/meetings/$meetingId/minutes/content'
+      fullPath: '/api/meetings/$meetingId/minutes/content'
+      preLoaderRoute: typeof ApiMeetingsMeetingIdMinutesContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/meetings/$meetingId/records/$recordId': {
       id: '/api/meetings/$meetingId/records/$recordId'
       path: '/api/meetings/$meetingId/records/$recordId'
@@ -1638,6 +1659,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiMeetingsMeetingIdGeneralReportsReportIdRoute,
   ApiMeetingsMeetingIdMinutesApproveRoute:
     ApiMeetingsMeetingIdMinutesApproveRoute,
+  ApiMeetingsMeetingIdMinutesContentRoute:
+    ApiMeetingsMeetingIdMinutesContentRoute,
   ApiMeetingsMeetingIdRecordsRecordIdRoute:
     ApiMeetingsMeetingIdRecordsRecordIdRoute,
   ApiAdminUsersIdIndexRoute: ApiAdminUsersIdIndexRoute,

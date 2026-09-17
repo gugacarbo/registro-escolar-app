@@ -121,7 +121,7 @@ describe("AppLayout", () => {
 			"/minutes",
 		);
 		expect(
-			screen.getByRole("link", { name: "Modelos de ata" }),
+			screen.getByRole("link", { name: "Presets de ata" }),
 		).toHaveAttribute("href", "/minutes/templates");
 		expect(screen.getAllByRole("link")).toHaveLength(10);
 	});

@@ -8,6 +8,21 @@ export const minuteApprovalStatusSchema = z.enum([
 	"aprovada",
 ]);
 
+const richContentValueSchema = (label: string) =>
+	z.union([
+		z.string(),
+		z.custom<Record<string, unknown>>((val) => {
+			if (typeof val !== "object" || val === null) return false;
+			return typeof (val as Record<string, unknown>).type === "string";
+		}, label),
+	]);
+
+export const minuteContentSchema = z.object({
+	headerContent: richContentValueSchema("Conteúdo do cabeçalho inválido"),
+	bodyContent: richContentValueSchema("Conteúdo do corpo inválido"),
+	footerContent: richContentValueSchema("Conteúdo do rodapé inválido"),
+});
+
 // POST /api/minute-templates (spec 0009): campos derivados do Drizzle;
 // blocos booleanos permanecem aceitos para compatibilidade, enquanto o corpo
 // editável é persistido em bodyContent.
@@ -19,33 +34,15 @@ export const createMinuteTemplateSchema = createInsertSchema(minuteTemplates)
 	})
 	.extend({
 		name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
-		headerContent: z
-			.union([
-				z.string(),
-				z.custom<Record<string, unknown>>((val) => {
-					if (typeof val !== "object" || val === null) return false;
-					return typeof (val as Record<string, unknown>).type === "string";
-				}, "Conteúdo do cabeçalho inválido"),
-			])
-			.optional(),
-		bodyContent: z
-			.union([
-				z.string(),
-				z.custom<Record<string, unknown>>((val) => {
-					if (typeof val !== "object" || val === null) return false;
-					return typeof (val as Record<string, unknown>).type === "string";
-				}, "Conteúdo do corpo inválido"),
-			])
-			.optional(),
-		footerContent: z
-			.union([
-				z.string(),
-				z.custom<Record<string, unknown>>((val) => {
-					if (typeof val !== "object" || val === null) return false;
-					return typeof (val as Record<string, unknown>).type === "string";
-				}, "Conteúdo do rodapé inválido"),
-			])
-			.optional(),
+		headerContent: richContentValueSchema(
+			"Conteúdo do cabeçalho inválido",
+		).optional(),
+		bodyContent: richContentValueSchema(
+			"Conteúdo do corpo inválido",
+		).optional(),
+		footerContent: richContentValueSchema(
+			"Conteúdo do rodapé inválido",
+		).optional(),
 	});
 
 export const updateMinuteTemplateSchema = createMinuteTemplateSchema;
@@ -73,6 +70,7 @@ export type CreateMinuteTemplateInput = z.infer<
 export type UpdateMinuteTemplateInput = z.infer<
 	typeof updateMinuteTemplateSchema
 >;
+export type UpdateMinuteContentInput = z.infer<typeof minuteContentSchema>;
 export type MinuteTemplate = z.infer<typeof selectMinuteTemplateSchema>;
 export type MinuteApprovalStatus = z.infer<typeof minuteApprovalStatusSchema>;
 export type Minute = z.infer<typeof selectMinuteSchema>;

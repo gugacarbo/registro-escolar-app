@@ -378,11 +378,11 @@ export function MeetingForm({
 					name="templateId"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Modelo de ata</FormLabel>
+							<FormLabel>Preset de ata</FormLabel>
 							<FormControl>
 								<Select value={field.value} onValueChange={field.onChange}>
-									<SelectTrigger aria-label="Modelo de ata">
-										<SelectValue placeholder="Selecione o modelo" />
+									<SelectTrigger aria-label="Preset de ata">
+										<SelectValue placeholder="Selecione o preset" />
 									</SelectTrigger>
 									<SelectContent>
 										{templates.map((template) => (

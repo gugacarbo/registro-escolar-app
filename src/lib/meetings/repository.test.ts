@@ -63,6 +63,35 @@ function createTestDb() {
 			created_at INTEGER NOT NULL,
 			updated_at INTEGER NOT NULL
 		);
+		CREATE TABLE minute_templates (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			header_content TEXT DEFAULT '{"type":"doc","content":[{"type":"paragraph"}]}' NOT NULL,
+			body_content TEXT,
+			footer_content TEXT DEFAULT '{"type":"doc","content":[{"type":"paragraph"}]}' NOT NULL,
+			show_meeting INTEGER DEFAULT 1 NOT NULL,
+			show_classes INTEGER DEFAULT 1 NOT NULL,
+			show_participants INTEGER DEFAULT 1 NOT NULL,
+			show_records INTEGER DEFAULT 1 NOT NULL,
+			show_general_reports INTEGER DEFAULT 1 NOT NULL,
+			show_signatures INTEGER DEFAULT 1 NOT NULL,
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL
+		);
+		CREATE TABLE minutes (
+			id TEXT PRIMARY KEY,
+			meeting_id TEXT NOT NULL,
+			template_id TEXT,
+			header_content TEXT,
+			body_content TEXT,
+			footer_content TEXT,
+			approval_status TEXT DEFAULT 'pendente_aprovacao' NOT NULL,
+			approved_at INTEGER,
+			approval_notes TEXT,
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL,
+			UNIQUE (meeting_id)
+		);
 		CREATE TABLE classes (
 			id TEXT PRIMARY KEY,
 			name TEXT NOT NULL,
@@ -124,6 +153,32 @@ describe("meetings repository", () => {
 		expect((await findMeetingById(db, created.id))?.title).toBe(
 			"Reunião 1 atualizada",
 		);
+	});
+
+	it("copia o preset ao criar a reunião e isola a troca de preset", async () => {
+		const { db } = createTestDb();
+		await db.insert(schema.minuteTemplates).values([
+			{ id: "preset-a", name: "Preset A", bodyContent: "Corpo A" },
+			{ id: "preset-b", name: "Preset B", bodyContent: "Corpo B" },
+		]);
+
+		const meeting = await createMeeting(db, {
+			title: "Reunião com preset",
+			templateId: "preset-a",
+		});
+		const first = await db.query.minutes.findFirst();
+		expect(first).toMatchObject({
+			meetingId: meeting.id,
+			templateId: "preset-a",
+			bodyContent: "Corpo A",
+		});
+
+		await updateMeeting(db, meeting.id, { templateId: "preset-b" });
+		const second = await db.query.minutes.findFirst();
+		expect(second).toMatchObject({
+			templateId: "preset-b",
+			bodyContent: "Corpo B",
+		});
 	});
 
 	it("lista reuniões sem filtro", async () => {

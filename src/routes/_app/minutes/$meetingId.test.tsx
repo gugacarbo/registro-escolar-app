@@ -8,9 +8,11 @@ import type { Meeting } from "#/lib/meetings/schema";
 const mocks = vi.hoisted(() => ({
 	useMeeting: vi.fn(),
 	useMinutePreview: vi.fn(),
+	useMinuteContent: vi.fn(),
 	useMinuteVersions: vi.fn(),
 	generateMock: vi.fn(),
 	mutateAsync: vi.fn(),
+	updateContentMock: vi.fn(),
 	approveMock: vi.fn(),
 	state: { lastApproveValues: undefined as unknown },
 }));
@@ -36,11 +38,17 @@ vi.mock("#/hooks/meetings/use-meeting", () => ({
 vi.mock("#/hooks/minutes/use-minute-preview", () => ({
 	useMinutePreview: mocks.useMinutePreview,
 }));
+vi.mock("#/hooks/minutes/use-minute-content", () => ({
+	useMinuteContent: mocks.useMinuteContent,
+}));
 vi.mock("#/hooks/minutes/use-minute-versions", () => ({
 	useMinuteVersions: mocks.useMinuteVersions,
 }));
 vi.mock("#/hooks/minutes/use-generate-minute", () => ({
 	useGenerateMinute: () => mocks.generateMock(),
+}));
+vi.mock("#/hooks/minutes/use-update-minute-content", () => ({
+	useUpdateMinuteContent: () => mocks.updateContentMock(),
 }));
 vi.mock("#/hooks/minutes/use-approve-minute", () => ({
 	useApproveMinute: () => mocks.approveMock(),
@@ -89,6 +97,11 @@ beforeEach(() => {
 		isLoading: false,
 		error: null,
 	});
+	mocks.useMinuteContent.mockReturnValue({
+		data: undefined,
+		isLoading: false,
+		error: null,
+	});
 	mocks.useMinuteVersions.mockReturnValue({
 		data: [
 			{
@@ -118,6 +131,11 @@ beforeEach(() => {
 		isPending: false,
 		error: null,
 		data: undefined,
+	});
+	mocks.updateContentMock.mockReturnValue({
+		mutateAsync: vi.fn().mockResolvedValue(undefined),
+		isPending: false,
+		error: null,
 	});
 	mocks.approveMock.mockReset();
 	mocks.approveMock.mockReturnValue({
@@ -153,6 +171,40 @@ describe("MinuteDetailPage", () => {
 		expect(
 			screen.getByRole("link", { name: /Baixar PDF/ }),
 		).toBeInTheDocument();
+	});
+
+	it("exibe o editor do conteúdo próprio da reunião", async () => {
+		const mutateAsync = vi.fn().mockResolvedValue(undefined);
+		mocks.useMinuteContent.mockReturnValue({
+			data: {
+				presetId: "preset-1",
+				presetName: "Preset Conselho",
+				headerContent: JSON.stringify({ type: "doc", content: [] }),
+				bodyContent: JSON.stringify({ type: "doc", content: [] }),
+				footerContent: JSON.stringify({ type: "doc", content: [] }),
+			},
+			isLoading: false,
+			error: null,
+		});
+		mocks.updateContentMock.mockReturnValue({
+			mutateAsync,
+			isPending: false,
+			error: null,
+		});
+		const user = userEvent.setup();
+
+		renderPage();
+
+		expect(screen.getByText(/Conteúdo inicial do preset/)).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: "Salvar conteúdo" }));
+		await screen.findByText("Conteúdo da ata atualizado.");
+		expect(mutateAsync).toHaveBeenCalledWith(
+			expect.objectContaining({
+				headerContent: expect.any(Object),
+				bodyContent: expect.any(Object),
+				footerContent: expect.any(Object),
+			}),
+		);
 	});
 
 	it("aprova a ata e exibe confirmação", async () => {

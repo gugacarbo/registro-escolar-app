@@ -295,13 +295,45 @@ export default function CouncilPage() {
 				/>
 			</div>
 
-			<div className="grid items-start gap-4 md:grid-cols-[minmax(18rem,0.34fr)_minmax(0,1fr)]">
+			{meetingClasses.length > 0 && (
+				<div data-testid="council-class-tabs" className="min-w-0">
+					<Card className="gap-0 p-2">
+						<span
+							data-testid="council-class-label"
+							className="absolute -top-2 left-5 z-10 bg-card px-1.5 text-xs leading-none font-semibold tracking-wide text-muted-foreground"
+						>
+							Turmas
+						</span>
+						<Tabs value={activeClassId} onValueChange={selectClass}>
+							<TabsList
+								aria-label="Turmas da reunião"
+								className="w-full max-w-full justify-start overflow-hidden"
+							>
+								{meetingClasses.map((link) => (
+									<TabsTrigger
+										key={link.id}
+										value={link.classId}
+										className="flex-none px-4"
+									>
+										{link.class?.name ?? link.classId}
+									</TabsTrigger>
+								))}
+							</TabsList>
+						</Tabs>
+					</Card>
+				</div>
+			)}
+
+			<div
+				data-testid="council-layout"
+				className="grid items-start gap-4 md:grid-cols-[minmax(18rem,0.34fr)_minmax(0,1fr)]"
+			>
 				<div data-testid="council-students-panel" className="min-w-0">
 					<Card className="md:sticky md:top-4">
 						<CardHeader>
-							<CardTitle>Turmas</CardTitle>
+							<CardTitle>Estudantes</CardTitle>
 							<CardDescription>
-								Escolha a turma e depois o estudante para registrar.
+								Escolha um estudante para registrar.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
@@ -311,27 +343,6 @@ export default function CouncilPage() {
 									Nenhuma turma vinculada a esta reunião.
 								</p>
 							)}
-							{meetingClasses.length > 0 && (
-								<div
-									className="flex flex-wrap gap-2"
-									role="group"
-									aria-label="Turmas da reunião"
-								>
-									{meetingClasses.map((link) => (
-										<Button
-											key={link.id}
-											type="button"
-											variant={
-												activeClassId === link.classId ? "default" : "outline"
-											}
-											onClick={() => selectClass(link.classId)}
-										>
-											{link.class?.name ?? link.classId}
-										</Button>
-									))}
-								</div>
-							)}
-
 							{activeClassId && (
 								<div className="space-y-2 border-t pt-4">
 									<div className="flex flex-wrap items-center justify-between gap-2">
@@ -399,52 +410,60 @@ export default function CouncilPage() {
 										</p>
 									)}
 									{filteredStudents.length > 0 && (
-										<ul className="grid gap-2" aria-label="Estudantes da turma">
-											{filteredStudents.map((student: StudentOption) => {
-												const isActive =
-													selectedStudent?.studentId === student.studentId;
-												const isNextPending =
-													(pendingStudentId ??
-														classStudents?.nextPendingStudentId) ===
-													student.studentId;
-												return (
-													<li key={student.studentId}>
-														<Button
-															variant="ghost"
-															type="button"
-															onClick={() => selectStudent(student.studentId)}
-															aria-pressed={isActive}
-															aria-label={`Selecionar ${student.name}`}
-															className={`flex w-full items-center gap-3 rounded-lg border p-2 text-left transition-colors hover:bg-accent ${isActive ? "border-primary ring-1 ring-primary" : ""}`}
-														>
-															<Avatar className="size-9 shrink-0">
-																<AvatarFallback>
-																	{initials(student.name)}
-																</AvatarFallback>
-															</Avatar>
-															<span className="min-w-0 flex-1">
-																<span className="block truncate text-sm font-medium">
-																	{student.name}
+										<div
+											data-testid="student-list-scroll"
+											className="student-list-scroll max-h-96 overflow-y-auto pr-1"
+										>
+											<ul
+												className="grid min-w-0 gap-2"
+												aria-label="Estudantes da turma"
+											>
+												{filteredStudents.map((student: StudentOption) => {
+													const isActive =
+														selectedStudent?.studentId === student.studentId;
+													const isNextPending =
+														(pendingStudentId ??
+															classStudents?.nextPendingStudentId) ===
+														student.studentId;
+													return (
+														<li key={student.studentId} className="min-w-0">
+															<Button
+																variant="ghost"
+																type="button"
+																onClick={() => selectStudent(student.studentId)}
+																aria-pressed={isActive}
+																aria-label={`Selecionar ${student.name}`}
+																className={`flex w-full min-w-0 items-center gap-3 overflow-hidden rounded-lg border p-2 text-left transition-colors hover:bg-accent ${isActive ? "border-primary ring-1 ring-primary" : ""}`}
+															>
+																<Avatar className="size-9 shrink-0">
+																	<AvatarFallback>
+																		{initials(student.name)}
+																	</AvatarFallback>
+																</Avatar>
+																<span className="min-w-0 flex-1">
+																	<span className="block truncate text-sm font-medium">
+																		{student.name}
+																	</span>
+																	{student.registrationNumber && (
+																		<span className="block truncate text-xs text-muted-foreground">
+																			Matrícula {student.registrationNumber}
+																		</span>
+																	)}
+																	{isNextPending && (
+																		<span className="block truncate text-xs font-medium text-primary">
+																			Próximo pendente
+																		</span>
+																	)}
 																</span>
-																{student.registrationNumber && (
-																	<span className="block text-xs text-muted-foreground">
-																		Matrícula {student.registrationNumber}
-																	</span>
+																{isActive && (
+																	<Badge variant="default">Ativo</Badge>
 																)}
-																{isNextPending && (
-																	<span className="block text-xs font-medium text-primary">
-																		Próximo pendente
-																	</span>
-																)}
-															</span>
-															{isActive && (
-																<Badge variant="default">Ativo</Badge>
-															)}
-														</Button>
-													</li>
-												);
-											})}
-										</ul>
+															</Button>
+														</li>
+													);
+												})}
+											</ul>
+										</div>
 									)}
 									{activeClassId &&
 										students.length === 0 &&

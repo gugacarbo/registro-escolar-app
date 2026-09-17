@@ -11,6 +11,7 @@ import {
 	MeetingNotFoundError,
 	MinuteAlreadyApprovedError,
 	MinuteNotFoundError,
+	MinuteNotEditableError,
 	NoCurrentVersionError,
 	PdfNotAvailableError,
 } from "./errors";
@@ -28,7 +29,9 @@ import {
 	generateMinuteVersion,
 	listMinutes,
 	listMinuteVersions,
+	getMinuteEditableContent,
 	previewMinute,
+	updateMinuteContent,
 	updateMinuteTemplate,
 } from "./repository";
 import { textDoc } from "./tiptap/serializer";
@@ -67,6 +70,9 @@ function createTestDb() {
 			id TEXT PRIMARY KEY,
 			meeting_id TEXT NOT NULL,
 			template_id TEXT,
+			header_content TEXT,
+			body_content TEXT,
+			footer_content TEXT,
 			approval_status TEXT DEFAULT 'pendente_aprovacao' NOT NULL,
 			approved_at INTEGER,
 			approval_notes TEXT,
@@ -364,6 +370,55 @@ describe("minutes repository (specs 0009/0010)", () => {
 		expect(versions[0]?.version).toBe(2);
 		const pdf1 = await findMinuteVersionPdf(setup.db, "meeting-1", 1);
 		expect(pdf1.length).toBeGreaterThan(100);
+	});
+
+	it("copia o conteúdo do preset e permite personalizar somente esta ata", async () => {
+		const preset = await createMinuteTemplate(setup.db, {
+			name: "Preset compartilhado",
+			headerContent: textDoc("Cabeçalho inicial"),
+			bodyContent: textDoc("Corpo inicial"),
+			footerContent: textDoc("Rodapé inicial"),
+		});
+		await setup.db
+			.update(schema.meetings)
+			.set({ templateId: preset.id })
+			.where(eq(schema.meetings.id, "meeting-1"));
+
+		const initial = await getMinuteEditableContent(setup.db, "meeting-1");
+		expect(initial.presetId).toBe(preset.id);
+		expect(initial.bodyContent).toContain("Corpo inicial");
+
+		await updateMinuteContent(setup.db, "meeting-1", {
+			headerContent: textDoc("Cabeçalho local"),
+			bodyContent: textDoc("Corpo local"),
+			footerContent: textDoc("Rodapé local"),
+		});
+		await updateMinuteTemplate(setup.db, preset.id, {
+			name: preset.name,
+			headerContent: textDoc("Cabeçalho alterado no preset"),
+			bodyContent: textDoc("Corpo alterado no preset"),
+			footerContent: textDoc("Rodapé alterado no preset"),
+		});
+
+		const preview = await previewMinute(setup.db, "meeting-1");
+		expect(preview.content).toContain("CABEÇALHO LOCAL");
+		expect(preview.content).toContain("Corpo local");
+		expect(preview.content).not.toContain("Corpo alterado no preset");
+	});
+
+	it("bloqueia edição de conteúdo quando a reunião está finalizada", async () => {
+		await setup.db
+			.update(schema.meetings)
+			.set({ status: "finished" })
+			.where(eq(schema.meetings.id, "meeting-1"));
+
+		await expect(
+			updateMinuteContent(setup.db, "meeting-1", {
+				headerContent: textDoc("Cabeçalho"),
+				bodyContent: textDoc("Corpo"),
+				footerContent: textDoc("Rodapé"),
+			}),
+		).rejects.toBeInstanceOf(MinuteNotEditableError);
 	});
 
 	it("recusa versão oficial em rascunho (borda 3, spec 0009)", async () => {

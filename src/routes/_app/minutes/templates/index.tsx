@@ -108,7 +108,7 @@ function NewTemplateDialogForm({
 						<FormItem>
 							<FormLabel>Nome *</FormLabel>
 							<FormControl>
-								<Input {...field} autoFocus placeholder="Modelo padrão" />
+								<Input {...field} autoFocus placeholder="Preset padrão" />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -142,11 +142,11 @@ function MinuteTemplatesPage() {
 		<PageShell>
 			<PageHeader
 				eyebrow="Configuração"
-				title="Modelos de ata"
-				description="Cadastre e mantenha os modelos usados para gerar atas."
+				title="Presets de ata"
+				description="Cadastre e mantenha presets reutilizáveis para iniciar atas."
 				actions={
 					<Button variant="secondary" onClick={() => setShowCreateDialog(true)}>
-						Novo modelo
+						Novo preset
 					</Button>
 				}
 			/>
@@ -154,14 +154,14 @@ function MinuteTemplatesPage() {
 			<Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
-						<DialogTitle>Novo modelo de ata</DialogTitle>
+						<DialogTitle>Novo preset de ata</DialogTitle>
 						<DialogDescription>
-							Dê um nome ao modelo. Cabeçalho, conteúdo e rodapé são
+							Dê um nome ao preset. Cabeçalho, conteúdo e rodapé são
 							configurados na edição, após a criação.
 						</DialogDescription>
 					</DialogHeader>
 					<NewTemplateDialogForm
-						submitLabel={create.isPending ? "Salvando..." : "Criar modelo"}
+						submitLabel={create.isPending ? "Salvando..." : "Criar preset"}
 						serverError={create.error?.message ?? null}
 						onSubmit={(values) =>
 							create.mutate(values, {
@@ -194,12 +194,12 @@ function MinuteTemplatesPage() {
 				isError={isError}
 				errorMessage={error instanceof Error ? error.message : undefined}
 				onRetry={() => refetch()}
-				ariaLabel="Tabela de modelos de ata"
-				emptyTitle="Nenhum modelo cadastrado"
-				emptyDescription="Cadastre um modelo para usar na geração das atas."
+				ariaLabel="Tabela de presets de ata"
+				emptyTitle="Nenhum preset cadastrado"
+				emptyDescription="Cadastre um preset para iniciar as atas das reuniões."
 				emptyAction={
 					<Button size="sm" onClick={() => setShowCreateDialog(true)}>
-						Novo modelo
+						Novo preset
 					</Button>
 				}
 			/>

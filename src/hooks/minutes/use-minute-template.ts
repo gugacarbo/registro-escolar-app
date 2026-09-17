@@ -15,7 +15,7 @@ export function useMinuteTemplate(id: string) {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao carregar template de ata");
+				throw new Error(body.error ?? "Falha ao carregar preset de ata");
 			}
 			return response.json() as Promise<MinuteTemplate>;
 		},

@@ -12,6 +12,8 @@ export const ERR_NO_CURRENT_VERSION =
 	"Não existe versão atual da ata para aprovar";
 export const ERR_MINUTE_ALREADY_APPROVED = "Ata já aprovada";
 export const ERR_PDF_NOT_AVAILABLE = "PDF não disponível para esta versão";
+export const ERR_MINUTE_NOT_EDITABLE =
+	"Reunião finalizada: reabra para editar a ata";
 
 export class MeetingNotFoundError extends Error {}
 export class MinuteTemplateNotFoundError extends Error {}
@@ -21,3 +23,4 @@ export class MinuteVersionNotFoundError extends Error {}
 export class NoCurrentVersionError extends Error {}
 export class MinuteAlreadyApprovedError extends Error {}
 export class PdfNotAvailableError extends Error {}
+export class MinuteNotEditableError extends Error {}

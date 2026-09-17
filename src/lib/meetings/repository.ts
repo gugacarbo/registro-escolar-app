@@ -1,7 +1,14 @@
 import { and, eq, like, sql } from "drizzle-orm";
 
 import type { DB } from "#/db";
-import { meetingClasses, meetingParticipants, meetings } from "#/db/schema";
+import {
+	meetingClasses,
+	meetingParticipants,
+	meetings,
+	minutes,
+	minuteTemplates,
+} from "#/db/schema";
+import { defaultMinuteBodyContent } from "#/lib/minutes/tiptap/serializer";
 
 import {
 	ERR_INVALID_TRANSITION,
@@ -24,7 +31,7 @@ import { ALLOWED_TRANSITIONS, NEXT_STATUS } from "./transitions";
 import type { ListMeetingsOptions } from "./types";
 
 export async function createMeeting(db: DB, input: CreateMeetingInput) {
-	return db
+	const meeting = await db
 		.insert(meetings)
 		.values({
 			...input,
@@ -32,6 +39,10 @@ export async function createMeeting(db: DB, input: CreateMeetingInput) {
 		})
 		.returning()
 		.get();
+	if (meeting.templateId) {
+		await syncMinutePreset(db, meeting.id, meeting.templateId);
+	}
+	return meeting;
 }
 
 export async function updateMeeting(
@@ -39,12 +50,21 @@ export async function updateMeeting(
 	id: string,
 	input: UpdateMeetingInput,
 ) {
-	return db
+	const previous =
+		input.templateId !== undefined ? await findMeetingById(db, id) : undefined;
+	const meeting = await db
 		.update(meetings)
 		.set(input)
 		.where(eq(meetings.id, id))
 		.returning()
 		.get();
+	if (
+		input.templateId !== undefined &&
+		previous?.templateId !== meeting.templateId
+	) {
+		await syncMinutePreset(db, meeting.id, meeting.templateId);
+	}
+	return meeting;
 }
 
 export async function findMeetingById(db: DB, id: string) {
@@ -110,6 +130,9 @@ export async function createMeetingWithRelations(
 		})
 		.returning()
 		.get();
+	if (meeting.templateId) {
+		await syncMinutePreset(db, meeting.id, meeting.templateId);
+	}
 
 	// Nota: db.transaction não é usado porque DB é a união
 	// DrizzleD1Database | BetterSQLite3Database, cujas assinaturas de
@@ -143,6 +166,65 @@ export async function createMeetingWithRelations(
 		}
 	}
 	return meeting;
+}
+
+async function syncMinutePreset(
+	db: DB,
+	meetingId: string,
+	templateId: string | null,
+) {
+	const preset = templateId
+		? await db.query.minuteTemplates.findFirst({
+				where: eq(minuteTemplates.id, templateId),
+			})
+		: undefined;
+	const minute = await db.query.minutes.findFirst({
+		where: (rows, { eq }) => eq(rows.meetingId, meetingId),
+	});
+
+	const content = preset
+		? {
+				headerContent: preset.headerContent,
+				bodyContent:
+					preset.bodyContent ??
+					JSON.stringify(
+						defaultMinuteBodyContent({
+							showMeeting: preset.showMeeting,
+							showClasses: preset.showClasses,
+							showParticipants: preset.showParticipants,
+							showRecords: preset.showRecords,
+							showGeneralReports: preset.showGeneralReports,
+							showSignatures: preset.showSignatures,
+						}),
+					),
+				footerContent: preset.footerContent,
+			}
+		: {
+				headerContent: null,
+				bodyContent: null,
+				footerContent: null,
+			};
+
+	if (minute) {
+		await db
+			.update(minutes)
+			.set({
+				templateId,
+				...content,
+				approvalStatus: "pendente_aprovacao",
+				approvedAt: null,
+				approvalNotes: null,
+			})
+			.where(eq(minutes.id, minute.id))
+			.run();
+	} else if (preset) {
+		await db.insert(minutes).values({
+			id: crypto.randomUUID(),
+			meetingId,
+			templateId,
+			...content,
+		});
+	}
 }
 
 export async function listMeetingClasses(db: DB, meetingId: string) {

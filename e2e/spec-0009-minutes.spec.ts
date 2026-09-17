@@ -11,6 +11,7 @@ import {
 	generateMinute,
 	previewMinute,
 	startMeeting,
+	updateMinuteContent,
 	updateMeetingTemplate,
 	transitionMeetingResponse,
 } from "./fixtures/api";
@@ -134,7 +135,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(secondPreview.content).not.toContain("CABEÇALHO A");
 	});
 
-	test("edita o template pela página e a próxima prévia reflete a alteração", async ({
+	test("edita o preset sem alterar a ata já configurada", async ({
 		apiContext,
 		authenticatedPage,
 	}) => {
@@ -161,12 +162,53 @@ test.describe("SPEC-0009 geração de ata", () => {
 		await authenticatedPage.getByRole("textbox", { name: "Cabeçalho" }).fill("Cabeçalho revisado");
 		await authenticatedPage.getByRole("button", { name: "Salvar alterações" }).click();
 		await expect(authenticatedPage.getByRole("status")).toHaveText(
-			"Modelo atualizado",
+			"Preset atualizado",
 		);
 
 		expect((await previewMinute(apiContext, meeting.id)).content).toContain(
+			"CABEÇALHO ORIGINAL",
+		);
+		expect((await previewMinute(apiContext, meeting.id)).content).not.toContain(
 			"CABEÇALHO REVISADO",
 		);
+	});
+
+	test("permite editar o conteúdo da ata na reunião", async ({
+		apiContext,
+		authenticatedPage,
+	}) => {
+		const template = await createMinuteTemplate(apiContext, {
+			name: "Preset para reunião",
+			headerText: "Cabeçalho do preset",
+			bodyContent: JSON.stringify({
+				type: "doc",
+				content: [{ type: "paragraph", content: [{ type: "text", text: "Corpo do preset" }] }],
+			}),
+		});
+		const meeting = await createMeeting(apiContext, {
+			title: "Ata com conteúdo local",
+			heldAt: "2026-05-10",
+			participants: [],
+			templateId: template.id,
+		});
+
+		await authenticatedPage.goto(`/minutes/${meeting.id}`);
+		await expect(
+			authenticatedPage.getByRole("textbox", { name: "Conteúdo" }),
+		).toContainText("Corpo do preset");
+		await authenticatedPage
+			.getByRole("textbox", { name: "Conteúdo" })
+			.fill("Corpo personalizado da reunião");
+		await authenticatedPage
+			.getByRole("button", { name: "Salvar conteúdo" })
+			.click();
+		await expect(
+			authenticatedPage.getByText("Conteúdo da ata atualizado.", { exact: true }),
+		).toBeVisible();
+
+		const preview = await previewMinute(apiContext, meeting.id);
+		expect(preview.content).toContain("Corpo personalizado da reunião");
+		expect(preview.content).not.toContain("Corpo do preset");
 	});
 
 	test("omite internos e agrupa registros por turma e estudante", async ({

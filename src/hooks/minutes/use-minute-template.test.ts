@@ -95,7 +95,7 @@ describe("useMinuteTemplate", () => {
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(result.current.error?.message).toBe(
-			"Falha ao carregar template de ata",
+			"Falha ao carregar preset de ata",
 		);
 	});
 

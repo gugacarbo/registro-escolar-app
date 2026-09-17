@@ -111,7 +111,7 @@ describe("AppSidebar", () => {
 			"/minutes",
 		);
 		expect(
-			screen.getByRole("link", { name: "Modelos de ata" }),
+			screen.getByRole("link", { name: "Presets de ata" }),
 		).toHaveAttribute("href", "/minutes/templates");
 		expect(screen.getAllByRole("link")).toHaveLength(9);
 	});
@@ -159,11 +159,11 @@ describe("AppSidebar", () => {
 		);
 	});
 
-	it("marca apenas Modelos de ata como ativo na página de templates", () => {
+	it("marca apenas Presets de ata como ativo na página de templates", () => {
 		renderSidebar("/minutes/templates");
 
 		expect(
-			screen.getByRole("link", { name: "Modelos de ata" }),
+			screen.getByRole("link", { name: "Presets de ata" }),
 		).toHaveAttribute("data-active", "true");
 		expect(screen.getByRole("link", { name: "Atas" })).toHaveAttribute(
 			"data-active",

@@ -3,6 +3,10 @@ import { AlertCircleIcon, DownloadIcon, FileTextIcon } from "lucide-react";
 import { useState } from "react";
 
 import {
+	MinuteContentEditor,
+	type MinuteContentEditorValues,
+} from "#/components/minutes/minute-content-editor";
+import {
 	AlertDialog,
 	AlertDialogAction,
 	AlertDialogCancel,
@@ -48,8 +52,10 @@ import { Textarea } from "#/components/ui/textarea";
 import { useMeeting } from "#/hooks/meetings/use-meeting";
 import { useApproveMinute } from "#/hooks/minutes/use-approve-minute";
 import { useGenerateMinute } from "#/hooks/minutes/use-generate-minute";
+import { useMinuteContent } from "#/hooks/minutes/use-minute-content";
 import { useMinutePreview } from "#/hooks/minutes/use-minute-preview";
 import { useMinuteVersions } from "#/hooks/minutes/use-minute-versions";
+import { useUpdateMinuteContent } from "#/hooks/minutes/use-update-minute-content";
 import type { MinuteApprovalStatus } from "#/lib/minutes/types";
 
 export const Route = createFileRoute("/_app/minutes/$meetingId")({
@@ -76,14 +82,18 @@ function ApprovalStatusBadge({ status }: { status: MinuteApprovalStatus }) {
 export default function MinuteDetailPage() {
 	const { meetingId } = Route.useParams();
 	const { data: meeting, isLoading: isLoadingMeeting } = useMeeting(meetingId);
+	const content = useMinuteContent(meetingId);
 	const preview = useMinutePreview(meetingId);
 	const versions = useMinuteVersions(meetingId);
 	const generate = useGenerateMinute(meetingId);
+	const updateContent = useUpdateMinuteContent(meetingId);
 	const approve = useApproveMinute(meetingId);
 	const [saved, setSaved] = useState(false);
+	const [contentSaved, setContentSaved] = useState(false);
 	const [confirmGenerate, setConfirmGenerate] = useState(false);
 
 	const isDraft = meeting?.status === "draft";
+	const isContentEditable = meeting?.status !== "finished";
 	const isApproved = preview.data?.approvalStatus === "aprovada";
 
 	const approveForm = useForm<ApproveFormValues>({
@@ -100,6 +110,12 @@ export default function MinuteDetailPage() {
 			observacao: values.observacao || undefined,
 		});
 		generateForm.reset();
+	}
+
+	async function saveContent(values: MinuteContentEditorValues) {
+		setContentSaved(false);
+		await updateContent.mutateAsync(values);
+		setContentSaved(true);
 	}
 
 	if (isLoadingMeeting) {
@@ -191,13 +207,45 @@ export default function MinuteDetailPage() {
 			)}
 
 			<PageSection
+				title="Conteúdo da ata"
+				description="Edite o conteúdo desta reunião. As alterações ficam vinculadas apenas a esta ata e não modificam o preset."
+			>
+				{content.isLoading && <Skeleton className="h-72 w-full" />}
+				{content.error && (
+					<p role="alert" className="text-sm text-destructive">
+						{content.error.message || "Falha ao carregar conteúdo da ata"}
+					</p>
+				)}
+				{!isContentEditable && (
+					<p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
+						A reunião está finalizada. Reabra-a para editar o conteúdo da ata.
+					</p>
+				)}
+				{isContentEditable && content.data && (
+					<MinuteContentEditor
+						key={`${meetingId}-${content.data.presetId ?? "default"}`}
+						initialContent={content.data}
+						onSubmit={saveContent}
+						submitLabel={updateContent.isPending ? "Salvando..." : "Salvar conteúdo"}
+						serverError={updateContent.error?.message ?? null}
+						isPending={updateContent.isPending}
+					/>
+				)}
+				{contentSaved && (
+					<p role="status" className="text-sm font-medium text-primary">
+						Conteúdo da ata atualizado.
+					</p>
+				)}
+			</PageSection>
+
+			<PageSection
 				title="Prévia da ata"
 				description="Conteúdo renderizado a partir dos registros, participantes e relatos da reunião."
 				actions={
 					<span className="text-sm text-muted-foreground">
 						{preview.data?.templateId
-							? "Modelo personalizado"
-							: "Modelo padrão"}
+							? "Preset personalizado"
+							: "Sem preset"}
 					</span>
 				}
 			>

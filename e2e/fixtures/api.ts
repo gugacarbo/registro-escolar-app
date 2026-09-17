@@ -333,6 +333,25 @@ export async function updateMeetingTemplate(
 	return res.json();
 }
 
+export async function updateMinuteContent(
+	ctx: ApiContext,
+	meetingId: string,
+	input: {
+		headerContent: Record<string, unknown>;
+		bodyContent: Record<string, unknown>;
+		footerContent: Record<string, unknown>;
+	},
+) {
+	const res = await api(
+		"PATCH",
+		`/api/meetings/${meetingId}/minutes/content`,
+		ctx.cookies,
+		input,
+	);
+	if (!res.ok) throw new Error(`updateMinuteContent failed: ${res.status}`);
+	return res.json();
+}
+
 export async function previewMinute(
 	ctx: ApiContext,
 	meetingId: string,

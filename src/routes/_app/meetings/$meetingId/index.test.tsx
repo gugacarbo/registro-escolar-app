@@ -141,20 +141,33 @@ beforeEach(() => {
 });
 
 describe("MeetingDetailPage (header em 375px)", () => {
-	it("exibe os quatro abas do detail", () => {
+	it("exibe as três abas do detail com contagens", () => {
 		renderPage();
-		expect(screen.getByText("Visão Geral")).toBeInTheDocument();
 		expect(screen.getByText("Turmas (0)")).toBeInTheDocument();
 		expect(screen.getByText("Participantes (0)")).toBeInTheDocument();
-		expect(screen.getByText("Ata e Documentos")).toBeInTheDocument();
+		expect(screen.getByRole("tab", { name: /Ata/ })).toBeInTheDocument();
+		expect(screen.queryByText("Visão Geral")).not.toBeInTheDocument();
+		expect(screen.queryByText("Ata e Documentos")).not.toBeInTheDocument();
+	});
+
+	it("mostra resumo executivo compacto sem cards duplicados", () => {
+		renderPage();
+
+		expect(screen.getByText("Turmas Participantes")).toBeInTheDocument();
+		expect(screen.queryByText("Turmas vinculadas")).not.toBeInTheDocument();
+		expect(screen.queryByText("Equipe participante")).not.toBeInTheDocument();
+		expect(screen.queryByText("Relatos gerais")).not.toBeInTheDocument();
+		expect(screen.queryByText("Ata da reunião")).not.toBeInTheDocument();
+		expect(screen.queryByText("Sala da reunião")).not.toBeInTheDocument();
+		expect(screen.queryByText("Turmas desta Reunião")).not.toBeInTheDocument();
 	});
 
 	it("usa linguagem de participação na reunião para abrir o espaço de trabalho", () => {
 		renderPage();
 
 		expect(
-			screen.getAllByRole("link", { name: /Participar da reunião/ }),
-		).toHaveLength(2);
+			screen.getByRole("link", { name: /Participar da reunião/ }),
+		).toBeInTheDocument();
 		expect(screen.queryByText("Entrar no Conselho")).not.toBeInTheDocument();
 		expect(screen.queryByText("Sala do Conselho")).not.toBeInTheDocument();
 	});
@@ -170,11 +183,10 @@ describe("MeetingDetailPage (header em 375px)", () => {
 		).not.toBeNull();
 	});
 
-	it("quebra as ações do header em telas estreitas (flex-wrap)", () => {
+	it("mantém ação de acompanhamento junto ao bloco de turmas", () => {
 		renderPage();
-		const actionsRow = document.querySelector(
-			".border-b.pb-2 > .flex.flex-wrap.items-center.gap-2",
-		);
-		expect(actionsRow).not.toBeNull();
+		expect(
+			screen.getByRole("link", { name: "Acompanhamento" }),
+		).toBeInTheDocument();
 	});
 });

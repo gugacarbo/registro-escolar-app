@@ -66,6 +66,11 @@ export const minutes = sqliteTable(
 			.notNull()
 			.references(() => meetings.id, { onDelete: "cascade" }),
 		templateId: text("template_id").references(() => minuteTemplates.id),
+		// Cópia editável do preset para esta reunião. Nullable para preservar
+		// atas legadas que ainda usam o template diretamente.
+		headerContent: text("header_content"),
+		bodyContent: text("body_content"),
+		footerContent: text("footer_content"),
 		approvalStatus: text("approval_status")
 			.notNull()
 			.default("pendente_aprovacao"),

@@ -27,6 +27,7 @@ import {
 	MeetingDraftError,
 	MeetingNotFoundError,
 	MinuteAlreadyApprovedError,
+	MinuteNotEditableError,
 	MinuteNotFoundError,
 	MinuteTemplateNotFoundError,
 	MinuteVersionNotFoundError,
@@ -39,8 +40,15 @@ import {
 	renderMinute,
 	serializeVersionRow,
 } from "./render";
-import type { MinuteApprovalStatus } from "./schema";
-import type { ListMinutesOptions, MinuteListItem, MinuteRow } from "./types";
+import { defaultMinuteBodyContent, emptyDoc } from "./tiptap/serializer";
+import type { MinuteApprovalStatus, UpdateMinuteContentInput } from "./schema";
+import type {
+	ListMinutesOptions,
+	MinuteEditableContentJson,
+	MinuteListItem,
+	MinuteRow,
+	MinuteTemplateRow,
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // Templates (spec 0009)
@@ -365,6 +373,91 @@ async function resolveTemplate(db: DB, meeting: Meeting) {
 	return null;
 }
 
+function asContentString(
+	value: string | object | null | undefined,
+	fallback: string,
+) {
+	if (typeof value === "string") return value;
+	if (value != null) return JSON.stringify(value);
+	return fallback;
+}
+
+function legacyBodyContent(template: MinuteTemplateRow) {
+	return JSON.stringify(
+		defaultMinuteBodyContent({
+			showMeeting: template.showMeeting,
+			showClasses: template.showClasses,
+			showParticipants: template.showParticipants,
+			showRecords: template.showRecords,
+			showGeneralReports: template.showGeneralReports,
+			showSignatures: template.showSignatures,
+		}),
+	);
+}
+
+function minuteHasEditableContent(minute: MinuteRow | undefined) {
+	return (
+		!!minute &&
+		[minute.headerContent, minute.bodyContent, minute.footerContent].some(
+			(value) => value != null,
+		)
+	);
+}
+
+function applyMinuteContent(
+	preset: MinuteTemplateRow | null,
+	minute: MinuteRow | undefined,
+): MinuteTemplateRow | null {
+	if (!preset && !minuteHasEditableContent(minute)) return null;
+
+	const base: MinuteTemplateRow = preset ?? {
+		id: minute?.templateId ?? "minute-local-content",
+		name: "Ata da reunião",
+		headerContent: JSON.stringify(emptyDoc()),
+		bodyContent: JSON.stringify(defaultMinuteBodyContent()),
+		footerContent: JSON.stringify(emptyDoc()),
+		showMeeting: true,
+		showClasses: true,
+		showParticipants: true,
+		showRecords: true,
+		showGeneralReports: true,
+		showSignatures: true,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	};
+
+	return {
+		...base,
+		headerContent: minute?.headerContent ?? base.headerContent,
+		bodyContent:
+			minute?.bodyContent ?? base.bodyContent ?? legacyBodyContent(base),
+		footerContent: minute?.footerContent ?? base.footerContent,
+	};
+}
+
+function buildMinuteEditableContent(
+	preset: MinuteTemplateRow | null,
+	minute: MinuteRow | undefined,
+): MinuteEditableContentJson {
+	const effective = applyMinuteContent(preset, minute);
+	return {
+		presetId: preset?.id ?? minute?.templateId ?? null,
+		presetName: preset?.name ?? null,
+		headerContent: asContentString(
+			effective?.headerContent,
+			JSON.stringify(emptyDoc()),
+		),
+		bodyContent: asContentString(
+			effective?.bodyContent,
+			JSON.stringify(defaultMinuteBodyContent()),
+		),
+		footerContent: asContentString(
+			effective?.footerContent,
+			JSON.stringify(emptyDoc()),
+		),
+	};
+}
+
 // ---------------------------------------------------------------------------
 // Prévia e geração (spec 0009)
 // ---------------------------------------------------------------------------
@@ -375,16 +468,97 @@ export async function findMinuteByMeetingId(db: DB, meetingId: string) {
 	});
 }
 
+export async function getMinuteEditableContent(
+	db: DB,
+	meetingId: string,
+): Promise<MinuteEditableContentJson> {
+	const meeting = await findMeetingById(db, meetingId);
+	if (!meeting) {
+		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
+	}
+	const preset = await resolveTemplate(db, meeting);
+	const minute = await findMinuteByMeetingId(db, meetingId);
+	return buildMinuteEditableContent(preset, minute);
+}
+
+export async function updateMinuteContent(
+	db: DB,
+	meetingId: string,
+	input: UpdateMinuteContentInput,
+): Promise<MinuteEditableContentJson> {
+	const meeting = await findMeetingById(db, meetingId);
+	if (!meeting) {
+		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
+	}
+	if (meeting.status === "finished") {
+		throw new MinuteNotEditableError(
+			"Reunião finalizada: reabra para editar a ata",
+		);
+	}
+
+	const preset = await resolveTemplate(db, meeting);
+	const values = {
+		headerContent: asContentString(
+			input.headerContent,
+			JSON.stringify(emptyDoc()),
+		),
+		bodyContent: asContentString(
+			input.bodyContent,
+			JSON.stringify(defaultMinuteBodyContent()),
+		),
+		footerContent: asContentString(
+			input.footerContent,
+			JSON.stringify(emptyDoc()),
+		),
+	};
+	const minute = await findMinuteByMeetingId(db, meetingId);
+	if (minute) {
+		await db
+			.update(minutes)
+			.set({
+				templateId: meeting.templateId ?? null,
+				...values,
+				approvalStatus: "pendente_aprovacao",
+				approvedAt: null,
+				approvalNotes: null,
+			})
+			.where(eq(minutes.id, minute.id))
+			.returning()
+			.get();
+	} else {
+		await db
+			.insert(minutes)
+			.values({
+				id: crypto.randomUUID(),
+				meetingId,
+				templateId: meeting.templateId ?? null,
+				...values,
+			})
+			.returning()
+			.get();
+	}
+
+	return {
+		presetId: preset?.id ?? meeting.templateId ?? null,
+		presetName: preset?.name ?? null,
+		...values,
+	};
+}
+
 /** Prévia (borda 3: permitida em qualquer status, inclusive rascunho). */
 export async function previewMinute(db: DB, meetingId: string) {
 	const meeting = await findMeetingById(db, meetingId);
 	if (!meeting) {
 		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
 	}
+	const minute = await findMinuteByMeetingId(db, meetingId);
 	const template = await resolveTemplate(db, meeting);
 	const data = await collectMinuteData(db, meetingId);
-	const rendered = renderMinute({ meeting, template, ...data });
-	const minute = await findMinuteByMeetingId(db, meetingId);
+	const rendered = renderMinute({
+		meeting,
+		template: applyMinuteContent(template, minute),
+		...data,
+	});
 	return {
 		meetingId,
 		templateId: template?.id ?? null,
@@ -394,6 +568,7 @@ export async function previewMinute(db: DB, meetingId: string) {
 		approvalNotes: minute?.approvalNotes ?? null,
 		rendered,
 		content: renderedToPlainText(rendered),
+		editableContent: buildMinuteEditableContent(template, minute),
 	};
 }
 
@@ -458,7 +633,11 @@ export async function generateMinuteVersion(
 
 	const template = await resolveTemplate(db, meeting);
 	const data = await collectMinuteData(db, meetingId);
-	const rendered = renderMinute({ meeting, template, ...data });
+	const rendered = renderMinute({
+		meeting,
+		template: applyMinuteContent(template, minute),
+		...data,
+	});
 	const content = renderedToPlainText(rendered);
 	const pdfBytes = await buildMinutePdf(rendered, {
 		generatedAt: new Date().toISOString(),

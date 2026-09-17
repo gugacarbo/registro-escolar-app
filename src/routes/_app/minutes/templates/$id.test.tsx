@@ -134,7 +134,7 @@ describe("MinuteTemplateDetailPage", () => {
 		expect(mocks.mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({ name: "Modelo padrão" }),
 		);
-		expect(await screen.findByText("Modelo atualizado")).toBeInTheDocument();
+		expect(await screen.findByText("Preset atualizado")).toBeInTheDocument();
 	});
 
 	it("exibe o estado de carregamento antes de receber o template", () => {
@@ -161,7 +161,7 @@ describe("MinuteTemplateDetailPage", () => {
 		renderPage();
 
 		expect(
-			screen.getByText("Falha ao carregar template de ata"),
+			screen.getByText("Falha ao carregar preset de ata"),
 		).toBeInTheDocument();
 	});
 
@@ -199,7 +199,7 @@ describe("MinuteTemplateDetailPage", () => {
 		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
 
 		expect(
-			await screen.findByText("Falha ao atualizar template de ata"),
+			await screen.findByText("Falha ao atualizar preset de ata"),
 		).toBeInTheDocument();
 	});
 });

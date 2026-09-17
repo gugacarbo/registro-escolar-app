@@ -6,26 +6,26 @@ import {
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
 
-test.describe("SPEC-0013 modelos de ata", () => {
-	test("exibe empty-state com CTA quando não há modelos", async ({
+test.describe("SPEC-0013 presets de ata", () => {
+	test("exibe empty-state com CTA quando não há presets", async ({
 		authenticatedPage: page,
 	}) => {
 		await page.goto("/minutes/templates");
 
 		await expect(
-			page.getByText("Nenhum modelo cadastrado", { exact: true }),
+			page.getByText("Nenhum preset cadastrado", { exact: true }),
 		).toBeVisible();
 		await expect(
-			page.getByText("Cadastre um modelo para usar na geração das atas."),
+			page.getByText("Cadastre um preset para iniciar as atas das reuniões."),
 		).toBeVisible();
 
-		await page.getByRole("button", { name: "Novo modelo" }).last().click();
+		await page.getByRole("button", { name: "Novo preset" }).last().click();
 
 		await expect(
 			page.getByRole("dialog").getByRole("textbox", { name: "Nome *" }),
 		).toBeVisible();
 		await expect(
-			page.getByRole("button", { name: "Criar modelo" }),
+			page.getByRole("button", { name: "Criar preset" }),
 		).toBeVisible();
 	});
 
@@ -93,7 +93,7 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		).toBeHidden();
 	});
 
-	test("salva edição do template e a próxima prévia reflete a alteração", async ({
+	test("salva edição do preset sem alterar atas já configuradas", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
@@ -118,28 +118,27 @@ test.describe("SPEC-0013 modelos de ata", () => {
 		await page.getByRole("button", { name: "Salvar alterações" }).click();
 
 		await expect(
-			page.getByText("Modelo atualizado", { exact: true }),
+			page.getByText("Preset atualizado", { exact: true }),
 		).toBeVisible({ timeout: 20_000 });
 
 		const preview = await previewMinute(apiContext, meeting.id);
 		expect(preview.templateId).toBe(template.id);
-		expect(preview.content).toContain("CABEÇALHO REVISADO NO E2E");
-		expect(preview.content).not.toContain("CABEÇALHO ORIGINAL");
-		expect(preview.content).toContain("Conteúdo revisado no e2e");
-		expect(preview.content).not.toContain("DATA DA REUNIÃO");
+		expect(preview.content).toContain("CABEÇALHO ORIGINAL");
+		expect(preview.content).not.toContain("CABEÇALHO REVISADO NO E2E");
+		expect(preview.content).not.toContain("Conteúdo revisado no e2e");
 	});
 
 	test("cria modelo pelo popup e personaliza na página de edição", async ({
 		authenticatedPage: page,
 	}) => {
 		await page.goto("/minutes/templates");
-		await page.getByRole("button", { name: "Novo modelo" }).last().click();
+		await page.getByRole("button", { name: "Novo preset" }).last().click();
 
 		const dialog = page.getByRole("dialog");
 		await dialog
 			.getByRole("textbox", { name: "Nome *" })
 			.fill("Modelo Rico e Placeholder");
-		await dialog.getByRole("button", { name: "Criar modelo" }).click();
+		await dialog.getByRole("button", { name: "Criar preset" }).click();
 
 		// O popup cria apenas o nome, fecha e o modelo aparece na listagem.
 		await expect(dialog).toBeHidden({ timeout: 20_000 });
@@ -163,7 +162,7 @@ test.describe("SPEC-0013 modelos de ata", () => {
 
 		await page.getByRole("button", { name: "Salvar alterações" }).click();
 		await expect(
-			page.getByText("Modelo atualizado", { exact: true }),
+			page.getByText("Preset atualizado", { exact: true }),
 		).toBeVisible({ timeout: 20_000 });
 	});
 });

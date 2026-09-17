@@ -120,6 +120,13 @@
       "when": 1789684648996,
       "tag": "0016_adiciona-papel-padrao-servidor",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1789688697651,
+      "tag": "0017_adiciona-conteudo-editavel-por-reuniao",
+      "breakpoints": true
     }
   ]
 }

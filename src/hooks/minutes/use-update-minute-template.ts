@@ -22,7 +22,7 @@ export function useUpdateMinuteTemplate(id: string) {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao atualizar template de ata");
+				throw new Error(body.error ?? "Falha ao atualizar preset de ata");
 			}
 			return response.json() as Promise<MinuteTemplate>;
 		},

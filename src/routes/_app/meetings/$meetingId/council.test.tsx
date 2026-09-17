@@ -212,7 +212,10 @@ describe("CouncilPage", () => {
 		expect(
 			screen.queryByText("Participação na reunião"),
 		).not.toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "Turma A" })).toBeInTheDocument();
+		expect(screen.getByRole("tab", { name: "Turma A" })).toHaveAttribute(
+			"data-state",
+			"active",
+		);
 		expect(
 			screen.getByRole("heading", { name: /Estudantes da turma/ }),
 		).toBeInTheDocument();
@@ -227,6 +230,49 @@ describe("CouncilPage", () => {
 			screen.getByRole("tab", { name: /Relatos gerais/ }),
 		).toBeInTheDocument();
 		expect(screen.queryByText(/spec 0007/i)).not.toBeInTheDocument();
+	});
+
+	it("posiciona as tabs de turma acima dos dois cards", () => {
+		renderPage();
+
+		const classTabs = screen.getByTestId("council-class-tabs");
+		const layout = screen.getByTestId("council-layout");
+
+		expect(classTabs.nextElementSibling).toBe(layout);
+		expect(screen.getByTestId("council-students-panel")).not.toContainElement(
+			classTabs,
+		);
+	});
+
+	it("apresenta o seletor de turmas como botões sobre um card", () => {
+		renderPage();
+
+		const classTabs = screen.getByTestId("council-class-tabs");
+
+		expect(classTabs.querySelector('[data-slot="card"]')).toBeInTheDocument();
+		expect(screen.getByTestId("council-class-label")).toHaveTextContent(
+			"Turmas",
+		);
+		const tabList = screen.getByRole("tablist", { name: "Turmas da reunião" });
+
+		expect(tabList).toHaveAttribute("data-variant", "default");
+		expect(tabList).toHaveClass("overflow-hidden");
+		expect(tabList).not.toHaveClass("overflow-x-auto");
+	});
+
+	it("mantém a lista de estudantes contida e rolável no card", () => {
+		renderPage();
+
+		const studentListScroll = screen.getByTestId("student-list-scroll");
+
+		expect(studentListScroll).toHaveClass("max-h-96", "overflow-y-auto");
+		expect(
+			screen.getByRole("list", { name: "Estudantes da turma" }),
+		).toHaveClass("min-w-0");
+		expect(screen.getByRole("button", { name: "Selecionar João" })).toHaveClass(
+			"min-w-0",
+			"overflow-hidden",
+		);
 	});
 
 	it("organiza estudantes à esquerda e registros à direita", async () => {
@@ -594,16 +640,17 @@ describe("CouncilPage estados adicionais", () => {
 			isLoading: false,
 		});
 		renderPage();
-		expect(screen.getByRole("button", { name: "Turma B" })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "class-3" })).toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: "Turma B" }));
+		expect(screen.getByRole("tab", { name: "Turma B" })).toBeInTheDocument();
+		expect(screen.getByRole("tab", { name: "class-3" })).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("tab", { name: "Turma B" }));
 		expect(mocks.useMeetingClassStudents).toHaveBeenLastCalledWith(
 			"meeting-1",
 			"class-2",
 		);
 	});
 
-	it("filtra por matrícula e usa fallback do primeiro pendente ao trocar de turma", () => {
+	it("filtra por matrícula e usa fallback do primeiro pendente ao trocar de turma", async () => {
+		const user = userEvent.setup();
 		mocks.useMeetingClassStudents.mockReturnValue({
 			data: {
 				students: [
@@ -675,8 +722,9 @@ describe("CouncilPage estados adicionais", () => {
 			isLoading: false,
 			isError: false,
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Turma A" }));
-		fireEvent.change(screen.getByLabelText("Buscar estudante"), {
+		await user.click(screen.getByRole("tab", { name: "Turma B" }));
+		const searchInput = await screen.findByLabelText("Buscar estudante");
+		fireEvent.change(searchInput, {
 			target: { value: "205" },
 		});
 		expect(

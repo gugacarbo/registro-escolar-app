@@ -26,6 +26,15 @@ export type MinutePreviewJson = {
 	approvedAt: string | null;
 	approvalNotes: string | null;
 	content: string;
+	editableContent: MinuteEditableContentJson;
+};
+
+export type MinuteEditableContentJson = {
+	presetId: string | null;
+	presetName: string | null;
+	headerContent: string;
+	bodyContent: string;
+	footerContent: string;
 };
 
 export type GenerateMinuteJson = {

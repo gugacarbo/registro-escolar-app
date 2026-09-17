@@ -41,7 +41,7 @@ Permitir criar e gerenciar o ciclo de vida de uma reunião de conselho de classe
 ## Fluxo
 
 1. O operador cria uma reunião informando nome e data.
-2. Em Rascunho, seleciona turmas participantes, servidores participantes, papéis e template de ata.
+	2. Em Rascunho, seleciona turmas participantes, servidores participantes, papéis e preset de ata.
 3. O operador inicia a reunião (Rascunho → Em andamento).
 4. Durante o conselho, o operador visualiza estudantes das turmas, seus registros independentes pré-existentes, e pode criar novos registros vinculados àquela reunião.
 5. O operador finaliza a reunião (Em andamento → Finalizada).
@@ -53,7 +53,7 @@ Permitir criar e gerenciar o ciclo de vida de uma reunião de conselho de classe
 - `PATCH /api/meetings/:id/start` — inicia reunião.
 - `PATCH /api/meetings/:id/finalize` — finaliza reunião.
 - `PATCH /api/meetings/:id/reopen` — reabre reunião finalizada.
-- Payload de criação: `nome`, `data`, `turmaIds[]`, `participantes[]` com `servidorId` e `papelId`, `templateId`.
+- Payload de criação: `nome`, `data`, `turmaIds[]`, `participantes[]` com `servidorId` e `papelId`, `templateId` opcional do preset.
 
 ## Casos de borda
 

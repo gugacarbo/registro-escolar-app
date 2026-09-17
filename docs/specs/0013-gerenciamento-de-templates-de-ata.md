@@ -1,28 +1,40 @@
 ---
-status: accepted
+status: implemented
 date: 2026-09-10
 builds-on:
   - ADR-0014
   - SPEC-0009
-implemented-by: []
+implemented-by:
+  - src/components/app-sidebar.tsx
+  - src/components/minutes/minute-template-form.tsx
+  - src/routes/_app/minutes/templates/index.tsx
+  - src/routes/_app/minutes/templates/$id.tsx
+  - src/db/minutes-schema.ts
+  - src/lib/minutes/repository.ts
+  - src/routes/api/meetings/$meetingId/minutes/content.ts
+  - src/components/minutes/minute-content-editor.tsx
+  - src/hooks/minutes/use-minute-content.ts
+  - src/hooks/minutes/use-update-minute-content.ts
+  - src/routes/_app/minutes/$meetingId.tsx
+  - src/routes/_app/meetings/$meetingId/index.tsx
 ---
 
-# Gerenciamento de templates de ata
+# Gerenciamento de presets de ata
 
 > Convenções compartilhadas: `docs/context/CONVENTIONS.md`.
 
 ## Objetivo
 
-Permitir que o operador encontre templates de ata em uma tabela padronizada e
-abra um template existente em uma página própria para editar e salvar seus
-campos e blocos.
+Permitir que o operador encontre presets de ata em uma tabela padronizada e
+abra um preset existente em uma página própria para editar e salvar seu
+conteúdo inicial. Cada reunião recebe uma cópia que pode ser personalizada.
 
 ## Fluxo
 
-1. O operador acessa a lista de modelos de ata.
-2. O sistema apresenta os modelos na tabela padrão da aplicação, com nome e
-   blocos habilitados.
-3. Ao selecionar uma linha, o sistema abre a página do template correspondente.
+1. O operador acessa a lista de presets de ata.
+2. O sistema apresenta os presets na tabela padrão da aplicação, com nome e
+   conteúdos personalizados.
+3. Ao selecionar uma linha, o sistema abre a página do preset correspondente.
 4. A página carrega os valores persistidos no formulário de edição.
 5. O operador salva as alterações e recebe confirmação de atualização.
 
@@ -31,22 +43,27 @@ campos e blocos.
 - A lista usa `DataTable`, com estados de carregamento, vazio e erro e
   paginação local.
 - Cada linha navegável aponta para `/minutes/templates/:id`.
-- `GET /api/minute-templates/:id` retorna o template solicitado; retorna `404`
+- `GET /api/minute-templates/:id` retorna o preset solicitado; retorna `404`
   quando ele não existe.
 - `PATCH /api/minute-templates/:id` atualiza nome, textos de cabeçalho/rodapé e
   blocos booleanos do template; retorna o template atualizado.
-- Uma edição de template afeta somente prévias e versões geradas posteriormente;
-  dados de reunião e versões já geradas permanecem inalterados.
+- Uma edição de preset altera apenas o conteúdo inicial de novas aplicações;
+  atas de reuniões já configuradas e versões já geradas permanecem inalteradas.
+- `GET /api/meetings/:id/minutes/content` e
+  `PATCH /api/meetings/:id/minutes/content` leem e salvam o conteúdo próprio da
+  reunião, permitido em Rascunho, Em andamento e Reaberta.
 
 ## Casos de borda
 
 | # | QUANDO ⟨gatilho⟩ | o sistema DEVE ⟨resposta⟩ |
 | --- | --- | --- |
 | 1 | a lista estiver carregando | exibir o estado de carregamento da tabela padrão |
-| 2 | não houver templates cadastrados | exibir empty-state com CTA para cadastrar um modelo |
+| 2 | não houver presets cadastrados | exibir empty-state com CTA para cadastrar um preset |
 | 3 | o operador clicar ou ativar por teclado uma linha | navegar para a página de edição daquele template |
-| 4 | o template solicitado não existir | exibir mensagem de falha de carregamento sem renderizar formulário vazio |
-| 5 | uma edição for salva | confirmar a atualização e refletir as alterações em prévias futuras, sem alterar versões existentes |
+| 4 | o preset solicitado não existir | exibir mensagem de falha de carregamento sem renderizar formulário vazio |
+| 5 | uma edição do preset for salva | confirmar a atualização sem alterar atas já configuradas ou versões existentes |
+| 6 | o operador editar a ata de uma reunião | salvar cópia local de cabeçalho, corpo e rodapé |
+| 7 | a reunião estiver finalizada e o operador editar seu conteúdo | rejeitar e orientar a reabrir a reunião |
 
 ## Questões em aberto
 
@@ -71,4 +88,4 @@ bun run build # exit 0
 
 ## Verificação
 
-Pendente da implementação e execução do DoD.
+Implementado com cópia por reunião, editor rico e bloqueio de edição após finalização. A verificação final está registrada após a execução do DoD.

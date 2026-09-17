@@ -52,7 +52,7 @@ const NAV_ITEMS: NavItem[] = [
 	{ title: "Componentes", to: "/components", icon: BookOpenText },
 	{ title: "Reuniões", to: "/meetings", icon: CalendarDays },
 	{ title: "Atas", to: "/minutes", icon: FileText },
-	{ title: "Modelos de ata", to: "/minutes/templates", icon: Files },
+	{ title: "Presets de ata", to: "/minutes/templates", icon: Files },
 ];
 
 const ADMIN_NAV_ITEMS: NavItem[] = [

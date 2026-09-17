@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	AlertCircleIcon,
 	ArrowRightIcon,
-	BookOpenIcon,
 	CalendarIcon,
 	CheckCircle2Icon,
 	ClockIcon,
@@ -44,7 +43,6 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
@@ -63,7 +61,6 @@ import { PageHeader, PageShell } from "#/components/ui/page";
 import { Skeleton } from "#/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { fetchRolesPage, fetchStaffPage } from "#/hooks/entity-fetchers";
-import { useGeneralReports } from "#/hooks/general-reports/use-general-reports";
 import { useAddParticipant } from "#/hooks/meetings/use-add-participant";
 import { useMeeting } from "#/hooks/meetings/use-meeting";
 import { useMeetingClasses } from "#/hooks/meetings/use-meeting-classes";
@@ -107,7 +104,6 @@ export default function MeetingDetailPage() {
 		useMeetingClasses(meetingId);
 	const { data: participants = [], isLoading: isLoadingParticipants } =
 		useParticipants(meetingId);
-	const { data: generalReports = [] } = useGeneralReports(meetingId);
 	const { data: templates = [] } = useMinuteTemplates();
 
 	const preview = useMinutePreview(meetingId);
@@ -115,7 +111,7 @@ export default function MeetingDetailPage() {
 	const generate = useGenerateMinute(meetingId);
 	const addParticipant = useAddParticipant(meetingId);
 
-	const [activeTab, setActiveTab] = useState("visao-geral");
+	const [activeTab, setActiveTab] = useState("turmas");
 
 	// Participantes Selects
 	const [staffSearch, setStaffSearch] = useState("");
@@ -181,8 +177,7 @@ export default function MeetingDetailPage() {
 				<div className="space-y-4">
 					<Skeleton className="h-8 w-48" />
 					<Skeleton className="h-16 w-full" />
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						<Skeleton className="h-28 w-full" />
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						<Skeleton className="h-28 w-full" />
 						<Skeleton className="h-28 w-full" />
 						<Skeleton className="h-28 w-full" />
@@ -235,22 +230,16 @@ export default function MeetingDetailPage() {
 				eyebrow="Reunião"
 				title={meeting.title}
 				description={
-					<div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+					<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
 						<MeetingStatusBadge status={meeting.status} />
 						<span className="flex items-center gap-1.5 text-muted-foreground">
 							<CalendarIcon className="size-4 shrink-0 text-primary/70" />
-							Data:{" "}
-							<strong className="font-medium text-foreground">
-								{formatDate(meeting.heldAt)}
-							</strong>
+							{formatDate(meeting.heldAt)}
 						</span>
 						{activeTemplate && (
 							<span className="flex items-center gap-1.5 text-muted-foreground">
 								<FileTextIcon className="size-4 shrink-0 text-primary/70" />
-								Modelo de ata:{" "}
-								<strong className="font-medium text-foreground">
-									{activeTemplate.name}
-								</strong>
+								Preset de ata: {activeTemplate.name}
 							</span>
 						)}
 					</div>
@@ -280,283 +269,70 @@ export default function MeetingDetailPage() {
 				}
 			/>
 
-			{meeting.status === "finished" && (
+			{(meeting.status === "finished" ||
+				meeting.status === "draft" ||
+				meeting.status === "reopened") && (
 				<div
 					role="status"
-					className="flex items-center gap-2 rounded-lg border border-primary/20 bg-secondary/80 p-3 text-sm text-foreground shadow-xs"
+					className="flex items-center gap-2 rounded-lg border border-primary/20 bg-secondary/80 px-3 py-2 text-sm text-foreground shadow-xs"
 				>
-					<CheckCircle2Icon className="size-4 shrink-0 text-primary" />
-					<span>Reunião finalizada — reabra para editar</span>
-				</div>
-			)}
-
-			{meeting.status === "draft" && (
-				<div className="flex items-center gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-900 shadow-xs dark:text-amber-200">
-					<ClockIcon className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-					<span>
-						Reunião em rascunho. Revise as turmas e a equipe de participantes
-						antes de iniciar a reunião.
-					</span>
-				</div>
-			)}
-
-			{meeting.status === "reopened" && (
-				<div className="flex items-center gap-2.5 rounded-lg border border-orange-500/20 bg-orange-500/10 p-3 text-sm text-orange-900 shadow-xs dark:text-orange-200">
-					<AlertCircleIcon className="size-4 shrink-0 text-orange-600 dark:text-orange-400" />
-					<span>
-						Reunião reaberta para ajustes. Ao finalizar os acertos nos
-						registros, lembre-se de atualizar a ata e concluir a sessão.
-					</span>
-				</div>
-			)}
-
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<Card>
-					<CardHeader className="pb-2">
-						<CardDescription className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider">
-							Turmas vinculadas
-							<GraduationCapIcon className="size-4 text-primary/60" />
-						</CardDescription>
-						<CardTitle className="text-2xl font-bold">
-							{isLoadingClasses ? "..." : meetingClasses.length}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="text-xs text-muted-foreground">
-						{meetingClasses.length > 0 ? (
-							<span className="line-clamp-1">
-								{meetingClasses
-									.map((c) => c.class?.name ?? c.classId)
-									.join(", ")}
+					{meeting.status === "finished" ? (
+						<>
+							<CheckCircle2Icon className="size-4 shrink-0 text-primary" />
+							<span>Reunião finalizada — reabra para editar</span>
+						</>
+					) : meeting.status === "draft" ? (
+						<>
+							<ClockIcon className="size-4 shrink-0 text-primary" />
+							<span>
+								Rascunho — revise turmas e participantes antes de iniciar
 							</span>
-						) : (
-							"Nenhuma turma vinculada"
-						)}
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="pb-2">
-						<CardDescription className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider">
-							Equipe participante
-							<UsersIcon className="size-4 text-primary/60" />
-						</CardDescription>
-						<CardTitle className="text-2xl font-bold">
-							{isLoadingParticipants ? "..." : participants.length}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="text-xs text-muted-foreground">
-						{participants.length === 1
-							? "1 servidor registrado"
-							: `${participants.length} servidores registrados`}
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="pb-2">
-						<CardDescription className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider">
-							Relatos gerais
-							<BookOpenIcon className="size-4 text-primary/60" />
-						</CardDescription>
-						<CardTitle className="text-2xl font-bold">
-							{generalReports.length}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="text-xs text-muted-foreground">
-						Observações gerais da reunião
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="pb-2">
-						<CardDescription className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider">
-							Ata da reunião
-							<FileTextIcon className="size-4 text-primary/60" />
-						</CardDescription>
-						<CardTitle className="text-2xl font-bold">
-							{preview.data?.approvalStatus === "aprovada"
-								? "Aprovada"
-								: preview.data
-									? "Em elaboração"
-									: "Pendente"}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="text-xs text-muted-foreground">
-						{versions.data?.length
-							? `${versions.data.length} versão(ões) gerada(s)`
-							: "Nenhuma versão emitida"}
-					</CardContent>
-				</Card>
-			</div>
+						</>
+					) : (
+						<>
+							<AlertCircleIcon className="size-4 shrink-0 text-primary" />
+							<span>Reaberta para ajustes — atualize a ata ao concluir</span>
+						</>
+					)}
+				</div>
+			)}
 
 			<Tabs
 				value={activeTab}
 				onValueChange={setActiveTab}
 				className="space-y-4"
 			>
-				<div className="flex flex-wrap items-center justify-between gap-2 border-b pb-2">
+				<div className="border-b pb-2">
 					<div className="min-w-0 max-w-full overflow-x-auto">
 						<TabsList>
-							<TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
 							<TabsTrigger value="turmas">
 								Turmas ({meetingClasses.length})
 							</TabsTrigger>
 							<TabsTrigger value="participantes">
 								Participantes ({participants.length})
 							</TabsTrigger>
-							<TabsTrigger value="ata">Ata e Documentos</TabsTrigger>
+							<TabsTrigger value="ata">
+								Ata
+								{versions.data?.length ? ` (${versions.data.length})` : ""}
+							</TabsTrigger>
 						</TabsList>
-					</div>
-
-					<div className="flex flex-wrap items-center gap-2">
-						<Link to="/meetings/$meetingId/participants" params={{ meetingId }}>
-							<Button variant="secondary" size="sm">
-								Participantes
-							</Button>
-						</Link>
-						<Link to="/meetings/$meetingId/students" params={{ meetingId }}>
-							<Button variant="secondary" size="sm">
-								Acompanhamento
-							</Button>
-						</Link>
 					</div>
 				</div>
 
-				<TabsContent value="visao-geral" className="space-y-6">
-					<div className="grid gap-4 md:grid-cols-3">
-						<Card className="flex flex-col justify-between border-primary/20 bg-card/60 transition-colors hover:border-primary/40">
-							<CardHeader>
-								<div className="flex items-center gap-2">
-									<div className="rounded-lg bg-primary/10 p-2 text-primary">
-										<UsersIcon className="size-5" />
-									</div>
-									<CardTitle className="text-lg">Sala da reunião</CardTitle>
-								</div>
-								<CardDescription>
-									Painel interativo para debater caso a caso os estudantes,
-									lançar registros avaliativos e indicar apontamentos na ata.
-								</CardDescription>
-							</CardHeader>
-							<CardFooter>
-								<Link
-									to="/meetings/$meetingId/council"
-									params={{ meetingId }}
-									className="w-full"
-								>
-									<Button className="w-full justify-between">
-										Participar da reunião
-										<ArrowRightIcon className="size-4" />
-									</Button>
-								</Link>
-							</CardFooter>
-						</Card>
-
-						<Card className="flex flex-col justify-between border-primary/20 bg-card/60 transition-colors hover:border-primary/40">
-							<CardHeader>
-								<div className="flex items-center gap-2">
-									<div className="rounded-lg bg-primary/10 p-2 text-primary">
-										<CheckCircle2Icon className="size-5" />
-									</div>
-									<CardTitle className="text-lg">
-										Acompanhamento de Turma
-									</CardTitle>
-								</div>
-								<CardDescription>
-									Verifique em lote o andamento dos estudantes (Pendente, Em
-									discussão, Concluído) e acompanhe o progresso até 100%.
-								</CardDescription>
-							</CardHeader>
-							<CardFooter>
-								<Link
-									to="/meetings/$meetingId/students"
-									params={{ meetingId }}
-									className="w-full"
-								>
-									<Button variant="outline" className="w-full justify-between">
-										Ver Acompanhamento
-										<ArrowRightIcon className="size-4" />
-									</Button>
-								</Link>
-							</CardFooter>
-						</Card>
-
-						<Card className="flex flex-col justify-between border-primary/20 bg-card/60 transition-colors hover:border-primary/40">
-							<CardHeader>
-								<div className="flex items-center gap-2">
-									<div className="rounded-lg bg-primary/10 p-2 text-primary">
-										<FileTextIcon className="size-5" />
-									</div>
-									<CardTitle className="text-lg">Ata e Documentação</CardTitle>
-								</div>
-								<CardDescription>
-									Gere versões consolidadas da ata, consulte o documento
-									completo e baixe o arquivo em PDF para arquivamento.
-								</CardDescription>
-							</CardHeader>
-							<CardFooter>
-								<Link to="/minutes" className="w-full">
-									<Button variant="outline" className="w-full justify-between">
-										Abrir Módulo de Atas
-										<ArrowRightIcon className="size-4" />
-									</Button>
-								</Link>
-							</CardFooter>
-						</Card>
-					</div>
-
+				<TabsContent value="turmas" className="space-y-4">
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between">
 							<div>
-								<CardTitle>Turmas desta Reunião</CardTitle>
+								<CardTitle>Turmas Participantes</CardTitle>
 								<CardDescription>
-									Turmas que fazem parte da pauta de deliberação.
+									Todas as turmas vinculadas a esta reunião.
 								</CardDescription>
 							</div>
-						</CardHeader>
-						<CardContent>
-							{isLoadingClasses && <Skeleton className="h-16 w-full" />}
-							{!isLoadingClasses && meetingClasses.length === 0 && (
-								<p className="text-sm text-muted-foreground">
-									Nenhuma turma cadastrada para esta reunião.
-								</p>
-							)}
-							<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-								{meetingClasses.map((item) => (
-									<div
-										key={item.id}
-										className="flex items-center justify-between rounded-lg border p-3 text-sm transition-colors hover:bg-accent/40"
-									>
-										<div className="min-w-0">
-											<p className="truncate font-semibold text-foreground">
-												{item.class?.name ?? item.classId}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												{item.class?.academicPeriod ?? "—"}
-												{item.class?.course ? ` · ${item.class.course}` : ""}
-												{item.class?.shift ? ` · ${item.class.shift}` : ""}
-											</p>
-										</div>
-										<Link
-											to="/meetings/$meetingId/council"
-											params={{ meetingId }}
-										>
-											<Button size="sm" variant="ghost">
-												Ver
-											</Button>
-										</Link>
-									</div>
-								))}
-							</div>
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				<TabsContent value="turmas" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Turmas Participantes</CardTitle>
-							<CardDescription>
-								Todas as turmas vinculadas a esta reunião.
-							</CardDescription>
+							<Link to="/meetings/$meetingId/students" params={{ meetingId }}>
+								<Button variant="outline" size="sm">
+									Acompanhamento
+								</Button>
+							</Link>
 						</CardHeader>
 						<CardContent>
 							{isLoadingClasses && <Skeleton className="h-24 w-full" />}
@@ -596,14 +372,14 @@ export default function MeetingDetailPage() {
 												{item.class?.course ? ` · ${item.class.course}` : ""}
 											</p>
 										</div>
-										<div className="flex items-center gap-2">
-											<Link
-												to="/meetings/$meetingId/council"
-												params={{ meetingId }}
-											>
-												<Button size="sm">Participar da reunião</Button>
-											</Link>
-										</div>
+										<Link
+											to="/meetings/$meetingId/council"
+											params={{ meetingId }}
+										>
+											<Button size="sm" variant="ghost">
+												Ver
+											</Button>
+										</Link>
 									</div>
 								))}
 							</div>
@@ -806,6 +582,12 @@ export default function MeetingDetailPage() {
 											{generate.isPending ? "Gerando..." : "Gerar nova versão"}
 										</Button>
 									)}
+									<Link
+										to="/minutes/$meetingId"
+										params={{ meetingId }}
+									>
+										<Button variant="secondary">Editar conteúdo da ata</Button>
+									</Link>
 									<Link to="/minutes">
 										<Button variant="outline">Ir para Atas</Button>
 									</Link>

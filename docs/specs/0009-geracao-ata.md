@@ -14,37 +14,42 @@ implemented-by:
   - src/routes/api/meetings/$meetingId/minutes/index.ts
 ---
 
-# Geração de ata com templates
+# Geração de ata com presets
 
 > Convenções compartilhadas: `docs/context/CONVENTIONS.md`.
 
 ## Objetivo
 
-Permitir gerar a ata formal de uma reunião a partir de template, dados da reunião, registros e relatos selecionados, sem alterar os registros originais.
+Permitir gerar a ata formal de uma reunião a partir de um preset inicial, dados da reunião, registros e relatos selecionados, sem alterar os registros originais. Depois de aplicado, o conteúdo da ata pertence à reunião e pode ser editado localmente.
 
 ## Fluxo
 
-1. Na preparação da reunião, o operador seleciona um template de ata.
-2. A qualquer momento em andamento ou após finalização, o operador solicita prévia da ata.
-3. O sistema renderiza a ata aplicando o template aos dados filtrados (apenas registros/relatos marcados para inclusão).
-4. Após finalização, uma versão oficial da ata é gerada com PDF.
+1. Na preparação da reunião, o operador seleciona um preset de ata.
+2. O sistema copia cabeçalho, corpo e rodapé do preset para a ata lógica da reunião.
+3. Enquanto a reunião estiver editável, o operador pode ajustar esses três campos sem alterar o preset compartilhado.
+4. A qualquer momento em andamento ou após finalização, o operador solicita prévia da ata.
+5. O sistema renderiza a ata aplicando o conteúdo local aos dados filtrados (apenas registros/relatos marcados para inclusão).
+6. Após finalização, uma versão oficial da ata é gerada com PDF.
 
 ## Contrato
 
-- `GET /api/meetings/:id/minutes/preview` — retorna prévia da ata.
-- `POST /api/meetings/:id/minutes/generate` — gera versão oficial e PDF.
-- `POST /api/minute-templates` — cadastra template.
-- Template define blocos: cabeçalho, reunião, turmas, participantes, registros por estudante, relatos gerais, assinaturas, rodapé.
+- `GET /api/meetings/:id/minutes` — retorna prévia e conteúdo editável efetivo da ata.
+- `GET /api/meetings/:id/minutes/content` — retorna a cópia editável da reunião.
+- `PATCH /api/meetings/:id/minutes/content` — salva cabeçalho, corpo e rodapé locais.
+- `POST /api/meetings/:id/minutes` — gera versão oficial e PDF.
+- `POST /api/minute-templates` — cadastra preset.
+- O preset define o conteúdo inicial; a ata da reunião mantém sua própria cópia.
 
 ## Casos de borda
 
 | #   | QUANDO ⟨gatilho⟩                            | o sistema DEVE ⟨resposta⟩                                           |
 | --- | ------------------------------------------- | ------------------------------------------------------------------- |
 | 1   | não houver registros marcados para inclusão | gerar ata mínima com cabeçalho e relatos gerais                     |
-| 2   | o template for alterado após prévia         | próxima prévia refletir novo template; dados permanecem inalterados |
+| 2   | o preset for alterado após uma reunião receber sua cópia | atas já configuradas manterem seu conteúdo local; novas reuniões usarem o preset atualizado |
 | 3   | a reunião ainda estiver em Rascunho         | permitir prévia, mas não gerar versão oficial                       |
 | 4   | houver registros internos                   | omiti-los da ata e do PDF                                           |
 | 5   | a reunião possuir múltiplas turmas          | agrupar registros por turma e por estudante conforme template       |
+| 6   | o operador editar conteúdo de reunião finalizada | rejeitar com conflito e exigir reabertura da reunião                 |
 
 ## Questões em aberto
 
