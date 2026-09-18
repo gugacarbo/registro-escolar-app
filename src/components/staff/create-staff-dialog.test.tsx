@@ -51,6 +51,9 @@ describe("CreateStaffDialog", () => {
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
 			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [], total: 0 }), { status: 200 }),
+			)
+			.mockResolvedValueOnce(
 				new Response(JSON.stringify({ id: "staff-1" }), { status: 201 }),
 			);
 
@@ -85,11 +88,15 @@ describe("CreateStaffDialog", () => {
 
 	it("exibe erro vindo do servidor sem fechar o dialog", async () => {
 		const user = userEvent.setup();
-		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify({ error: "Servidor já cadastrado" }), {
-				status: 409,
-			}),
-		);
+		vi.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [], total: 0 }), { status: 200 }),
+			)
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ error: "Servidor já cadastrado" }), {
+					status: 409,
+				}),
+			);
 		renderDialog();
 
 		await user.type(await screen.findByLabelText("Nome *"), "João Silva");
