@@ -12,6 +12,11 @@ import { findActiveStaffById } from "#/lib/staff/repository";
 
 import { createMeetingHandler, listMeetingsHandler } from "./index";
 
+vi.mock("#/lib/cloudflare-env", () => ({
+	getRuntimeEnv: vi.fn().mockResolvedValue(undefined),
+	requireD1: vi.fn((env: Env | undefined) => env?.DB),
+}));
+
 vi.mock("#/lib/auth/session", () => ({
 	getSession: vi.fn(),
 }));
@@ -269,7 +274,7 @@ describe("POST /api/meetings/", () => {
 				method: "POST",
 				body: JSON.stringify({
 					title: "Reunião 1",
-					participants: [{ staffId: "missing", roleId: "role-1" }],
+					participants: [{ staffId: "missing", roleIds: ["role-1"] }],
 				}),
 			}),
 			context: { env: createEnv() },
@@ -291,7 +296,7 @@ describe("POST /api/meetings/", () => {
 				method: "POST",
 				body: JSON.stringify({
 					title: "Reunião 1",
-					participants: [{ staffId: "staff-1", roleId: "missing" }],
+					participants: [{ staffId: "staff-1", roleIds: ["missing"] }],
 				}),
 			}),
 			context: { env: createEnv() },
@@ -319,7 +324,7 @@ describe("POST /api/meetings/", () => {
 					title: "Reunião 1",
 					templateId: "template-1",
 					classIds: ["class-1"],
-					participants: [{ staffId: "staff-1", roleId: "role-1" }],
+					participants: [{ staffId: "staff-1", roleIds: ["role-1"] }],
 				}),
 			}),
 			context: { env: createEnv() },
@@ -333,7 +338,7 @@ describe("POST /api/meetings/", () => {
 				title: "Reunião 1",
 				templateId: "template-1",
 				classIds: ["class-1"],
-				participants: [{ staffId: "staff-1", roleId: "role-1" }],
+				participants: [{ staffId: "staff-1", roleIds: ["role-1"] }],
 			}),
 		);
 	});
