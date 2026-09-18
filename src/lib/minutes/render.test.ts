@@ -223,6 +223,48 @@ describe("renderMinute", () => {
 		expect(text).not.toContain("Relatos gerais");
 		expect(text).not.toContain("Assinaturas");
 	});
+
+	it("preserva fallback textual e imagens no corpo editável", () => {
+		const invalidJsonTemplate = {
+			name: "Preset textual",
+			headerContent: "texto sem JSON válido",
+			bodyContent: { type: "doc" },
+			footerContent: "123",
+		} as unknown as RenderInput["template"];
+		const fallbackRendered = renderMinute(
+			baseInput({ template: invalidJsonTemplate }),
+		);
+		expect(renderedToPlainText(fallbackRendered)).toContain(
+			"TEXTO SEM JSON VÁLIDO",
+		);
+
+		const imageRendered = renderMinute(
+			baseInput({
+				template: {
+					name: "Preset com imagem",
+					bodyContent: {
+						type: "doc",
+						content: [
+							{
+								type: "paragraph",
+								content: [
+									{
+										type: "image",
+										attrs: { src: "data:image/png;base64,QQ==" },
+									},
+								],
+							},
+						],
+					},
+				} as unknown as RenderInput["template"],
+			}),
+		);
+		expect(imageRendered.elements).toContainEqual({
+			kind: "image",
+			src: "data:image/png;base64,QQ==",
+			alt: "",
+		});
+	});
 });
 
 describe("serializeVersionRow", () => {

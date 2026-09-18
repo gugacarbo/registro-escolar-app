@@ -5,6 +5,7 @@ import {
 	parseDataUrl,
 } from "./image-utils";
 import {
+	defaultMinuteBodyContent,
 	emptyDoc,
 	plainTextToTipTap,
 	type RenderContext,
@@ -74,6 +75,36 @@ describe("TipTap serializer & utils", () => {
 		expect(plainTextToTipTap("")).toEqual(emptyDoc());
 		const multiLine = plainTextToTipTap("Linha 1\nLinha 2");
 		expect(multiLine.content?.length).toBe(2);
+		const trailingEmptyLine = plainTextToTipTap("Linha 1\n");
+		expect(trailingEmptyLine.content?.[1]?.content).toBeUndefined();
+	});
+
+	it("cria o corpo padrão com todas as seções e respeita as flags", () => {
+		const defaultBody = defaultMinuteBodyContent();
+		expect(defaultBody.content).toHaveLength(11);
+		expect(defaultBody.content?.map((node) => node.type)).toEqual([
+			"paragraph",
+			"heading",
+			"paragraph",
+			"heading",
+			"paragraph",
+			"heading",
+			"paragraph",
+			"heading",
+			"paragraph",
+			"heading",
+			"paragraph",
+		]);
+
+		const hiddenBody = defaultMinuteBodyContent({
+			showMeeting: false,
+			showClasses: false,
+			showParticipants: false,
+			showRecords: false,
+			showGeneralReports: false,
+			showSignatures: false,
+		});
+		expect(hiddenBody.content).toEqual([]);
 	});
 
 	it("converte TipTap para texto plano e resolve placeholders", () => {
@@ -103,6 +134,24 @@ describe("TipTap serializer & utils", () => {
 			mockContext,
 		);
 		expect(mixed).toContain("a\nb");
+
+		const missingText = tipTapToPlainText(
+			{
+				type: "doc",
+				content: [{ type: "paragraph", content: [{ type: "text" }] }],
+			},
+			mockContext,
+		);
+		expect(missingText).toBe("");
+
+		const emptyBlocks = tipTapToPlainText(
+			{
+				type: "doc",
+				content: [{ type: "paragraph" }, { type: "heading" }],
+			},
+			mockContext,
+		);
+		expect(emptyBlocks).toBe("");
 
 		// placeholder sem tipo (attrs ausentes) não quebra
 		const noType = tipTapToPlainText(
@@ -392,6 +441,25 @@ describe("TipTap serializer & utils", () => {
 				alt: "Logo",
 			},
 		]);
+
+		const unknownPlaceholder = tipTapToMinuteElements(
+			{
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [
+							{
+								type: "minutePlaceholder",
+								attrs: { "data-type": "placeholder-inexistente" },
+							},
+						],
+					},
+				],
+			},
+			mockContext,
+		);
+		expect(unknownPlaceholder).toEqual([]);
 	});
 
 	it("image-utils valida formatos, lê base64 e faz parse da data URL", async () => {
