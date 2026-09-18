@@ -260,7 +260,7 @@ describe("CouncilPage", () => {
 		expect(tabList).not.toHaveClass("overflow-x-auto");
 	});
 
-	it("mantém a lista de estudantes contida e rolável no card", () => {
+	it("mantém a lista de estudantes contida com rolagem no card", () => {
 		renderPage();
 
 		const studentListScroll = screen.getByTestId("student-list-scroll");
