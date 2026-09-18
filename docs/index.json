@@ -495,7 +495,7 @@
     "id": "SPEC-0009",
     "path": "docs/specs/0009-geracao-ata.md",
     "layer": "specs",
-    "title": "Geração de ata com templates",
+    "title": "Geração de ata com presets",
     "status": "implemented",
     "builds-on": [
       "ADR-0014",
@@ -508,8 +508,15 @@
       "src/lib/minutes/repository.ts",
       "src/lib/minutes/render.ts",
       "src/lib/minutes/pdf.ts",
+      "src/lib/meetings/repository.ts",
       "src/routes/api/minute-templates/index.ts",
-      "src/routes/api/meetings/$meetingId/minutes/index.ts"
+      "src/routes/api/meetings/$meetingId/minutes/index.ts",
+      "src/routes/api/meetings/$meetingId/minutes/content.ts",
+      "src/components/minutes/minute-content-editor.tsx",
+      "src/hooks/minutes/use-minute-content.ts",
+      "src/hooks/minutes/use-update-minute-content.ts",
+      "src/routes/_app/minutes/$meetingId.tsx",
+      "src/routes/_app/meetings/$meetingId/index.tsx"
     ]
   },
   {
@@ -575,14 +582,27 @@
     "id": "SPEC-0013",
     "path": "docs/specs/0013-gerenciamento-de-templates-de-ata.md",
     "layer": "specs",
-    "title": "Gerenciamento de templates de ata",
-    "status": "accepted",
+    "title": "Gerenciamento de presets de ata",
+    "status": "implemented",
     "builds-on": [
       "ADR-0014",
       "SPEC-0009"
     ],
     "superseded-by": null,
-    "implemented-by": []
+    "implemented-by": [
+      "src/components/app-sidebar.tsx",
+      "src/components/minutes/minute-template-form.tsx",
+      "src/routes/_app/minutes/templates/index.tsx",
+      "src/routes/_app/minutes/templates/$id.tsx",
+      "src/db/minutes-schema.ts",
+      "src/lib/minutes/repository.ts",
+      "src/routes/api/meetings/$meetingId/minutes/content.ts",
+      "src/components/minutes/minute-content-editor.tsx",
+      "src/hooks/minutes/use-minute-content.ts",
+      "src/hooks/minutes/use-update-minute-content.ts",
+      "src/routes/_app/minutes/$meetingId.tsx",
+      "src/routes/_app/meetings/$meetingId/index.tsx"
+    ]
   },
   {
     "id": "SPEC-0014",

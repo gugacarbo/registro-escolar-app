@@ -40,8 +40,8 @@ import {
 	renderMinute,
 	serializeVersionRow,
 } from "./render";
-import { defaultMinuteBodyContent, emptyDoc } from "./tiptap/serializer";
 import type { MinuteApprovalStatus, UpdateMinuteContentInput } from "./schema";
+import { defaultMinuteBodyContent, emptyDoc } from "./tiptap/serializer";
 import type {
 	ListMinutesOptions,
 	MinuteEditableContentJson,

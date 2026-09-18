@@ -10,8 +10,15 @@ implemented-by:
   - src/lib/minutes/repository.ts
   - src/lib/minutes/render.ts
   - src/lib/minutes/pdf.ts
+  - src/lib/meetings/repository.ts
   - src/routes/api/minute-templates/index.ts
   - src/routes/api/meetings/$meetingId/minutes/index.ts
+  - src/routes/api/meetings/$meetingId/minutes/content.ts
+  - src/components/minutes/minute-content-editor.tsx
+  - src/hooks/minutes/use-minute-content.ts
+  - src/hooks/minutes/use-update-minute-content.ts
+  - src/routes/_app/minutes/$meetingId.tsx
+  - src/routes/_app/meetings/$meetingId/index.tsx
 ---
 
 # Geração de ata com presets
@@ -73,10 +80,13 @@ bun run build ..................... exit 0
 
 ## Verificação
 
-DoD executado em 2026-09-09. Templates são persistidos em `minute_templates`;
-as atas ficam 1:1 com a reunião (`minutes`) e cada versão guarda conteúdo e PDF
-em `minute_versions`. Prévia funciona inclusive em rascunho; geração oficial é
-rejeitada em rascunho; registros/relatos internos são omitidos; a renderização
-agrupa registros por turma e estudante; sem registros a ata mínima continua gerável.
-PDF é gerado com `pdf-lib` (A4, paginação e quebra por largura real de fonte) e
-persistido em BLOB D1. Gates conforme DoD.
+DoD executado em 2026-09-17. Presets são persistidos em `minute_templates`;
+ao selecionar um preset, a reunião recebe uma cópia local em `minutes`, que
+pode ser editada sem alterar o preset ou outras reuniões. Prévia funciona
+inclusive em rascunho; geração oficial é rejeitada em rascunho;
+registros/relatos internos são omitidos; a renderização agrupa registros por
+turma e estudante; sem registros a ata mínima continua gerável. O conteúdo
+local é bloqueado após finalização e volta a ser editável somente após
+reabertura. Gates executados: `bunx drizzle-kit check`, `bun run check`,
+`bun run typecheck`, testes focados (87 aprovados, 1 ignorado), `bun run build`
+e E2E dos cenários de atas e presets (14 aprovados).

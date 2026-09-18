@@ -99,7 +99,7 @@ describe("hooks de criação", () => {
 			"Falha ao criar componente",
 			"Falha ao matricular estudante",
 			"Falha ao criar reunião",
-			"Falha ao criar modelo de ata",
+			"Falha ao criar preset de ata",
 			"Falha ao criar oferta",
 			"Falha ao criar papel",
 			"Falha ao criar servidor",

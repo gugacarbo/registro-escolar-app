@@ -582,10 +582,7 @@ export default function MeetingDetailPage() {
 											{generate.isPending ? "Gerando..." : "Gerar nova versão"}
 										</Button>
 									)}
-									<Link
-										to="/minutes/$meetingId"
-										params={{ meetingId }}
-									>
+									<Link to="/minutes/$meetingId" params={{ meetingId }}>
 										<Button variant="secondary">Editar conteúdo da ata</Button>
 									</Link>
 									<Link to="/minutes">

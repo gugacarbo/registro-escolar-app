@@ -88,4 +88,8 @@ bun run build # exit 0
 
 ## Verificação
 
-Implementado com cópia por reunião, editor rico e bloqueio de edição após finalização. A verificação final está registrada após a execução do DoD.
+DoD executado em 2026-09-17. O fluxo de lista, criação e edição de presets,
+isolamento da cópia por reunião, editor rico e bloqueio após finalização foi
+validado por testes focados (87 aprovados, 1 ignorado), `bun run typecheck`,
+`bun run check`, `bun run build` e pelos 14 cenários E2E de atas e presets
+(14 aprovados).

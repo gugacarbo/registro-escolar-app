@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-import type { MinuteEditableContentJson } from "#/lib/minutes/types";
 import type { UpdateMinuteContentInput } from "#/lib/minutes/schema";
+import type { MinuteEditableContentJson } from "#/lib/minutes/types";
 
 import { getMinuteContentQueryKey } from "./use-minute-content";
 import { getMinutePreviewQueryKey } from "./use-minute-preview";

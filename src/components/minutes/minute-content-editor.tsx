@@ -3,8 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
-import { RichTextEditor } from "#/components/ui/rich-text-editor";
 import {
 	Form,
 	FormControl,
@@ -15,9 +13,10 @@ import {
 	FormNative,
 	FormSubmit,
 } from "#/components/ui/form";
+import { RichTextEditor } from "#/components/ui/rich-text-editor";
 import {
-	emptyDoc,
 	defaultMinuteBodyContent,
+	emptyDoc,
 } from "#/lib/minutes/tiptap/serializer";
 import type { MinuteEditableContentJson } from "#/lib/minutes/types";
 

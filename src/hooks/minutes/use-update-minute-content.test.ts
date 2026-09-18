@@ -6,8 +6,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { textDoc } from "#/lib/minutes/tiptap/serializer";
 
 import { getMinuteContentQueryKey } from "./use-minute-content";
-import { useUpdateMinuteContent } from "./use-update-minute-content";
 import { getMinutePreviewQueryKey } from "./use-minute-preview";
+import { useUpdateMinuteContent } from "./use-update-minute-content";
 
 const values = {
 	headerContent: textDoc("Cabeçalho local"),

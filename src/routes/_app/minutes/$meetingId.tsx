@@ -226,7 +226,9 @@ export default function MinuteDetailPage() {
 						key={`${meetingId}-${content.data.presetId ?? "default"}`}
 						initialContent={content.data}
 						onSubmit={saveContent}
-						submitLabel={updateContent.isPending ? "Salvando..." : "Salvar conteúdo"}
+						submitLabel={
+							updateContent.isPending ? "Salvando..." : "Salvar conteúdo"
+						}
 						serverError={updateContent.error?.message ?? null}
 						isPending={updateContent.isPending}
 					/>
@@ -243,9 +245,7 @@ export default function MinuteDetailPage() {
 				description="Conteúdo renderizado a partir dos registros, participantes e relatos da reunião."
 				actions={
 					<span className="text-sm text-muted-foreground">
-						{preview.data?.templateId
-							? "Preset personalizado"
-							: "Sem preset"}
+						{preview.data?.templateId ? "Preset personalizado" : "Sem preset"}
 					</span>
 				}
 			>

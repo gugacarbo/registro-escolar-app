@@ -11,7 +11,6 @@ import {
 	generateMinute,
 	previewMinute,
 	startMeeting,
-	updateMinuteContent,
 	updateMeetingTemplate,
 	transitionMeetingResponse,
 } from "./fixtures/api";
