@@ -5,12 +5,13 @@ import {
 	updateMeetingTemplate,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
+import { gotoReady } from "./pages/navigation";
 
 test.describe("SPEC-0013 presets de ata", () => {
 	test("exibe empty-state com CTA quando não há presets", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/minutes/templates");
+		await gotoReady(page, "/minutes/templates");
 
 		await expect(
 			page.getByText("Nenhum preset cadastrado", { exact: true }),
@@ -41,7 +42,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 			name: "Modelo Lista Beta",
 		});
 
-		await page.goto("/minutes/templates");
+		await gotoReady(page, "/minutes/templates");
 
 		await expect(
 			page.getByRole("cell", { name: "Modelo Lista Alfa" }),
@@ -58,7 +59,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 	}) => {
 		await createMinuteTemplate(apiContext, { name: "Modelo Teclado" });
 
-		await page.goto("/minutes/templates");
+		await gotoReady(page, "/minutes/templates");
 		const row = page
 			.getByRole("row", { name: "Modelo Teclado" })
 			.first();
@@ -78,7 +79,8 @@ test.describe("SPEC-0013 presets de ata", () => {
 	test("exibe falha para template inexistente sem renderizar formulário", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto(
+		await gotoReady(
+			page,
 			"/minutes/templates/00000000-0000-0000-0000-000000000000",
 		);
 
@@ -109,7 +111,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 		});
 		await updateMeetingTemplate(apiContext, meeting.id, template.id);
 
-		await page.goto(`/minutes/templates/${template.id}`);
+		await gotoReady(page, `/minutes/templates/${template.id}`);
 		const headerField = page.getByRole("textbox", { name: "Cabeçalho" });
 		await expect(headerField).toHaveText("Cabeçalho original");
 		await headerField.fill("Cabeçalho revisado no e2e");
@@ -131,7 +133,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 	test("cria modelo pelo popup e personaliza na página de edição", async ({
 		authenticatedPage: page,
 	}) => {
-		await page.goto("/minutes/templates");
+		await gotoReady(page, "/minutes/templates");
 		await page.getByRole("button", { name: "Novo preset" }).last().click();
 
 		const dialog = page.getByRole("dialog");
