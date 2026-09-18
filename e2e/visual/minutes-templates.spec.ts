@@ -16,7 +16,7 @@ test("@visual mantém a lista de modelos de ata no padrão de tabela", async ({
 	await expectRouteScreenshot(authenticatedPage, {
 		name: "minutes-templates.png",
 		ready: authenticatedPage.getByRole("table", {
-			name: "Tabela de modelos de ata",
+			name: "Tabela de presets de ata",
 		}),
 		mask: [
 			authenticatedPage

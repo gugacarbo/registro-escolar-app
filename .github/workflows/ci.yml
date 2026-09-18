@@ -95,5 +95,8 @@ jobs:
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium
 
+      - name: Prepare local database
+        run: bun run e2e:setup
+
       - name: Run visual tests
         run: bun run test:visual
