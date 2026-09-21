@@ -1,5 +1,11 @@
 import type { MeetingStatus, TransitionAction } from "./schema";
 
+const EDITABLE_MEETING_STATUSES: readonly string[] = [
+	"draft",
+	"in_progress",
+	"reopened",
+];
+
 // Máquina de estados da reunião (spec 0005):
 // draft → in_progress → finished → reopened (→ in_progress → finished …)
 export const ALLOWED_TRANSITIONS: Record<MeetingStatus, TransitionAction[]> = {
@@ -26,4 +32,12 @@ export function canCreateIndependentRecord(): boolean {
 	// Borda 6: registro independente de reunião é permitido em
 	// qualquer estado do ciclo de vida.
 	return true;
+}
+
+/**
+ * Dados gerais e turmas editáveis em rascunho, em andamento e reaberta
+ * (spec 0005, bordas 7/8/10). Finalizada exige reabertura.
+ */
+export function canEditMeetingData(status: string): boolean {
+	return EDITABLE_MEETING_STATUSES.includes(status);
 }

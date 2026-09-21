@@ -26,7 +26,7 @@ export function useRoles({
 			params.set("pageSize", String(pageSize));
 			const response = await fetch(`/api/roles?${params.toString()}`);
 			if (!response.ok) {
-				throw new Error("Falha ao carregar papéis");
+				throw new Error("Falha ao carregar cargos");
 			}
 			return response.json() as Promise<RolesPageResult>;
 		},

@@ -24,7 +24,7 @@ describe("entity-fetchers", () => {
 		expect(String(spy.mock.calls[0][0])).toContain("page=2");
 	});
 
-	it("busca turmas, servidores, papéis, componentes e reuniões", async () => {
+	it("busca turmas, servidores, cargos, componentes e reuniões", async () => {
 		const body = () => JSON.stringify({ data: [], total: 0 });
 		const spy = vi
 			.spyOn(globalThis, "fetch")

@@ -49,7 +49,7 @@ export default function MinuteTemplateDetailPage() {
 			setServerError(
 				submitError instanceof Error
 					? submitError.message
-					: "Falha ao atualizar preset de ata",
+					: "Falha ao atualizar modelo de ata",
 			);
 		}
 	}
@@ -58,7 +58,7 @@ export default function MinuteTemplateDetailPage() {
 		<PageShell>
 			<PageHeader
 				eyebrow="Configuração"
-				title={template?.name ?? "Editar preset de ata"}
+				title={template?.name ?? "Editar modelo de ata"}
 				actions={
 					<Link to="/minutes/templates">
 						<Button variant="secondary">Voltar para a lista</Button>
@@ -70,14 +70,14 @@ export default function MinuteTemplateDetailPage() {
 				<p className="text-sm text-destructive">
 					{error instanceof Error
 						? error.message
-						: "Falha ao carregar preset de ata"}
+						: "Falha ao carregar modelo de ata"}
 				</p>
 			)}
 			{template && (
 				<>
 					{saved && (
 						<p className="text-sm text-muted-foreground" role="status">
-							Preset atualizado
+							Modelo atualizado
 						</p>
 					)}
 					<MinuteTemplateForm

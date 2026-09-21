@@ -107,7 +107,7 @@ export async function createParticipantHandler({
 	for (const roleId of parsed.data.roleIds) {
 		const role = await findRoleById(db, roleId);
 		if (!role) {
-			return json({ error: "Papel não encontrado" }, 404);
+			return json({ error: "Cargo não encontrado" }, 404);
 		}
 		roles.push(role);
 	}

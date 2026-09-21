@@ -80,7 +80,7 @@ describe("GET /api/roles/:id", () => {
 		expect(sessionMock).toHaveBeenCalledWith(request, undefined);
 	});
 
-	it("retorna 404 quando o papel não existe", async () => {
+	it("retorna 404 quando o cargo não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findRoleById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
@@ -93,10 +93,10 @@ describe("GET /api/roles/:id", () => {
 		});
 		expect(response.status).toBe(404);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toBe("Papel não encontrado");
+		expect(body.error).toBe("Cargo não encontrado");
 	});
 
-	it("retorna 200 com o papel", async () => {
+	it("retorna 200 com o cargo", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findRoleById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -145,7 +145,7 @@ describe("PATCH /api/roles/:id", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("retorna 404 no PATCH quando o papel não existe", async () => {
+	it("retorna 404 no PATCH quando o cargo não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findRoleById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
@@ -160,7 +160,7 @@ describe("PATCH /api/roles/:id", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 200 e atualiza o papel", async () => {
+	it("retorna 200 e atualiza o cargo", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findRoleById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -193,16 +193,16 @@ describe("PATCH /api/roles/:id", () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findRoleById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-			id: "papel-1",
+			id: "cargo-1",
 			name: "Registro",
 		} as never);
 		const response = await updateRoleHandler({
-			request: new Request("http://localhost/api/papels/papel-1", {
+			request: new Request("http://localhost/api/roles/cargo-1", {
 				method: "PATCH",
 				body: "not-json",
 			}),
 			context: { env: createEnv() },
-			params: { id: "papel-1" },
+			params: { id: "cargo-1" },
 		});
 		expect(response.status).toBe(400);
 	});

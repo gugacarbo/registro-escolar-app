@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createRoleSchema } from "./schema";
 
 describe("roles schema", () => {
-	it("aceita papel válido", () => {
+	it("aceita cargo válido", () => {
 		const parsed = createRoleSchema.safeParse({ name: "Professor" });
 		expect(parsed.success).toBe(true);
 	});

@@ -70,7 +70,7 @@ export function MinuteTemplateForm({
 						<FormItem>
 							<FormLabel>Nome *</FormLabel>
 							<FormControl>
-								<Input {...field} placeholder="Preset padrão" />
+								<Input {...field} placeholder="Modelo padrão" />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -87,7 +87,7 @@ export function MinuteTemplateForm({
 									aria-label="Cabeçalho"
 									value={field.value as Record<string, unknown>}
 									onChange={field.onChange}
-									placeholder="Cabeçalho do preset..."
+									placeholder="Cabeçalho do modelo..."
 								/>
 							</FormControl>
 							<FormMessage />
@@ -105,7 +105,7 @@ export function MinuteTemplateForm({
 									aria-label="Conteúdo"
 									value={field.value as Record<string, unknown>}
 									onChange={field.onChange}
-									placeholder="Conteúdo principal do preset..."
+									placeholder="Conteúdo principal do modelo..."
 								/>
 							</FormControl>
 							<FormMessage />
@@ -123,7 +123,7 @@ export function MinuteTemplateForm({
 									aria-label="Rodapé"
 									value={field.value as Record<string, unknown>}
 									onChange={field.onChange}
-									placeholder="Rodapé do preset..."
+									placeholder="Rodapé do modelo..."
 								/>
 							</FormControl>
 							<FormMessage />

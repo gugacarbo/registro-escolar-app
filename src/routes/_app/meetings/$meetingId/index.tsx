@@ -60,18 +60,27 @@ import { Input } from "#/components/ui/input";
 import { PageHeader, PageShell } from "#/components/ui/page";
 import { Skeleton } from "#/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import { fetchRolesPage, fetchStaffPage } from "#/hooks/entity-fetchers";
+import {
+	fetchClassesPage,
+	fetchRolesPage,
+	fetchStaffPage,
+} from "#/hooks/entity-fetchers";
+import { useAddMeetingClass } from "#/hooks/meetings/use-add-meeting-class";
 import { useAddParticipant } from "#/hooks/meetings/use-add-participant";
 import { useMeeting } from "#/hooks/meetings/use-meeting";
 import { useMeetingClasses } from "#/hooks/meetings/use-meeting-classes";
 import { useParticipants } from "#/hooks/meetings/use-participants";
+import { useRemoveMeetingClass } from "#/hooks/meetings/use-remove-meeting-class";
 import { useGenerateMinute } from "#/hooks/minutes/use-generate-minute";
 import { useMinutePreview } from "#/hooks/minutes/use-minute-preview";
 import { useMinuteTemplates } from "#/hooks/minutes/use-minute-templates";
 import { useMinuteVersions } from "#/hooks/minutes/use-minute-versions";
 import { useAsyncOptions } from "#/hooks/use-async-options";
 import type { MeetingStatus } from "#/lib/meetings/schema";
-import { canEditLinkedRecord } from "#/lib/meetings/transitions";
+import {
+	canEditLinkedRecord,
+	canEditMeetingData,
+} from "#/lib/meetings/transitions";
 
 export const Route = createFileRoute("/_app/meetings/$meetingId/")({
 	component: MeetingDetailPage,
@@ -105,6 +114,29 @@ export default function MeetingDetailPage() {
 	const { data: participants = [], isLoading: isLoadingParticipants } =
 		useParticipants(meetingId);
 	const { data: templates = [] } = useMinuteTemplates();
+
+	const addMeetingClass = useAddMeetingClass(meetingId);
+	const removeMeetingClass = useRemoveMeetingClass(meetingId);
+	const [classSearch, setClassSearch] = useState("");
+	const [classToAdd, setClassToAdd] = useState("");
+	const [classError, setClassError] = useState<string | null>(null);
+	const { data: classesResult, isLoading: isLoadingClassOptions } =
+		useAsyncOptions({
+			queryKey: ["meeting-detail-classes", "classes"],
+			search: classSearch,
+			fetchPage: fetchClassesPage,
+			select: (classRow) => ({
+				id: classRow.id,
+				name: `${classRow.name} — ${classRow.academicPeriod}`,
+			}),
+		});
+	const linkedClassIds = useMemo(
+		() => new Set(meetingClasses.map((item) => item.classId)),
+		[meetingClasses],
+	);
+	const classOptions = (classesResult?.options ?? []).filter(
+		(option) => !linkedClassIds.has(option.id),
+	);
 
 	const preview = useMinutePreview(meetingId);
 	const versions = useMinuteVersions(meetingId);
@@ -150,14 +182,38 @@ export default function MeetingDetailPage() {
 
 	const canEdit =
 		!!meeting && canEditLinkedRecord(meeting.status as MeetingStatus);
+	const canEditData = !!meeting && canEditMeetingData(meeting.status);
 	const isDraft = meeting?.status === "draft";
 	const isApproved = preview.data?.approvalStatus === "aprovada";
 	const activeTemplate = templates.find((t) => t.id === meeting?.templateId);
 
+	async function handleAddClass() {
+		setClassError(null);
+		if (!classToAdd) {
+			setClassError("Selecione uma turma");
+			return;
+		}
+		try {
+			await addMeetingClass.mutateAsync(classToAdd);
+			setClassToAdd("");
+		} catch (error) {
+			if (error instanceof Error) setClassError(error.message);
+		}
+	}
+
+	async function handleRemoveClass(classId: string) {
+		setClassError(null);
+		try {
+			await removeMeetingClass.mutateAsync(classId);
+		} catch (error) {
+			if (error instanceof Error) setClassError(error.message);
+		}
+	}
+
 	async function handleAddParticipant() {
 		setParticipantError(null);
 		if (!staffId || roleIds.length === 0) {
-			setParticipantError("Selecione o servidor e o papel");
+			setParticipantError("Selecione o servidor e o cargo");
 			return;
 		}
 		try {
@@ -239,14 +295,14 @@ export default function MeetingDetailPage() {
 						{activeTemplate && (
 							<span className="flex items-center gap-1.5 text-muted-foreground">
 								<FileTextIcon className="size-4 shrink-0 text-primary/70" />
-								Preset de ata: {activeTemplate.name}
+								Modelo de ata: {activeTemplate.name}
 							</span>
 						)}
 					</div>
 				}
 				actions={
 					<div className="flex flex-wrap items-center gap-2">
-						{(meeting.status === "draft" || meeting.status === "reopened") && (
+						{canEditData && (
 							<EditMeetingDialog
 								meeting={meeting}
 								trigger={
@@ -271,6 +327,7 @@ export default function MeetingDetailPage() {
 
 			{(meeting.status === "finished" ||
 				meeting.status === "draft" ||
+				meeting.status === "in_progress" ||
 				meeting.status === "reopened") && (
 				<div
 					role="status"
@@ -279,7 +336,10 @@ export default function MeetingDetailPage() {
 					{meeting.status === "finished" ? (
 						<>
 							<CheckCircle2Icon className="size-4 shrink-0 text-primary" />
-							<span>Reunião finalizada — reabra para editar</span>
+							<span>
+								Reunião finalizada — reabra para editar dados, turmas e
+								registros
+							</span>
 						</>
 					) : meeting.status === "draft" ? (
 						<>
@@ -288,10 +348,17 @@ export default function MeetingDetailPage() {
 								Rascunho — revise turmas e participantes antes de iniciar
 							</span>
 						</>
-					) : (
+					) : meeting.status === "reopened" ? (
 						<>
 							<AlertCircleIcon className="size-4 shrink-0 text-primary" />
 							<span>Reaberta para ajustes — atualize a ata ao concluir</span>
+						</>
+					) : (
+						<>
+							<AlertCircleIcon className="size-4 shrink-0 text-primary" />
+							<span>
+								Em andamento — você pode ajustar dados e turmas desta reunião
+							</span>
 						</>
 					)}
 				</div>
@@ -334,7 +401,39 @@ export default function MeetingDetailPage() {
 								</Button>
 							</Link>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="space-y-4">
+							{canEditData && (
+								<div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+									<h4 className="text-sm font-semibold">Vincular turma</h4>
+									<div className="flex flex-wrap items-end gap-2">
+										<EntitySelect
+											label="Turma"
+											placeholder="Selecione a turma"
+											value={classToAdd}
+											onChange={setClassToAdd}
+											options={classOptions}
+											isLoading={isLoadingClassOptions}
+											total={classesResult?.total ?? 0}
+											loadedAll={classesResult?.loadedAll ?? true}
+											search={classSearch}
+											onSearchChange={setClassSearch}
+										/>
+										<Button
+											type="button"
+											onClick={() => void handleAddClass()}
+											disabled={addMeetingClass.isPending}
+										>
+											<PlusIcon className="mr-1.5 size-4" />
+											Vincular
+										</Button>
+									</div>
+									{classError && (
+										<p role="alert" className="text-sm text-destructive">
+											{classError}
+										</p>
+									)}
+								</div>
+							)}
 							{isLoadingClasses && <Skeleton className="h-24 w-full" />}
 							{!isLoadingClasses && meetingClasses.length === 0 && (
 								<Empty>
@@ -344,7 +443,9 @@ export default function MeetingDetailPage() {
 										</EmptyMedia>
 										<EmptyTitle>Nenhuma turma selecionada</EmptyTitle>
 										<EmptyDescription>
-											Edite a reunião para vincular as turmas participantes.
+											{canEditData
+												? "Vincule as turmas participantes desta reunião."
+												: "A reunião finalizada mantém as turmas vinculadas; reabra para alterar."}
 										</EmptyDescription>
 									</EmptyHeader>
 								</Empty>
@@ -372,14 +473,26 @@ export default function MeetingDetailPage() {
 												{item.class?.course ? ` · ${item.class.course}` : ""}
 											</p>
 										</div>
-										<Link
-											to="/meetings/$meetingId/council"
-											params={{ meetingId }}
-										>
-											<Button size="sm" variant="ghost">
-												Ver
-											</Button>
-										</Link>
+										<div className="flex items-center gap-1">
+											<Link
+												to="/meetings/$meetingId/council"
+												params={{ meetingId }}
+											>
+												<Button size="sm" variant="ghost">
+													Ver
+												</Button>
+											</Link>
+											{canEditData && (
+												<Button
+													size="sm"
+													variant="ghost"
+													onClick={() => void handleRemoveClass(item.classId)}
+													disabled={removeMeetingClass.isPending}
+												>
+													Desvincular
+												</Button>
+											)}
+										</div>
 									</div>
 								))}
 							</div>
@@ -394,7 +507,7 @@ export default function MeetingDetailPage() {
 								<div>
 									<CardTitle>Equipe e Participantes</CardTitle>
 									<CardDescription>
-										Servidores designados e seus respectivos papéis na reunião.
+										Servidores designados e seus respectivos cargos na reunião.
 									</CardDescription>
 								</div>
 								<Link
@@ -437,12 +550,12 @@ export default function MeetingDetailPage() {
 											onSearchChange={setStaffSearch}
 										/>
 										<fieldset className="grid min-w-48 gap-2">
-											<legend className="text-sm font-medium">Papéis</legend>
+											<legend className="text-sm font-medium">Cargos</legend>
 											<Input
 												value={roleSearch}
 												onChange={(event) => setRoleSearch(event.target.value)}
-												placeholder="Buscar papel"
-												aria-label="Buscar papel"
+												placeholder="Buscar cargo"
+												aria-label="Buscar cargo"
 											/>
 											<div className="grid gap-2 rounded-md border p-2">
 												{roles.map((role) => (
@@ -465,14 +578,14 @@ export default function MeetingDetailPage() {
 												))}
 												{isLoadingRoles && (
 													<p className="text-xs text-muted-foreground">
-														Carregando papéis...
+														Carregando cargos...
 													</p>
 												)}
 											</div>
 											<p className="text-xs text-muted-foreground">
 												{roleIds.length === 0
-													? "Selecione um ou mais papéis."
-													: `${roleIds.length} papel(is) selecionado(s)`}
+													? "Selecione um ou mais cargos."
+													: `${roleIds.length} cargo(s) selecionado(s)`}
 											</p>
 										</fieldset>
 										<Button

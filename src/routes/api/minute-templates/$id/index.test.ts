@@ -136,7 +136,7 @@ describe("GET /api/minute-templates/:id", () => {
 
 		expect(response.status).toBe(404);
 		expect(await response.json()).toEqual({
-			error: "Template de ata não encontrado",
+			error: "Modelo de ata não encontrado",
 		});
 	});
 

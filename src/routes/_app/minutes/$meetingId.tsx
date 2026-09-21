@@ -208,7 +208,7 @@ export default function MinuteDetailPage() {
 
 			<PageSection
 				title="Conteúdo da ata"
-				description="Edite o conteúdo desta reunião. As alterações ficam vinculadas apenas a esta ata e não modificam o preset."
+				description="Edite o conteúdo desta reunião. As alterações ficam vinculadas apenas a esta ata e não modificam o modelo."
 			>
 				{content.isLoading && <Skeleton className="h-72 w-full" />}
 				{content.error && (
@@ -245,7 +245,7 @@ export default function MinuteDetailPage() {
 				description="Conteúdo renderizado a partir dos registros, participantes e relatos da reunião."
 				actions={
 					<span className="text-sm text-muted-foreground">
-						{preview.data?.templateId ? "Preset personalizado" : "Sem preset"}
+						{preview.data?.templateId ? "Modelo personalizado" : "Sem modelo"}
 					</span>
 				}
 			>

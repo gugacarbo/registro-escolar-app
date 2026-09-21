@@ -18,7 +18,7 @@ export function useCreateRole() {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao criar papel");
+				throw new Error(body.error ?? "Falha ao criar cargo");
 			}
 			return response.json() as Promise<Role>;
 		},

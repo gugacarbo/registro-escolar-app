@@ -284,7 +284,7 @@ describe("POST /api/meetings/", () => {
 		expect(body.error).toBe("Servidor não encontrado");
 	});
 
-	it("retorna 404 quando um papel não existe", async () => {
+	it("retorna 404 quando um cargo não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findActiveStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -303,7 +303,7 @@ describe("POST /api/meetings/", () => {
 		});
 		expect(response.status).toBe(404);
 		const body = (await response.json()) as { error: string };
-		expect(body.error).toBe("Papel não encontrado");
+		expect(body.error).toBe("Cargo não encontrado");
 	});
 
 	it("retorna 201 e cria a reunião sempre como draft", async () => {

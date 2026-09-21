@@ -156,7 +156,7 @@ describe("useUpdateMinuteTemplate", () => {
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(result.current.error?.message).toBe(
-			"Falha ao atualizar preset de ata",
+			"Falha ao atualizar modelo de ata",
 		);
 	});
 });

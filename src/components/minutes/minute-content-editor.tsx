@@ -84,7 +84,7 @@ export function MinuteContentEditor({
 			>
 				{initialContent.presetName && (
 					<p className="text-sm text-muted-foreground">
-						Conteúdo inicial do preset: {initialContent.presetName}
+						Conteúdo inicial do modelo: {initialContent.presetName}
 					</p>
 				)}
 				<FormField

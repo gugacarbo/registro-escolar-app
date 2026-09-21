@@ -45,7 +45,7 @@ export function CreateRoleDialog({
 		setServerError(null);
 		try {
 			await createRole.mutateAsync(values);
-			toast.success("Papel cadastrado");
+			toast.success("Cargo cadastrado");
 			handleOpenChange(false);
 			onSuccess?.();
 		} catch (error) {
@@ -60,9 +60,9 @@ export function CreateRoleDialog({
 			{trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Novo papel</DialogTitle>
+					<DialogTitle>Novo cargo</DialogTitle>
 					<DialogDescription>
-						Preencha os dados para cadastrar um papel.
+						Preencha os dados para cadastrar um cargo.
 					</DialogDescription>
 				</DialogHeader>
 				<RoleForm

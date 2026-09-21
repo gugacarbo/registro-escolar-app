@@ -91,7 +91,7 @@ export async function createRoleHandler({
 
 	if (existingRole) {
 		return new Response(
-			JSON.stringify({ error: "Papel já existe", existingRole }),
+			JSON.stringify({ error: "Cargo já existe", existingRole }),
 			{
 				status: 409,
 				headers: { "Content-Type": "application/json" },

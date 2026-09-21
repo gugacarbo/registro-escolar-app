@@ -86,7 +86,7 @@ describe("MinuteTemplatesPage", () => {
 		render(<MinuteTemplatesPage />);
 
 		const table = screen.getByRole("table", {
-			name: "Tabela de presets de ata",
+			name: "Tabela de modelos de ata",
 		});
 		expect(
 			within(table).getByRole("columnheader", { name: "Nome" }),
@@ -106,7 +106,7 @@ describe("MinuteTemplatesPage", () => {
 	it("abre e fecha o formulário de cadastro pelo cabeçalho", () => {
 		render(<MinuteTemplatesPage />);
 
-		fireEvent.click(screen.getByRole("button", { name: "Novo preset" }));
+		fireEvent.click(screen.getByRole("button", { name: "Novo modelo" }));
 		expect(screen.getByLabelText("Nome *")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Fechar" })).toBeInTheDocument();
 
@@ -132,13 +132,13 @@ describe("MinuteTemplatesPage", () => {
 		render(<MinuteTemplatesPage />);
 
 		const newModelButtons = screen.getAllByRole("button", {
-			name: "Novo preset",
+			name: "Novo modelo",
 		});
 		fireEvent.click(newModelButtons.at(-1)!);
 		fireEvent.change(screen.getByLabelText("Nome *"), {
 			target: { value: "Modelo novo" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Criar preset" }));
+		fireEvent.click(screen.getByRole("button", { name: "Criar modelo" }));
 
 		await waitFor(() =>
 			expect(mutate).toHaveBeenCalledWith(
@@ -209,7 +209,7 @@ describe("MinuteTemplatesPage", () => {
 		});
 
 		render(<MinuteTemplatesPage />);
-		fireEvent.click(screen.getByRole("button", { name: "Novo preset" }));
+		fireEvent.click(screen.getByRole("button", { name: "Novo modelo" }));
 
 		expect(
 			screen.getByRole("button", { name: "Salvando..." }),

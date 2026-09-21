@@ -134,7 +134,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(secondPreview.content).not.toContain("CABEÇALHO A");
 	});
 
-	test("edita o preset sem alterar a ata já configurada", async ({
+	test("edita o modelo sem alterar a ata já configurada", async ({
 		apiContext,
 		authenticatedPage,
 	}) => {
@@ -161,7 +161,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 		await authenticatedPage.getByRole("textbox", { name: "Cabeçalho" }).fill("Cabeçalho revisado");
 		await authenticatedPage.getByRole("button", { name: "Salvar alterações" }).click();
 		await expect(authenticatedPage.getByRole("status")).toHaveText(
-			"Preset atualizado",
+			"Modelo atualizado",
 		);
 
 		expect((await previewMinute(apiContext, meeting.id)).content).toContain(
@@ -177,11 +177,11 @@ test.describe("SPEC-0009 geração de ata", () => {
 		authenticatedPage,
 	}) => {
 		const template = await createMinuteTemplate(apiContext, {
-			name: "Preset para reunião",
-			headerText: "Cabeçalho do preset",
+			name: "Modelo para reunião",
+			headerText: "Cabeçalho do modelo",
 			bodyContent: JSON.stringify({
 				type: "doc",
-				content: [{ type: "paragraph", content: [{ type: "text", text: "Corpo do preset" }] }],
+				content: [{ type: "paragraph", content: [{ type: "text", text: "Corpo do modelo" }] }],
 			}),
 		});
 		const meeting = await createMeeting(apiContext, {
@@ -194,7 +194,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 		await authenticatedPage.goto(`/minutes/${meeting.id}`);
 		await expect(
 			authenticatedPage.getByRole("textbox", { name: "Conteúdo" }),
-		).toContainText("Corpo do preset");
+		).toContainText("Corpo do modelo");
 		await authenticatedPage
 			.getByRole("textbox", { name: "Conteúdo" })
 			.fill("Corpo personalizado da reunião");
@@ -207,7 +207,7 @@ test.describe("SPEC-0009 geração de ata", () => {
 
 		const preview = await previewMinute(apiContext, meeting.id);
 		expect(preview.content).toContain("Corpo personalizado da reunião");
-		expect(preview.content).not.toContain("Corpo do preset");
+		expect(preview.content).not.toContain("Corpo do modelo");
 	});
 
 	test("omite internos e agrupa registros por turma e estudante", async ({

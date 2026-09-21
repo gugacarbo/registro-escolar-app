@@ -74,10 +74,10 @@ afterEach(() => {
 });
 
 describe("RolesPage", () => {
-	it("renderiza a tabela com o nome do papel", () => {
+	it("renderiza a tabela com o nome do cargo", () => {
 		renderPage();
 
-		const table = screen.getByRole("table", { name: "Tabela de papéis" });
+		const table = screen.getByRole("table", { name: "Tabela de cargos" });
 		expect(
 			within(table).getByRole("columnheader", { name: "Nome" }),
 		).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe("RolesPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("exibe estado vazio quando não há papéis", () => {
+	it("exibe estado vazio quando não há cargos", () => {
 		mocks.useRoles.mockReturnValue({
 			data: makePage({ data: [], total: 0 }),
 			isLoading: false,
@@ -94,7 +94,7 @@ describe("RolesPage", () => {
 		});
 		renderPage();
 
-		expect(screen.getByText("Nenhum papel encontrado")).toBeInTheDocument();
+		expect(screen.getByText("Nenhum cargo encontrado")).toBeInTheDocument();
 		expect(screen.getByText("Nenhum registro encontrado")).toBeInTheDocument();
 	});
 
@@ -160,7 +160,7 @@ describe("RolesPage", () => {
 	it("navega para o detalhe ao clicar em célula de texto da linha", () => {
 		renderPage();
 
-		const table = screen.getByRole("table", { name: "Tabela de papéis" });
+		const table = screen.getByRole("table", { name: "Tabela de cargos" });
 		fireEvent.click(within(table).getByRole("cell", { name: "Professor" }));
 
 		expect(mocks.navigate).toHaveBeenCalledTimes(1);
@@ -170,10 +170,10 @@ describe("RolesPage", () => {
 		});
 	});
 
-	it("clicar no botão Novo papel não dispara a navegação da linha", () => {
+	it("clicar no botão Novo cargo não dispara a navegação da linha", () => {
 		renderPage();
 
-		fireEvent.click(screen.getByRole("button", { name: "Novo papel" }));
+		fireEvent.click(screen.getByRole("button", { name: "Novo cargo" }));
 
 		expect(mocks.navigate).not.toHaveBeenCalled();
 	});

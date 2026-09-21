@@ -20,7 +20,7 @@ describe("meetings schema", () => {
 		expect(parsed.success).toBe(false);
 	});
 
-	it("exige servidor e papel na participação", () => {
+	it("exige servidor e cargo na participação", () => {
 		const parsed = createMeetingParticipantSchema.safeParse({
 			meetingId: "meeting-1",
 			staffId: "staff-1",
@@ -56,7 +56,7 @@ describe("meetings schema", () => {
 		expect(invalid.success).toBe(false);
 	});
 
-	it("createMeetingApiSchema exige servidor e papel em cada participante", () => {
+	it("createMeetingApiSchema exige servidor e cargo em cada participante", () => {
 		const invalid = createMeetingApiSchema.safeParse({
 			title: "Conselho",
 			participants: [{ staffId: "staff-1" }],
@@ -64,7 +64,7 @@ describe("meetings schema", () => {
 		expect(invalid.success).toBe(false);
 	});
 
-	it("createMeetingApiSchema aceita vários papéis para o mesmo servidor", () => {
+	it("createMeetingApiSchema aceita vários cargos para o mesmo servidor", () => {
 		const parsed = createMeetingApiSchema.safeParse({
 			title: "Reunião",
 			participants: [{ staffId: "staff-1", roleIds: ["role-1", "role-2"] }],

@@ -115,12 +115,12 @@ describe("MinuteTemplateDetailPage", () => {
 			data: undefined,
 			isLoading: false,
 			isError: true,
-			error: new Error("Template de ata não encontrado"),
+			error: new Error("Modelo de ata não encontrado"),
 		});
 		renderPage();
 
 		expect(
-			screen.getByText("Template de ata não encontrado"),
+			screen.getByText("Modelo de ata não encontrado"),
 		).toBeInTheDocument();
 		expect(screen.queryByLabelText("Nome *")).not.toBeInTheDocument();
 	});
@@ -134,7 +134,7 @@ describe("MinuteTemplateDetailPage", () => {
 		expect(mocks.mutateAsync).toHaveBeenCalledWith(
 			expect.objectContaining({ name: "Modelo padrão" }),
 		);
-		expect(await screen.findByText("Preset atualizado")).toBeInTheDocument();
+		expect(await screen.findByText("Modelo atualizado")).toBeInTheDocument();
 	});
 
 	it("exibe o estado de carregamento antes de receber o template", () => {
@@ -161,7 +161,7 @@ describe("MinuteTemplateDetailPage", () => {
 		renderPage();
 
 		expect(
-			screen.getByText("Falha ao carregar preset de ata"),
+			screen.getByText("Falha ao carregar modelo de ata"),
 		).toBeInTheDocument();
 	});
 
@@ -199,7 +199,7 @@ describe("MinuteTemplateDetailPage", () => {
 		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
 
 		expect(
-			await screen.findByText("Falha ao atualizar preset de ata"),
+			await screen.findByText("Falha ao atualizar modelo de ata"),
 		).toBeInTheDocument();
 	});
 });

@@ -30,7 +30,7 @@ const initialContent: MinuteEditableContentJson = {
 };
 
 describe("MinuteContentEditor", () => {
-	it("permite editar conteúdo da ata sem exibir campos do preset", async () => {
+	it("permite editar conteúdo da ata sem exibir campos do modelo", async () => {
 		const user = userEvent.setup();
 		const onSubmit = vi.fn();
 

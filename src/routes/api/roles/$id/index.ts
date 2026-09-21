@@ -42,7 +42,7 @@ export async function getRoleHandler({
 	const db = createDb(requireD1(env));
 	const role = await findRoleById(db, params.id);
 	if (!role) {
-		return json({ error: "Papel não encontrado" }, 404);
+		return json({ error: "Cargo não encontrado" }, 404);
 	}
 	return json(role, 200);
 }
@@ -74,7 +74,7 @@ export async function updateRoleHandler({
 	const db = createDb(requireD1(env));
 	const role = await findRoleById(db, params.id);
 	if (!role) {
-		return json({ error: "Papel não encontrado" }, 404);
+		return json({ error: "Cargo não encontrado" }, 404);
 	}
 
 	const updated = await updateRole(db, params.id, parsed.data);

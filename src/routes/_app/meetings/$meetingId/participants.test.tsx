@@ -69,7 +69,7 @@ beforeEach(() => {
 });
 
 describe("ParticipantsPage", () => {
-	it("exibe nomes legíveis de servidor e papel", async () => {
+	it("exibe nomes legíveis de servidor e cargo", async () => {
 		renderPage();
 		expect(
 			await screen.findByText(/Maria Silva — Coordenador/),
@@ -82,12 +82,12 @@ describe("ParticipantsPage", () => {
 		expect(screen.getByText("Carregando...")).toBeInTheDocument();
 	});
 
-	it("exige servidor e papel antes de adicionar", async () => {
+	it("exige servidor e cargo antes de adicionar", async () => {
 		const user = userEvent.setup();
 		renderPage();
 		await user.click(screen.getByRole("button", { name: "Adicionar" }));
 		expect(
-			await screen.findByText("Selecione o servidor e o papel"),
+			await screen.findByText("Selecione o servidor e o cargo"),
 		).toBeInTheDocument();
 	});
 

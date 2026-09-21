@@ -242,8 +242,8 @@ export function MeetingForm({
 							<Input
 								value={roleSearch}
 								onChange={(event) => setRoleSearch(event.target.value)}
-								placeholder="Buscar papel"
-								aria-label="Buscar papel"
+								placeholder="Buscar cargo"
+								aria-label="Buscar cargo"
 							/>
 							{!isLoadingStaff && staffResult && !staffResult.loadedAll && (
 								<p className="text-xs text-muted-foreground">
@@ -253,7 +253,7 @@ export function MeetingForm({
 							)}
 							{!isLoadingRoles && rolesResult && !rolesResult.loadedAll && (
 								<p className="text-xs text-muted-foreground">
-									Mostrando {roleOptions.length} de {rolesResult.total} papéis.
+									Mostrando {roleOptions.length} de {rolesResult.total} cargos.
 									Refine a busca para ver mais.
 								</p>
 							)}
@@ -304,7 +304,7 @@ export function MeetingForm({
 										name={`participantes.${index}.papelIds`}
 										render={({ field }) => (
 											<div className="grid min-w-48 gap-2">
-												<Label>Papéis</Label>
+												<Label>Cargos</Label>
 												<div className="grid gap-2 rounded-md border p-2">
 													{roleOptions.map((role) => (
 														<label
@@ -328,7 +328,7 @@ export function MeetingForm({
 													))}
 													{isLoadingRoles && (
 														<p className="text-xs text-muted-foreground">
-															Carregando papéis...
+															Carregando cargos...
 														</p>
 													)}
 													{field.value.map((id) => {
@@ -346,8 +346,8 @@ export function MeetingForm({
 												</div>
 												<p className="text-xs text-muted-foreground">
 													{field.value.length === 0
-														? "Selecione um ou mais papéis."
-														: `${field.value.length} papel(is) selecionado(s)`}
+														? "Selecione um ou mais cargos."
+														: `${field.value.length} cargo(s) selecionado(s)`}
 												</p>
 												<FormMessage />
 											</div>
@@ -378,11 +378,11 @@ export function MeetingForm({
 					name="templateId"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Preset de ata</FormLabel>
+							<FormLabel>Modelo de ata</FormLabel>
 							<FormControl>
 								<Select value={field.value} onValueChange={field.onChange}>
-									<SelectTrigger aria-label="Preset de ata">
-										<SelectValue placeholder="Selecione o preset" />
+									<SelectTrigger aria-label="Modelo de ata">
+										<SelectValue placeholder="Selecione o modelo" />
 									</SelectTrigger>
 									<SelectContent>
 										{templates.map((template) => (

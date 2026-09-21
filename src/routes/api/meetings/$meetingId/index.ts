@@ -3,9 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
+import { ERR_MEETING_FINISHED } from "#/lib/meetings/errors";
 import { findMeetingById, updateMeeting } from "#/lib/meetings/repository";
 import type { UpdateMeetingInput } from "#/lib/meetings/schema";
 import { updateMeetingSchema } from "#/lib/meetings/schema";
+import { canEditMeetingData } from "#/lib/meetings/transitions";
 import { d1Middleware } from "#/middleware/d1";
 
 export const Route = createFileRoute("/api/meetings/$meetingId/")({
@@ -87,14 +89,11 @@ export async function updateMeetingHandler({
 	if (!meeting) {
 		return json({ error: "Reunião não encontrada" }, 404);
 	}
-	// Edição só em rascunho ou reaberta (spec 0005). O PATCH de turmas
-	// (classIds) é tratado pelas rotas de classes; aqui vão apenas os
-	// dados gerais da reunião.
-	if (meeting.status !== "draft" && meeting.status !== "reopened") {
-		return json(
-			{ error: "Reunião em andamento/finalizada não pode ser editada" },
-			409,
-		);
+	// Dados gerais editáveis em rascunho, em andamento e reaberta (spec 0005,
+	// bordas 7/10). Turmas têm rotas próprias
+	// (POST/DELETE /api/meetings/:id/classes).
+	if (!canEditMeetingData(meeting.status)) {
+		return json({ error: ERR_MEETING_FINISHED }, 409);
 	}
 
 	const update: UpdateMeetingInput = {};

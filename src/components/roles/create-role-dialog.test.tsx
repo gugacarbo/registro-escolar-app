@@ -40,12 +40,12 @@ describe("CreateRoleDialog", () => {
 		renderDialog();
 
 		expect(await screen.findByRole("dialog")).toBeInTheDocument();
-		expect(screen.getByText("Novo papel")).toBeVisible();
+		expect(screen.getByText("Novo cargo")).toBeVisible();
 		expect(screen.getByLabelText("Nome *")).toBeVisible();
 		expect(screen.getByRole("button", { name: "Salvar" })).toBeInTheDocument();
 	});
 
-	it("cria o papel, fecha o dialog e notifica sucesso", async () => {
+	it("cria o cargo, fecha o dialog e notifica sucesso", async () => {
 		const user = userEvent.setup();
 		const onSuccess = vi.fn();
 		const fetchMock = vi
@@ -80,13 +80,13 @@ describe("CreateRoleDialog", () => {
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);
 		expect(onSuccess).toHaveBeenCalled();
-		expect(mocks.toast.success).toHaveBeenCalledWith("Papel cadastrado");
+		expect(mocks.toast.success).toHaveBeenCalledWith("Cargo cadastrado");
 	});
 
 	it("exibe erro vindo do servidor sem fechar o dialog", async () => {
 		const user = userEvent.setup();
 		vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-			new Response(JSON.stringify({ error: "Papel já existe" }), {
+			new Response(JSON.stringify({ error: "Cargo já existe" }), {
 				status: 409,
 			}),
 		);
@@ -95,7 +95,7 @@ describe("CreateRoleDialog", () => {
 		await user.type(await screen.findByLabelText("Nome *"), "Professor");
 		await user.click(screen.getByRole("button", { name: "Salvar" }));
 
-		expect(await screen.findByText("Papel já existe")).toBeVisible();
+		expect(await screen.findByText("Cargo já existe")).toBeVisible();
 		expect(screen.getByRole("dialog")).toBeInTheDocument();
 	});
 });
@@ -108,7 +108,7 @@ it("renderiza trigger e controla abertura não controlada", async () => {
 	);
 	await user.click(screen.getByRole("button", { name: "Abrir dialog" }));
 	expect(await screen.findByRole("dialog")).toBeInTheDocument();
-	expect(screen.getByText("Novo papel")).toBeVisible();
+	expect(screen.getByText("Novo cargo")).toBeVisible();
 	await user.click(screen.getByRole("button", { name: "Fechar" }));
 	await waitFor(() =>
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),

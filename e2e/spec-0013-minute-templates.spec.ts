@@ -7,26 +7,26 @@ import {
 import { expect, test } from "./fixtures/test";
 import { gotoReady } from "./pages/navigation";
 
-test.describe("SPEC-0013 presets de ata", () => {
-	test("exibe empty-state com CTA quando não há presets", async ({
+test.describe("SPEC-0013 modelos de ata", () => {
+	test("exibe empty-state com CTA quando não há modelos", async ({
 		authenticatedPage: page,
 	}) => {
 		await gotoReady(page, "/minutes/templates");
 
 		await expect(
-			page.getByText("Nenhum preset cadastrado", { exact: true }),
+			page.getByText("Nenhum modelo cadastrado", { exact: true }),
 		).toBeVisible();
 		await expect(
-			page.getByText("Cadastre um preset para iniciar as atas das reuniões."),
+			page.getByText("Cadastre um modelo para iniciar as atas das reuniões."),
 		).toBeVisible();
 
-		await page.getByRole("button", { name: "Novo preset" }).last().click();
+		await page.getByRole("button", { name: "Novo modelo" }).last().click();
 
 		await expect(
 			page.getByRole("dialog").getByRole("textbox", { name: "Nome *" }),
 		).toBeVisible();
 		await expect(
-			page.getByRole("button", { name: "Criar preset" }),
+			page.getByRole("button", { name: "Criar modelo" }),
 		).toBeVisible();
 	});
 
@@ -85,7 +85,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 		);
 
 		await expect(
-			page.getByText("Template de ata não encontrado"),
+			page.getByText("Modelo de ata não encontrado"),
 		).toBeVisible({ timeout: 20_000 });
 		await expect(
 			page.getByRole("textbox", { name: "Nome *" }),
@@ -95,7 +95,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 		).toBeHidden();
 	});
 
-	test("salva edição do preset sem alterar atas já configuradas", async ({
+	test("salva edição do modelo sem alterar atas já configuradas", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
@@ -120,7 +120,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 		await page.getByRole("button", { name: "Salvar alterações" }).click();
 
 		await expect(
-			page.getByText("Preset atualizado", { exact: true }),
+			page.getByText("Modelo atualizado", { exact: true }),
 		).toBeVisible({ timeout: 20_000 });
 
 		const preview = await previewMinute(apiContext, meeting.id);
@@ -134,13 +134,13 @@ test.describe("SPEC-0013 presets de ata", () => {
 		authenticatedPage: page,
 	}) => {
 		await gotoReady(page, "/minutes/templates");
-		await page.getByRole("button", { name: "Novo preset" }).last().click();
+		await page.getByRole("button", { name: "Novo modelo" }).last().click();
 
 		const dialog = page.getByRole("dialog");
 		await dialog
 			.getByRole("textbox", { name: "Nome *" })
 			.fill("Modelo Rico e Placeholder");
-		await dialog.getByRole("button", { name: "Criar preset" }).click();
+		await dialog.getByRole("button", { name: "Criar modelo" }).click();
 
 		// O popup cria apenas o nome, fecha e o modelo aparece na listagem.
 		await expect(dialog).toBeHidden({ timeout: 20_000 });
@@ -164,7 +164,7 @@ test.describe("SPEC-0013 presets de ata", () => {
 
 		await page.getByRole("button", { name: "Salvar alterações" }).click();
 		await expect(
-			page.getByText("Preset atualizado", { exact: true }),
+			page.getByText("Modelo atualizado", { exact: true }),
 		).toBeVisible({ timeout: 20_000 });
 	});
 });

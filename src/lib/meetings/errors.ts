@@ -9,11 +9,16 @@ export const ERR_MEETING_WITHOUT_CLASSES =
 	"Reunião sem turmas: selecione ao menos uma turma antes de iniciar";
 export const ERR_INVALID_TRANSITION = "Transição inválida para o estado atual";
 export const ERR_MEETING_FINISHED =
-	"Reunião finalizada: reabra para editar registros vinculados";
+	"Reunião finalizada: reabra para editar dados e turmas";
+export const ERR_MEETING_CLASS_IN_USE =
+	"Turma com acompanhamento registrado: não é possível desvincular";
+export const ERR_MEETING_CLASS_ALREADY_LINKED = "Turma já vinculada à reunião";
 export const ERR_LINKED_ENTITY_NOT_FOUND =
-	"Turma/Servidor/Papel não encontrado";
+	"Turma/Servidor/Cargo não encontrado";
 
 export class MeetingNotFoundError extends Error {}
 export class MeetingNotEditableError extends Error {}
+export class MeetingClassInUseError extends Error {}
+export class MeetingClassAlreadyLinkedError extends Error {}
 export class MeetingWithoutClassesError extends Error {}
 export class InvalidTransitionError extends Error {}

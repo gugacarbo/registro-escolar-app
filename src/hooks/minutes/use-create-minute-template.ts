@@ -23,7 +23,7 @@ export function useCreateMinuteTemplate() {
 				const body = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(body.error ?? "Falha ao criar preset de ata");
+				throw new Error(body.error ?? "Falha ao criar modelo de ata");
 			}
 			return response.json() as Promise<MinuteTemplate>;
 		},

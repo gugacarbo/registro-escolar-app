@@ -65,8 +65,7 @@ describe("useMinuteTemplate", () => {
 			"fetch",
 			vi.fn().mockResolvedValue({
 				ok: false,
-				json: () =>
-					Promise.resolve({ error: "Template de ata não encontrado" }),
+				json: () => Promise.resolve({ error: "Modelo de ata não encontrado" }),
 			}),
 		);
 
@@ -75,9 +74,7 @@ describe("useMinuteTemplate", () => {
 		});
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
-		expect(result.current.error?.message).toBe(
-			"Template de ata não encontrado",
-		);
+		expect(result.current.error?.message).toBe("Modelo de ata não encontrado");
 	});
 
 	it("usa mensagem padrão quando o corpo não contém erro estruturado", async () => {
@@ -95,7 +92,7 @@ describe("useMinuteTemplate", () => {
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(result.current.error?.message).toBe(
-			"Falha ao carregar preset de ata",
+			"Falha ao carregar modelo de ata",
 		);
 	});
 

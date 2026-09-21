@@ -81,19 +81,19 @@ describe("RoleDetailPage", () => {
 		expect(screen.getByText("Carregando...")).toBeInTheDocument();
 	});
 
-	it("exibe mensagem de erro quando o papel não é encontrado (404)", () => {
+	it("exibe mensagem de erro quando o cargo não é encontrado (404)", () => {
 		mocks.useRole.mockReturnValue({
 			data: undefined,
 			isLoading: false,
 			isError: true,
-			error: new Error("Falha ao carregar papel"),
+			error: new Error("Falha ao carregar cargo"),
 		});
 		renderPage();
 
-		expect(screen.getByText("Falha ao carregar papel")).toBeInTheDocument();
+		expect(screen.getByText("Falha ao carregar cargo")).toBeInTheDocument();
 	});
 
-	it("preenche o formulário com os dados do papel", () => {
+	it("preenche o formulário com os dados do cargo", () => {
 		renderPage();
 
 		expect(screen.getByLabelText("Nome *")).toHaveValue("Professor");
@@ -111,17 +111,17 @@ describe("RoleDetailPage", () => {
 		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
 
 		expect(mocks.mutateAsync).toHaveBeenCalledWith({ name: "Diretor" });
-		expect(await screen.findByText("Papel atualizado")).toBeInTheDocument();
+		expect(await screen.findByText("Cargo atualizado")).toBeInTheDocument();
 	});
 
 	it("exibe erro do servidor quando a atualização falha", async () => {
-		mocks.mutateAsync.mockRejectedValue(new Error("Papel não encontrado"));
+		mocks.mutateAsync.mockRejectedValue(new Error("Cargo não encontrado"));
 		const user = userEvent.setup();
 		renderPage();
 
 		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
 
-		expect(await screen.findByText("Papel não encontrado")).toBeInTheDocument();
-		expect(screen.queryByText("Papel atualizado")).not.toBeInTheDocument();
+		expect(await screen.findByText("Cargo não encontrado")).toBeInTheDocument();
+		expect(screen.queryByText("Cargo atualizado")).not.toBeInTheDocument();
 	});
 });

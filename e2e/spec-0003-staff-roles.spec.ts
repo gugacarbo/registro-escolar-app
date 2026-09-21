@@ -11,7 +11,7 @@ import {
 import { expect, test } from "./fixtures/test";
 import { gotoReady } from "./pages/navigation";
 
-test.describe("SPEC-0003 servidores e papéis", () => {
+test.describe("SPEC-0003 servidores e cargos", () => {
 	test("cadastra e lista servidor pela UI", async ({
 		authenticatedPage: page,
 	}) => {
@@ -52,19 +52,19 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		).toBeVisible();
 	});
 
-	test("abre o detalhe do papel ao clicar na linha", async ({
+	test("abre o detalhe do cargo ao clicar na linha", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
-		const role = await createRole(apiContext, "Papel Linha Clicável");
+		const role = await createRole(apiContext, "Cargo Linha Clicável");
 
 		await gotoReady(page,"/roles");
-		const cell = page.getByRole("cell", { name: "Papel Linha Clicável" });
+		const cell = page.getByRole("cell", { name: "Cargo Linha Clicável" });
 		await expect(cell).toBeVisible();
 		await cell.click();
 		await expect(page).toHaveURL(new RegExp(`/roles/${role.id}`));
 		await expect(
-			page.getByRole("heading", { name: "Papel Linha Clicável" }),
+			page.getByRole("heading", { name: "Cargo Linha Clicável" }),
 		).toBeVisible();
 	});
 
@@ -82,14 +82,14 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		expect(body.existingStaff.id).toBe(first.id);
 	});
 
-	test("garante papel padrão Professor", async ({ apiContext }) => {
+	test("garante cargo padrão Professor", async ({ apiContext }) => {
 		const roles = await listRoles(apiContext);
 		expect(roles.filter((role) => role.name === "Professor")).toHaveLength(1);
 		const duplicateDefault = await createRoleResponse(apiContext, "Professor");
 		expect(duplicateDefault.status).toBe(409);
 	});
 
-	test("normaliza papel duplicado", async ({ apiContext }) => {
+	test("normaliza cargo duplicado", async ({ apiContext }) => {
 		const normalizedResponse = await createRoleResponse(
 			apiContext,
 			"Coordenacao Pedagogica",
@@ -105,7 +105,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		expect(duplicateResponse.status).toBe(409);
 	});
 
-	test("adiciona participante com papel e exibe IDs", async ({
+	test("adiciona participante com cargo e exibe IDs", async ({
 		authenticatedPage: page,
 		apiContext,
 	}) => {
@@ -132,12 +132,12 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 		await expect(page.getByText(`${staff.name} — Professor`)).toBeVisible();
 	});
 
-	test("rejeita papel inexistente em participação", async ({
+	test("rejeita cargo inexistente em participação", async ({
 		apiContext,
 	}) => {
-		const staff = await createStaff(apiContext, "Servidor Papel Inválido");
+		const staff = await createStaff(apiContext, "Servidor Cargo Inválido");
 		const meeting = await createMeeting(apiContext, {
-			title: "Reunião Papel Inválido",
+			title: "Reunião Cargo Inválido",
 			heldAt: "2026-05-01",
 			classIds: [],
 			participants: [],
@@ -151,7 +151,7 @@ test.describe("SPEC-0003 servidores e papéis", () => {
 			},
 		);
 		expect(response.status).toBe(404);
-		expect(await response.json()).toMatchObject({ error: "Papel não encontrado" });
+		expect(await response.json()).toMatchObject({ error: "Cargo não encontrado" });
 	});
 
 	test("soft delete de servidor preserva participações históricas", async ({

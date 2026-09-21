@@ -2,7 +2,7 @@
 // Mesmo padrão de src/lib/general-reports/errors.ts.
 
 export const ERR_MEETING_NOT_FOUND = "Reunião não encontrada";
-export const ERR_TEMPLATE_NOT_FOUND = "Template de ata não encontrado";
+export const ERR_TEMPLATE_NOT_FOUND = "Modelo de ata não encontrado";
 export const ERR_TEMPLATE_NAME_REQUIRED = "Nome do template é obrigatório";
 export const ERR_MEETING_DRAFT =
 	"Reunião em rascunho: prévia permitida, versão oficial exige reunião iniciada";

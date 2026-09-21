@@ -48,11 +48,11 @@ const NAV_ITEMS: NavItem[] = [
 	{ title: "Estudantes", to: "/students", icon: GraduationCap },
 	{ title: "Turmas", to: "/classes", icon: LayoutGrid },
 	{ title: "Servidores", to: "/staff", icon: Briefcase },
-	{ title: "Papéis", to: "/roles", icon: Shield },
+	{ title: "Cargos", to: "/roles", icon: Shield },
 	{ title: "Componentes", to: "/components", icon: BookOpenText },
 	{ title: "Reuniões", to: "/meetings", icon: CalendarDays },
 	{ title: "Atas", to: "/minutes", icon: FileText },
-	{ title: "Presets de ata", to: "/minutes/templates", icon: Files },
+	{ title: "Modelos de Ata", to: "/minutes/templates", icon: Files },
 ];
 
 const ADMIN_NAV_ITEMS: NavItem[] = [

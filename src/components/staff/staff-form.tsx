@@ -79,10 +79,10 @@ export function StaffForm({
 					name="defaultRoleId"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Papel padrão</FormLabel>
+							<FormLabel>Cargo padrão</FormLabel>
 							<EntitySelect
-								label="Papel padrão"
-								placeholder="Selecione um papel"
+								label="Cargo padrão"
+								placeholder="Selecione um cargo"
 								value={field.value ?? ""}
 								onChange={field.onChange}
 								options={[
@@ -105,7 +105,7 @@ export function StaffForm({
 									size="sm"
 									onClick={() => field.onChange(null)}
 								>
-									Remover papel padrão
+									Remover cargo padrão
 								</Button>
 							)}
 							<FormMessage />

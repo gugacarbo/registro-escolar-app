@@ -195,7 +195,7 @@ describe("MinuteDetailPage", () => {
 
 		renderPage();
 
-		expect(screen.getByText(/Conteúdo inicial do preset/)).toBeInTheDocument();
+		expect(screen.getByText(/Conteúdo inicial do modelo/)).toBeInTheDocument();
 		await user.click(screen.getByRole("button", { name: "Salvar conteúdo" }));
 		await screen.findByText("Conteúdo da ata atualizado.");
 		expect(mutateAsync).toHaveBeenCalledWith(

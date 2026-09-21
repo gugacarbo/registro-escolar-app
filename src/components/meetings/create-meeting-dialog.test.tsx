@@ -57,7 +57,7 @@ describe("CreateMeetingDialog", () => {
 		expect(await screen.findByRole("dialog")).toBeInTheDocument();
 		expect(screen.getByText("Nova reunião")).toBeVisible();
 		expect(screen.getByLabelText("Nome *")).toBeVisible();
-		expect(screen.getByLabelText("Preset de ata")).toBeVisible();
+		expect(screen.getByLabelText("Modelo de ata")).toBeVisible();
 		expect(screen.getByRole("button", { name: "Salvar" })).toBeInTheDocument();
 	});
 

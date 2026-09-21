@@ -4,6 +4,7 @@ import type { DB } from "#/db";
 import {
 	meetingClasses,
 	meetingParticipants,
+	meetingStudentStatus,
 	meetings,
 	minutes,
 	minuteTemplates,
@@ -12,10 +13,14 @@ import { defaultMinuteBodyContent } from "#/lib/minutes/tiptap/serializer";
 
 import {
 	ERR_INVALID_TRANSITION,
+	ERR_MEETING_CLASS_ALREADY_LINKED,
+	ERR_MEETING_CLASS_IN_USE,
 	ERR_MEETING_FINISHED,
 	ERR_MEETING_NOT_FOUND,
 	ERR_MEETING_WITHOUT_CLASSES,
 	InvalidTransitionError,
+	MeetingClassAlreadyLinkedError,
+	MeetingClassInUseError,
 	MeetingNotEditableError,
 	MeetingNotFoundError,
 	MeetingWithoutClassesError,
@@ -27,7 +32,11 @@ import type {
 	UpdateMeetingInput,
 } from "./schema";
 import { meetingStatusSchema } from "./schema";
-import { ALLOWED_TRANSITIONS, NEXT_STATUS } from "./transitions";
+import {
+	ALLOWED_TRANSITIONS,
+	canEditMeetingData,
+	NEXT_STATUS,
+} from "./transitions";
 import type { ListMeetingsOptions } from "./types";
 
 export async function createMeeting(db: DB, input: CreateMeetingInput) {
@@ -238,9 +247,7 @@ async function findEditableMeeting(db: DB, meetingId: string) {
 	if (!meeting) {
 		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
 	}
-	// Turmas só podem ser vinculadas/removidas antes de a reunião
-	// começar ou depois de reaberta (draft | reopened).
-	if (meeting.status !== "draft" && meeting.status !== "reopened") {
+	if (!canEditMeetingData(meeting.status)) {
 		throw new MeetingNotEditableError(ERR_MEETING_FINISHED);
 	}
 	return meeting;
@@ -252,6 +259,15 @@ export async function addMeetingClass(
 	classId: string,
 ) {
 	await findEditableMeeting(db, meetingId);
+	const existing = await db.query.meetingClasses.findFirst({
+		where: and(
+			eq(meetingClasses.meetingId, meetingId),
+			eq(meetingClasses.classId, classId),
+		),
+	});
+	if (existing) {
+		throw new MeetingClassAlreadyLinkedError(ERR_MEETING_CLASS_ALREADY_LINKED);
+	}
 	return db
 		.insert(meetingClasses)
 		.values({
@@ -263,12 +279,22 @@ export async function addMeetingClass(
 		.get();
 }
 
+/** Borda 9: turma com acompanhamento registrado não pode ser desvinculada. */
 export async function removeMeetingClass(
 	db: DB,
 	meetingId: string,
 	classId: string,
 ) {
 	await findEditableMeeting(db, meetingId);
+	const tracked = await db.query.meetingStudentStatus.findFirst({
+		where: and(
+			eq(meetingStudentStatus.meetingId, meetingId),
+			eq(meetingStudentStatus.classId, classId),
+		),
+	});
+	if (tracked) {
+		throw new MeetingClassInUseError(ERR_MEETING_CLASS_IN_USE);
+	}
 	await db
 		.delete(meetingClasses)
 		.where(

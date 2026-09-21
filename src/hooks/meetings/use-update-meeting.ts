@@ -22,7 +22,10 @@ export function useUpdateMeeting(meetingId: string) {
 				body: JSON.stringify(data),
 			});
 			if (!response.ok) {
-				throw new Error("Falha ao atualizar reunião");
+				const body = (await response.json().catch(() => ({}))) as {
+					error?: string;
+				};
+				throw new Error(body.error ?? "Falha ao atualizar reunião");
 			}
 			return response.json() as Promise<Meeting>;
 		},

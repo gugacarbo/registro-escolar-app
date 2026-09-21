@@ -12,7 +12,7 @@ export function useRole(id: string) {
 		queryFn: async () => {
 			const response = await fetch(`/api/roles/${id}`);
 			if (!response.ok) {
-				throw new Error("Falha ao carregar papel");
+				throw new Error("Falha ao carregar cargo");
 			}
 			return response.json() as Promise<Role>;
 		},

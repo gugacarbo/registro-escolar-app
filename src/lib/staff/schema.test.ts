@@ -8,7 +8,7 @@ describe("staff schema", () => {
 		expect(parsed.success).toBe(true);
 	});
 
-	it("aceita papel padrão opcional", () => {
+	it("aceita cargo padrão opcional", () => {
 		const parsed = createStaffSchema.safeParse({
 			name: "João Silva",
 			defaultRoleId: "role-1",

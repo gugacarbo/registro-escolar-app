@@ -10,6 +10,8 @@ import { createStaff } from "#/lib/staff/repository";
 
 import {
 	InvalidTransitionError,
+	MeetingClassAlreadyLinkedError,
+	MeetingClassInUseError,
 	MeetingNotEditableError,
 	MeetingNotFoundError,
 	MeetingWithoutClassesError,
@@ -120,6 +122,16 @@ function createTestDb() {
 			UNIQUE (meeting_id, class_id),
 			FOREIGN KEY (meeting_id) REFERENCES meetings(id),
 			FOREIGN KEY (class_id) REFERENCES classes(id)
+		);
+		CREATE TABLE meeting_student_status (
+			id TEXT PRIMARY KEY,
+			meeting_id TEXT NOT NULL,
+			class_id TEXT NOT NULL,
+			student_id TEXT NOT NULL,
+			status TEXT NOT NULL DEFAULT 'pendente',
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL,
+			UNIQUE (meeting_id, class_id, student_id)
 		);
 	`);
 	const db = drizzle(sqlite, { schema }) as unknown as DB;
@@ -245,7 +257,7 @@ describe("meetings repository", () => {
 		).rejects.toThrow();
 	});
 
-	it("permite mais de um papel para o mesmo servidor na reunião", async () => {
+	it("permite mais de um cargo para o mesmo servidor na reunião", async () => {
 		const { db } = createTestDb();
 		const meeting = await createMeeting(db, { title: "Reunião 1" });
 		const member = await createStaff(db, { name: "João Silva" });
@@ -268,7 +280,7 @@ describe("meetings repository", () => {
 		expect(await listParticipantsByMeeting(db, meeting.id)).toHaveLength(2);
 	});
 
-	it("permite o mesmo servidor com papéis diferentes em reuniões diferentes", async () => {
+	it("permite o mesmo servidor com cargos diferentes em reuniões diferentes", async () => {
 		const { db } = createTestDb();
 		const first = await createMeeting(db, { title: "Reunião 1" });
 		const second = await createMeeting(db, { title: "Reunião 2" });
@@ -364,10 +376,11 @@ describe("meeting lifecycle", () => {
 		);
 	});
 
-	it("vincula/remove turma em draft e reopened, bloqueia nos demais estados", async () => {
+	it("edita turmas em draft, in_progress e reopened e bloqueia em finished", async () => {
 		const { db } = createTestDb();
 		const first = await createTestClass(db, "class-1");
 		const second = await createTestClass(db, "class-2");
+		const third = await createTestClass(db, "class-3");
 		const meeting = await createMeetingWithRelations(db, {
 			title: "Reunião 1",
 			classIds: [first.id],
@@ -375,16 +388,48 @@ describe("meeting lifecycle", () => {
 		const link = await addMeetingClass(db, meeting.id, second.id);
 		expect(link.classId).toBe(second.id);
 		expect(await listMeetingClasses(db, meeting.id)).toHaveLength(2);
+
+		// Em andamento (borda 8): vínculo permitido durante a reunião.
 		await startMeeting(db, meeting.id);
-		await expect(addMeetingClass(db, meeting.id, first.id)).rejects.toThrow(
+		await addMeetingClass(db, meeting.id, third.id);
+		expect(await listMeetingClasses(db, meeting.id)).toHaveLength(3);
+		await expect(addMeetingClass(db, meeting.id, second.id)).rejects.toThrow(
+			MeetingClassAlreadyLinkedError,
+		);
+
+		// Finalizada (borda 10): exige reabertura.
+		await finalizeMeeting(db, meeting.id);
+		await expect(addMeetingClass(db, meeting.id, second.id)).rejects.toThrow(
 			MeetingNotEditableError,
 		);
-		await finalizeMeeting(db, meeting.id);
 		await expect(removeMeetingClass(db, meeting.id, second.id)).rejects.toThrow(
 			MeetingNotEditableError,
 		);
+
+		// Reaberta volta a permitir remoção.
 		await reopenMeeting(db, meeting.id);
 		await removeMeetingClass(db, meeting.id, second.id);
+		expect(await listMeetingClasses(db, meeting.id)).toHaveLength(2);
+	});
+
+	it("bloqueia remoção de turma com acompanhamento registrado (borda 9)", async () => {
+		const { db } = createTestDb();
+		const klass = await createTestClass(db, "class-1");
+		const meeting = await createMeetingWithRelations(db, {
+			title: "Reunião 1",
+			classIds: [klass.id],
+		});
+		await startMeeting(db, meeting.id);
+		await db.insert(schema.meetingStudentStatus).values({
+			id: "status-1",
+			meetingId: meeting.id,
+			classId: klass.id,
+			studentId: "student-1",
+			status: "concluido",
+		});
+		await expect(removeMeetingClass(db, meeting.id, klass.id)).rejects.toThrow(
+			MeetingClassInUseError,
+		);
 		expect(await listMeetingClasses(db, meeting.id)).toHaveLength(1);
 	});
 

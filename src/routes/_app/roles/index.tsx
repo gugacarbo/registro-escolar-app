@@ -47,10 +47,10 @@ export default function RolesPage() {
 		<PageShell>
 			<PageHeader
 				eyebrow="Configuração"
-				title="Papéis"
+				title="Cargos"
 				description="Defina as funções usadas ao identificar participantes do conselho."
 				actions={
-					<Button onClick={() => setDialogOpen(true)}>Novo papel</Button>
+					<Button onClick={() => setDialogOpen(true)}>Novo cargo</Button>
 				}
 			/>
 			<PageToolbar>
@@ -79,9 +79,9 @@ export default function RolesPage() {
 				}
 				isLoading={isLoading}
 				isError={isError}
-				ariaLabel="Tabela de papéis"
-				emptyTitle="Nenhum papel encontrado"
-				emptyDescription="Ajuste a busca ou cadastre um novo papel."
+				ariaLabel="Tabela de cargos"
+				emptyTitle="Nenhum cargo encontrado"
+				emptyDescription="Ajuste a busca ou cadastre um novo cargo."
 			/>
 			<CreateRoleDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 		</PageShell>

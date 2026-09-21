@@ -246,7 +246,7 @@ describe("POST /api/meetings/:id/participants", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 404 quando o papel não existe", async () => {
+	it("retorna 404 quando o cargo não existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -343,7 +343,7 @@ describe("POST /api/meetings/:id/participants", () => {
 		expect(listParticipantsByMeeting).toBeDefined();
 	});
 
-	it("retorna 201 e cria todos os papéis selecionados para o servidor", async () => {
+	it("retorna 201 e cria todos os cargos selecionados para o servidor", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({

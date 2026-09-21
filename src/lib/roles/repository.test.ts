@@ -31,14 +31,14 @@ function createTestDb() {
 }
 
 describe("roles repository", () => {
-	it("cria um papel", async () => {
+	it("cria um cargo", async () => {
 		const { db } = createTestDb();
 		const role = await createRole(db, { name: "Coordenação pedagógica" });
 		expect(role.name).toBe("Coordenação pedagógica");
 		expect(role.id).toBeTypeOf("string");
 	});
 
-	it("encontra papel por id", async () => {
+	it("encontra cargo por id", async () => {
 		const { db } = createTestDb();
 		const created = await createRole(db, { name: "Direção" });
 		const found = await findRoleById(db, created.id);
@@ -55,7 +55,7 @@ describe("roles repository", () => {
 		expect(found?.name).toBe("Coordenação pedagógica");
 	});
 
-	it("garante apenas o papel padrão Professor de forma idempotente", async () => {
+	it("garante apenas o cargo padrão Professor de forma idempotente", async () => {
 		const { db } = createTestDb();
 		expect(DEFAULT_ROLES).toEqual(["Professor"]);
 		await ensureDefaultRoles(db);
@@ -65,7 +65,7 @@ describe("roles repository", () => {
 		expect(all[0].name).toBe("Professor");
 	});
 
-	it("lista papéis com busca", async () => {
+	it("lista cargos com busca", async () => {
 		const { db } = createTestDb();
 		await createRole(db, { name: "Professor" });
 		await createRole(db, { name: "Direção" });
@@ -74,7 +74,7 @@ describe("roles repository", () => {
 		expect(results[0].name).toBe("Direção");
 	});
 
-	it("conta papéis respeitando a busca", async () => {
+	it("conta cargos respeitando a busca", async () => {
 		const { db } = createTestDb();
 		await createRole(db, { name: "Professor" });
 		await createRole(db, { name: "Direção" });
@@ -83,7 +83,7 @@ describe("roles repository", () => {
 		expect(await countRoles(db, { search: "  " })).toBe(2);
 	});
 
-	it("atualiza o nome do papel", async () => {
+	it("atualiza o nome do cargo", async () => {
 		const { db } = createTestDb();
 		const created = await createRole(db, { name: "Direção" });
 		const updated = await updateRole(db, created.id, { name: "Coordenação" });

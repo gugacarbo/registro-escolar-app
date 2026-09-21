@@ -26,6 +26,12 @@ function wrapper({ children }: { children: ReactNode }) {
 	);
 }
 
+type MutationLike = {
+	mutate: (variables: unknown) => void;
+	isError: boolean;
+	error?: Error;
+};
+
 afterEach(() => vi.restoreAllMocks());
 
 describe("hooks de atualização", () => {
@@ -41,21 +47,17 @@ describe("hooks de atualização", () => {
 			() => useUpdateRole("role-1"),
 			() => useUpdateStaffMember("staff-1"),
 			() => useUpdateStudent("student-1"),
+			() => useUpdateMeeting("meeting-1"),
 		];
 		for (const useHook of hooks) {
-			const { result } = renderHook(useHook, { wrapper });
-			result.current.mutate({ name: "Novo", title: "Novo" } as never);
+			const { result } = renderHook<MutationLike, void>(
+				() => (useHook as unknown as () => MutationLike)(),
+				{ wrapper },
+			);
+			result.current.mutate({ name: "Novo", title: "Novo" });
 			await waitFor(() => expect(result.current.isError).toBe(true));
 			expect(result.current.error?.message).toBe("Registro inválido");
 		}
-		const meeting = renderHook(() => useUpdateMeeting("meeting-1"), {
-			wrapper,
-		});
-		meeting.result.current.mutate({ title: "Nova" });
-		await waitFor(() => expect(meeting.result.current.isError).toBe(true));
-		expect(meeting.result.current.error?.message).toBe(
-			"Falha ao atualizar reunião",
-		);
 	});
 
 	it("usa mensagens padrão quando o corpo de erro não traz error", async () => {
@@ -67,15 +69,20 @@ describe("hooks de atualização", () => {
 			() => useUpdateRole("role-1"),
 			() => useUpdateStaffMember("staff-1"),
 			() => useUpdateStudent("student-1"),
+			() => useUpdateMeeting("meeting-1"),
 		];
 		const expected = [
 			"Falha ao atualizar componente",
-			"Falha ao atualizar papel",
+			"Falha ao atualizar cargo",
 			"Falha ao atualizar servidor",
 			"Falha ao atualizar estudante",
+			"Falha ao atualizar reunião",
 		];
 		for (const [index, useHook] of hooks.entries()) {
-			const { result } = renderHook(useHook, { wrapper });
+			const { result } = renderHook<MutationLike, void>(
+				() => (useHook as unknown as () => MutationLike)(),
+				{ wrapper },
+			);
 			result.current.mutate({ name: "Novo" });
 			await waitFor(() => expect(result.current.isError).toBe(true));
 			expect(result.current.error?.message).toBe(expected[index]);

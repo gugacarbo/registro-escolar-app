@@ -90,7 +90,7 @@ export async function createStaffHandler({
 		parsed.data.defaultRoleId &&
 		!(await findRoleById(db, parsed.data.defaultRoleId))
 	) {
-		return new Response(JSON.stringify({ error: "Papel não encontrado" }), {
+		return new Response(JSON.stringify({ error: "Cargo não encontrado" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});

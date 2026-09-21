@@ -217,7 +217,7 @@ describe("PATCH /api/staff/:id", () => {
 		);
 	});
 
-	it("atualiza o papel padrão do servidor", async () => {
+	it("atualiza o cargo padrão do servidor", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		vi.mocked(findStaffById).mockResolvedValueOnce({

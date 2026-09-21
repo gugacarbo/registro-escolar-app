@@ -34,14 +34,14 @@ export default function RoleDetailPage() {
 
 	return (
 		<DetailPage
-			title={role?.name ?? "Dados do papel"}
+			title={role?.name ?? "Dados do cargo"}
 			backTo={{ to: "/roles", label: "Voltar para a lista" }}
 			isLoading={isLoading}
 			error={
 				isError
 					? error instanceof Error
 						? error.message
-						: "Falha ao carregar papel"
+						: "Falha ao carregar cargo"
 					: null
 			}
 		>
@@ -49,7 +49,7 @@ export default function RoleDetailPage() {
 				<>
 					{saved && (
 						<p className="text-sm text-muted-foreground" role="status">
-							Papel atualizado
+							Cargo atualizado
 						</p>
 					)}
 					<RoleForm

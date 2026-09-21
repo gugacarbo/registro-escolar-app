@@ -220,7 +220,7 @@ describe("POST /api/roles", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("retorna 201 e cria o papel", async () => {
+	it("retorna 201 e cria o cargo", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const createMock = createRole as ReturnType<typeof vi.fn>;
@@ -241,7 +241,7 @@ describe("POST /api/roles", () => {
 		expect(response.status).toBe(201);
 	});
 
-	it("retorna 409 quando o papel já existe", async () => {
+	it("retorna 409 quando o cargo já existe", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		const findMock = findRoleByNormalizedName as ReturnType<typeof vi.fn>;

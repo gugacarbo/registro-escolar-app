@@ -126,7 +126,7 @@ describe("StaffDetailPage", () => {
 
 		expect(screen.getByLabelText("Nome *")).toHaveValue("João Silva");
 		expect(screen.getByLabelText("Email")).toHaveValue("joao@example.com");
-		expect(screen.getByLabelText("Papel padrão")).toBeInTheDocument();
+		expect(screen.getByLabelText("Cargo padrão")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Salvar alterações" }),
 		).toBeInTheDocument();
@@ -150,11 +150,11 @@ describe("StaffDetailPage", () => {
 		expect(await screen.findByText("Servidor atualizado")).toBeInTheDocument();
 	});
 
-	it("define e remove o papel padrão", async () => {
+	it("define e remove o cargo padrão", async () => {
 		const user = userEvent.setup();
 		renderPage();
 
-		await user.click(screen.getByLabelText("Papel padrão"));
+		await user.click(screen.getByLabelText("Cargo padrão"));
 		await user.click(
 			await screen.findByRole("option", { name: "Coordenador" }),
 		);
@@ -164,7 +164,7 @@ describe("StaffDetailPage", () => {
 			expect.objectContaining({ defaultRoleId: "role-1" }),
 		);
 		await user.click(
-			screen.getByRole("button", { name: "Remover papel padrão" }),
+			screen.getByRole("button", { name: "Remover cargo padrão" }),
 		);
 		await user.click(screen.getByRole("button", { name: "Salvar alterações" }));
 		expect(mocks.mutateAsync).toHaveBeenLastCalledWith(

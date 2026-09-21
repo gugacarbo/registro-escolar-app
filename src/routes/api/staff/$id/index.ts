@@ -86,7 +86,7 @@ export async function updateStaffHandler({
 		parsed.data.defaultRoleId &&
 		!(await findRoleById(db, parsed.data.defaultRoleId))
 	) {
-		return json({ error: "Papel não encontrado" }, 400);
+		return json({ error: "Cargo não encontrado" }, 400);
 	}
 
 	const updated = await updateStaff(db, params.id, parsed.data);

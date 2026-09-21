@@ -9,10 +9,16 @@ vi.mock("#/lib/auth/session", () => ({
 	getSession: vi.fn(),
 }));
 
-vi.mock("#/lib/meetings/repository", () => ({
-	findMeetingById: vi.fn(),
-	updateMeeting: vi.fn(),
-}));
+vi.mock("#/lib/meetings/repository", async () => {
+	const actual = await vi.importActual<
+		typeof import("#/lib/meetings/repository")
+	>("#/lib/meetings/repository");
+	return {
+		...actual,
+		findMeetingById: vi.fn(),
+		updateMeeting: vi.fn(),
+	};
+});
 
 function createMockSession() {
 	const now = new Date();
@@ -169,12 +175,42 @@ describe("PATCH /api/meetings/:id", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 409 quando a reunião está em andamento", async () => {
+	it("retorna 200 e atualiza dados gerais em andamento (borda 7)", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			status: "in_progress",
+		});
+		(updateMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			title: "Título durante o conselho",
+			status: "in_progress",
+		});
+		const response = await updateMeetingHandler({
+			request: new Request("http://localhost/api/meetings/meeting-1/", {
+				method: "PATCH",
+				body: JSON.stringify({ title: "Título durante o conselho" }),
+			}),
+			context: { env: createEnv() },
+			params: { meetingId: "meeting-1" },
+		});
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as { title: string };
+		expect(body.title).toBe("Título durante o conselho");
+	});
+
+	it("retorna 200 e atualiza dados gerais em reaberta", async () => {
+		const sessionMock = getSession as ReturnType<typeof vi.fn>;
+		sessionMock.mockResolvedValueOnce(createMockSession());
+		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			status: "reopened",
+		});
+		(updateMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			id: "meeting-1",
+			title: "Novo título",
+			status: "reopened",
 		});
 		const response = await updateMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {
@@ -184,11 +220,7 @@ describe("PATCH /api/meetings/:id", () => {
 			context: { env: createEnv() },
 			params: { meetingId: "meeting-1" },
 		});
-		expect(response.status).toBe(409);
-		const body = (await response.json()) as { error: string };
-		expect(body.error).toBe(
-			"Reunião em andamento/finalizada não pode ser editada",
-		);
+		expect(response.status).toBe(200);
 	});
 
 	it("retorna 409 quando a reunião está finalizada", async () => {
@@ -207,6 +239,10 @@ describe("PATCH /api/meetings/:id", () => {
 			params: { meetingId: "meeting-1" },
 		});
 		expect(response.status).toBe(409);
+		const body = (await response.json()) as { error: string };
+		expect(body.error).toBe(
+			"Reunião finalizada: reabra para editar dados e turmas",
+		);
 	});
 
 	it("retorna 200 e atualiza a reunião em rascunho", async () => {

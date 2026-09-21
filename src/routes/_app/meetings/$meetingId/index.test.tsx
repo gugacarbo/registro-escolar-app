@@ -7,6 +7,8 @@ import type { Meeting } from "#/lib/meetings/schema";
 const mocks = vi.hoisted(() => ({
 	useMeeting: vi.fn(),
 	useMeetingClasses: vi.fn(),
+	useAddMeetingClass: vi.fn(),
+	useRemoveMeetingClass: vi.fn(),
 	useParticipants: vi.fn(),
 	useGeneralReports: vi.fn(),
 	useMinuteTemplates: vi.fn(),
@@ -34,9 +36,11 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("#/components/meetings/edit-meeting-dialog", () => ({
-	EditMeetingDialog: () => null,
+	EditMeetingDialog: ({ trigger }: { trigger?: React.ReactNode }) =>
+		trigger ?? null,
 }));
 vi.mock("#/hooks/entity-fetchers", () => ({
+	fetchClassesPage: vi.fn(),
 	fetchRolesPage: vi.fn(),
 	fetchStaffPage: vi.fn(),
 }));
@@ -51,6 +55,12 @@ vi.mock("#/hooks/meetings/use-meeting", () => ({
 }));
 vi.mock("#/hooks/meetings/use-meeting-classes", () => ({
 	useMeetingClasses: mocks.useMeetingClasses,
+}));
+vi.mock("#/hooks/meetings/use-add-meeting-class", () => ({
+	useAddMeetingClass: mocks.useAddMeetingClass,
+}));
+vi.mock("#/hooks/meetings/use-remove-meeting-class", () => ({
+	useRemoveMeetingClass: mocks.useRemoveMeetingClass,
 }));
 vi.mock("#/hooks/meetings/use-participants", () => ({
 	useParticipants: mocks.useParticipants,
@@ -133,6 +143,14 @@ beforeEach(() => {
 		error: null,
 	});
 	mocks.useAsyncOptions.mockReturnValue({ data: undefined, isLoading: false });
+	mocks.useAddMeetingClass.mockReturnValue({
+		mutateAsync: vi.fn().mockResolvedValue(undefined),
+		isPending: false,
+	});
+	mocks.useRemoveMeetingClass.mockReturnValue({
+		mutateAsync: vi.fn().mockResolvedValue(undefined),
+		isPending: false,
+	});
 	mocks.useTransitionMeeting.mockReturnValue({
 		mutateAsync: vi.fn().mockResolvedValue(undefined),
 		isPending: false,
@@ -188,5 +206,46 @@ describe("MeetingDetailPage (header em 375px)", () => {
 		expect(
 			screen.getByRole("link", { name: "Acompanhamento" }),
 		).toBeInTheDocument();
+	});
+});
+
+describe("MeetingDetailPage — edição de dados e turmas em andamento", () => {
+	it("oferece Editar dados durante a reunião (borda 7)", () => {
+		renderPage();
+		expect(
+			screen.getByRole("button", { name: /Editar dados/ }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/Em andamento — você pode ajustar dados e turmas/),
+		).toBeInTheDocument();
+	});
+
+	it("oferece vínculo de turma durante a reunião (borda 8)", () => {
+		mocks.useAsyncOptions.mockReturnValue({
+			data: {
+				options: [{ id: "class-2", name: "Turma B — 2026" }],
+				total: 1,
+				loadedAll: true,
+			},
+			isLoading: false,
+		});
+		renderPage();
+		expect(screen.getByText("Vincular turma")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Vincular/ }),
+		).toBeInTheDocument();
+	});
+
+	it("não oferece edição de dados/turmas quando finalizada (borda 10)", () => {
+		mocks.useMeeting.mockReturnValue({
+			data: makeMeeting({ status: "finished" }),
+			isLoading: false,
+		});
+		renderPage();
+		expect(
+			screen.queryByRole("button", { name: /Editar dados/ }),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText("Vincular turma")).not.toBeInTheDocument();
+		expect(screen.queryByText("Desvincular")).not.toBeInTheDocument();
 	});
 });

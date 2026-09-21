@@ -95,6 +95,17 @@ URL de produção: https://registro-escolar-app.gugacarbo.workers.dev
   `NODE_ENV=production`, que não existe no workerd) — qualquer um consegue
   forjar cookie de sessão. Trocar o secret invalida as sessões existentes.
 
+- `bun run e2e` pode falhar localmente por ambiente, não por código: se já
+  houver `vite dev` em `:3001`, o `reuseExistingServer` do Playwright adota esse
+  servidor e o banco de dev (com admin permanente) faz
+  `POST /api/auth/sign-up/email` responder 403. Para isolar, defina
+  `E2E_BASE_URL` (outra porta) e `E2E_PERSIST_STATE` **absoluto**, `E2E_DB_PATH`
+  apontando para o **mesmo** `.sqlite` do state dir, e acrescente
+  `BETTER_AUTH_URL`/`BETTER_AUTH_TRUSTED_ORIGINS` ao `dist/server/.dev.vars`
+  copiado. `E2E_PERSIST_STATE` relativo é resolvido contra a raiz do Vite
+  (aninha e é ignorado) e o `E2E_DB_PATH` default segue `.wrangler/state/e2e`,
+  então as fixtures limpam um banco diferente do que o servidor usa.
+
 ## Mapa de contexto
 
 <!-- Índice dos capítulos (docs/context/), cada um com QUANDO carregar.

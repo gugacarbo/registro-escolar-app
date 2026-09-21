@@ -27,11 +27,11 @@ const meetingParticipantApiInputSchema = z
 		roleIds: roleIds ?? (roleId ? [roleId] : []),
 	}))
 	.refine((value) => value.roleIds.length > 0, {
-		message: "Selecione ao menos um papel",
+		message: "Selecione ao menos um cargo",
 		path: ["roleIds"],
 	})
 	.refine((value) => new Set(value.roleIds).size === value.roleIds.length, {
-		message: "Não repita o mesmo papel",
+		message: "Não repita o mesmo cargo",
 		path: ["roleIds"],
 	});
 

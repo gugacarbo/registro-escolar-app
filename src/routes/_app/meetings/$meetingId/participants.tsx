@@ -48,7 +48,7 @@ export default function ParticipantsPage() {
 	async function handleAdd() {
 		setServerError(null);
 		if (!staffId || roleIds.length === 0) {
-			setServerError("Selecione o servidor e o papel");
+			setServerError("Selecione o servidor e o cargo");
 			return;
 		}
 		try {
@@ -95,12 +95,12 @@ export default function ParticipantsPage() {
 					onSearchChange={setStaffSearch}
 				/>
 				<fieldset className="grid min-w-48 gap-2">
-					<legend className="text-sm font-medium">Papéis</legend>
+					<legend className="text-sm font-medium">Cargos</legend>
 					<Input
 						value={roleSearch}
 						onChange={(event) => setRoleSearch(event.target.value)}
-						placeholder="Buscar papel"
-						aria-label="Buscar papel"
+						placeholder="Buscar cargo"
+						aria-label="Buscar cargo"
 					/>
 					<div className="grid gap-2 rounded-md border p-2">
 						{roles.map((role) => (
@@ -120,14 +120,14 @@ export default function ParticipantsPage() {
 						))}
 						{isLoadingRoles && (
 							<p className="text-xs text-muted-foreground">
-								Carregando papéis...
+								Carregando cargos...
 							</p>
 						)}
 					</div>
 					<p className="text-xs text-muted-foreground">
 						{roleIds.length === 0
-							? "Selecione um ou mais papéis."
-							: `${roleIds.length} papel(is) selecionado(s)`}
+							? "Selecione um ou mais cargos."
+							: `${roleIds.length} cargo(s) selecionado(s)`}
 					</p>
 				</fieldset>
 				<Button
