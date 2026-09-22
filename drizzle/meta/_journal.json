@@ -127,6 +127,13 @@
       "when": 1789688697651,
       "tag": "0017_adiciona-conteudo-editavel-por-reuniao",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1790096460324,
+      "tag": "0018_remapeia-status-reuniao",
+      "breakpoints": true
     }
   ]
 }

@@ -1,20 +1,16 @@
 import { Badge } from "#/components/ui/badge";
 
 const STATUS_LABELS: Record<string, string> = {
-	draft: "Rascunho",
-	in_progress: "Em andamento",
-	finished: "Finalizada",
-	reopened: "Reaberta",
+	open: "Aberta",
+	closed: "Encerrada",
 };
 
 const STATUS_VARIANTS: Record<
 	string,
 	"default" | "secondary" | "destructive" | "outline"
 > = {
-	draft: "secondary",
-	in_progress: "default",
-	finished: "outline",
-	reopened: "destructive",
+	open: "default",
+	closed: "outline",
 };
 
 export function MeetingStatusBadge({ status }: { status: string }) {

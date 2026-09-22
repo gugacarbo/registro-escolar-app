@@ -68,9 +68,12 @@ export async function updateStudentStatusHandler({
 		return json({ error: "Reunião não encontrada" }, 404);
 	}
 
-	if (meeting.status !== "in_progress" && meeting.status !== "reopened") {
+	if (meeting.status !== "open") {
 		return json(
-			{ error: "Reunião não está em andamento", meetingStatus: meeting.status },
+			{
+				error: "Reunião encerrada: reabra para editar o acompanhamento",
+				meetingStatus: meeting.status,
+			},
 			409,
 		);
 	}

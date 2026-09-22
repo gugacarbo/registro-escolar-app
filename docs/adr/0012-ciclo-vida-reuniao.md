@@ -1,13 +1,15 @@
 ---
-status: accepted
+status: superseded
 date: 2026-09-08
 builds-on:
   - ADR-0011
-superseded-by: null
+superseded-by: ADR-0021
 deciders: []
 ---
 
 # Adota ciclo de vida Rascunho/Em andamento/Finalizada/Reaberta para reuniões
+
+> ⚠️ VERDADE ATUAL: a reunião mantém ciclo de vida explícito, agora com dois estados. O fluxo Rascunho/Em andamento/Finalizada/Reaberta e as transições start/finalize foram revogados. ADR-0021 é a fonte.
 
 ## Contexto e problema
 

@@ -5,9 +5,8 @@ import {
 	createGeneralReport,
 	createMeeting,
 	createStaff,
+	generateMinute,
 	listRoles,
-	startMeeting,
-	transitionMeetingResponse,
 } from "./fixtures/api";
 import { expect, test, type ApiContext } from "./fixtures/test";
 
@@ -19,7 +18,6 @@ async function setup(apiContext: ApiContext, title: string) {
 		classIds: [klass.id],
 		participants: [],
 	});
-	await startMeeting(apiContext, meeting.id);
 	return meeting;
 }
 
@@ -87,12 +85,12 @@ test.describe("SPEC-0008 relatos gerais", () => {
 		expect(report.includeInMinutes).toBe(false);
 	});
 
-	test("rejeita criação e edição fora de andamento/reaberta", async ({
+	test("rejeita criação e edição com a reunião encerrada", async ({
 		apiContext,
 	}) => {
 		const meeting = await setup(apiContext, "Estado");
 		const report = await createGeneralReport(apiContext, meeting.id, "Antes do fim");
-		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
+		await generateMinute(apiContext, meeting.id);
 
 		const createResponse = await fetch(
 			`${baseURL}/api/meetings/${meeting.id}/general-reports`,
@@ -103,7 +101,7 @@ test.describe("SPEC-0008 relatos gerais", () => {
 			},
 		);
 		expect(createResponse.status).toBe(409);
-		expect(await createResponse.json()).toMatchObject({ meetingStatus: "finished" });
+		expect(await createResponse.json()).toMatchObject({ meetingStatus: "closed" });
 
 		const updateResponse = await fetch(
 			`${baseURL}/api/meetings/${meeting.id}/general-reports/${report.id}`,
@@ -114,7 +112,7 @@ test.describe("SPEC-0008 relatos gerais", () => {
 			},
 		);
 		expect(updateResponse.status).toBe(409);
-		expect(await updateResponse.json()).toMatchObject({ meetingStatus: "finished" });
+		expect(await updateResponse.json()).toMatchObject({ meetingStatus: "closed" });
 	});
 
 	test("aceita participante como autor", async ({ apiContext }) => {

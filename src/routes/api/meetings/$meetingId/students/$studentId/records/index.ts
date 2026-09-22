@@ -92,8 +92,8 @@ export async function createLinkedRecordHandler({
 	if (!meeting) {
 		return json({ error: ERR_MEETING_NOT_FOUND }, 404);
 	}
-	// Borda 5: só Em andamento/Reaberta aceita registros vinculados.
-	if (meeting.status !== "in_progress" && meeting.status !== "reopened") {
+	// Borda 5: só reunião aberta aceita registros vinculados.
+	if (meeting.status !== "open") {
 		return json(
 			{ error: ERR_MEETING_NOT_IN_PROGRESS, meetingStatus: meeting.status },
 			409,

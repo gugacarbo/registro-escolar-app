@@ -67,7 +67,7 @@ function mockInProgressMeeting() {
 	(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 		id: "meeting-1",
 		title: "Reunião 1",
-		status: "in_progress",
+		status: "open",
 		heldAt: new Date("2025-06-10T12:00:00.000Z"),
 		createdAt: new Date("2025-06-01T12:00:00.000Z"),
 	});
@@ -134,13 +134,13 @@ describe("PATCH /api/meetings/:id/students/:studentId/status", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 409 quando a reunião não está em andamento", async () => {
+	it("retorna 409 quando a reunião está encerrada", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Reunião 1",
-			status: "draft",
+			status: "closed",
 			heldAt: null,
 			createdAt: new Date("2025-06-01T12:00:00.000Z"),
 		});

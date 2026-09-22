@@ -33,17 +33,18 @@ Permitir gerar a ata formal de uma reunião a partir de um modelo inicial, dados
 
 1. Na preparação da reunião, o operador seleciona um modelo de ata.
 2. O sistema copia cabeçalho, corpo e rodapé do modelo para a ata lógica da reunião.
-3. Enquanto a reunião estiver editável, o operador pode ajustar esses três campos sem alterar o modelo compartilhado.
-4. A qualquer momento em andamento ou após finalização, o operador solicita prévia da ata.
+3. Enquanto a reunião estiver `open`, o operador pode ajustar esses três campos sem alterar o modelo compartilhado.
+4. A qualquer momento, o operador solicita prévia da ata.
 5. O sistema renderiza a ata aplicando o conteúdo local aos dados filtrados (apenas registros/relatos marcados para inclusão).
-6. Após finalização, uma versão oficial da ata é gerada com PDF.
+6. O operador gera a versão oficial da ata com PDF; a reunião é encerrada (`open` → `closed`) na mesma operação.
+7. Para corrigir e emitir nova versão, o operador reabre a reunião, ajusta o conteúdo e gera novamente.
 
 ## Contrato
 
 - `GET /api/meetings/:id/minutes` — retorna prévia e conteúdo editável efetivo da ata.
 - `GET /api/meetings/:id/minutes/content` — retorna a cópia editável da reunião.
 - `PATCH /api/meetings/:id/minutes/content` — salva cabeçalho, corpo e rodapé locais.
-- `POST /api/meetings/:id/minutes` — gera versão oficial e PDF.
+- `POST /api/meetings/:id/minutes` — gera versão oficial com PDF e encerra a reunião; em `closed` responde `409` exigindo reabertura.
 - `POST /api/minute-templates` — cadastra modelo.
 - O modelo define o conteúdo inicial; a ata da reunião mantém sua própria cópia.
 
@@ -53,10 +54,11 @@ Permitir gerar a ata formal de uma reunião a partir de um modelo inicial, dados
 | --- | ------------------------------------------- | ------------------------------------------------------------------- |
 | 1   | não houver registros marcados para inclusão | gerar ata mínima com cabeçalho e relatos gerais                     |
 | 2   | o modelo for alterado após uma reunião receber sua cópia | atas já configuradas manterem seu conteúdo local; novas reuniões usarem o modelo atualizado |
-| 3   | a reunião ainda estiver em Rascunho         | permitir prévia, mas não gerar versão oficial                       |
+| 3   | a reunião estiver `closed`                  | permitir prévia, mas exigir reabertura para gerar nova versão       |
 | 4   | houver registros internos                   | omiti-los da ata e do PDF                                           |
 | 5   | a reunião possuir múltiplas turmas          | agrupar registros por turma e por estudante conforme template       |
-| 6   | o operador editar conteúdo de reunião finalizada | rejeitar com conflito e exigir reabertura da reunião                 |
+| 6   | o operador editar conteúdo de reunião `closed` | rejeitar com conflito e exigir reabertura da reunião                 |
+| 7   | o operador gerar a versão oficial em reunião `open` | gerar a versão e encerrar a reunião                 |
 
 ## Questões em aberto
 
@@ -83,10 +85,10 @@ bun run build ..................... exit 0
 DoD executado em 2026-09-17. Modelos são persistidos em `minute_templates`;
 ao selecionar um modelo, a reunião recebe uma cópia local em `minutes`, que
 pode ser editada sem alterar o modelo ou outras reuniões. Prévia funciona
-inclusive em rascunho; geração oficial é rejeitada em rascunho;
+em qualquer estado; geração oficial exige reunião `open` e a encerra;
 registros/relatos internos são omitidos; a renderização agrupa registros por
 turma e estudante; sem registros a ata mínima continua gerável. O conteúdo
-local é bloqueado após finalização e volta a ser editável somente após
+local é bloqueado com a reunião encerrada e volta a ser editável somente após
 reabertura. Gates executados: `bunx drizzle-kit check`, `bun run check`,
 `bun run typecheck`, testes focados (87 aprovados, 1 ignorado), `bun run build`
 e E2E dos cenários de atas e modelos (14 aprovados).

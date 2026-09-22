@@ -60,7 +60,7 @@ export async function setRecordInclusionHandler({
 	if (!meeting) {
 		return json({ error: ERR_MEETING_NOT_FOUND }, 404);
 	}
-	if (meeting.status !== "in_progress" && meeting.status !== "reopened") {
+	if (meeting.status !== "open") {
 		return json(
 			{ error: ERR_MEETING_NOT_IN_PROGRESS, meetingStatus: meeting.status },
 			409,

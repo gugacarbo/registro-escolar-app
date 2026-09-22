@@ -2,7 +2,7 @@
 status: implemented
 date: 2026-09-08
 builds-on:
-  - ADR-0012
+  - ADR-0021
   - ADR-0011
   - ADR-0013
 implemented-by:
@@ -13,25 +13,17 @@ implemented-by:
   - src/lib/meetings/errors.ts
   - src/routes/api/meetings/index.ts
   - src/routes/api/meetings/$meetingId/index.ts
-  - src/routes/api/meetings/$meetingId/start.ts
-  - src/routes/api/meetings/$meetingId/finalize.ts
   - src/routes/api/meetings/$meetingId/reopen.ts
   - src/routes/api/meetings/$meetingId/classes/index.ts
   - src/routes/api/meetings/$meetingId/classes/$classId/index.ts
+  - src/routes/api/meetings/$meetingId/participants.ts
   - src/components/meetings/meeting-form.tsx
   - src/components/meetings/meeting-status-badge.tsx
   - src/components/meetings/transition-buttons.tsx
-  - src/hooks/meetings/use-meetings.ts
-  - src/hooks/meetings/use-create-meeting.ts
-  - src/hooks/meetings/use-meeting.ts
-  - src/hooks/meetings/use-update-meeting.ts
-  - src/hooks/meetings/use-add-meeting-class.ts
-  - src/hooks/meetings/use-remove-meeting-class.ts
   - src/hooks/meetings/use-transition-meeting.ts
   - src/routes/_app/meetings/index.tsx
-  - src/components/meetings/edit-meeting-dialog.tsx
-  - src/components/meetings/create-meeting-dialog.tsx
   - src/routes/_app/meetings/$meetingId/index.tsx
+  - src/routes/_app/meetings/$meetingId/council.tsx
 ---
 
 # Criação e ciclo de vida de reunião
@@ -40,52 +32,67 @@ implemented-by:
 
 ## Objetivo
 
-Permitir criar e gerenciar o ciclo de vida de uma reunião de conselho de classe, desde a preparação até a finalização e reabertura, distinguindo registros vinculados à reunião de registros independentes do estudante.
+Permitir criar e gerenciar uma reunião de conselho de classe em um único estado
+de trabalho (**Aberta**) e encerrá-la ao emitir a ata oficial, mantendo o
+caminho de reabertura para correções e novas versões da ata. O estado da
+reunião regula o que pode ser alterado dentro dela, não os registros
+independentes do estudante.
 
 ## Fluxo
 
-1. O operador cria uma reunião informando nome e data.
-2. Em Rascunho, seleciona turmas participantes, servidores participantes, cargos e modelo de ata.
-3. O operador inicia a reunião (Rascunho → Em andamento).
-4. Durante o conselho, o operador visualiza estudantes das turmas, seus registros independentes pré-existentes, e pode criar novos registros vinculados àquela reunião. Também pode ajustar os dados gerais da reunião (nome, data, modelo de ata) e as turmas participantes.
-5. O operador finaliza a reunião (Em andamento → Finalizada).
-6. Se necessário, reabre a reunião para correções (Finalizada → Reaberta → Em andamento → Finalizada).
+1. O operador cria uma reunião informando nome, data, turmas, participantes e
+   modelo de ata. Ela nasce **Aberta**.
+2. Em **Aberta**, o operador ajusta dados gerais, turmas, participantes,
+   acompanhamento dos estudantes, registros vinculados, relatos gerais e o
+   conteúdo da ata.
+3. O operador gera a versão oficial da ata. A geração encerra a reunião:
+   **Aberta → Encerrada**.
+4. Em **Encerrada**, dados, turmas, registros vinculados, relatos gerais e
+   conteúdo da ata não podem ser alterados.
+5. Se necessário, o operador reabre a reunião para correções
+   (**Encerrada → Aberta**); a próxima geração da ata cria a versão seguinte e
+   encerra novamente.
 
 ## Contrato
 
-- `POST /api/meetings` — cria reunião em Rascunho.
-- `GET /api/meetings/:id/classes` — lista turmas vinculadas.
-- `POST /api/meetings/:id/classes` — vincula turma à reunião.
-- `DELETE /api/meetings/:id/classes/:classId` — desvincula turma da reunião.
-- `PATCH /api/meetings/:id` — atualiza dados gerais (nome, data, modelo de ata).
-- `PATCH /api/meetings/:id/start` — inicia reunião.
-- `PATCH /api/meetings/:id/finalize` — finaliza reunião.
-- `PATCH /api/meetings/:id/reopen` — reabre reunião finalizada.
-- Payload de criação: `nome`, `data`, `turmaIds[]`, `participantes[]` com `servidorId` e `papelId`, `templateId` opcional do modelo.
+- `POST /api/meetings` — cria reunião em `open`.
+- `GET /api/meetings/:id` — retorna a reunião, incluindo `status`.
+- `PATCH /api/meetings/:id` — atualiza dados gerais (nome, data, local, modelo
+  de ata); permitido apenas em `open`.
+- `POST /api/meetings/:id/classes` — vincula turma; permitido apenas em `open`.
+- `DELETE /api/meetings/:id/classes/:classId` — desvincula turma; permitido
+  apenas em `open` e rejeitado com conflito se a turma já possuir acompanhamento.
+- `POST /api/meetings/:id/participants` — adiciona participante; permitido
+  apenas em `open`.
+- `PATCH /api/meetings/:id/reopen` — reabre reunião `closed`, retornando-a para
+  `open`. Única transição de estado explícita.
+- `POST /api/meetings/:id/minutes` — gera versão oficial da ata e encerra a
+  reunião (`open` → `closed`); em `closed` responde conflito exigindo reabertura.
+- Estados de reunião: `open` (Aberta) e `closed` (Encerrada).
 
 ## Casos de borda
 
-| #   | QUANDO ⟨gatilho⟩                                                                     | o sistema DEVE ⟨resposta⟩                                    |
-| --- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| 1   | a reunião estiver Finalizada e o operador tentar editar registro vinculado à reunião | rejeitar e informar necessidade de reabertura                |
-| 2   | a reunião estiver Finalizada e houver registro independente do estudante             | permitir visualizar, mas não permitir novo vínculo exclusivo |
-| 3   | a reunião não tiver turmas selecionadas ao iniciar                                   | rejeitar início                                              |
-| 4   | a reunião for reaberta                                                               | manter versões anteriores da ata e seus PDFs                 |
-| 5   | o operador tentar iniciar uma reunião já em andamento                                | rejeitar transição inválida                                  |
-| 6   | um registro independente for criado enquanto a reunião está em qualquer estado       | permitir, pois não depende do estado da reunião              |
-| 7   | a reunião estiver Em andamento ou Reaberta e o operador editar dados gerais          | permitir a atualização                                       |
-| 8   | a reunião estiver Rascunho, Em andamento ou Reaberta e o operador vincular turma     | permitir, refletindo no acompanhamento e na ata              |
-| 9   | o operador desvincular turma que já possui acompanhamento de estudantes registrado   | rejeitar com conflito e manter a turma vinculada             |
-| 10  | a reunião estiver Finalizada e o operador tentar editar dados gerais ou turmas       | rejeitar e informar necessidade de reabertura                |
+| #   | QUANDO ⟨gatilho⟩                                                                                                                                                   | o sistema DEVE ⟨resposta⟩                                         |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| 1   | a reunião estiver `closed` e o operador tentar editar dados gerais, turmas, participantes, acompanhamento, registros vinculados, relatos gerais ou conteúdo da ata | rejeitar e informar necessidade de reabertura                     |
+| 2   | a reunião estiver `closed` e existir registro independente do estudante                                                                                            | permitir visualizar e criar/editar o registro independente        |
+| 3   | o operador gerar a versão oficial da ata em reunião `open`                                                                                                         | criar a versão e transicionar a reunião para `closed`             |
+| 4   | o operador tentar gerar ata em reunião `closed`                                                                                                                    | rejeitar e informar necessidade de reabertura                     |
+| 5   | a reunião for reaberta                                                                                                                                             | voltar para `open` e manter versões anteriores da ata e seus PDFs |
+| 6   | o operador tentar reabrir reunião `open`                                                                                                                           | rejeitar transição inválida                                       |
+| 7   | um registro independente for criado em qualquer estado da reunião                                                                                                  | permitir, pois não depende do estado da reunião                   |
+| 8   | a reunião estiver `open` e o operador vincular turma                                                                                                               | permitir, refletindo no acompanhamento e na ata                   |
+| 9   | o operador desvincular turma que já possui acompanhamento de estudantes registrado                                                                                 | rejeitar com conflito e manter a turma vinculada                  |
+| 10  | a reunião estiver `open` e o operador adicionar participante                                                                                                       | permitir                                                          |
 
-## Regras de edição durante a reunião
+## Regras de edição por estado
 
-- `PATCH /api/meetings/:id` aceita `draft`, `in_progress` e `reopened`; em
-  `finished` responde `409` com exigência de reabertura.
-- `POST /api/meetings/:id/classes` aceita `draft`, `in_progress` e `reopened`.
-- `DELETE /api/meetings/:id/classes/:classId` aceita `draft`, `in_progress` e
-  `reopened`; responde `409` se a turma já possuir acompanhamento
-  (`meeting_student_status`) naquela reunião, para não perder registro já feito.
+- `open` aceita: `PATCH /api/meetings/:id`, `POST/DELETE /api/meetings/:id/classes`,
+  `POST /api/meetings/:id/participants`, acompanhamento, registros vinculados,
+  relatos gerais, conteúdo da ata e geração da ata.
+- `closed` aceita apenas: leitura, registros independentes do estudante
+  (criar/editar) e `PATCH /api/meetings/:id/reopen`.
+- A geração da ata é o único gatilho que fecha a reunião.
 - A edição de turmas não apaga acompanhamento, registros vinculados, relatos
   gerais nem versões de ata já emitidas.
 
@@ -98,41 +105,42 @@ Nenhuma — os dez casos de borda estão cobertos por testes.
 ```bash
 bunx tsc --noEmit --skipLibCheck        # exit 0
 bun run check                            # exit 0
+bun run test --run                       # casos 1-10 verdes
 ```
 
 ## Revisão humana
 
 - Estados e transições; mensagens de erro apresentadas ao operador.
-- Edição em Em andamento: dados gerais e turmas ficam disponíveis durante a
-  reunião; registros vinculados continuam restritos a Em andamento/Reaberta.
+- Encerramento automático da reunião ao gerar a ata e o fluxo de reabertura.
 
 ## Verificação
 
-```text
-2026-09-09 — implementação API + UI completa:
-- bunx tsc --noEmit --skipLibCheck → exit 0
-- bun run test → 58 arquivos, 460 testes, tudo verde
-- biome nos 44 arquivos do escopo (db meetings, lib/meetings, routes/api/meetings,
-  hooks/meetings, components/meetings, routes/_app/meetings) → limpo
-- bun run check → exit 0 (299 arquivos)
-- bun run test:coverage → global ≥95% (statements/lines 98,45%; funções 99,20%; branches 95,09%)
-- Endpoints: POST /api/meetings (201 sempre draft), PATCH :id/start (422 sem
-  turmas, 409 transição inválida), PATCH :id/finalize, PATCH :id/reopen + hint
-- UI: /meetings (lista+filtros+transições), /meetings/new, /meetings/:id e
-  /meetings/:id/council integrado às specs 0006/0007
+DoD executado em 2026-09-22 (ADR-0021). A reunião nasce `open` e permanece
+editável; gerar a versão oficial da ata a encerra (`open → closed`) na mesma
+operação; `PATCH /api/meetings/:id/reopen` é a única transição explícita e
+devolve a reunião para `open`. As rotas `start`/`finalize` foram removidas
+(arquivos e `routeTree.gen.ts` regenerado). Em `closed`, `PATCH` de dados,
+turmas, participantes, acompanhamento, registros vinculados, relatos gerais e
+conteúdo da ata respondem `409` com `meetingStatus: "closed"`; registros
+independentes continuam permitidos. A aprovação exige reunião `closed`
+(`ERR_MEETING_NOT_CLOSED` quando aberta) e a migração
+`drizzle/0018_remapeia-status-reuniao.sql` remapeia
+`draft|in_progress|reopened → open` e `finished → closed`. O default `open` é
+aplicado explicitamente em `createMeeting`/`createMeetingWithRelations` porque
+o D1 não permite o rebuild da tabela `meetings` (tem 7 filhas com FK) dentro da
+transação da migration: o default físico legado `'draft'` permanece na coluna,
+mas nunca é usado (ver `AGENTS.md > Gotchas` e a consequência no ADR-0021).
 
-2026-09-21 — edição durante a reunião (bordas 7/8/9/10):
-- bun run typecheck → exit 0
-- bun run check → exit 0 (542 arquivos)
-- bun run test → 177 arquivos, 1168 testes verdes (1 skip)
-- bun run test:coverage → 96,69% statements/lines; 95,02% branches;
-  97,17% funções (≥95%)
-- bun run e2e → 125 testes verdes, incluindo os dois novos cenários
-  SPEC-0005 (edição de dados/turmas em andamento; bloqueio de remoção com
-  acompanhamento e edição em finalizada)
-- PATCH /api/meetings/:id em in_progress/reopened → 200; finished → 409
-- POST /api/meetings/:id/classes em draft/in_progress/reopened → 201;
-  DELETE .../classes/:classId → 200, 409 com acompanhamento, 409 em finished
-- UI: aba Turmas vincula/desvincula em andamento; diálogo "Editar dados"
-  disponível em in_progress; banner orienta ajustes durante a reunião
+Gates executados:
+
+```bash
+bun run typecheck        # exit 0
+bun run check            # exit 0 (544 arquivos)
+bunx vitest run --project=unit --maxWorkers=2  # 178 arquivos, 1204 verdes, 1 ignorado
+bun run test:coverage    # branches 95.02% (limite 95%)
+bun run db:local:migrate # 0018 aplicada
+bun run e2e              # 118 verdes (spec-0005 e demais specs)
+bun run test:visual      # 8 verdes
+bun run build            # exit 0
+scripts/docs-check --emit-index  # 36 docs, 0 erros
 ```

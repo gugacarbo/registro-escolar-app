@@ -14,7 +14,6 @@ import {
 	MeetingClassInUseError,
 	MeetingNotEditableError,
 	MeetingNotFoundError,
-	MeetingWithoutClassesError,
 } from "./errors";
 import {
 	addMeetingClass,
@@ -22,7 +21,6 @@ import {
 	createMeeting,
 	createMeetingWithRelations,
 	createParticipant,
-	finalizeMeeting,
 	findMeetingById,
 	findParticipant,
 	listMeetingClasses,
@@ -30,7 +28,6 @@ import {
 	listParticipantsByMeeting,
 	removeMeetingClass,
 	reopenMeeting,
-	startMeeting,
 	transitionMeeting,
 	updateMeeting,
 } from "./repository";
@@ -58,7 +55,7 @@ function createTestDb() {
 		CREATE TABLE meetings (
 			id TEXT PRIMARY KEY,
 			title TEXT NOT NULL,
-			status TEXT NOT NULL DEFAULT 'draft',
+			status TEXT NOT NULL DEFAULT 'open',
 			held_at INTEGER,
 			location TEXT,
 			template_id TEXT,
@@ -147,11 +144,11 @@ async function createTestClass(db: DB, id: string) {
 }
 
 describe("meetings repository", () => {
-	it("cria uma reunião com status rascunho por padrão", async () => {
+	it("cria uma reunião com status aberta por padrão", async () => {
 		const { db } = createTestDb();
 		const meeting = await createMeeting(db, { title: "Reunião pedagógica" });
 		expect(meeting.title).toBe("Reunião pedagógica");
-		expect(meeting.status).toBe("draft");
+		expect(meeting.status).toBe("open");
 		expect(meeting.id).toBeTypeOf("string");
 	});
 
@@ -211,25 +208,25 @@ describe("meetings repository", () => {
 
 	it("filtra reuniões por status", async () => {
 		const { db } = createTestDb();
-		await createMeeting(db, { title: "Reunião 1", status: "draft" });
-		await createMeeting(db, { title: "Reunião 2", status: "finished" });
-		expect(await listMeetings(db, { status: "draft" })).toHaveLength(1);
-		expect(await listMeetings(db, { status: "finished" })).toHaveLength(1);
+		await createMeeting(db, { title: "Reunião 1", status: "open" });
+		await createMeeting(db, { title: "Reunião 2", status: "closed" });
+		expect(await listMeetings(db, { status: "open" })).toHaveLength(1);
+		expect(await listMeetings(db, { status: "closed" })).toHaveLength(1);
 		expect(
-			await listMeetings(db, { search: "Reunião", status: "draft" }),
+			await listMeetings(db, { search: "Reunião", status: "open" }),
 		).toHaveLength(1);
 	});
 
 	it("conta reuniões combinando busca e status", async () => {
 		const { db } = createTestDb();
-		await createMeeting(db, { title: "Reunião 1", status: "draft" });
-		await createMeeting(db, { title: "Reunião 2", status: "finished" });
+		await createMeeting(db, { title: "Reunião 1", status: "open" });
+		await createMeeting(db, { title: "Reunião 2", status: "closed" });
 		expect(await countMeetings(db, {})).toBe(2);
-		expect(await countMeetings(db, { status: "draft" })).toBe(1);
+		expect(await countMeetings(db, { status: "open" })).toBe(1);
 		expect(await countMeetings(db, { search: "Reunião 2" })).toBe(1);
-		expect(
-			await countMeetings(db, { search: "Reunião", status: "draft" }),
-		).toBe(1);
+		expect(await countMeetings(db, { search: "Reunião", status: "open" })).toBe(
+			1,
+		);
 		expect(await countMeetings(db, { search: "  " })).toBe(2);
 	});
 
@@ -315,68 +312,34 @@ describe("meeting lifecycle", () => {
 			classIds: [klass.id],
 			participants: [{ staffId: member.id, roleId: role.id }],
 		});
-		expect(meeting.status).toBe("draft");
+		expect(meeting.status).toBe("open");
 		expect(meeting.templateId).toBeNull();
 		expect(await listMeetingClasses(db, meeting.id)).toHaveLength(1);
 		expect(await listParticipantsByMeeting(db, meeting.id)).toHaveLength(1);
 	});
 
-	it("percorre o ciclo completo draft → in_progress → finished → reopened", async () => {
+	it("reabre uma reunião encerrada (closed → open)", async () => {
 		const { db } = createTestDb();
 		const klass = await createTestClass(db, "class-1");
 		const meeting = await createMeetingWithRelations(db, {
 			title: "Reunião 1",
 			classIds: [klass.id],
 		});
-		const started = await startMeeting(db, meeting.id);
-		expect(started.status).toBe("in_progress");
-		const finished = await finalizeMeeting(db, meeting.id);
-		expect(finished.status).toBe("finished");
+		expect(meeting.status).toBe("open");
+		await updateMeeting(db, meeting.id, { status: "closed" });
 		const reopened = await reopenMeeting(db, meeting.id);
-		expect(reopened.status).toBe("reopened");
-		const restarted = await startMeeting(db, meeting.id);
-		expect(restarted.status).toBe("in_progress");
-		// Borda 5: não iniciar reunião que já está em andamento.
-		await expect(startMeeting(db, meeting.id)).rejects.toThrow(
-			InvalidTransitionError,
-		);
-		const refinished = await finalizeMeeting(db, meeting.id);
-		expect(refinished.status).toBe("finished");
+		expect(reopened.status).toBe("open");
 	});
 
-	it("bloqueia início de reunião sem turmas (borda 3)", async () => {
+	it("bloqueia reopen de reunião aberta (borda 6)", async () => {
 		const { db } = createTestDb();
-		const meeting = await createMeetingWithRelations(db, {
-			title: "Sem turmas",
-		});
-		await expect(startMeeting(db, meeting.id)).rejects.toThrow(
-			MeetingWithoutClassesError,
-		);
-	});
-
-	it("bloqueia finalize em rascunho e reopen em draft/in_progress", async () => {
-		const { db } = createTestDb();
-		const klass = await createTestClass(db, "class-1");
-		const draft = await createMeetingWithRelations(db, {
-			title: "Rascunho",
-		});
-		await expect(finalizeMeeting(db, draft.id)).rejects.toThrow(
-			InvalidTransitionError,
-		);
-		await expect(reopenMeeting(db, draft.id)).rejects.toThrow(
-			InvalidTransitionError,
-		);
-		const meeting = await createMeetingWithRelations(db, {
-			title: "Com turma",
-			classIds: [klass.id],
-		});
-		await startMeeting(db, meeting.id);
+		const meeting = await createMeetingWithRelations(db, { title: "Aberta" });
 		await expect(reopenMeeting(db, meeting.id)).rejects.toThrow(
 			InvalidTransitionError,
 		);
 	});
 
-	it("edita turmas em draft, in_progress e reopened e bloqueia em finished", async () => {
+	it("edita turmas em reunião aberta e bloqueia em encerrada (bordas 1/8/9/10)", async () => {
 		const { db } = createTestDb();
 		const first = await createTestClass(db, "class-1");
 		const second = await createTestClass(db, "class-2");
@@ -389,16 +352,15 @@ describe("meeting lifecycle", () => {
 		expect(link.classId).toBe(second.id);
 		expect(await listMeetingClasses(db, meeting.id)).toHaveLength(2);
 
-		// Em andamento (borda 8): vínculo permitido durante a reunião.
-		await startMeeting(db, meeting.id);
+		// Aberta (borda 8): vínculo permitido durante a reunião.
 		await addMeetingClass(db, meeting.id, third.id);
 		expect(await listMeetingClasses(db, meeting.id)).toHaveLength(3);
 		await expect(addMeetingClass(db, meeting.id, second.id)).rejects.toThrow(
 			MeetingClassAlreadyLinkedError,
 		);
 
-		// Finalizada (borda 10): exige reabertura.
-		await finalizeMeeting(db, meeting.id);
+		// Encerrada (borda 1): exige reabertura.
+		await updateMeeting(db, meeting.id, { status: "closed" });
 		await expect(addMeetingClass(db, meeting.id, second.id)).rejects.toThrow(
 			MeetingNotEditableError,
 		);
@@ -419,7 +381,6 @@ describe("meeting lifecycle", () => {
 			title: "Reunião 1",
 			classIds: [klass.id],
 		});
-		await startMeeting(db, meeting.id);
 		await db.insert(schema.meetingStudentStatus).values({
 			id: "status-1",
 			meetingId: meeting.id,
@@ -435,9 +396,9 @@ describe("meeting lifecycle", () => {
 
 	it("erro ao transicionar reunião inexistente", async () => {
 		const { db } = createTestDb();
-		await expect(transitionMeeting(db, "inexistente", "start")).rejects.toThrow(
-			MeetingNotFoundError,
-		);
+		await expect(
+			transitionMeeting(db, "inexistente", "reopen"),
+		).rejects.toThrow(MeetingNotFoundError);
 	});
 
 	it("erro ao vincular/remover turma de reunião inexistente", async () => {

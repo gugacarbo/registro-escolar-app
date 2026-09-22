@@ -136,12 +136,10 @@ describe("PATCH /api/meetings/:meetingId/minutes/content", () => {
 		});
 	});
 
-	it("retorna conflito quando a reunião está finalizada", async () => {
+	it("retorna conflito quando a reunião está encerrada", async () => {
 		vi.mocked(getSession).mockResolvedValueOnce(session());
 		vi.mocked(updateMinuteContent).mockRejectedValueOnce(
-			new MinuteNotEditableError(
-				"Reunião finalizada: reabra para editar a ata",
-			),
+			new MinuteNotEditableError("Reunião encerrada: reabra para editar a ata"),
 		);
 
 		const response = await updateMinuteContentHandler({

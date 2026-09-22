@@ -15,7 +15,7 @@
 | [ADR-0009](0009-tailwind-shadcn-ui-interface.md) | Adota Tailwind CSS v4 e shadcn/ui para estilização e componentes | accepted |
 | [ADR-0010](0010-t3env-variaveis-ambiente.md) | Adota T3Env para validação e isolamento de variáveis de ambiente | accepted |
 | [ADR-0011](0011-modelo-entidades-dominio.md) | Adota modelo de entidades independentes para estudantes, turmas, vínculos, servidores e componentes | accepted |
-| [ADR-0012](0012-ciclo-vida-reuniao.md) | Adota ciclo de vida Rascunho/Em andamento/Finalizada/Reaberta para reuniões | accepted |
+| [ADR-0012](0012-ciclo-vida-reuniao.md) | Adota ciclo de vida Rascunho/Em andamento/Finalizada/Reaberta para reuniões | superseded |
 | [ADR-0013](0013-registros-estudante-independentes.md) | Adota registros de estudante como entidades independentes e reutilizáveis entre reuniões | accepted |
 | [ADR-0014](0014-ata-entidade-separada.md) | Adota ata como entidade separada da reunião com template, versionamento e PDF | accepted |
 | [ADR-0015](0015-historico-vinculo-temporal.md) | Adota histórico baseado em vínculo temporal sem snapshots | accepted |
@@ -24,3 +24,4 @@
 | [ADR-0018](0018-importacao-estudantes-csv.md) | Adota importação em lote de estudantes via CSV/planilha com detecção de duplicidade | accepted |
 | [ADR-0019](0019-geracao-pdf-serverless.md) | Adota geração de PDF das atas em pipeline serverless/edge | accepted |
 | [ADR-0020](0020-adota-controle-de-acesso-por-papeis.md) | Adota controle de acesso por papéis | accepted |
+| [ADR-0021](0021-adota-ciclo-de-vida-aberta-encerrada-para-reunioes.md) | Adota ciclo de vida Aberta/Encerrada para reuniões | accepted |

@@ -16,3 +16,4 @@ formato da tabela é apontada pelo comando, nunca lida em silêncio.
 | NNNN | título | data | situação |
 |---|---|---|---|
 | 0020 | Adota controle de acesso por papéis | 2026-09-11 | em uso |
+| 0021 | Adota ciclo de vida Aberta/Encerrada para reuniões | 2026-09-22 | em uso |

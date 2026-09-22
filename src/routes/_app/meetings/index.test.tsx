@@ -46,7 +46,7 @@ function makeMeeting(overrides: Partial<Meeting> = {}): Meeting {
 	return {
 		id: "meeting-1",
 		title: "Conselho de classe",
-		status: "draft",
+		status: "open",
 		heldAt: null,
 		location: null,
 		templateId: null,
@@ -124,7 +124,7 @@ describe("MeetingsPage", () => {
 		).toHaveClass("hidden", "sm:table-cell");
 		expect(
 			screen
-				.getAllByText("Rascunho")
+				.getAllByText("Aberta")
 				.some((status) =>
 					status.parentElement?.classList.contains("sm:hidden"),
 				),
@@ -212,7 +212,7 @@ describe("MeetingsPage", () => {
 		renderPage();
 
 		const table = screen.getByRole("table", { name: "Tabela de reuniões" });
-		fireEvent.click(within(table).getAllByText("Rascunho")[0]);
+		fireEvent.click(within(table).getAllByText("Aberta")[0]);
 
 		expect(mocks.navigate).toHaveBeenCalledTimes(1);
 		expect(mocks.navigate).toHaveBeenCalledWith({

@@ -63,8 +63,8 @@ export async function updateLinkedRecordHandler({
 	if (!meeting) {
 		return json({ error: ERR_MEETING_NOT_FOUND }, 404);
 	}
-	// Borda 5: edição só com reunião Em andamento/Reaberta.
-	if (meeting.status !== "in_progress" && meeting.status !== "reopened") {
+	// Borda 5: edição só com reunião aberta.
+	if (meeting.status !== "open") {
 		return json(
 			{ error: ERR_MEETING_NOT_IN_PROGRESS, meetingStatus: meeting.status },
 			409,

@@ -15,7 +15,7 @@ function baseInput(overrides: Partial<RenderInput> = {}): RenderInput {
 			heldAt: new Date("2024-04-15T12:00:00Z"),
 			location: "Sala dos Professores",
 			templateId: null,
-			status: "draft",
+			status: "open",
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		} as RenderInput["meeting"],

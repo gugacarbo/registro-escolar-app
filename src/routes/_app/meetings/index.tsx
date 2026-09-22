@@ -24,10 +24,8 @@ export const Route = createFileRoute("/_app/meetings/")({
 });
 
 const STATUS_OPTIONS: Array<{ value: MeetingStatus; label: string }> = [
-	{ value: "draft", label: "Rascunho" },
-	{ value: "in_progress", label: "Em andamento" },
-	{ value: "finished", label: "Finalizada" },
-	{ value: "reopened", label: "Reaberta" },
+	{ value: "open", label: "Aberta" },
+	{ value: "closed", label: "Encerrada" },
 ];
 
 const columns = [
@@ -96,7 +94,7 @@ export default function MeetingsPage() {
 			<PageHeader
 				eyebrow="Gestão de reuniões"
 				title="Reuniões"
-				description="Acompanhe cada reunião do rascunho à finalização e participe diretamente da reunião."
+				description="Acompanhe cada reunião da abertura ao encerramento pela ata e participe diretamente do conselho."
 				actions={
 					<Button onClick={() => setDialogOpen(true)}>Nova reunião</Button>
 				}

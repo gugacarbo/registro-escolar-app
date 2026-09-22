@@ -25,7 +25,7 @@ Permitir ao operador acompanhar o progresso da discussão dos estudantes das tur
 
 ## Fluxo
 
-1. A reunião é iniciada.
+1. A reunião está `open` (Aberta).
 2. O operador seleciona uma das turmas da reunião.
 3. O sistema lista os estudantes vinculados à turma na data da reunião.
 4. O operador seleciona um estudante, marca como "Em discussão", consulta histórico, adiciona registros e marca como "Concluído".
@@ -36,6 +36,7 @@ Permitir ao operador acompanhar o progresso da discussão dos estudantes das tur
 - `GET /api/meetings/:id/classes/:classId/students` — estudantes da turma na data da reunião.
 - `PATCH /api/meetings/:id/students/:studentId/status` — atualiza status de acompanhamento.
 - Status permitidos: `pendente`, `em_discussao`, `concluido`, `nao_discutido`.
+- `PATCH` é permitido apenas com a reunião `open`; em `closed` responde `409` exigindo reabertura.
 
 ## Casos de borda
 
@@ -68,7 +69,7 @@ scripts/docs-check ................ exit 0
 
 ## Verificação
 
-DoD executado em 2026-09-09. A tabela `meeting_student_statuses` materializa o
+Atualização 2026-09-22 (ADR-0021): o acompanhamento é permitido apenas em reunião `open`; em `closed` o PATCH responde conflito. DoD original (2026-09-09). A tabela `meeting_student_statuses` materializa o
 status por `(meetingId, classId, studentId)`, garantindo acompanhamento
 independente por turma e permitindo o mesmo estudante em mais de uma turma da
 reunião. A listagem usa vínculos temporais ativos na data da reunião; turma sem

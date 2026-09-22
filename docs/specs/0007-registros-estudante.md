@@ -42,7 +42,7 @@ Permitir criar múltiplos registros independentes sobre um estudante, com ou sem
 
 ### Registro vinculado a uma reunião
 
-1. Durante a discussão de um estudante em uma reunião Em andamento, o operador clica em adicionar registro.
+1. Durante a discussão de um estudante em uma reunião `open`, o operador clica em adicionar registro.
 2. Preenche texto livre obrigatório.
 3. Opcionalmente seleciona categoria, componente curricular e origem (participante da reunião).
 4. Define se o registro deve ser incluído na ata (padrão sim).
@@ -53,7 +53,7 @@ Permitir criar múltiplos registros independentes sobre um estudante, com ou sem
 - `POST /api/students/:id/records` — cria registro independente do estudante.
 - `POST /api/meetings/:id/students/:studentId/records` — cria registro vinculado à reunião.
 - `GET /api/meetings/:id/students/:studentId/records` — lista registros do estudante na reunião, incluindo independentes aplicáveis.
-- `PATCH /api/meetings/:id/records/:recordId` — edita registro vinculado à reunião (só se reunião Em andamento/Reaberta).
+- `PATCH /api/meetings/:id/records/:recordId` — edita registro vinculado à reunião (só se reunião `open`).
 - `PATCH /api/meetings/:id/students/:studentId/records/:recordId/include` — define se registro independente entra na ata desta reunião.
 - Payload independente: `texto` obrigatório; `turmaId`, `categoriaId`, `componenteId`, `origemId` (servidor), `incluirNaAta` opcionais.
 - Payload vinculado: `texto` obrigatório; `categoriaId`, `componenteId`, `origemId`, `incluirNaAta` opcionais. `origemId` deve ser participante da reunião.
@@ -66,7 +66,7 @@ Permitir criar múltiplos registros independentes sobre um estudante, com ou sem
 | 2   | a origem de um registro vinculado a reunião for um servidor que não participa da reunião         | rejeitar com erro de autoria inválida (CA-005)                        |
 | 3   | o componente não for oferecido para a turma do estudante na data                                 | permitir, mas opcionalmente sinalizar desencontro                     |
 | 4   | o registro for marcado como não incluir na ata                                                   | armazenar normalmente e omitir na ata/PDF (CA-004)                    |
-| 5   | a reunião estiver Finalizada e o operador tentar criar/editar registro vinculado à reunião       | rejeitar e informar necessidade de reabertura                         |
+| 5   | a reunião estiver `closed` e o operador tentar criar/editar registro vinculado à reunião         | rejeitar e informar necessidade de reabertura                         |
 | 6   | o operador criar quatro registros para o mesmo estudante na mesma reunião                        | manter os quatro como registros independentes (CA-003)                |
 | 7   | existir registro independente do estudante e a reunião incluir a turma à qual ele está vinculado | exibir o registro como contexto e permitir inclusão na ata            |
 | 8   | existir registro independente do estudante mas a reunião não envolver a turma referenciada       | não exibir o registro como contexto nesta reunião                     |
@@ -96,7 +96,7 @@ scripts/docs-check ................ exit 0
 DoD executado em 2026-09-09. Modelos `student_records` e
 `record_meeting_inclusions` criam as migrations 0006 (nomeada) e estão aplicadas
 localmente. Bordas: texto vazio → 400; origem não participante → 422; componente
-fora da oferta é permitido; incluirNaAta=false é persistido; reunião finalizada
+fora da oferta é permitido; incluirNaAta=false é persistido; reunião encerrada
 → 409 pedindo reabertura; múltiplos registros coexistem; contexto independente é
 filtrado pelas turmas da reunião; toggle de inclusão grava somente a decisão por
 reunião, preservando o registro original. Gates conforme DoD acima.

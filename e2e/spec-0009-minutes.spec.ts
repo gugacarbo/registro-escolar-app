@@ -10,35 +10,31 @@ import {
 	createStudent,
 	generateMinute,
 	previewMinute,
-	startMeeting,
 	updateMeetingTemplate,
-	transitionMeetingResponse,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
 
 test.describe("SPEC-0009 geração de ata", () => {
-	test("prévia funciona em rascunho mas geração oficial é rejeitada", async ({
+	test("prévia funciona em reunião aberta e a geração encerra a reunião", async ({
 		apiContext,
 	}) => {
-		const klass = await createClass(apiContext, "Turma Ata Rascunho", "2026");
+		const klass = await createClass(apiContext, "Turma Ata Aberta", "2026");
 		const meeting = await createMeeting(apiContext, {
-			title: "Ata Rascunho",
+			title: "Ata Aberta",
 			heldAt: "2026-05-10",
 			classIds: [klass.id],
 			participants: [],
 		});
 		const preview = await previewMinute(apiContext, meeting.id);
-		expect(preview.status).toBe("draft");
-		expect(preview.content).toContain("ATA — ATA RASCUNHO");
+		expect(preview.status).toBe("open");
+		expect(preview.content).toContain("ATA — ATA ABERTA");
 
-		const generateResponse = await fetch(
-			`${baseURL}/api/meetings/${meeting.id}/minutes`,
-			{ method: "POST", headers: { Cookie: apiContext.cookies } },
-		);
-		expect(generateResponse.status).toBe(409);
+		const generated = await generateMinute(apiContext, meeting.id);
+		expect(generated.version).toBe(1);
+		expect((await previewMinute(apiContext, meeting.id)).status).toBe("closed");
 	});
 
-	test("gera versão oficial com PDF após finalização", async ({ apiContext }) => {
+	test("gera versão oficial com PDF", async ({ apiContext }) => {
 		const klass = await createClass(apiContext, "Turma Ata Oficial", "2026");
 		const meeting = await createMeeting(apiContext, {
 			title: "Ata Oficial",
@@ -46,9 +42,6 @@ test.describe("SPEC-0009 geração de ata", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
-		const finish = await transitionMeetingResponse(apiContext, meeting.id, "finalize");
-		expect(finish.status).toBe(200);
 
 		const generated = await generateMinute(apiContext, meeting.id, "Versão v1");
 		expect(generated).toMatchObject({ version: 1, isCurrent: true, pdfSize: expect.any(Number) });
@@ -70,7 +63,6 @@ test.describe("SPEC-0009 geração de ata", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createGeneralReport(apiContext, meeting.id, "Relato público mínimo");
 		const preview = await previewMinute(apiContext, meeting.id);
 		expect(preview.content).toContain("ATA — ATA MÍNIMA");
@@ -78,7 +70,6 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(preview.content).toContain("Relato público mínimo");
 		expect(preview.content).not.toContain("Registros por estudante");
 
-		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
 		const generated = await generateMinute(apiContext, meeting.id);
 		expect(generated.pdfSize).toBeGreaterThan(0);
 	});
@@ -93,7 +84,6 @@ test.describe("SPEC-0009 geração de ata", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createGeneralReport(apiContext, meeting.id, "Relato interno", {
 			incluirNaAta: false,
 		});
@@ -101,7 +91,6 @@ test.describe("SPEC-0009 geração de ata", () => {
 		expect(preview.content).not.toContain("Relato interno");
 		expect(preview.content).not.toContain("Relatos gerais");
 
-		await transitionMeetingResponse(apiContext, meeting.id, "finalize");
 		const generated = await generateMinute(apiContext, meeting.id);
 		expect(generated.pdfSize).toBeGreaterThan(0);
 	});
@@ -233,7 +222,6 @@ test.describe("SPEC-0009 geração de ata", () => {
 			classIds: [klassA.id, klassB.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(apiContext, meeting.id, studentA.id, "Registro A público");
 		await createLinkedRecord(apiContext, meeting.id, studentA.id, "Registro A interno", {
 			incluirNaAta: false,

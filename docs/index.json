@@ -133,11 +133,11 @@
     "path": "docs/adr/0012-ciclo-vida-reuniao.md",
     "layer": "adr",
     "title": "Adota ciclo de vida Rascunho/Em andamento/Finalizada/Reaberta para reuniões",
-    "status": "accepted",
+    "status": "superseded",
     "builds-on": [
       "ADR-0011"
     ],
-    "superseded-by": null,
+    "superseded-by": "ADR-0021",
     "implemented-by": []
   },
   {
@@ -239,6 +239,19 @@
     "builds-on": [
       "ADR-0008",
       "ADR-0003"
+    ],
+    "superseded-by": null,
+    "implemented-by": []
+  },
+  {
+    "id": "ADR-0021",
+    "path": "docs/adr/0021-adota-ciclo-de-vida-aberta-encerrada-para-reunioes.md",
+    "layer": "adr",
+    "title": "Adota ciclo de vida Aberta/Encerrada para reuniões",
+    "status": "accepted",
+    "builds-on": [
+      "ADR-0013",
+      "ADR-0014"
     ],
     "superseded-by": null,
     "implemented-by": []
@@ -386,7 +399,7 @@
     "title": "Criação e ciclo de vida de reunião",
     "status": "implemented",
     "builds-on": [
-      "ADR-0012",
+      "ADR-0021",
       "ADR-0011",
       "ADR-0013"
     ],
@@ -399,25 +412,17 @@
       "src/lib/meetings/errors.ts",
       "src/routes/api/meetings/index.ts",
       "src/routes/api/meetings/$meetingId/index.ts",
-      "src/routes/api/meetings/$meetingId/start.ts",
-      "src/routes/api/meetings/$meetingId/finalize.ts",
       "src/routes/api/meetings/$meetingId/reopen.ts",
       "src/routes/api/meetings/$meetingId/classes/index.ts",
       "src/routes/api/meetings/$meetingId/classes/$classId/index.ts",
+      "src/routes/api/meetings/$meetingId/participants.ts",
       "src/components/meetings/meeting-form.tsx",
       "src/components/meetings/meeting-status-badge.tsx",
       "src/components/meetings/transition-buttons.tsx",
-      "src/hooks/meetings/use-meetings.ts",
-      "src/hooks/meetings/use-create-meeting.ts",
-      "src/hooks/meetings/use-meeting.ts",
-      "src/hooks/meetings/use-update-meeting.ts",
-      "src/hooks/meetings/use-add-meeting-class.ts",
-      "src/hooks/meetings/use-remove-meeting-class.ts",
       "src/hooks/meetings/use-transition-meeting.ts",
       "src/routes/_app/meetings/index.tsx",
-      "src/components/meetings/edit-meeting-dialog.tsx",
-      "src/components/meetings/create-meeting-dialog.tsx",
-      "src/routes/_app/meetings/$meetingId/index.tsx"
+      "src/routes/_app/meetings/$meetingId/index.tsx",
+      "src/routes/_app/meetings/$meetingId/council.tsx"
     ]
   },
   {

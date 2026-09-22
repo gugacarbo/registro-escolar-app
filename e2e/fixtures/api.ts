@@ -276,30 +276,18 @@ export async function createMinuteTemplate(
 	return res.json();
 }
 
-export async function startMeeting(
-	ctx: ApiContext,
-	meetingId: string,
-): Promise<{ id: string; status: string }> {
-	const res = await api("PATCH", `/api/meetings/${meetingId}/start`, ctx.cookies);
-	if (!res.ok) throw new Error(`startMeeting failed: ${res.status}`);
-	return res.json();
-}
-
 export async function transitionMeetingResponse(
 	ctx: ApiContext,
 	meetingId: string,
-	action: "start" | "finalize" | "reopen",
+	action: "reopen",
 ) {
 	return api("PATCH", `/api/meetings/${meetingId}/${action}`, ctx.cookies);
 }
 
-export async function finalizeMeeting(ctx: ApiContext, meetingId: string) {
-	const res = await api("PATCH", `/api/meetings/${meetingId}/finalize`, ctx.cookies);
-	if (!res.ok) throw new Error(`finalizeMeeting failed: ${res.status}`);
-	return res.json();
-}
-
-export async function reopenMeeting(ctx: ApiContext, meetingId: string) {
+export async function reopenMeeting(
+	ctx: ApiContext,
+	meetingId: string,
+): Promise<{ id: string; status: string }> {
 	const res = await api("PATCH", `/api/meetings/${meetingId}/reopen`, ctx.cookies);
 	if (!res.ok) throw new Error(`reopenMeeting failed: ${res.status}`);
 	return res.json();

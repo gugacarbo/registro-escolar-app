@@ -92,8 +92,8 @@ export default function MinuteDetailPage() {
 	const [contentSaved, setContentSaved] = useState(false);
 	const [confirmGenerate, setConfirmGenerate] = useState(false);
 
-	const isDraft = meeting?.status === "draft";
-	const isContentEditable = meeting?.status !== "finished";
+	const isClosed = meeting?.status === "closed";
+	const isContentEditable = meeting?.status === "open";
 	const isApproved = preview.data?.approvalStatus === "aprovada";
 
 	const approveForm = useForm<ApproveFormValues>({
@@ -200,9 +200,9 @@ export default function MinuteDetailPage() {
 				}
 			/>
 
-			{isDraft && (
+			{isClosed && (
 				<p className="text-sm text-muted-foreground">
-					Reunião em rascunho — inicie a reunião para gerar a versão oficial.
+					Reunião encerrada — reabra para gerar uma nova versão da ata.
 				</p>
 			)}
 
@@ -218,7 +218,7 @@ export default function MinuteDetailPage() {
 				)}
 				{!isContentEditable && (
 					<p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
-						A reunião está finalizada. Reabra-a para editar o conteúdo da ata.
+						A reunião está encerrada. Reabra-a para editar o conteúdo da ata.
 					</p>
 				)}
 				{isContentEditable && content.data && (
@@ -293,7 +293,7 @@ export default function MinuteDetailPage() {
 								</FormItem>
 							)}
 						/>
-						<FormSubmit disabled={generate.isPending || isDraft}>
+						<FormSubmit disabled={generate.isPending || isClosed}>
 							{generate.isPending ? "Gerando..." : "Gerar nova versão"}
 						</FormSubmit>
 					</FormNative>

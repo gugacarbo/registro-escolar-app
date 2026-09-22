@@ -97,6 +97,17 @@ export async function createParticipantHandler({
 	if (!meeting) {
 		return json({ error: "Reunião não encontrada" }, 404);
 	}
+	// Participantes só podem ser adicionados com a reunião aberta
+	// (spec 0005, borda 10).
+	if (meeting.status !== "open") {
+		return json(
+			{
+				error: "Reunião encerrada: reabra para adicionar participantes",
+				meetingStatus: meeting.status,
+			},
+			409,
+		);
+	}
 
 	const staffMember = await findActiveStaffById(db, parsed.data.staffId);
 	if (!staffMember) {

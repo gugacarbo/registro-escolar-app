@@ -3,7 +3,7 @@ import {
 	createMeeting,
 	createMinuteTemplate,
 	generateMinute,
-	startMeeting,
+	reopenMeeting,
 } from "../fixtures/api";
 import { expect, test } from "../fixtures/test";
 import { expectRouteScreenshot } from "./helpers";
@@ -23,8 +23,11 @@ test("@visual mantém a tela de visualização/edição da ata", async ({
 		classIds: [klass.id],
 		templateId: template.id,
 	});
-	await startMeeting(apiContext, meeting.id);
 	await generateMinute(apiContext, meeting.id);
+	// ADR-0021: gerar a ata encerra a reunião e a tela passa para read-only.
+	// Reabrimos para fotografar o estado editável, que é o alvo deste teste
+	// (o estado encerrado é coberto pelos e2e de ciclo de vida).
+	await reopenMeeting(apiContext, meeting.id);
 
 	await authenticatedPage.goto(`/minutes/${meeting.id}`);
 

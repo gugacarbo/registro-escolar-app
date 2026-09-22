@@ -86,7 +86,7 @@ function makeHistory(
 			{
 				id: "meeting-1",
 				title: "Conselho 2026",
-				status: "finished",
+				status: "closed",
 				heldAt: "2026-05-10T21:00:00.000Z",
 			},
 		],
@@ -101,7 +101,7 @@ function makeHistory(
 				turmaNome: "Turma A",
 				reuniaoId: "meeting-1",
 				reuniaoTitulo: "Conselho 2026",
-				reuniaoStatus: "finished",
+				reuniaoStatus: "closed",
 				texto: "Baixo rendimento",
 				categoriaId: null,
 				componenteId: null,
@@ -192,7 +192,7 @@ describe("ClassStudentsPage", () => {
 			"href",
 			"/meetings/$meetingId",
 		);
-		expect(screen.getByText("Finalizada")).toBeInTheDocument();
+		expect(screen.getByText("Encerrada")).toBeInTheDocument();
 	});
 
 	it("abre a aba de ofertas do painel de configurações", async () => {

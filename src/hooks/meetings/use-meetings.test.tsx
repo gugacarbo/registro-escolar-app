@@ -25,7 +25,7 @@ describe("useMeetings", () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
 			new Response(
 				JSON.stringify({
-					data: [{ id: "meeting-1", title: "Reunião", status: "draft" }],
+					data: [{ id: "meeting-1", title: "Reunião", status: "open" }],
 					total: 1,
 					page: 2,
 					pageSize: 10,
@@ -37,7 +37,7 @@ describe("useMeetings", () => {
 			() =>
 				useMeetings({
 					search: "Reunião",
-					status: "draft",
+					status: "open",
 					page: 2,
 					pageSize: 10,
 				}),
@@ -50,7 +50,7 @@ describe("useMeetings", () => {
 		);
 		expect(url.pathname).toBe("/api/meetings");
 		expect(url.searchParams.get("search")).toBe("Reunião");
-		expect(url.searchParams.get("status")).toBe("draft");
+		expect(url.searchParams.get("status")).toBe("open");
 		expect(url.searchParams.get("page")).toBe("2");
 		expect(url.searchParams.get("pageSize")).toBe("10");
 		expect(result.current.data).toMatchObject({ total: 1, page: 2 });
@@ -92,9 +92,9 @@ describe("useMeetings", () => {
 
 	it("getMeetingsQueryKey sem args retorna o prefixo de invalidação", async () => {
 		expect(getMeetingsQueryKey()).toEqual(["meetings"]);
-		expect(getMeetingsQueryKey("busca", "draft")).toEqual([
+		expect(getMeetingsQueryKey("busca", "open")).toEqual([
 			"meetings",
-			{ search: "busca", status: "draft", page: 1, pageSize: 10 },
+			{ search: "busca", status: "open", page: 1, pageSize: 10 },
 		]);
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
@@ -104,7 +104,7 @@ describe("useMeetings", () => {
 					{ status: 200 },
 				),
 			);
-		const { result } = renderHook(() => useMeetings({ status: "draft" }), {
+		const { result } = renderHook(() => useMeetings({ status: "open" }), {
 			wrapper: createWrapper(),
 		});
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -112,6 +112,6 @@ describe("useMeetings", () => {
 			fetchMock.mock.calls[0][0] as string,
 			"http://localhost",
 		);
-		expect(url.searchParams.get("status")).toBe("draft");
+		expect(url.searchParams.get("status")).toBe("open");
 	});
 });

@@ -20,7 +20,7 @@ import {
 const sampleMeeting = {
 	id: "minute-preview-meeting",
 	title: "Conselho de Classe — 1º Bimestre",
-	status: "in_progress",
+	status: "open",
 	heldAt: new Date("2026-03-15T12:00:00.000Z"),
 	location: "Sala dos professores",
 	templateId: null,

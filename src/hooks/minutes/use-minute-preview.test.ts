@@ -17,7 +17,7 @@ function createWrapper() {
 const preview = {
 	meetingId: "meeting-1",
 	templateId: null,
-	status: "finished",
+	status: "closed",
 	approvalStatus: "pendente_aprovacao",
 	content: "Ata da reunião",
 };

@@ -106,6 +106,18 @@ URL de produção: https://registro-escolar-app.gugacarbo.workers.dev
   (aninha e é ignorado) e o `E2E_DB_PATH` default segue `.wrangler/state/e2e`,
   então as fixtures limpam um banco diferente do que o servidor usa.
 
+- O D1 aplica cada arquivo de migration numa transação e desligar FK
+  (`PRAGMA foreign_keys=OFF`) é no-op dentro dela: no D1 (local e remoto) o
+  pragma segue `1`, e `writable_schema` responde `SQLITE_AUTH`. Consequência:
+  **não dá para reconstruir uma tabela pai** (`__new_*` + `DROP`/`RENAME`, o
+  padrão do drizzle-kit) se ela tiver filhos com FK. `defer_foreign_keys`
+  falha no commit (`SQLITE_CONSTRAINT_FOREIGNKEY`) e `legacy_alter_table`
+  reescreve a FK do filho para `*_old`. Só resta reconstruir o pai **e todas**
+  as filhas numa migration só — evite. Por isso `meetings.status` mantém o
+  default físico legado `'draft'` no banco apesar de o schema declarar `open`;
+  a aplicação sempre grava `status` explicitamente, então o default nunca é
+  usado.
+
 ## Mapa de contexto
 
 <!-- Índice dos capítulos (docs/context/), cada um com QUANDO carregar.

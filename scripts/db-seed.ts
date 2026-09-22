@@ -476,7 +476,7 @@ async function main() {
 			.values({
 				id: id(),
 				title: `${pick(MEETING_TITLES)} — ${faker.date.month({ abbreviated: false })}`,
-				status: i < 2 ? "finished" : pick(["draft", "in_progress", "finished"]),
+				status: i < 2 ? "closed" : pick(["open", "closed"]),
 				heldAt,
 			})
 			.returning();

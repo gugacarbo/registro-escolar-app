@@ -45,11 +45,11 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		expect(response.status).toBe(401);
 	});
 
-	it("retorna 409 quando a reunião está finalizada (borda 5)", async () => {
+	it("retorna 409 quando a reunião está encerrada (borda 5)", async () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "finished",
+			status: "closed",
 		});
 		const response = await updateLinkedRecordHandler({
 			request: patch({ texto: "Editado" }),
@@ -63,7 +63,7 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		(updateLinkedRecord as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
 			new RecordNotFoundError("Registro não encontrado"),
@@ -80,7 +80,7 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		(updateLinkedRecord as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
 			new RecordNotLinkedToMeetingError("outra"),
@@ -124,7 +124,7 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		(updateLinkedRecord as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
 			new RecordNotFoundError("outro contexto"),
@@ -142,7 +142,7 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		(updateLinkedRecord as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
 			new InvalidOriginError("origem"),
@@ -159,7 +159,7 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		(updateLinkedRecord as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "rec-1",
@@ -179,7 +179,7 @@ describe("PATCH /api/meetings/:id/records/:recordId", () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		const request = new Request(
 			"http://localhost/api/meetings/meeting-1/records/rec-1",

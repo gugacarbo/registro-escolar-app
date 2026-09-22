@@ -28,7 +28,7 @@ function createTestDb() {
 		CREATE TABLE meetings (
 			id TEXT PRIMARY KEY,
 			title TEXT NOT NULL,
-			status TEXT NOT NULL DEFAULT 'draft',
+			status TEXT NOT NULL DEFAULT 'open',
 			held_at INTEGER,
 			location TEXT,
 			template_id TEXT,

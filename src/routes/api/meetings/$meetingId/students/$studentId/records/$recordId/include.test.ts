@@ -30,7 +30,7 @@ function env() {
 function inProgressMeeting() {
 	(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 		id: "meeting-1",
-		status: "in_progress",
+		status: "open",
 	});
 }
 
@@ -157,11 +157,11 @@ describe("PATCH /api/meetings/:id/students/:studentId/records/:recordId/include"
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 409 quando a reunião está finalizada", async () => {
+	it("retorna 409 quando a reunião está encerrada", async () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "finished",
+			status: "closed",
 		});
 		const response = await setRecordInclusionHandler({
 			request: patch({ incluir: false }),

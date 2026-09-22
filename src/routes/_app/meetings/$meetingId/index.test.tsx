@@ -91,7 +91,7 @@ function makeMeeting(overrides: Partial<Meeting> = {}): Meeting {
 	return {
 		id: "meeting-1",
 		title: "Conselho de Classe",
-		status: "in_progress",
+		status: "open",
 		heldAt: now,
 		templateId: null,
 		createdAt: now,
@@ -209,18 +209,18 @@ describe("MeetingDetailPage (header em 375px)", () => {
 	});
 });
 
-describe("MeetingDetailPage — edição de dados e turmas em andamento", () => {
-	it("oferece Editar dados durante a reunião (borda 7)", () => {
+describe("MeetingDetailPage — edição de dados e turmas em reunião aberta", () => {
+	it("oferece Editar dados em reunião aberta (borda 1)", () => {
 		renderPage();
 		expect(
 			screen.getByRole("button", { name: /Editar dados/ }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(/Em andamento — você pode ajustar dados e turmas/),
+			screen.getByText(/Reunião aberta — registre o conselho e gere a ata/),
 		).toBeInTheDocument();
 	});
 
-	it("oferece vínculo de turma durante a reunião (borda 8)", () => {
+	it("oferece vínculo de turma em reunião aberta (borda 8)", () => {
 		mocks.useAsyncOptions.mockReturnValue({
 			data: {
 				options: [{ id: "class-2", name: "Turma B — 2026" }],
@@ -236,9 +236,9 @@ describe("MeetingDetailPage — edição de dados e turmas em andamento", () => 
 		).toBeInTheDocument();
 	});
 
-	it("não oferece edição de dados/turmas quando finalizada (borda 10)", () => {
+	it("não oferece edição de dados/turmas quando encerrada (borda 1)", () => {
 		mocks.useMeeting.mockReturnValue({
-			data: makeMeeting({ status: "finished" }),
+			data: makeMeeting({ status: "closed" }),
 			isLoading: false,
 		});
 		renderPage();

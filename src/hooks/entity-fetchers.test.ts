@@ -37,7 +37,7 @@ describe("entity-fetchers", () => {
 			page: 1,
 			pageSize: 100,
 			search: "conselho",
-			status: "draft",
+			status: "open",
 		});
 		expect(spy).toHaveBeenCalledTimes(5);
 	});
@@ -50,14 +50,14 @@ describe("entity-fetchers", () => {
 			);
 		await fetchMeetingsPage({
 			search: "conselho",
-			status: "draft",
+			status: "open",
 			page: 3,
 			pageSize: 50,
 		});
 		const url = String(spy.mock.calls[0][0]);
 		expect(url).toContain("/api/meetings?");
 		expect(url).toContain("search=conselho");
-		expect(url).toContain("status=draft");
+		expect(url).toContain("status=open");
 		expect(url).toContain("page=3");
 		expect(url).toContain("pageSize=50");
 	});

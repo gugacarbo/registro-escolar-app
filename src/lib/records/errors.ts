@@ -8,7 +8,7 @@ export const ERR_RECORD_NOT_FOUND = "Registro não encontrado";
 export const ERR_RECORD_NOT_LINKED_TO_MEETING =
 	"Registro não está vinculado a esta reunião";
 export const ERR_MEETING_NOT_IN_PROGRESS =
-	"Reunião finalizada: reabra para criar/editar registros vinculados";
+	"Reunião encerrada: reabra para criar/editar registros vinculados";
 export const ERR_STUDENT_NOT_IN_MEETING =
 	"Estudante não pertence às turmas desta reunião";
 export const ERR_INVALID_ORIGIN =

@@ -55,7 +55,7 @@ export async function listMeetingsHandler({
 	const statusParam = url.searchParams.get("status");
 	const status = statusParam
 		? meetingStatusSchema.safeParse(statusParam).success
-			? (statusParam as "draft" | "in_progress" | "finished" | "reopened")
+			? (statusParam as "open" | "closed")
 			: undefined
 		: undefined;
 
@@ -112,7 +112,7 @@ export async function createMeetingHandler({
 		}
 	}
 
-	// A reunião nasce sempre como rascunho (spec 0005).
+	// A reunião nasce sempre aberta (spec 0005).
 	const meeting = await createMeetingWithRelations(db, {
 		title: parsed.data.title,
 		heldAt: parsed.data.heldAt ?? null,

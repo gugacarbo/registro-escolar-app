@@ -68,6 +68,7 @@ function mockValidRefs() {
 	(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 		id: "meeting-1",
 		title: "Reunião 1",
+		status: "open",
 	});
 	(findActiveStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 		id: "staff-1",
@@ -135,6 +136,7 @@ describe("GET /api/meetings/:id/participants", () => {
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Reunião 1",
+			status: "open",
 		});
 		(
 			listParticipantsByMeeting as ReturnType<typeof vi.fn>
@@ -251,6 +253,7 @@ describe("POST /api/meetings/:id/participants", () => {
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
+			status: "open",
 		});
 		(findActiveStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "staff-1",
@@ -276,6 +279,7 @@ describe("POST /api/meetings/:id/participants", () => {
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
+			status: "open",
 		});
 		(findActiveStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
 			undefined,
@@ -348,6 +352,7 @@ describe("POST /api/meetings/:id/participants", () => {
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
+			status: "open",
 		});
 		(findActiveStaffById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "staff-1",

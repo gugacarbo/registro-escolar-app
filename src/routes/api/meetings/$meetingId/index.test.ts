@@ -110,7 +110,7 @@ describe("GET /api/meetings/:id", () => {
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Reunião 1",
-			status: "draft",
+			status: "open",
 		});
 		const response = await getMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {
@@ -145,7 +145,7 @@ describe("PATCH /api/meetings/:id", () => {
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "draft",
+			status: "open",
 		});
 		const response = await updateMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {
@@ -175,17 +175,17 @@ describe("PATCH /api/meetings/:id", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 200 e atualiza dados gerais em andamento (borda 7)", async () => {
+	it("retorna 200 e atualiza dados gerais em reunião aberta (borda 1)", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		(updateMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Título durante o conselho",
-			status: "in_progress",
+			status: "open",
 		});
 		const response = await updateMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {
@@ -200,17 +200,17 @@ describe("PATCH /api/meetings/:id", () => {
 		expect(body.title).toBe("Título durante o conselho");
 	});
 
-	it("retorna 200 e atualiza dados gerais em reaberta", async () => {
+	it("retorna 200 e atualiza dados gerais após reabertura", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "reopened",
+			status: "open",
 		});
 		(updateMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Novo título",
-			status: "reopened",
+			status: "open",
 		});
 		const response = await updateMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {
@@ -223,12 +223,12 @@ describe("PATCH /api/meetings/:id", () => {
 		expect(response.status).toBe(200);
 	});
 
-	it("retorna 409 quando a reunião está finalizada", async () => {
+	it("retorna 409 quando a reunião está encerrada", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "finished",
+			status: "closed",
 		});
 		const response = await updateMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {
@@ -241,21 +241,21 @@ describe("PATCH /api/meetings/:id", () => {
 		expect(response.status).toBe(409);
 		const body = (await response.json()) as { error: string };
 		expect(body.error).toBe(
-			"Reunião finalizada: reabra para editar dados e turmas",
+			"Reunião encerrada: reabra para editar dados, turmas e registros",
 		);
 	});
 
-	it("retorna 200 e atualiza a reunião em rascunho", async () => {
+	it("retorna 200 e atualiza a reunião aberta", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "draft",
+			status: "open",
 		});
 		(updateMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Novo título",
-			status: "draft",
+			status: "open",
 		});
 		const response = await updateMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {
@@ -275,14 +275,14 @@ describe("PATCH /api/meetings/:id", () => {
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "draft",
+			status: "open",
 		});
 		(updateMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Reunião",
 			heldAt: new Date(Date.UTC(2026, 8, 9)),
 			templateId: null,
-			status: "draft",
+			status: "open",
 		});
 		const request = new Request("http://localhost/api/meetings/meeting-1/", {
 			method: "PATCH",
@@ -315,7 +315,7 @@ describe("PATCH /api/meetings/:id", () => {
 		);
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "draft",
+			status: "open",
 		});
 		const response = await updateMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/", {

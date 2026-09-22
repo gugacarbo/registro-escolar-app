@@ -28,7 +28,7 @@ function env() {
 	return { DB: {} as D1Database, BETTER_AUTH_SECRET: "x" } as unknown as Env;
 }
 
-function meeting(status = "in_progress") {
+function meeting(status = "open") {
 	(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 		id: "meeting-1",
 		status,
@@ -94,11 +94,11 @@ describe("PATCH /api/meetings/:id/general-reports/:reportId", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 409 quando a reunião está finalizada (borda 3)", async () => {
+	it("retorna 409 quando a reunião está encerrada (borda 3)", async () => {
 		session();
-		meeting("finished");
+		meeting("closed");
 		(updateGeneralReport as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-			new MeetingNotInProgressError("finalizada"),
+			new MeetingNotInProgressError("encerrada"),
 		);
 		const response = await updateGeneralReportHandler({
 			request: patch({ texto: "Novo" }),

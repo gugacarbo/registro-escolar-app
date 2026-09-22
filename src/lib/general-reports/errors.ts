@@ -5,7 +5,7 @@
 export const ERR_REPORT_NOT_FOUND = "Relato geral não encontrado";
 export const ERR_REPORT_TEXT_REQUIRED = "Texto é obrigatório";
 export const ERR_REPORT_NOT_IN_PROGRESS =
-	"Reunião finalizada: reabra para criar/editar relatos gerais";
+	"Reunião encerrada: reabra para criar/editar relatos gerais";
 export const ERR_INVALID_ORIGIN =
 	"A origem deve ser um participante desta reunião (CA-005)";
 

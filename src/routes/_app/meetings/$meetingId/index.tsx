@@ -4,7 +4,6 @@ import {
 	ArrowRightIcon,
 	CalendarIcon,
 	CheckCircle2Icon,
-	ClockIcon,
 	DownloadIcon,
 	FileTextIcon,
 	GraduationCapIcon,
@@ -183,7 +182,7 @@ export default function MeetingDetailPage() {
 	const canEdit =
 		!!meeting && canEditLinkedRecord(meeting.status as MeetingStatus);
 	const canEditData = !!meeting && canEditMeetingData(meeting.status);
-	const isDraft = meeting?.status === "draft";
+	const isClosed = meeting?.status === "closed";
 	const isApproved = preview.data?.approvalStatus === "aprovada";
 	const activeTemplate = templates.find((t) => t.id === meeting?.templateId);
 
@@ -325,42 +324,26 @@ export default function MeetingDetailPage() {
 				}
 			/>
 
-			{(meeting.status === "finished" ||
-				meeting.status === "draft" ||
-				meeting.status === "in_progress" ||
-				meeting.status === "reopened") && (
+			{meeting.status === "closed" ? (
 				<div
 					role="status"
 					className="flex items-center gap-2 rounded-lg border border-primary/20 bg-secondary/80 px-3 py-2 text-sm text-foreground shadow-xs"
 				>
-					{meeting.status === "finished" ? (
-						<>
-							<CheckCircle2Icon className="size-4 shrink-0 text-primary" />
-							<span>
-								Reunião finalizada — reabra para editar dados, turmas e
-								registros
-							</span>
-						</>
-					) : meeting.status === "draft" ? (
-						<>
-							<ClockIcon className="size-4 shrink-0 text-primary" />
-							<span>
-								Rascunho — revise turmas e participantes antes de iniciar
-							</span>
-						</>
-					) : meeting.status === "reopened" ? (
-						<>
-							<AlertCircleIcon className="size-4 shrink-0 text-primary" />
-							<span>Reaberta para ajustes — atualize a ata ao concluir</span>
-						</>
-					) : (
-						<>
-							<AlertCircleIcon className="size-4 shrink-0 text-primary" />
-							<span>
-								Em andamento — você pode ajustar dados e turmas desta reunião
-							</span>
-						</>
-					)}
+					<CheckCircle2Icon className="size-4 shrink-0 text-primary" />
+					<span>
+						Reunião encerrada pela ata — reabra para editar dados, turmas e
+						registros
+					</span>
+				</div>
+			) : (
+				<div
+					role="status"
+					className="flex items-center gap-2 rounded-lg border border-primary/20 bg-secondary/80 px-3 py-2 text-sm text-foreground shadow-xs"
+				>
+					<AlertCircleIcon className="size-4 shrink-0 text-primary" />
+					<span>
+						Reunião aberta — registre o conselho e gere a ata para encerrar
+					</span>
 				</div>
 			)}
 
@@ -445,7 +428,7 @@ export default function MeetingDetailPage() {
 										<EmptyDescription>
 											{canEditData
 												? "Vincule as turmas participantes desta reunião."
-												: "A reunião finalizada mantém as turmas vinculadas; reabra para alterar."}
+												: "A reunião encerrada mantém as turmas vinculadas; reabra para alterar."}
 										</EmptyDescription>
 									</EmptyHeader>
 								</Empty>
@@ -662,7 +645,7 @@ export default function MeetingDetailPage() {
 									{isApproved ? (
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
-												<Button disabled={generate.isPending || isDraft}>
+												<Button disabled={generate.isPending || isClosed}>
 													{generate.isPending
 														? "Gerando..."
 														: "Gerar nova versão"}
@@ -690,7 +673,7 @@ export default function MeetingDetailPage() {
 									) : (
 										<Button
 											onClick={() => generate.mutate({})}
-											disabled={generate.isPending || isDraft}
+											disabled={generate.isPending || isClosed}
 										>
 											{generate.isPending ? "Gerando..." : "Gerar nova versão"}
 										</Button>
@@ -705,10 +688,9 @@ export default function MeetingDetailPage() {
 							</div>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							{isDraft && (
+							{isClosed && (
 								<p className="text-sm text-muted-foreground">
-									Reunião em rascunho — inicie a reunião para gerar a versão
-									oficial da ata.
+									Reunião encerrada — reabra para gerar uma nova versão da ata.
 								</p>
 							)}
 							{generate.error && (

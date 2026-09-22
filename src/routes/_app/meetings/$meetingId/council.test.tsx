@@ -109,7 +109,7 @@ beforeEach(() => {
 	vi.mocked(toast.error).mockReset();
 	mockFetchComponents();
 	mocks.useMeeting.mockReturnValue({
-		data: { id: "meeting-1", title: "Conselho", status: "in_progress" },
+		data: { id: "meeting-1", title: "Conselho", status: "open" },
 		isLoading: false,
 	});
 	mocks.useMeetingClasses.mockReturnValue({
@@ -423,16 +423,16 @@ describe("CouncilPage", () => {
 		expect(toast.success).toHaveBeenCalledWith("Registro atualizado");
 	});
 
-	it("bloqueia edição quando a reunião está finalizada", async () => {
+	it("bloqueia edição quando a reunião está encerrada", async () => {
 		const user = userEvent.setup();
 		mocks.useMeeting.mockReturnValue({
-			data: { id: "meeting-1", title: "Conselho", status: "finished" },
+			data: { id: "meeting-1", title: "Conselho", status: "closed" },
 			isLoading: false,
 		});
 		renderPage();
 		await selectStudent(user);
 		expect(
-			screen.getByText(/Reunião finalizada — reabra para editar registros/i),
+			screen.getByText(/Reunião encerrada — reabra para editar registros/i),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("button", { name: "Novo registro" }),
@@ -785,16 +785,18 @@ describe("CouncilPage estados adicionais", () => {
 		).toBeInTheDocument();
 	});
 
-	it("mostra mensagem específica para rascunho", async () => {
+	it("bloqueia edição com a reunião encerrada (borda 1)", async () => {
 		const user = userEvent.setup();
 		mocks.useMeeting.mockReturnValue({
-			data: { id: "meeting-1", title: "Conselho", status: "draft" },
+			data: { id: "meeting-1", title: "Conselho", status: "closed" },
 			isLoading: false,
 		});
 		renderPage();
 		await selectStudent(user);
 		expect(
-			screen.getByText("Inicie a reunião para criar registros vinculados."),
+			screen.getByText(
+				"Reunião encerrada — reabra para editar registros vinculados.",
+			),
 		).toBeInTheDocument();
 	});
 

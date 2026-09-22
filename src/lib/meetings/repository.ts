@@ -15,15 +15,13 @@ import {
 	ERR_INVALID_TRANSITION,
 	ERR_MEETING_CLASS_ALREADY_LINKED,
 	ERR_MEETING_CLASS_IN_USE,
-	ERR_MEETING_FINISHED,
+	ERR_MEETING_CLOSED,
 	ERR_MEETING_NOT_FOUND,
-	ERR_MEETING_WITHOUT_CLASSES,
 	InvalidTransitionError,
 	MeetingClassAlreadyLinkedError,
 	MeetingClassInUseError,
 	MeetingNotEditableError,
 	MeetingNotFoundError,
-	MeetingWithoutClassesError,
 } from "./errors";
 import type {
 	CreateMeetingInput,
@@ -45,6 +43,7 @@ export async function createMeeting(db: DB, input: CreateMeetingInput) {
 		.values({
 			...input,
 			id: crypto.randomUUID(),
+			status: input.status ?? "open",
 		})
 		.returning()
 		.get();
@@ -135,7 +134,7 @@ export async function createMeetingWithRelations(
 			title: input.title,
 			heldAt: input.heldAt ?? null,
 			templateId: input.templateId ?? null,
-			status: "draft",
+			status: "open",
 		})
 		.returning()
 		.get();
@@ -146,7 +145,7 @@ export async function createMeetingWithRelations(
 	// Nota: db.transaction não é usado porque DB é a união
 	// DrizzleD1Database | BetterSQLite3Database, cujas assinaturas de
 	// transaction divergem; os vínculos são gravados sequencialmente
-	// logo após a reunião (rascunho nunca fica parcial por API).
+	// logo após a reunião (a reunião nasce aberta e nunca fica parcial por API).
 	for (const classId of input.classIds ?? []) {
 		await db
 			.insert(meetingClasses)
@@ -248,7 +247,7 @@ async function findEditableMeeting(db: DB, meetingId: string) {
 		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
 	}
 	if (!canEditMeetingData(meeting.status)) {
-		throw new MeetingNotEditableError(ERR_MEETING_FINISHED);
+		throw new MeetingNotEditableError(ERR_MEETING_CLOSED);
 	}
 	return meeting;
 }
@@ -319,22 +318,7 @@ export async function transitionMeeting(
 	if (!ALLOWED_TRANSITIONS[status].includes(action)) {
 		throw new InvalidTransitionError(ERR_INVALID_TRANSITION);
 	}
-	if (action === "start") {
-		// Borda 3: reunião sem turmas não pode ser iniciada.
-		const linkedClasses = await listMeetingClasses(db, id);
-		if (linkedClasses.length === 0) {
-			throw new MeetingWithoutClassesError(ERR_MEETING_WITHOUT_CLASSES);
-		}
-	}
 	return updateMeeting(db, id, { status: NEXT_STATUS[action] });
-}
-
-export function startMeeting(db: DB, id: string) {
-	return transitionMeeting(db, id, "start");
-}
-
-export function finalizeMeeting(db: DB, id: string) {
-	return transitionMeeting(db, id, "finalize");
 }
 
 export function reopenMeeting(db: DB, id: string) {

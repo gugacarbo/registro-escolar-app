@@ -5,11 +5,9 @@
 
 export const ERR_UNAUTHENTICATED = "Não autenticado";
 export const ERR_MEETING_NOT_FOUND = "Reunião não encontrada";
-export const ERR_MEETING_WITHOUT_CLASSES =
-	"Reunião sem turmas: selecione ao menos uma turma antes de iniciar";
 export const ERR_INVALID_TRANSITION = "Transição inválida para o estado atual";
-export const ERR_MEETING_FINISHED =
-	"Reunião finalizada: reabra para editar dados e turmas";
+export const ERR_MEETING_CLOSED =
+	"Reunião encerrada: reabra para editar dados, turmas e registros";
 export const ERR_MEETING_CLASS_IN_USE =
 	"Turma com acompanhamento registrado: não é possível desvincular";
 export const ERR_MEETING_CLASS_ALREADY_LINKED = "Turma já vinculada à reunião";
@@ -20,5 +18,4 @@ export class MeetingNotFoundError extends Error {}
 export class MeetingNotEditableError extends Error {}
 export class MeetingClassInUseError extends Error {}
 export class MeetingClassAlreadyLinkedError extends Error {}
-export class MeetingWithoutClassesError extends Error {}
 export class InvalidTransitionError extends Error {}

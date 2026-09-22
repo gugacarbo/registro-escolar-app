@@ -7,14 +7,9 @@ import { z } from "zod";
 
 import { meetingParticipants, meetings } from "#/db/schema";
 
-export const meetingStatusSchema = z.enum([
-	"draft",
-	"in_progress",
-	"finished",
-	"reopened",
-]);
+export const meetingStatusSchema = z.enum(["open", "closed"]);
 
-export const transitionMeetingSchema = z.enum(["start", "finalize", "reopen"]);
+export const transitionMeetingSchema = z.enum(["reopen"]);
 
 const meetingParticipantApiInputSchema = z
 	.object({

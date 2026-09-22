@@ -60,12 +60,12 @@ describe("DELETE /api/meetings/:meetingId/classes/:classId", () => {
 		expect((await remove()).status).toBe(404);
 	});
 
-	it("retorna 200 ao desvincular em andamento (borda 8)", async () => {
+	it("retorna 200 ao desvincular em reunião aberta (borda 8)", async () => {
 		vi.mocked(getSession).mockResolvedValue({} as never);
 		vi.mocked(requireD1).mockReturnValue({} as never);
 		vi.mocked(findMeetingById).mockResolvedValue({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		} as never);
 		vi.mocked(removeMeetingClass).mockResolvedValue(undefined as never);
 		const response = await remove();
@@ -82,7 +82,7 @@ describe("DELETE /api/meetings/:meetingId/classes/:classId", () => {
 		vi.mocked(requireD1).mockReturnValue({} as never);
 		vi.mocked(findMeetingById).mockResolvedValue({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		} as never);
 		vi.mocked(removeMeetingClass).mockRejectedValue(
 			new MeetingClassInUseError(
@@ -93,16 +93,16 @@ describe("DELETE /api/meetings/:meetingId/classes/:classId", () => {
 		expect(response.status).toBe(409);
 	});
 
-	it("retorna 409 quando a reunião está finalizada (borda 10)", async () => {
+	it("retorna 409 quando a reunião está encerrada (borda 1)", async () => {
 		vi.mocked(getSession).mockResolvedValue({} as never);
 		vi.mocked(requireD1).mockReturnValue({} as never);
 		vi.mocked(findMeetingById).mockResolvedValue({
 			id: "meeting-1",
-			status: "finished",
+			status: "closed",
 		} as never);
 		vi.mocked(removeMeetingClass).mockRejectedValue(
 			new MeetingNotEditableError(
-				"Reunião finalizada: reabra para editar dados e turmas",
+				"Reunião encerrada: reabra para editar dados, turmas e registros",
 			),
 		);
 		expect((await remove()).status).toBe(409);

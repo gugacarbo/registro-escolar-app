@@ -3,7 +3,6 @@ import {
 	createMeeting,
 	createMinuteTemplate,
 	generateMinute,
-	startMeeting,
 } from "../fixtures/api";
 import { expect, test } from "../fixtures/test";
 import { expectRouteScreenshot } from "./helpers";
@@ -23,7 +22,6 @@ test("@visual mantém a lista de atas no padrão de tabela", async ({
 		classIds: [klass.id],
 		templateId: template.id,
 	});
-	await startMeeting(apiContext, meeting.id);
 	await generateMinute(apiContext, meeting.id);
 
 	await authenticatedPage.goto("/minutes");

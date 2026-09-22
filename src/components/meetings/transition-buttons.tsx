@@ -20,53 +20,17 @@ type TransitionOption = {
 	confirmationLabel: string;
 };
 
+// ADR-0021: o único estado explícito é a reabertura; o encerramento
+// acontece ao gerar a ata.
 const TRANSITIONS_BY_STATUS: Record<string, TransitionOption[]> = {
-	draft: [
-		{
-			action: "start",
-			label: "Iniciar",
-			confirmationTitle: "Iniciar reunião",
-			confirmationDescription:
-				"A reunião passará para Em andamento e poderá receber registros.",
-			confirmationLabel: "Confirmar início",
-		},
-	],
-	in_progress: [
-		{
-			action: "finalize",
-			label: "Finalizar",
-			confirmationTitle: "Finalizar reunião",
-			confirmationDescription:
-				"A reunião será marcada como finalizada. Você poderá reabri-la depois se precisar alterar os registros.",
-			confirmationLabel: "Confirmar finalização",
-		},
-	],
-	finished: [
+	closed: [
 		{
 			action: "reopen",
 			label: "Reabrir",
 			confirmationTitle: "Reabrir reunião",
 			confirmationDescription:
-				"A reunião voltará a aceitar alterações e deixará de constar como finalizada.",
+				"A reunião voltará a aceitar alterações e deixará de constar como encerrada. Gere a ata novamente ao concluir.",
 			confirmationLabel: "Confirmar reabertura",
-		},
-	],
-	reopened: [
-		{
-			action: "start",
-			label: "Retomar",
-			confirmationTitle: "Retomar reunião",
-			confirmationDescription:
-				"A reunião voltará para Em andamento e poderá receber novos registros.",
-			confirmationLabel: "Confirmar retomada",
-		},
-		{
-			action: "finalize",
-			label: "Finalizar",
-			confirmationTitle: "Finalizar reunião",
-			confirmationDescription:
-				"A reunião será marcada como finalizada. Você poderá reabri-la depois se precisar alterar os registros.",
-			confirmationLabel: "Confirmar finalização",
 		},
 	],
 };
@@ -111,7 +75,7 @@ export function TransitionButtons({
 					<Button
 						key={option.action + option.label}
 						type="button"
-						variant={option.action === "finalize" ? "outline" : "default"}
+						variant="outline"
 						disabled={transition.isPending}
 						onClick={() => {
 							setError(null);

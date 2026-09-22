@@ -4,7 +4,8 @@ import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import {
-	MeetingDraftError,
+	MeetingClosedError,
+	MeetingNotClosedError,
 	MeetingNotFoundError,
 	MinuteAlreadyApprovedError,
 	MinuteNotFoundError,
@@ -100,7 +101,7 @@ export async function generateHandler({ request, context, params }: Ctx) {
 		if (error instanceof MeetingNotFoundError) {
 			return json({ error: error.message }, 404);
 		}
-		if (error instanceof MeetingDraftError) {
+		if (error instanceof MeetingClosedError) {
 			return json({ error: error.message }, 409);
 		}
 		throw error;
@@ -193,7 +194,8 @@ export async function approveHandler({ request, context, params }: Ctx) {
 		}
 		if (
 			error instanceof NoCurrentVersionError ||
-			error instanceof MinuteAlreadyApprovedError
+			error instanceof MinuteAlreadyApprovedError ||
+			error instanceof MeetingNotClosedError
 		) {
 			return json({ error: error.message }, 409);
 		}

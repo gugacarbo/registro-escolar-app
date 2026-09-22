@@ -7,7 +7,6 @@ import {
 	createLinkedRecord,
 	createMeeting,
 	createStudent,
-	startMeeting,
 } from "./fixtures/api";
 import { expect, test, type ApiContext } from "./fixtures/test";
 
@@ -104,7 +103,6 @@ test.describe("SPEC-0012 histórico da turma", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro filtros turma");
 
 		const component = await createComponent(apiContext, "Componente Histórico Turma");
@@ -158,7 +156,6 @@ test.describe("SPEC-0012 histórico da turma", () => {
 			classIds: [second.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro equivalente 2026");
 
 		const firstHistory = await getClassHistory(apiContext, first.id);
@@ -184,7 +181,6 @@ test.describe("SPEC-0012 histórico da turma", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(
 			apiContext,
 			meeting.id,
@@ -226,7 +222,6 @@ test.describe("SPEC-0012 histórico da turma", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro interno turma", {
 			incluirNaAta: false,
 		});

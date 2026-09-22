@@ -61,7 +61,7 @@ function makeMeeting(overrides: Partial<Meeting> = {}): Meeting {
 	return {
 		id: "meeting-1",
 		title: "Conselho de Classe",
-		status: "in_progress",
+		status: "open",
 		heldAt: now,
 		templateId: null,
 		createdAt: now,
@@ -90,7 +90,7 @@ beforeEach(() => {
 		data: {
 			meetingId: "meeting-1",
 			templateId: null,
-			status: "in_progress",
+			status: "open",
 			approvalStatus: "pendente_aprovacao",
 			content: "ATA — CONSELHO DE CLASSE",
 		},
@@ -242,7 +242,7 @@ describe("MinuteDetailPage", () => {
 			data: {
 				meetingId: "meeting-1",
 				templateId: null,
-				status: "in_progress",
+				status: "open",
 				approvalStatus: "aprovada",
 				content: "ATA",
 			},
@@ -271,7 +271,7 @@ describe("MinuteDetailPage", () => {
 			data: {
 				meetingId: "meeting-1",
 				templateId: null,
-				status: "in_progress",
+				status: "open",
 				approvalStatus: "aprovada",
 				content: "ATA",
 			},

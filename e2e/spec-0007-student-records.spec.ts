@@ -9,10 +9,9 @@ import {
 	createRole,
 	createStaff,
 	createStudent,
+	generateMinute,
 	previewMinute,
 	setRecordInclusion,
-	startMeeting,
-	transitionMeetingResponse,
 } from "./fixtures/api";
 import { expect, test, type ApiContext } from "./fixtures/test";
 
@@ -33,7 +32,6 @@ async function setupMeetingWithStudent(
 		classIds: [klass.id],
 		participants: [],
 	});
-	await startMeeting(apiContext, meeting.id);
 	return { klass, student, meeting };
 }
 
@@ -123,7 +121,6 @@ test.describe("SPEC-0007 registros de estudante", () => {
 			classIds: [includedClass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		const included = await createIndependentRecord(
 			apiContext,
 			student.id,
@@ -187,7 +184,6 @@ test.describe("SPEC-0007 registros de estudante", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		const staff = await createStaff(apiContext, `Servidor ${suffix}`);
 		const role = await createRole(apiContext, `Papel ${suffix}`);
 		await addParticipant(apiContext, meeting.id, staff.id, role.id);
@@ -301,7 +297,7 @@ test.describe("SPEC-0007 registros de estudante", () => {
 		expect(preview.content).toContain(contextRecord.texto);
 	});
 
-	test("edita registro vinculado enquanto em andamento e rejeita após finalizar", async ({
+	test("edita registro vinculado em reunião aberta e rejeita após a ata encerrar", async ({
 		apiContext,
 	}) => {
 		const { meeting, student } = await setupMeetingWithStudent(apiContext, "Edição");
@@ -313,8 +309,7 @@ test.describe("SPEC-0007 registros de estudante", () => {
 		});
 		expect(update.status).toBe(200);
 
-		const finish = await transitionMeetingResponse(apiContext, meeting.id, "finalize");
-		expect(finish.status).toBe(200);
+		await generateMinute(apiContext, meeting.id);
 		const rejected = await fetch(`${baseURL}/api/meetings/${meeting.id}/records/${record.id}`, {
 			method: "PATCH",
 			headers: { Cookie: apiContext.cookies, "Content-Type": "application/json" },

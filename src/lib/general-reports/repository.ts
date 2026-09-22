@@ -25,8 +25,8 @@ async function requireEditableMeeting(db: DB, meetingId: string) {
 	if (!meeting) {
 		throw new ReportNotFoundError("Reunião não encontrada");
 	}
-	// Borda 3: relatos só podem ser criados/editados com a reunião em
-	// andamento ou reaberta (canEditLinkedRecord, spec 0005).
+	// Borda 3 (spec 0008): relatos só podem ser criados/editados com a
+	// reunião aberta (canEditLinkedRecord, spec 0005/ADR-0021).
 	if (
 		!canEditLinkedRecord(
 			meeting.status as Parameters<typeof canEditLinkedRecord>[0],

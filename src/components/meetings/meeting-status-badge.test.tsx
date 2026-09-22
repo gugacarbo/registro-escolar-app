@@ -6,10 +6,8 @@ import { MeetingStatusBadge } from "./meeting-status-badge";
 describe("MeetingStatusBadge", () => {
 	it("renderiza todos os status conhecidos", () => {
 		const cases = [
-			["draft", "Rascunho"],
-			["in_progress", "Em andamento"],
-			["finished", "Finalizada"],
-			["reopened", "Reaberta"],
+			["open", "Aberta"],
+			["closed", "Encerrada"],
 		] as const;
 		for (const [status, label] of cases) {
 			const { unmount } = render(<MeetingStatusBadge status={status} />);

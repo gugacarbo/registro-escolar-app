@@ -46,12 +46,8 @@ export async function reopenMeetingHandler({
 
 	try {
 		const reopened = await transitionMeeting(db, params.meetingId, "reopen");
-		// Dica de próximo passo do ciclo de vida (spec 0005):
-		// Finalizada → Reaberta → Em andamento → Finalizada.
-		return json(
-			{ ...reopened, hint: "Use start para voltar a em andamento" },
-			200,
-		);
+		// ADR-0021: encerrada → aberta; a próxima geração de ata encerra de novo.
+		return json(reopened, 200);
 	} catch (error) {
 		if (error instanceof InvalidTransitionError) {
 			return json({ error: error.message }, 409);

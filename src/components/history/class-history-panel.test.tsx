@@ -168,7 +168,7 @@ describe("ClassHistoryPanel", () => {
 					{
 						id: "meeting-1",
 						title: "Conselho",
-						status: "finalizada",
+						status: "closed",
 						heldAt: null,
 					},
 				],

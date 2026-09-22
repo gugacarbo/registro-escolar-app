@@ -27,11 +27,11 @@ Permitir registrar observações gerais sobre a reunião, independentes de estud
 
 ## Fluxo
 
-1. Em uma reunião em andamento, o operador acessa a seção de relatos gerais.
+1. Em uma reunião `open`, o operador acessa a seção de relatos gerais.
 2. Preenche o texto livre.
 3. Opcionalmente seleciona categoria, autor participante e inclusão na ata.
 4. Salva o relato.
-5. Relatos podem ser editados enquanto a reunião estiver em andamento.
+5. Relatos podem ser editados enquanto a reunião estiver `open`.
 
 ## Contrato
 
@@ -46,7 +46,7 @@ Permitir registrar observações gerais sobre a reunião, independentes de estud
 | --- | ------------------------------------------------------ | -------------------------------------------- |
 | 1   | o relato tiver autor que não é participante da reunião | rejeitar com erro de autoria inválida        |
 | 2   | o relato for marcado como interno                      | armazenar e omitir na ata/PDF                |
-| 3   | a reunião não estiver Em andamento                     | rejeitar criação/edição                      |
+| 3   | a reunião não estiver `open`                           | rejeitar criação/edição                      |
 | 4   | o texto estiver vazio                                  | rejeitar com erro de validação               |
 | 5   | todos os relatos forem removidos da ata                | ata ainda deve ser gerável com demais blocos |
 
@@ -74,6 +74,6 @@ scripts/docs-check ................ exit 0
 DoD executado em 2026-09-09. A migration nomeada 0007 cria `general_reports`
 e foi aplicada localmente. Bordas: autor não participante → 422; relato interno
 fica `includeInMinutes=false` e será omitido da ata/PDF; criação/edição exigem
-reunião `in_progress` ou `reopened`; texto vazio → 400; ausência total de
+reunião `open`; texto vazio → 400; ausência total de
 relatos incluídos não impede a futura geração da ata (blocos opcionais).
 Gates conforme DoD acima.

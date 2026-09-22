@@ -4,7 +4,6 @@ import {
 	createEnrollment,
 	createMeeting,
 	createStudent,
-	startMeeting,
 	updateStudentStatus,
 } from "./fixtures/api";
 import { restoreEnrollmentAsActive } from "./fixtures/db";
@@ -50,7 +49,6 @@ async function setupStartedMeeting(
 		classIds: [klass.id],
 		participants: [],
 	});
-	await startMeeting(ctx, meeting.id);
 	return { klass, students, meeting };
 }
 
@@ -78,7 +76,6 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 
 		const result = await listMeetingClassStudents(apiContext, meeting.id, klass.id);
 		expect(result.students.map((student) => student.name)).toEqual(["Estudante Ativo"]);
@@ -100,7 +97,6 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 			classIds: [otherClass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting2.id);
 
 		await page.goto(`/meetings/${meeting.id}/students`);
 		await page.getByRole("combobox", { name: "Turma" }).click();
@@ -221,7 +217,6 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 			classIds: [classA.id, classB.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 
 		await updateStudentStatus(
 			apiContext,
@@ -270,7 +265,6 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 			classIds: [first.id, second.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 
 		await updateStudentStatus(apiContext, meeting.id, student.id, "concluido", first.id);
 		const firstResult = await listMeetingClassStudents(apiContext, meeting.id, first.id);

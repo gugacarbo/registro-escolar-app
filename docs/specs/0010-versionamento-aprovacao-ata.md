@@ -21,11 +21,11 @@ Permitir versionar a ata de uma reunião, preservar PDFs anteriores e registrar 
 
 ## Fluxo
 
-1. Ao finalizar uma reunião, é criada a versão v1 da ata com PDF.
-2. Se a reunião for reaberta, corrigida e finalizada novamente, é criada a v2.
+1. O operador gera a ata em uma reunião `open`: é criada a versão v1 com PDF e a reunião é encerrada.
+2. Se a reunião for reaberta, corrigida e tiver nova ata gerada, é criada a v2 e a reunião é encerrada novamente.
 3. A v1 e seu PDF permanecem acessíveis.
 4. A versão mais recente é marcada como atual.
-5. O operador pode aprovar a ata, registrando data e observação opcional.
+5. O operador pode aprovar a ata de reunião `closed`, registrando data e observação opcional.
 
 ## Contrato
 

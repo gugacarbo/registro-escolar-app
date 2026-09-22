@@ -16,7 +16,7 @@ export const meetings = sqliteTable(
 	{
 		id: text("id").primaryKey(),
 		title: text("title").notNull(),
-		status: text("status").notNull().default("draft"),
+		status: text("status").notNull().default("open"),
 		heldAt: integer("held_at", { mode: "timestamp_ms" }),
 		location: text("location"),
 		templateId: text("template_id"),

@@ -24,7 +24,7 @@ function createTestDb() {
 		CREATE TABLE meetings (
 			id TEXT PRIMARY KEY,
 			title TEXT NOT NULL,
-			status TEXT NOT NULL DEFAULT 'draft',
+			status TEXT NOT NULL DEFAULT 'open',
 			held_at INTEGER,
 			location TEXT,
 			template_id TEXT,
@@ -107,8 +107,8 @@ async function seedMeeting(
 describe("general reports repository", () => {
 	it("valida que a origem é participante da própria reunião", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "in_progress");
-		await seedMeeting(db, "meeting-2", "in_progress");
+		await seedMeeting(db, "meeting-1", "open");
+		await seedMeeting(db, "meeting-2", "open");
 		expect(
 			await isParticipantOfMeeting(db, "meeting-1", "participant-meeting-1"),
 		).toBe(true);
@@ -119,7 +119,7 @@ describe("general reports repository", () => {
 
 	it("cria relato com status em andamento e inclui na ata por padrão", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "in_progress");
+		await seedMeeting(db, "meeting-1", "open");
 		const report = await createGeneralReport(db, {
 			meetingId: "meeting-1",
 			texto: "Acolhimento inicial realizado",
@@ -148,7 +148,7 @@ describe("general reports repository", () => {
 
 	it("permite reunião reaberta e relato interno (borda 2)", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "reopened");
+		await seedMeeting(db, "meeting-1", "open");
 		const report = await createGeneralReport(db, {
 			meetingId: "meeting-1",
 			texto: "Relato interno",
@@ -161,10 +161,10 @@ describe("general reports repository", () => {
 
 	it("rejeita criação fora de andamento/reaberta (borda 3)", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "draft-1", "draft");
+		await seedMeeting(db, "closed-1", "closed");
 		await expect(
 			createGeneralReport(db, {
-				meetingId: "draft-1",
+				meetingId: "closed-1",
 				texto: "Qualquer",
 				originId: null,
 				categoryId: null,
@@ -184,7 +184,7 @@ describe("general reports repository", () => {
 
 	it("rejeita autor que não é participante da reunião (borda 1)", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "in_progress");
+		await seedMeeting(db, "meeting-1", "open");
 		await expect(
 			createGeneralReport(db, {
 				meetingId: "meeting-1",
@@ -198,7 +198,7 @@ describe("general reports repository", () => {
 
 	it("edita relato enquanto a reunião está em andamento", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "in_progress");
+		await seedMeeting(db, "meeting-1", "open");
 		const created = await createGeneralReport(db, {
 			meetingId: "meeting-1",
 			texto: "Rascunho",
@@ -217,7 +217,7 @@ describe("general reports repository", () => {
 		expect(updated.includeInMinutes).toBe(false);
 
 		// relato de outra reunião não é acessível pela rota desta
-		await seedMeeting(db, "meeting-2", "in_progress");
+		await seedMeeting(db, "meeting-2", "open");
 		await expect(
 			updateGeneralReport(db, "meeting-2", created.id, {
 				texto: "Inválido",
@@ -228,9 +228,9 @@ describe("general reports repository", () => {
 		).rejects.toBeInstanceOf(ReportNotFoundError);
 	});
 
-	it("rejeita edição quando a reunião está finalizada (borda 3)", async () => {
+	it("rejeita edição quando a reunião está encerrada (borda 3)", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "in_progress");
+		await seedMeeting(db, "meeting-1", "open");
 		const created = await createGeneralReport(db, {
 			meetingId: "meeting-1",
 			texto: "Relato",
@@ -240,7 +240,7 @@ describe("general reports repository", () => {
 		});
 		await db
 			.update(schema.meetings)
-			.set({ status: "finished" })
+			.set({ status: "closed" })
 			.where(eq(schema.meetings.id, created.meetingId));
 		await expect(
 			updateGeneralReport(db, "meeting-1", created.id, {
@@ -269,7 +269,7 @@ describe("general reports repository", () => {
 
 	it("permite atualização parcial e valida origem na edição", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "in_progress");
+		await seedMeeting(db, "meeting-1", "open");
 		const created = await createGeneralReport(db, {
 			meetingId: "meeting-1",
 			texto: "Original",
@@ -294,7 +294,7 @@ describe("general reports repository", () => {
 
 	it("aplica default no create e atualização sem texto", async () => {
 		const { db } = createTestDb();
-		await seedMeeting(db, "meeting-1", "in_progress");
+		await seedMeeting(db, "meeting-1", "open");
 		const created = await createGeneralReport(db, {
 			meetingId: "meeting-1",
 			texto: "Original",

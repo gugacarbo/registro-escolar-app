@@ -113,7 +113,7 @@ describe("GET /api/meetings/", () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(listMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
-			{ id: "meeting-1", title: "Reunião 1", status: "draft" },
+			{ id: "meeting-1", title: "Reunião 1", status: "open" },
 		]);
 		(countMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce(1);
 		const response = await listMeetingsHandler({
@@ -136,7 +136,7 @@ describe("GET /api/meetings/", () => {
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(listMeetings as ReturnType<typeof vi.fn>).mockResolvedValueOnce([]);
 		const response = await listMeetingsHandler({
-			request: new Request("http://localhost/api/meetings/?status=draft", {
+			request: new Request("http://localhost/api/meetings/?status=closed", {
 				method: "GET",
 			}),
 			context: { env: createEnv() },
@@ -144,11 +144,11 @@ describe("GET /api/meetings/", () => {
 		expect(response.status).toBe(200);
 		expect(listMeetings).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ status: "draft" }),
+			expect.objectContaining({ status: "closed" }),
 		);
 		expect(countMeetings).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.objectContaining({ status: "draft" }),
+			expect.objectContaining({ status: "closed" }),
 		);
 	});
 
@@ -306,7 +306,7 @@ describe("POST /api/meetings/", () => {
 		expect(body.error).toBe("Cargo não encontrado");
 	});
 
-	it("retorna 201 e cria a reunião sempre como draft", async () => {
+	it("retorna 201 e cria a reunião sempre como open", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		mockValidRefs();
@@ -315,7 +315,7 @@ describe("POST /api/meetings/", () => {
 		).mockResolvedValueOnce({
 			id: "meeting-1",
 			title: "Reunião 1",
-			status: "draft",
+			status: "open",
 		});
 		const response = await createMeetingHandler({
 			request: new Request("http://localhost/api/meetings/", {
@@ -331,7 +331,7 @@ describe("POST /api/meetings/", () => {
 		});
 		expect(response.status).toBe(201);
 		const body = (await response.json()) as { status: string };
-		expect(body.status).toBe("draft");
+		expect(body.status).toBe("open");
 		expect(createMeetingWithRelations).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.objectContaining({
@@ -352,7 +352,7 @@ describe("POST /api/meetings/", () => {
 			createMeetingWithRelations as ReturnType<typeof vi.fn>
 		).mockResolvedValueOnce({
 			id: "meeting-2",
-			status: "draft",
+			status: "open",
 		});
 		const response = await createMeetingHandler({
 			request: new Request("http://localhost/api/meetings/", {

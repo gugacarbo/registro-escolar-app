@@ -84,10 +84,10 @@ describe("meetings schema", () => {
 		}
 	});
 
-	it("transitionMeetingSchema aceita apenas start, finalize e reopen", () => {
-		expect(transitionMeetingSchema.safeParse("start").success).toBe(true);
-		expect(transitionMeetingSchema.safeParse("finalize").success).toBe(true);
+	it("transitionMeetingSchema aceita apenas reopen (ADR-0021)", () => {
 		expect(transitionMeetingSchema.safeParse("reopen").success).toBe(true);
+		expect(transitionMeetingSchema.safeParse("start").success).toBe(false);
+		expect(transitionMeetingSchema.safeParse("finalize").success).toBe(false);
 		expect(transitionMeetingSchema.safeParse("pause").success).toBe(false);
 	});
 });

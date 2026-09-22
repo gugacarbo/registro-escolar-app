@@ -533,9 +533,8 @@ export default function CouncilPage() {
 													className="text-sm text-muted-foreground"
 													role="status"
 												>
-													{meeting && meeting.status === "draft"
-														? "Inicie a reunião para criar registros vinculados."
-														: "Reunião finalizada — reabra para editar registros vinculados."}
+													Reunião encerrada — reabra para editar registros
+													vinculados.
 												</p>
 											) : (
 												<Dialog
@@ -801,9 +800,7 @@ export default function CouncilPage() {
 										Edição bloqueada pelo status
 									</AlertDialogTitle>
 									<AlertDialogDescription>
-										{meeting && meeting.status === "draft"
-											? "Inicie a reunião para criar registros vinculados."
-											: "Reunião finalizada — reabra para editar registros vinculados."}
+										Reunião encerrada — reabra para editar registros vinculados.
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>

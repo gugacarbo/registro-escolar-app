@@ -7,8 +7,7 @@ import {
 	createLinkedRecord,
 	createMeeting,
 	createStudent,
-	startMeeting,
-	transitionMeetingResponse,
+	generateMinute,
 } from "./fixtures/api";
 import { expect, test, type ApiContext } from "./fixtures/test";
 
@@ -87,7 +86,6 @@ test.describe("SPEC-0011 histórico do estudante", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(
 			apiContext,
 			meeting.id,
@@ -109,7 +107,6 @@ test.describe("SPEC-0011 histórico do estudante", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro interno histórico", {
 			incluirNaAta: false,
 		});
@@ -144,7 +141,6 @@ test.describe("SPEC-0011 histórico do estudante", () => {
 			classIds: [second.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		const component = await createComponent(apiContext, "História Componente");
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro com componente", {
 			componenteId: component.id,
@@ -221,19 +217,13 @@ test.describe("SPEC-0011 histórico do estudante", () => {
 			classIds: [klass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(
 			apiContext,
 			meeting.id,
 			student.id,
 			"Registro na linha do tempo UI",
 		);
-		const finish = await transitionMeetingResponse(
-			apiContext,
-			meeting.id,
-			"finalize",
-		);
-		expect(finish.status).toBe(200);
+		await generateMinute(apiContext, meeting.id);
 
 		await page.goto(`/students/${student.id}`);
 		await expect(
@@ -277,7 +267,6 @@ test.describe("SPEC-0011 histórico do estudante", () => {
 			classIds: [oldClass.id],
 			participants: [],
 		});
-		await startMeeting(apiContext, meeting.id);
 		await createLinkedRecord(apiContext, meeting.id, student.id, "Registro antigo contextualizado");
 
 		const history = await getStudentHistory(apiContext, student.id);

@@ -1,43 +1,31 @@
 import type { MeetingStatus, TransitionAction } from "./schema";
 
-const EDITABLE_MEETING_STATUSES: readonly string[] = [
-	"draft",
-	"in_progress",
-	"reopened",
-];
-
-// Máquina de estados da reunião (spec 0005):
-// draft → in_progress → finished → reopened (→ in_progress → finished …)
+/**
+ * Máquina de estados da reunião (spec 0005 / ADR-0021):
+ * open → closed (ao gerar a ata) ; closed → open (reabertura explícita).
+ */
 export const ALLOWED_TRANSITIONS: Record<MeetingStatus, TransitionAction[]> = {
-	draft: ["start"],
-	in_progress: ["finalize"],
-	finished: ["reopen"],
-	reopened: ["start", "finalize"],
+	open: [],
+	closed: ["reopen"],
 };
 
 export const NEXT_STATUS: Record<TransitionAction, MeetingStatus> = {
-	start: "in_progress",
-	finalize: "finished",
-	reopen: "reopened",
+	reopen: "open",
 };
 
-export function canEditLinkedRecord(status: MeetingStatus): boolean {
-	// Integração com as specs 0006/0007 (registros vinculados):
-	// atas e registros só podem ser criados/editados enquanto a
-	// reunião está em andamento ou reaberta (borda 1).
-	return status === "in_progress" || status === "reopened";
-}
-
-export function canCreateIndependentRecord(): boolean {
-	// Borda 6: registro independente de reunião é permitido em
-	// qualquer estado do ciclo de vida.
-	return true;
-}
-
 /**
- * Dados gerais e turmas editáveis em rascunho, em andamento e reaberta
- * (spec 0005, bordas 7/8/10). Finalizada exige reabertura.
+ * A reunião só aceita trabalho enquanto está aberta. Em `closed` exige
+ * reabertura (spec 0005, borda 1).
  */
+export function canEditLinkedRecord(status: MeetingStatus): boolean {
+	return status === "open";
+}
+
 export function canEditMeetingData(status: string): boolean {
-	return EDITABLE_MEETING_STATUSES.includes(status);
+	return status === "open";
+}
+
+/** Registros independentes de reunião são permitidos em qualquer estado. */
+export function canCreateIndependentRecord(): boolean {
+	return true;
 }

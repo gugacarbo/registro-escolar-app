@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
 import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
-import { ERR_MEETING_FINISHED } from "#/lib/meetings/errors";
+import { ERR_MEETING_CLOSED } from "#/lib/meetings/errors";
 import { findMeetingById, updateMeeting } from "#/lib/meetings/repository";
 import type { UpdateMeetingInput } from "#/lib/meetings/schema";
 import { updateMeetingSchema } from "#/lib/meetings/schema";
@@ -89,11 +89,10 @@ export async function updateMeetingHandler({
 	if (!meeting) {
 		return json({ error: "Reunião não encontrada" }, 404);
 	}
-	// Dados gerais editáveis em rascunho, em andamento e reaberta (spec 0005,
-	// bordas 7/10). Turmas têm rotas próprias
-	// (POST/DELETE /api/meetings/:id/classes).
+	// Dados gerais editáveis apenas com a reunião aberta (spec 0005, borda 1).
+	// Turmas têm rotas próprias (POST/DELETE /api/meetings/:id/classes).
 	if (!canEditMeetingData(meeting.status)) {
-		return json({ error: ERR_MEETING_FINISHED }, 409);
+		return json({ error: ERR_MEETING_CLOSED }, 409);
 	}
 
 	const update: UpdateMeetingInput = {};

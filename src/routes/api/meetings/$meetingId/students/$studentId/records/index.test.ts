@@ -34,7 +34,7 @@ function env() {
 function inProgressMeeting() {
 	(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 		id: "meeting-1",
-		status: "in_progress",
+		status: "open",
 		heldAt: new Date("2025-06-10T12:00:00.000Z"),
 	});
 }
@@ -102,11 +102,11 @@ describe("POST /api/meetings/:id/students/:studentId/records", () => {
 		expect(response.status).toBe(400);
 	});
 
-	it("retorna 409 quando a reunião está finalizada (borda 5)", async () => {
+	it("retorna 409 quando a reunião está encerrada (borda 5)", async () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "finished",
+			status: "closed",
 		});
 		const response = await createLinkedRecordHandler({
 			request: post({ texto: "Registro" }),
@@ -144,11 +144,11 @@ describe("POST /api/meetings/:id/students/:studentId/records", () => {
 		expect(response.status).toBe(404);
 	});
 
-	it("retorna 201 e aceita reunião reaberta (borda 5)", async () => {
+	it("retorna 201 e aceita reunião aberta (borda 5)", async () => {
 		session();
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "reopened",
+			status: "open",
 		});
 		(createLinkedRecord as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "rec-1",

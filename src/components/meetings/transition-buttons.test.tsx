@@ -23,18 +23,23 @@ beforeEach(() => {
 });
 
 describe("TransitionButtons", () => {
-	it("pede confirmação contextual antes de finalizar uma reunião", async () => {
-		const user = userEvent.setup();
-		render(<TransitionButtons meetingId="meeting-1" status="in_progress" />);
+	it("não oferece transições em reunião aberta", () => {
+		render(<TransitionButtons meetingId="meeting-1" status="open" />);
+		expect(screen.queryByRole("button")).not.toBeInTheDocument();
+	});
 
-		await user.click(screen.getByRole("button", { name: "Finalizar" }));
+	it("pede confirmação contextual antes de reabrir uma reunião encerrada", async () => {
+		const user = userEvent.setup();
+		render(<TransitionButtons meetingId="meeting-1" status="closed" />);
+
+		await user.click(screen.getByRole("button", { name: "Reabrir" }));
 
 		expect(
-			screen.getByRole("heading", { name: "Finalizar reunião" }),
+			screen.getByRole("heading", { name: "Reabrir reunião" }),
 		).toBeVisible();
 		expect(
 			screen.getByText(
-				"A reunião será marcada como finalizada. Você poderá reabri-la depois se precisar alterar os registros.",
+				"A reunião voltará a aceitar alterações e deixará de constar como encerrada. Gere a ata novamente ao concluir.",
 			),
 		).toBeVisible();
 		expect(mocks.mutateAsync).not.toHaveBeenCalled();
@@ -42,32 +47,30 @@ describe("TransitionButtons", () => {
 
 	it("exibe o erro da transição dentro do diálogo de confirmação", async () => {
 		const user = userEvent.setup();
-		mocks.mutateAsync.mockRejectedValue(
-			new Error("Não foi possível finalizar"),
-		);
-		render(<TransitionButtons meetingId="meeting-1" status="in_progress" />);
+		mocks.mutateAsync.mockRejectedValue(new Error("Não foi possível reabrir"));
+		render(<TransitionButtons meetingId="meeting-1" status="closed" />);
 
-		await user.click(screen.getByRole("button", { name: "Finalizar" }));
+		await user.click(screen.getByRole("button", { name: "Reabrir" }));
 		await user.click(
-			screen.getByRole("button", { name: "Confirmar finalização" }),
+			screen.getByRole("button", { name: "Confirmar reabertura" }),
 		);
 
-		const dialog = screen.getByRole("dialog", { name: "Finalizar reunião" });
+		const dialog = screen.getByRole("dialog", { name: "Reabrir reunião" });
 		expect(await screen.findByRole("alert")).toHaveTextContent(
-			"Não foi possível finalizar",
+			"Não foi possível reabrir",
 		);
 		expect(dialog).toContainElement(screen.getByRole("alert"));
 	});
 
 	it("executa a transição somente após a confirmação", async () => {
 		const user = userEvent.setup();
-		render(<TransitionButtons meetingId="meeting-1" status="in_progress" />);
+		render(<TransitionButtons meetingId="meeting-1" status="closed" />);
 
-		await user.click(screen.getByRole("button", { name: "Finalizar" }));
+		await user.click(screen.getByRole("button", { name: "Reabrir" }));
 		await user.click(
-			screen.getByRole("button", { name: "Confirmar finalização" }),
+			screen.getByRole("button", { name: "Confirmar reabertura" }),
 		);
 
-		expect(mocks.mutateAsync).toHaveBeenCalledWith("finalize");
+		expect(mocks.mutateAsync).toHaveBeenCalledWith("reopen");
 	});
 });

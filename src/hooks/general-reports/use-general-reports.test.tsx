@@ -78,7 +78,7 @@ describe("hooks de relatos gerais", () => {
 
 	it("propaga erro do servidor", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			new Response(JSON.stringify({ error: "Reunião finalizada" }), {
+			new Response(JSON.stringify({ error: "Reunião encerrada" }), {
 				status: 409,
 			}),
 		);
@@ -87,6 +87,6 @@ describe("hooks de relatos gerais", () => {
 		});
 		result.current.mutate({ texto: "Relato" });
 		await waitFor(() => expect(result.current.isError).toBe(true));
-		expect(result.current.error?.message).toBe("Reunião finalizada");
+		expect(result.current.error?.message).toBe("Reunião encerrada");
 	});
 });

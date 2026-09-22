@@ -51,7 +51,7 @@ conteúdo inicial. Cada reunião recebe uma cópia que pode ser personalizada.
   atas de reuniões já configuradas e versões já geradas permanecem inalteradas.
 - `GET /api/meetings/:id/minutes/content` e
   `PATCH /api/meetings/:id/minutes/content` leem e salvam o conteúdo próprio da
-  reunião, permitido em Rascunho, Em andamento e Reaberta.
+  reunião, permitido apenas em reunião `open`.
 
 ## Casos de borda
 
@@ -63,7 +63,7 @@ conteúdo inicial. Cada reunião recebe uma cópia que pode ser personalizada.
 | 4 | o modelo solicitado não existir | exibir mensagem de falha de carregamento sem renderizar formulário vazio |
 | 5 | uma edição do modelo for salva | confirmar a atualização sem alterar atas já configuradas ou versões existentes |
 | 6 | o operador editar a ata de uma reunião | salvar cópia local de cabeçalho, corpo e rodapé |
-| 7 | a reunião estiver finalizada e o operador editar seu conteúdo | rejeitar e orientar a reabrir a reunião |
+| 7 | a reunião estiver encerrada e o operador editar seu conteúdo | rejeitar e orientar a reabrir a reunião |
 
 ## Questões em aberto
 
@@ -89,7 +89,7 @@ bun run build # exit 0
 ## Verificação
 
 DoD executado em 2026-09-17. O fluxo de lista, criação e edição de modelos,
-isolamento da cópia por reunião, editor rico e bloqueio após finalização foi
+Atualização 2026-09-22 (ADR-0021): o bloqueio do conteúdo ocorre com a reunião `closed`. DoD original: isolamento da cópia por reunião, editor rico e bloqueio após encerramento foi
 validado por testes focados (87 aprovados, 1 ignorado), `bun run typecheck`,
 `bun run check`, `bun run build` e pelos 14 cenários E2E de atas e modelos
 (14 aprovados).

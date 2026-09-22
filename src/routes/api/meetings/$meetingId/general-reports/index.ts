@@ -99,10 +99,10 @@ export async function createGeneralReportHandler({
 	if (!meeting) {
 		return json({ error: "Reunião não encontrada" }, 404);
 	}
-	if (meeting.status !== "in_progress" && meeting.status !== "reopened") {
+	if (meeting.status !== "open") {
 		return json(
 			{
-				error: "Reunião finalizada: reabra para criar/editar relatos gerais",
+				error: "Reunião encerrada: reabra para criar/editar relatos gerais",
 				meetingStatus: meeting.status,
 			},
 			409,

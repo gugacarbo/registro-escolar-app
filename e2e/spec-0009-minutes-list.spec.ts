@@ -4,7 +4,6 @@ import {
 	createMeeting,
 	createMinuteTemplate,
 	generateMinute,
-	startMeeting,
 } from "./fixtures/api";
 import { expect, test } from "./fixtures/test";
 
@@ -23,7 +22,6 @@ test.describe("Lista de atas no padrão de tabela do app", () => {
 			classIds: [klass.id],
 			templateId: template.id,
 		});
-		await startMeeting(apiContext, meeting.id);
 		await generateMinute(apiContext, meeting.id);
 
 		await authenticatedPage.goto("/minutes");
@@ -103,7 +101,6 @@ test.describe("Lista de atas no padrão de tabela do app", () => {
 			heldAt: "2026-05-10",
 			classIds: [klass.id],
 		});
-		await startMeeting(apiContext, pending.id);
 		await generateMinute(apiContext, pending.id);
 
 		const approved = await createMeeting(apiContext, {
@@ -111,7 +108,6 @@ test.describe("Lista de atas no padrão de tabela do app", () => {
 			heldAt: "2026-05-11",
 			classIds: [klass.id],
 		});
-		await startMeeting(apiContext, approved.id);
 		await generateMinute(apiContext, approved.id, "observação do teste");
 		const approveResponse = await fetch(
 			`${baseURL}/api/meetings/${approved.id}/minutes/approve`,

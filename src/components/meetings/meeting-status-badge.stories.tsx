@@ -8,7 +8,7 @@ const meta = {
 	argTypes: {
 		status: {
 			control: { type: "select" },
-			options: ["draft", "in_progress", "finished", "reopened", "unknown"],
+			options: ["open", "closed", "unknown"],
 		},
 	},
 } satisfies Meta<typeof MeetingStatusBadge>;
@@ -18,15 +18,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	args: { status: "in_progress" },
+	args: { status: "open" },
 };
 
-export const Draft: Story = {
-	args: { status: "draft" },
-};
-
-export const Reopened: Story = {
-	args: { status: "reopened" },
+export const Closed: Story = {
+	args: { status: "closed" },
 };
 
 export const Unknown: Story = {
@@ -38,10 +34,10 @@ export const Unknown: Story = {
 };
 
 export const CyclesThroughStatuses: Story = {
-	args: { status: "in_progress" },
+	args: { status: "open" },
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const badge = canvas.getByText("Em andamento");
+		const badge = canvas.getByText("Aberta");
 
 		await userEvent.click(document.body);
 		await expect(badge).toHaveAttribute("data-slot", "badge");

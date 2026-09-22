@@ -12,11 +12,12 @@ import {
 	recordMeetingInclusions,
 	studentRecords,
 } from "#/db/schema";
-import { findMeetingById } from "#/lib/meetings/repository";
+import { findMeetingById, updateMeeting } from "#/lib/meetings/repository";
 import type { Meeting } from "#/lib/meetings/schema";
 
 import {
-	ERR_MEETING_DRAFT,
+	ERR_MEETING_CLOSED,
+	ERR_MEETING_NOT_CLOSED,
 	ERR_MEETING_NOT_FOUND,
 	ERR_MINUTE_ALREADY_APPROVED,
 	ERR_MINUTE_NOT_FOUND,
@@ -24,7 +25,8 @@ import {
 	ERR_PDF_NOT_AVAILABLE,
 	ERR_TEMPLATE_NOT_FOUND,
 	ERR_VERSION_NOT_FOUND,
-	MeetingDraftError,
+	MeetingClosedError,
+	MeetingNotClosedError,
 	MeetingNotFoundError,
 	MinuteAlreadyApprovedError,
 	MinuteNotEditableError,
@@ -490,9 +492,9 @@ export async function updateMinuteContent(
 	if (!meeting) {
 		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
 	}
-	if (meeting.status === "finished") {
+	if (meeting.status !== "open") {
 		throw new MinuteNotEditableError(
-			"Reunião finalizada: reabra para editar a ata",
+			"Reunião encerrada: reabra para editar a ata",
 		);
 	}
 
@@ -545,7 +547,7 @@ export async function updateMinuteContent(
 	};
 }
 
-/** Prévia (borda 3: permitida em qualquer status, inclusive rascunho). */
+/** Prévia: permitida em qualquer status, inclusive `closed` (spec 0009). */
 export async function previewMinute(db: DB, meetingId: string) {
 	const meeting = await findMeetingById(db, meetingId);
 	if (!meeting) {
@@ -572,10 +574,10 @@ export async function previewMinute(db: DB, meetingId: string) {
 	};
 }
 
-/** Borda 3: versão oficial exige reunião iniciada (não rascunho). */
-function assertNotDraft(meeting: Meeting) {
-	if (meeting.status === "draft") {
-		throw new MeetingDraftError(ERR_MEETING_DRAFT);
+/** Borda 3/4: versão oficial exige reunião aberta. */
+function assertOpenMeeting(meeting: Meeting) {
+	if (meeting.status !== "open") {
+		throw new MeetingClosedError(ERR_MEETING_CLOSED);
 	}
 }
 
@@ -593,7 +595,7 @@ export async function generateMinuteVersion(
 	if (!meeting) {
 		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
 	}
-	assertNotDraft(meeting);
+	assertOpenMeeting(meeting);
 
 	let minute = await findMinuteByMeetingId(db, meetingId);
 	if (!minute) {
@@ -668,7 +670,14 @@ export async function generateMinuteVersion(
 		.returning()
 		.get();
 
-	return { minute, version, pdfBytes };
+	// ADR-0021: a geração da ata encerra a reunião (open → closed). O PDF já
+	// foi construído a partir do conteúdo recém-gerado, então não há leitura
+	// posterior dependente do status.
+	const closedMeeting = await updateMeeting(db, meetingId, {
+		status: "closed",
+	});
+
+	return { minute, version, pdfBytes, meeting: closedMeeting };
 }
 
 // ---------------------------------------------------------------------------
@@ -723,6 +732,14 @@ export async function approveMinute(
 	meetingId: string,
 	input: { data?: Date; observacao?: string | null } = {},
 ): Promise<MinuteRow> {
+	const meeting = await findMeetingById(db, meetingId);
+	if (!meeting) {
+		throw new MeetingNotFoundError(ERR_MEETING_NOT_FOUND);
+	}
+	// Borda 6 (0010): aprovação exige reunião encerrada (ata gerada).
+	if (meeting.status !== "closed") {
+		throw new MeetingNotClosedError(ERR_MEETING_NOT_CLOSED);
+	}
 	const minute = await findMinuteByMeetingId(db, meetingId);
 	if (!minute) {
 		throw new MinuteNotFoundError(ERR_MINUTE_NOT_FOUND);

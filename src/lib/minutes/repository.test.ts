@@ -7,12 +7,12 @@ import type { DB } from "#/db";
 import * as schema from "#/db/schema";
 
 import {
-	MeetingDraftError,
+	MeetingClosedError,
+	MeetingNotClosedError,
 	MeetingNotFoundError,
 	MinuteAlreadyApprovedError,
 	MinuteNotEditableError,
 	MinuteNotFoundError,
-	NoCurrentVersionError,
 	PdfNotAvailableError,
 } from "./errors";
 import { buildMinutePdf, pdfBytesToBuffer } from "./pdf";
@@ -44,7 +44,7 @@ function createTestDb() {
 		CREATE TABLE meetings (
 			id TEXT PRIMARY KEY,
 			title TEXT NOT NULL,
-			status TEXT NOT NULL DEFAULT 'draft',
+			status TEXT NOT NULL DEFAULT 'open',
 			held_at INTEGER,
 			location TEXT,
 			template_id TEXT,
@@ -160,10 +160,15 @@ async function seedBase(db: DB) {
 		{
 			id: "meeting-1",
 			title: "Conselho 1º Ano",
-			status: "in_progress",
+			status: "open",
 			heldAt: meetingDate,
 		},
-		{ id: "draft-1", title: "Rascunho", status: "draft", heldAt: meetingDate },
+		{
+			id: "closed-1",
+			title: "Encerrada",
+			status: "closed",
+			heldAt: meetingDate,
+		},
 	]);
 	await db.insert(schema.classes).values([
 		{ id: "class-1", name: "1º Ano A", academicPeriod: "2025" },
@@ -243,10 +248,10 @@ describe("minutes repository (specs 0009/0010)", () => {
 			texto: "Interno",
 			includeInMinutes: false,
 		});
-		const preview = await previewMinute(setup.db, "draft-1");
-		expect(preview.status).toBe("draft");
+		const preview = await previewMinute(setup.db, "closed-1");
+		expect(preview.status).toBe("closed");
 		expect(preview.approvalStatus).toBe("pendente_aprovacao");
-		expect(preview.content).toContain("RASCUNHO");
+		expect(preview.content).toContain("ENCERRADA");
 
 		const full = await previewMinute(setup.db, "meeting-1");
 		expect(full.content).not.toContain("Interno");
@@ -289,7 +294,7 @@ describe("minutes repository (specs 0009/0010)", () => {
 			meeting: {
 				id: "m",
 				title: "Título",
-				status: "in_progress",
+				status: "open",
 				heldAt: null,
 				location: null,
 				templateId: null,
@@ -326,7 +331,7 @@ describe("minutes repository (specs 0009/0010)", () => {
 			meeting: {
 				id: "m",
 				title: "Título",
-				status: "draft",
+				status: "closed",
 				heldAt: null,
 				location: null,
 				templateId: null,
@@ -354,12 +359,20 @@ describe("minutes repository (specs 0009/0010)", () => {
 		]);
 	});
 
-	it("gera v1 com PDF, preserva v1 e marca só a nova como atual (CA-008/borda 5)", async () => {
-		const { version } = await generateMinuteVersion(setup.db, "meeting-1");
+	it("gera v1 com PDF e encerra a reunião; reabre e cria v2 (CA-008/bordas 3/5)", async () => {
+		const { version, meeting } = await generateMinuteVersion(
+			setup.db,
+			"meeting-1",
+		);
 		expect(version.version).toBe(1);
 		expect(version.isCurrent).toBe(true);
+		expect(meeting.status).toBe("closed");
 		expect(Buffer.isBuffer(version.pdf) && version.pdf.length > 100).toBe(true);
 
+		await setup.db
+			.update(schema.meetings)
+			.set({ status: "open" })
+			.where(eq(schema.meetings.id, "meeting-1"));
 		const v2 = await generateMinuteVersion(setup.db, "meeting-1", {
 			notes: "correção",
 		});
@@ -406,10 +419,10 @@ describe("minutes repository (specs 0009/0010)", () => {
 		expect(preview.content).not.toContain("Corpo alterado no preset");
 	});
 
-	it("bloqueia edição de conteúdo quando a reunião está finalizada", async () => {
+	it("bloqueia edição de conteúdo quando a reunião está encerrada", async () => {
 		await setup.db
 			.update(schema.meetings)
-			.set({ status: "finished" })
+			.set({ status: "closed" })
 			.where(eq(schema.meetings.id, "meeting-1"));
 
 		await expect(
@@ -421,15 +434,21 @@ describe("minutes repository (specs 0009/0010)", () => {
 		).rejects.toBeInstanceOf(MinuteNotEditableError);
 	});
 
-	it("recusa versão oficial em rascunho (borda 3, spec 0009)", async () => {
+	it("recusa aprovar quando a reunião não existe", async () => {
+		await expect(approveMinute(setup.db, "missing")).rejects.toBeInstanceOf(
+			MeetingNotFoundError,
+		);
+	});
+
+	it("recusa versão oficial em reunião encerrada (borda 4, spec 0009)", async () => {
 		await expect(
-			generateMinuteVersion(setup.db, "draft-1"),
-		).rejects.toBeInstanceOf(MeetingDraftError);
+			generateMinuteVersion(setup.db, "closed-1"),
+		).rejects.toBeInstanceOf(MeetingClosedError);
 	});
 
 	it("aprova com data automática (borda 4) e volta a pendente ao regenerar (borda 2)", async () => {
 		await expect(approveMinute(setup.db, "meeting-1")).rejects.toBeInstanceOf(
-			MinuteNotFoundError,
+			MeetingNotClosedError,
 		);
 		await generateMinuteVersion(setup.db, "meeting-1");
 		const approved = await approveMinute(setup.db, "meeting-1", {
@@ -440,21 +459,28 @@ describe("minutes repository (specs 0009/0010)", () => {
 		await expect(approveMinute(setup.db, "meeting-1")).rejects.toBeInstanceOf(
 			MinuteAlreadyApprovedError,
 		);
+		await setup.db
+			.update(schema.meetings)
+			.set({ status: "open" })
+			.where(eq(schema.meetings.id, "meeting-1"));
 		const regenerated = await generateMinuteVersion(setup.db, "meeting-1");
 		expect(regenerated.minute.approvalStatus).toBe("pendente_aprovacao");
 		expect(regenerated.minute.approvedAt).toBeNull();
 	});
 
-	it("sem versão atual não aprova e PDF de versão inexistente dá 404 (bordas 3/1)", async () => {
-		await setup.db.insert(schema.minutes).values({
-			id: "minute-x",
-			meetingId: "draft-1",
-		});
-		await expect(approveMinute(setup.db, "draft-1")).rejects.toBeInstanceOf(
-			NoCurrentVersionError,
+	it("não aprova reunião aberta; sem versão atual também não aprova (borda 6)", async () => {
+		await expect(approveMinute(setup.db, "meeting-1")).rejects.toBeInstanceOf(
+			MeetingNotClosedError,
+		);
+		await setup.db
+			.update(schema.meetings)
+			.set({ status: "closed" })
+			.where(eq(schema.meetings.id, "meeting-1"));
+		await expect(approveMinute(setup.db, "meeting-1")).rejects.toBeInstanceOf(
+			MinuteNotFoundError,
 		);
 		await expect(
-			findMinuteVersionPdf(setup.db, "draft-1", 9),
+			findMinuteVersionPdf(setup.db, "closed-1", 9),
 		).rejects.toBeInstanceOf(Error);
 		await expect(
 			listMinuteVersions(setup.db, "missing"),
@@ -554,7 +580,7 @@ describe("minutes repository (specs 0009/0010)", () => {
 			},
 			{
 				id: "minute-2",
-				meetingId: "draft-1",
+				meetingId: "closed-1",
 				templateId: null,
 				approvalStatus: "pendente_aprovacao",
 				createdAt: meetingDate,
@@ -574,8 +600,8 @@ describe("minutes repository (specs 0009/0010)", () => {
 		// Ordenado por updatedAt desc; versão atual refletida via max(version).
 		expect(all[0]).toMatchObject({
 			id: "minute-2",
-			meetingId: "draft-1",
-			meetingTitle: "Rascunho",
+			meetingId: "closed-1",
+			meetingTitle: "Encerrada",
 			templateName: null,
 			approvalStatus: "pendente_aprovacao",
 			currentVersion: null,

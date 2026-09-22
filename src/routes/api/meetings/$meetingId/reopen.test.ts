@@ -93,12 +93,12 @@ describe("PATCH /api/meetings/:id/reopen", () => {
 		expect(body.error).toBe("Reunião não encontrada");
 	});
 
-	it("retorna 409 quando a reunião está em andamento", async () => {
+	it("retorna 409 quando a reunião está aberta", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "in_progress",
+			status: "open",
 		});
 		(transitionMeeting as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
 			new InvalidTransitionError(),
@@ -113,16 +113,16 @@ describe("PATCH /api/meetings/:id/reopen", () => {
 		expect(response.status).toBe(409);
 	});
 
-	it("retorna 200 com hint ao reabrir a reunião", async () => {
+	it("retorna 200 ao reabrir a reunião", async () => {
 		const sessionMock = getSession as ReturnType<typeof vi.fn>;
 		sessionMock.mockResolvedValueOnce(createMockSession());
 		(findMeetingById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "finished",
+			status: "closed",
 		});
 		(transitionMeeting as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			id: "meeting-1",
-			status: "reopened",
+			status: "open",
 		});
 		const response = await reopenMeetingHandler({
 			request: new Request("http://localhost/api/meetings/meeting-1/reopen", {
@@ -132,11 +132,7 @@ describe("PATCH /api/meetings/:id/reopen", () => {
 			params: { meetingId: "meeting-1" },
 		});
 		expect(response.status).toBe(200);
-		const body = (await response.json()) as {
-			status: string;
-			hint: string;
-		};
-		expect(body.status).toBe("reopened");
-		expect(body.hint).toBe("Use start para voltar a em andamento");
+		const body = (await response.json()) as { status: string };
+		expect(body.status).toBe("open");
 	});
 });
