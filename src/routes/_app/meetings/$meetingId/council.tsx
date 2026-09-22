@@ -162,6 +162,7 @@ export default function CouncilPage() {
 	function selectStudent(studentId: string) {
 		setSelectedStudentId(studentId);
 		setEditingRecord(null);
+		setEditingReport(null);
 		setTab("registros");
 	}
 
@@ -170,6 +171,7 @@ export default function CouncilPage() {
 		setSelectedClassId(classId);
 		setStudentSearch("");
 		setEditingRecord(null);
+		setEditingReport(null);
 		setTab("registros");
 		let next = "";
 		if (classStudents && classId === activeClassId) {
@@ -332,9 +334,6 @@ export default function CouncilPage() {
 					<Card className="md:sticky md:top-4">
 						<CardHeader>
 							<CardTitle>Estudantes</CardTitle>
-							<CardDescription>
-								Escolha um estudante para registrar.
-							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{isLoadingClasses && <Skeleton className="h-10 w-full" />}
