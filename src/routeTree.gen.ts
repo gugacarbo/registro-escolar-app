@@ -53,6 +53,7 @@ import { Route as AppMeetingsMeetingIdStudentsRouteImport } from './routes/_app/
 import { Route as AppMinutesTemplatesIndexRouteImport } from './routes/_app/minutes/templates/index'
 import { Route as AppMinutesTemplatesIdRouteImport } from './routes/_app/minutes/templates/$id'
 import { Route as ApiAdminUsersIndexRouteImport } from './routes/api/admin/users/index'
+import { Route as ApiClassesIdIndexRouteImport } from './routes/api/classes/$id/index'
 import { Route as ApiClassesIdHistoryRouteImport } from './routes/api/classes/$id/history'
 import { Route as ApiClassesIdOffersRouteImport } from './routes/api/classes/$id/offers'
 import { Route as ApiClassesIdStudentsRouteImport } from './routes/api/classes/$id/students'
@@ -308,6 +309,11 @@ const ApiAdminUsersIndexRoute = ApiAdminUsersIndexRouteImport.update({
   path: '/api/admin/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiClassesIdIndexRoute = ApiClassesIdIndexRouteImport.update({
+  id: '/api/classes/$id/',
+  path: '/api/classes/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiClassesIdHistoryRoute = ApiClassesIdHistoryRouteImport.update({
   id: '/api/classes/$id/history',
   path: '/api/classes/$id/history',
@@ -532,6 +538,7 @@ export interface FileRoutesByFullPath {
   '/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
   '/minutes/templates/': typeof AppMinutesTemplatesIndexRoute
   '/api/admin/users/': typeof ApiAdminUsersIndexRoute
+  '/api/classes/$id/': typeof ApiClassesIdIndexRoute
   '/api/components/$id/': typeof ApiComponentsIdIndexRoute
   '/api/invitations/$id/': typeof ApiInvitationsIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
@@ -606,6 +613,7 @@ export interface FileRoutesByTo {
   '/meetings/$meetingId': typeof AppMeetingsMeetingIdIndexRoute
   '/minutes/templates': typeof AppMinutesTemplatesIndexRoute
   '/api/admin/users': typeof ApiAdminUsersIndexRoute
+  '/api/classes/$id': typeof ApiClassesIdIndexRoute
   '/api/components/$id': typeof ApiComponentsIdIndexRoute
   '/api/invitations/$id': typeof ApiInvitationsIdIndexRoute
   '/api/meetings/$meetingId': typeof ApiMeetingsMeetingIdIndexRoute
@@ -683,6 +691,7 @@ export interface FileRoutesById {
   '/_app/meetings/$meetingId/': typeof AppMeetingsMeetingIdIndexRoute
   '/_app/minutes/templates/': typeof AppMinutesTemplatesIndexRoute
   '/api/admin/users/': typeof ApiAdminUsersIndexRoute
+  '/api/classes/$id/': typeof ApiClassesIdIndexRoute
   '/api/components/$id/': typeof ApiComponentsIdIndexRoute
   '/api/invitations/$id/': typeof ApiInvitationsIdIndexRoute
   '/api/meetings/$meetingId/': typeof ApiMeetingsMeetingIdIndexRoute
@@ -760,6 +769,7 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId/'
     | '/minutes/templates/'
     | '/api/admin/users/'
+    | '/api/classes/$id/'
     | '/api/components/$id/'
     | '/api/invitations/$id/'
     | '/api/meetings/$meetingId/'
@@ -834,6 +844,7 @@ export interface FileRouteTypes {
     | '/meetings/$meetingId'
     | '/minutes/templates'
     | '/api/admin/users'
+    | '/api/classes/$id'
     | '/api/components/$id'
     | '/api/invitations/$id'
     | '/api/meetings/$meetingId'
@@ -910,6 +921,7 @@ export interface FileRouteTypes {
     | '/_app/meetings/$meetingId/'
     | '/_app/minutes/templates/'
     | '/api/admin/users/'
+    | '/api/classes/$id/'
     | '/api/components/$id/'
     | '/api/invitations/$id/'
     | '/api/meetings/$meetingId/'
@@ -960,6 +972,7 @@ export interface RootRouteChildren {
   ApiStudentsIdHistoryRoute: typeof ApiStudentsIdHistoryRoute
   ApiStudentsIdRecordsRoute: typeof ApiStudentsIdRecordsRoute
   ApiAdminUsersIndexRoute: typeof ApiAdminUsersIndexRoute
+  ApiClassesIdIndexRoute: typeof ApiClassesIdIndexRoute
   ApiComponentsIdIndexRoute: typeof ApiComponentsIdIndexRoute
   ApiInvitationsIdIndexRoute: typeof ApiInvitationsIdIndexRoute
   ApiMeetingsMeetingIdIndexRoute: typeof ApiMeetingsMeetingIdIndexRoute
@@ -1294,6 +1307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminUsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/classes/$id/': {
+      id: '/api/classes/$id/'
+      path: '/api/classes/$id'
+      fullPath: '/api/classes/$id/'
+      preLoaderRoute: typeof ApiClassesIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/classes/$id/history': {
       id: '/api/classes/$id/history'
       path: '/api/classes/$id/history'
@@ -1625,6 +1645,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiStudentsIdHistoryRoute: ApiStudentsIdHistoryRoute,
   ApiStudentsIdRecordsRoute: ApiStudentsIdRecordsRoute,
   ApiAdminUsersIndexRoute: ApiAdminUsersIndexRoute,
+  ApiClassesIdIndexRoute: ApiClassesIdIndexRoute,
   ApiComponentsIdIndexRoute: ApiComponentsIdIndexRoute,
   ApiInvitationsIdIndexRoute: ApiInvitationsIdIndexRoute,
   ApiMeetingsMeetingIdIndexRoute: ApiMeetingsMeetingIdIndexRoute,
