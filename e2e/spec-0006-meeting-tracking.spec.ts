@@ -100,11 +100,7 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 
 		await page.goto(`/meetings/${meeting.id}/students`);
 		await page.getByRole("combobox", { name: "Turma" }).click();
-		await page
-			.locator('[data-slot="select-item"]')
-			.filter({ hasText: klass.name })
-			.last()
-			.click();
+		await page.getByRole("option", { name: klass.name }).last().click();
 
 		await expect(page.getByText("Alice Acompanhamento")).toBeVisible();
 		await expect(page.getByText("Bob Acompanhamento")).toBeVisible();
@@ -134,10 +130,7 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 		]);
 		await page.goto(`/meetings/${meeting.id}/students`);
 		await page.getByRole("combobox", { name: "Turma" }).click();
-		await page
-			.locator('[data-slot="select-item"]')
-			.filter({ hasText: klass.name })
-			.click();
+		await page.getByRole("option", { name: klass.name }).click();
 		await page
 			.getByRole("button", { name: "Marcar Único Acompanhamento como Concluído" })
 			.click();
@@ -162,10 +155,7 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 
 		await page.goto(`/meetings/${meeting.id}/students`);
 		await page.getByRole("combobox", { name: "Turma" }).click();
-		await page
-			.locator('[data-slot="select-item"]')
-			.filter({ hasText: klass.name })
-			.click();
+		await page.getByRole("option", { name: klass.name }).click();
 
 		await expect(page.getByText("0 de 1 concluídos (0%)")).toBeVisible();
 

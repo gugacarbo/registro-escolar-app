@@ -72,9 +72,7 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 			name: "Componente",
 		});
 		await componentTrigger.click();
-		const option = page
-			.locator('[data-slot="select-item"]')
-			.filter({ hasText: component.name });
+		const option = page.getByRole("option", { name: component.name });
 		await expect(option).toBeAttached();
 		await option.click();
 		await expect(componentTrigger).toContainText(component.name);
@@ -83,7 +81,7 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 			.click();
 
 		await expect(
-			page.getByRole("listitem").filter({ hasText: "Biologia E2E" }),
+			page.getByRole("row").filter({ hasText: "Biologia E2E" }),
 		).toBeVisible();
 		await expect(dialog).not.toBeVisible();
 	});

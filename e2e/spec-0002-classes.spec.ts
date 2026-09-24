@@ -92,19 +92,17 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 
 		await gotoReady(page,"/classes/enroll");
 		await page.getByRole("combobox").first().click();
-		const studentOption = page.locator('[data-slot="select-item"]').filter({ hasText: student.name });
+		const studentOption = page.getByRole("option", { name: student.name });
 		await expect(studentOption).toBeAttached();
 		await studentOption.click();
 		await page.getByRole("combobox").nth(1).click();
-		const classOption = page.locator('[data-slot="select-item"]').filter({ hasText: "Turma Matrícula — 2026" });
+		const classOption = page.getByRole("option", { name: "Turma Matrícula — 2026" });
 		await expect(classOption).toBeAttached();
 		await classOption.click();
 		await page.locator("input[type=date]").first().fill("2026-03-01");
 		await page.getByRole("button", { name: "Matricular" }).click();
 
-		const row = page
-			.getByRole("listitem")
-			.filter({ hasText: "Estudante Matrícula" });
+		const row = page.getByRole("row").filter({ hasText: "Estudante Matrícula" });
 		await expect(row).toContainText("Ativa");
 		await expect(page).toHaveURL(new RegExp(`/classes/${klass.id}/students`));
 	});
