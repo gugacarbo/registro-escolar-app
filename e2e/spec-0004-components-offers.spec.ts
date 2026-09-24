@@ -72,8 +72,11 @@ test.describe("SPEC-0004 componentes e ofertas", () => {
 			name: "Componente",
 		});
 		await componentTrigger.click();
-		const option = page.getByRole("option", { name: component.name });
-		await expect(option).toBeAttached();
+		const option = page.getByRole("option", {
+			name: component.name,
+			exact: true,
+		});
+		await expect(option).toBeVisible();
 		await option.click();
 		await expect(componentTrigger).toContainText(component.name);
 		await dialog

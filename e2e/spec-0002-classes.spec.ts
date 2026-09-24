@@ -54,7 +54,10 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 
 		const classesPage = new ClassesPage(page);
 		await classesPage.goto();
-		const cell = page.getByRole("cell", { name: "Turma Linha Clicável" });
+		const cell = page.getByRole("cell", {
+			name: "Turma Linha Clicável",
+			exact: true,
+		});
 		await expect(cell).toBeVisible();
 		await cell.click();
 		await expect(page).toHaveURL(
@@ -91,13 +94,19 @@ test.describe("SPEC-0002 turmas e matrículas", () => {
 		const klass = await createClass(apiContext, "Turma Matrícula", "2026");
 
 		await gotoReady(page,"/classes/enroll");
-		await page.getByRole("combobox").first().click();
-		const studentOption = page.getByRole("option", { name: student.name });
-		await expect(studentOption).toBeAttached();
+		await page.getByRole("combobox", { name: "Estudante" }).click();
+		const studentOption = page.getByRole("option", {
+			name: student.name,
+			exact: true,
+		});
+		await expect(studentOption).toBeVisible();
 		await studentOption.click();
-		await page.getByRole("combobox").nth(1).click();
-		const classOption = page.getByRole("option", { name: "Turma Matrícula — 2026" });
-		await expect(classOption).toBeAttached();
+		await page.getByRole("combobox", { name: "Turma" }).click();
+		const classOption = page.getByRole("option", {
+			name: "Turma Matrícula — 2026",
+			exact: true,
+		});
+		await expect(classOption).toBeVisible();
 		await classOption.click();
 		await page.locator("input[type=date]").first().fill("2026-03-01");
 		await page.getByRole("button", { name: "Matricular" }).click();

@@ -100,7 +100,12 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 
 		await page.goto(`/meetings/${meeting.id}/students`);
 		await page.getByRole("combobox", { name: "Turma" }).click();
-		await page.getByRole("option", { name: klass.name }).last().click();
+		const classOption = page.getByRole("option", {
+			name: klass.name,
+			exact: true,
+		});
+		await expect(classOption).toBeVisible();
+		await classOption.last().click();
 
 		await expect(page.getByText("Alice Acompanhamento")).toBeVisible();
 		await expect(page.getByText("Bob Acompanhamento")).toBeVisible();
@@ -130,7 +135,12 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 		]);
 		await page.goto(`/meetings/${meeting.id}/students`);
 		await page.getByRole("combobox", { name: "Turma" }).click();
-		await page.getByRole("option", { name: klass.name }).click();
+		const singleOption = page.getByRole("option", {
+			name: klass.name,
+			exact: true,
+		});
+		await expect(singleOption).toBeVisible();
+		await singleOption.click();
 		await page
 			.getByRole("button", { name: "Marcar Único Acompanhamento como Concluído" })
 			.click();
@@ -155,7 +165,12 @@ test.describe("SPEC-0006 acompanhamento dos estudantes", () => {
 
 		await page.goto(`/meetings/${meeting.id}/students`);
 		await page.getByRole("combobox", { name: "Turma" }).click();
-		await page.getByRole("option", { name: klass.name }).click();
+		const counterOption = page.getByRole("option", {
+			name: klass.name,
+			exact: true,
+		});
+		await expect(counterOption).toBeVisible();
+		await counterOption.click();
 
 		await expect(page.getByText("0 de 1 concluídos (0%)")).toBeVisible();
 
