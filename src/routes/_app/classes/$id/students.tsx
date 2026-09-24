@@ -36,14 +36,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
-import {
-	Empty,
-	EmptyContent,
-	EmptyDescription,
-	EmptyHeader,
-	EmptyMedia,
-	EmptyTitle,
-} from "#/components/ui/empty";
 import { PageHeader, PageSection, PageShell } from "#/components/ui/page";
 import { Skeleton } from "#/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -170,10 +162,41 @@ function orderStudents(rows: ClassHistoryStudent[]) {
 	});
 }
 
+const studentColumns = [
+	{
+		header: "Nome",
+		cell: (student: ClassHistoryStudent) => (
+			<span className="font-medium">{student.name}</span>
+		),
+	},
+	{
+		header: "Início",
+		cell: (student: ClassHistoryStudent) => formatDate(student.startDate),
+	},
+	{
+		header: "Fim",
+		cell: (student: ClassHistoryStudent) =>
+			student.endDate ? (
+				formatDate(student.endDate)
+			) : (
+				<span className="text-muted-foreground">Em andamento</span>
+			),
+	},
+	{
+		header: "Status",
+		align: "right" as const,
+		cell: (student: ClassHistoryStudent) => (
+			<EnrollmentStatusBadge status={student.status} />
+		),
+	},
+];
+
 export default function ClassStudentsPage() {
 	const { id } = Route.useParams();
 	const [filters, setFilters] = useState<HistoryFilters>({});
 	const [activeTab, setActiveTab] = useState("estudantes");
+	const [studentsPage, setStudentsPage] = useState(1);
+	const [studentsPageSize, setStudentsPageSize] = useState(10);
 	const [meetingsPage, setMeetingsPage] = useState(1);
 	const [meetingsPageSize, setMeetingsPageSize] = useState(10);
 	const [timelinePage, setTimelinePage] = useState(1);
@@ -184,6 +207,7 @@ export default function ClassStudentsPage() {
 	const students = data?.estudantes ?? [];
 	const meetings = data?.reunioes ?? [];
 	const events = data?.eventos ?? [];
+	const orderedStudents = orderStudents(students);
 	const activeCount = students.filter(
 		(student) => student.status === "ativa",
 	).length;
@@ -389,19 +413,31 @@ export default function ClassStudentsPage() {
 								<Skeleton className="h-16 w-full" />
 								<Skeleton className="h-16 w-full" />
 							</div>
-						) : students.length === 0 ? (
-							<Empty className="border-0">
-								<EmptyHeader>
-									<EmptyMedia variant="icon">
-										<Users2Icon />
-									</EmptyMedia>
-									<EmptyTitle>Nenhum estudante vinculado</EmptyTitle>
-									<EmptyDescription>
-										Matricule um estudante nesta turma para acompanhar os
-										vínculos.
-									</EmptyDescription>
-								</EmptyHeader>
-								<EmptyContent>
+						) : (
+							<DataTable
+								columns={studentColumns}
+								rows={paginate(
+									orderedStudents,
+									studentsPage,
+									studentsPageSize,
+								)}
+								getRowKey={(student) =>
+									`${student.studentId}-${student.startDate}`
+								}
+								total={orderedStudents.length}
+								page={studentsPage}
+								pageSize={studentsPageSize}
+								onPageChange={setStudentsPage}
+								onPageSizeChange={(size) => {
+									setStudentsPageSize(size);
+									setStudentsPage(1);
+								}}
+								isLoading={isLoading}
+								isError={isError}
+								ariaLabel="Estudantes vinculados"
+								emptyTitle="Nenhum estudante vinculado."
+								emptyDescription="Matricule um estudante nesta turma para acompanhar os vínculos."
+								emptyAction={
 									<EnrollmentDialog
 										defaultTurmaId={id}
 										turmaName={data?.turma.name}
@@ -411,28 +447,8 @@ export default function ClassStudentsPage() {
 											</Button>
 										}
 									/>
-								</EmptyContent>
-							</Empty>
-						) : (
-							<ul aria-label="Estudantes vinculados" className="grid gap-2">
-								{orderStudents(students).map((student) => (
-									<li
-										key={`${student.studentId}-${student.startDate}`}
-										className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-background/40 p-3"
-									>
-										<div className="min-w-0">
-											<p className="font-medium">{student.name}</p>
-											<p className="text-sm text-muted-foreground">
-												Início {formatDate(student.startDate)}
-												{student.endDate
-													? ` · Fim ${formatDate(student.endDate)}`
-													: " · Em andamento"}
-											</p>
-										</div>
-										<EnrollmentStatusBadge status={student.status} />
-									</li>
-								))}
-							</ul>
+								}
+							/>
 						)}
 					</PageSection>
 				</TabsContent>

@@ -165,8 +165,17 @@ describe("ClassStudentsPage", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("Ativa")).toBeInTheDocument();
 		expect(screen.getByText("Transferida")).toBeInTheDocument();
+		const studentsTable = screen.getByRole("table", {
+			name: "Estudantes vinculados",
+		});
 		expect(
-			screen.getByText("Início 01/01/2026 · Em andamento"),
+			within(studentsTable).getByRole("columnheader", { name: "Nome" }),
+		).toBeInTheDocument();
+		expect(within(studentsTable).getByText("João")).toBeInTheDocument();
+		expect(within(studentsTable).getByText("Maria")).toBeInTheDocument();
+		expect(within(studentsTable).getByText("01/01/2026")).toBeInTheDocument();
+		expect(
+			within(studentsTable).getByText("Em andamento"),
 		).toBeInTheDocument();
 	});
 
@@ -183,10 +192,12 @@ describe("ClassStudentsPage", () => {
 
 	it("coloca vínculos ativos antes dos encerrados", () => {
 		renderPage();
-		const list = screen.getByRole("list", { name: "Estudantes vinculados" });
-		const items = within(list).getAllByRole("listitem");
-		expect(items[0] ?? "").toHaveTextContent("João");
-		expect(items[1] ?? "").toHaveTextContent("Maria");
+		const table = screen.getByRole("table", {
+			name: "Estudantes vinculados",
+		});
+		const rows = within(table).getAllByRole("row");
+		expect(rows[1]).toHaveTextContent("João");
+		expect(rows[2]).toHaveTextContent("Maria");
 	});
 
 	it("abre a aba de reuniões com data e status", async () => {
@@ -234,7 +245,7 @@ describe("ClassStudentsPage", () => {
 		});
 		renderPage();
 
-		expect(screen.getByText("Nenhum estudante vinculado")).toBeInTheDocument();
+		expect(screen.getByText("Nenhum estudante vinculado.")).toBeInTheDocument();
 		await user.click(screen.getByRole("tab", { name: "Reuniões (0)" }));
 		expect(
 			screen.getByText("Nenhuma reunião vinculada a esta turma."),
@@ -253,9 +264,7 @@ describe("ClassStudentsPage", () => {
 		});
 		renderPage();
 
-		expect(screen.getByRole("alert")).toHaveTextContent(
-			"Não foi possível carregar os dados da turma.",
-		);
+		expect(screen.getByText("Não foi possível carregar os dados da turma.")).toBeInTheDocument();
 	});
 
 	it("envia filtros para a linha do tempo e limpa ao clicar em Limpar", async () => {
