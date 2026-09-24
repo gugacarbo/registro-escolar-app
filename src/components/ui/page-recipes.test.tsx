@@ -8,8 +8,6 @@ describe("ListPage", () => {
 		render(
 			<ListPage
 				title="Usuários"
-				eyebrow="Administração"
-				description="Contas de acesso."
 				actions={<button type="button">Novo usuário</button>}
 				toolbar={<input placeholder="Buscar" />}
 			>
@@ -19,8 +17,6 @@ describe("ListPage", () => {
 		expect(
 			screen.getByRole("heading", { level: 1, name: "Usuários" }),
 		).toBeInTheDocument();
-		expect(screen.getByText("Administração")).toBeInTheDocument();
-		expect(screen.getByText("Contas de acesso.")).toBeInTheDocument();
 		expect(screen.getByText("Novo usuário")).toBeInTheDocument();
 		expect(screen.getByPlaceholderText("Buscar")).toBeInTheDocument();
 		expect(screen.getByText("Conteúdo da lista")).toBeInTheDocument();

@@ -170,7 +170,6 @@ export default function MinuteDetailPage() {
 			</Breadcrumb>
 
 			<PageHeader
-				eyebrow="Conselho de classe"
 				title={`Ata de ${meeting.title}`}
 				description={
 					<div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">

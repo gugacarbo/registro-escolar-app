@@ -141,9 +141,7 @@ function MinuteTemplatesPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Configuração"
 				title="Modelos de Ata"
-				description="Cadastre e mantenha modelos reutilizáveis para iniciar atas."
 				actions={
 					<Button variant="secondary" onClick={() => setShowCreateDialog(true)}>
 						Novo modelo

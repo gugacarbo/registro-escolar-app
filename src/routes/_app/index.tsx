@@ -135,7 +135,6 @@ function AppHome() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Sistema de registro"
 				title="Central do conselho de classe"
 				actions={
 					<Button asChild size="lg">

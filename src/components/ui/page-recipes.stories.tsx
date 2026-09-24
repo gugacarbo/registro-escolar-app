@@ -48,8 +48,6 @@ function ListPageDemo() {
 	return (
 		<ListPage
 			title="Atas"
-			description="Gerencie as atas"
-			eyebrow="Registro"
 			actions={<Button size="sm">Nova ata</Button>}
 			toolbar={
 				<PageToolbar>
@@ -82,8 +80,6 @@ function ListPageLoadingDemo() {
 	return (
 		<ListPage
 			title="Atas"
-			description="Gerencie as atas"
-			eyebrow="Registro"
 			actions={<Button size="sm">Nova ata</Button>}
 			toolbar={
 				<PageToolbar>

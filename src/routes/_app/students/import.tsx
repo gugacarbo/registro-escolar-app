@@ -170,9 +170,7 @@ export default function ImportStudentsPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Importação"
 				title="Importar estudantes"
-				description="Envie um arquivo CSV ou planilha (.csv, .xlsx, .xls, .ods) com a coluna nome, revise conflitos e confirme os vínculos."
 			/>
 			<div className="flex items-center gap-3">
 				<Button

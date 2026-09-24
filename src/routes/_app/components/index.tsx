@@ -46,9 +46,7 @@ export default function ComponentsPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Configuração"
 				title="Componentes curriculares"
-				description="Mantenha a nomenclatura oficial das disciplinas usada em ofertas e registros."
 				actions={
 					<Button onClick={() => setDialogOpen(true)}>Novo componente</Button>
 				}

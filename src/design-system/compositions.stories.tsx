@@ -107,7 +107,6 @@ export const ListPageExample: Story = {
 	render: () => (
 		<ListPage
 			title="Componentes"
-			description="Catálogo de componentes do design system."
 			actions={<Button size="sm">Novo componente</Button>}
 			toolbar={
 				<PageToolbar>

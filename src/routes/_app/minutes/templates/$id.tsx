@@ -57,7 +57,6 @@ export default function MinuteTemplateDetailPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Configuração"
 				title={template?.name ?? "Editar modelo de ata"}
 				actions={
 					<Link to="/minutes/templates">

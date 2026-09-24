@@ -37,9 +37,7 @@ export const PageHeaderCompleto: Story = {
 	name: "PageHeader Completo",
 	render: () => (
 		<PageHeader
-			eyebrow="Caderno Institucional"
 			title="Comunicados"
-			description="Envie comunicados para turmas, famílias e servidores da escola."
 			actions={
 				<>
 					<Button variant="outline" size="sm">

@@ -25,31 +25,24 @@ function PageHeader({
 	className,
 	title,
 	description,
-	eyebrow,
 	actions,
 	children,
 	...props
 }: React.ComponentProps<"header"> & {
 	title: React.ReactNode;
 	description?: React.ReactNode;
-	eyebrow?: React.ReactNode;
 	actions?: React.ReactNode;
 }) {
 	return (
 		<header
 			data-slot="page-header"
 			className={cn(
-				"flex flex-col gap-5 border-b-2 border-primary/15 pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-8",
+				"flex flex-row items-center justify-between gap-4 border-b-2 border-primary/15 pb-5",
 				className,
 			)}
 			{...props}
 		>
 			<div className="min-w-0 space-y-2">
-				{eyebrow && (
-					<p className="flex items-center gap-2 text-[0.6875rem] font-semibold tracking-[0.18em] text-primary/70 uppercase before:size-1.5 before:rounded-full before:bg-highlight">
-						{eyebrow}
-					</p>
-				)}
 				<h1 className="font-display text-2xl leading-tight tracking-tight text-balance text-foreground sm:text-[2rem]">
 					{title}
 				</h1>

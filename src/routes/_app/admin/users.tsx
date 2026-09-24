@@ -96,9 +96,7 @@ export default function AdminUsersPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Administração"
 				title="Usuários"
-				description="Contas de acesso do Registro Escolar e seus papéis de autorização."
 			/>
 			<PageToolbar>
 				<SearchInput

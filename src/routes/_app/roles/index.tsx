@@ -46,9 +46,7 @@ export default function RolesPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Configuração"
 				title="Cargos"
-				description="Defina as funções usadas ao identificar participantes do conselho."
 				actions={
 					<Button onClick={() => setDialogOpen(true)}>Novo cargo</Button>
 				}

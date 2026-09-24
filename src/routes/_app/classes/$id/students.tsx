@@ -120,7 +120,6 @@ export default function ClassStudentsPage() {
 			</Breadcrumb>
 
 			<PageHeader
-				eyebrow="Estrutura escolar"
 				title={data ? data.turma.name : "Estudantes da turma"}
 				description={
 					data ? (

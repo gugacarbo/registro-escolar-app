@@ -55,9 +55,7 @@ export default function StaffPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Equipe"
 				title="Servidores"
-				description="Professores, gestores e especialistas que participam das reuniões e atas do conselho."
 				actions={<CreateStaffDialog trigger={<Button>Novo servidor</Button>} />}
 			/>
 			<PageToolbar>

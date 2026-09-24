@@ -166,7 +166,6 @@ export default function StudentDetailPage() {
 			</Breadcrumb>
 
 			<PageHeader
-				eyebrow="Estudantes"
 				title={student?.name ?? "Estudante"}
 				description={
 					student ? (

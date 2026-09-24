@@ -282,7 +282,6 @@ export default function MeetingDetailPage() {
 			</Breadcrumb>
 
 			<PageHeader
-				eyebrow="Reunião"
 				title={meeting.title}
 				description={
 					<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">

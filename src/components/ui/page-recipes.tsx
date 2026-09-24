@@ -16,8 +16,6 @@ import {
  */
 function ListPage({
 	title,
-	description,
-	eyebrow,
 	actions,
 	toolbar,
 	children,
@@ -25,19 +23,12 @@ function ListPage({
 	...props
 }: React.ComponentProps<"section"> & {
 	title: React.ReactNode;
-	description?: React.ReactNode;
-	eyebrow?: React.ReactNode;
 	actions?: React.ReactNode;
 	toolbar?: React.ReactNode;
 }) {
 	return (
 		<PageShell className={className} {...props}>
-			<PageHeader
-				eyebrow={eyebrow}
-				title={title}
-				description={description}
-				actions={actions}
-			/>
+			<PageHeader title={title} actions={actions} />
 			{toolbar && <div data-slot="list-page-toolbar">{toolbar}</div>}
 			{children}
 		</PageShell>

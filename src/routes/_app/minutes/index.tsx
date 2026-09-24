@@ -103,9 +103,7 @@ export default function MinutesPage() {
 	return (
 		<PageShell>
 			<PageHeader
-				eyebrow="Conselho de classe"
 				title="Atas"
-				description="Todas as atas das reuniões, com status de aprovação e versões geradas."
 			/>
 			<PageToolbar className="sm:justify-between">
 				<SearchInput
