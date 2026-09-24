@@ -432,10 +432,10 @@ export default function CouncilPage() {
 																onClick={() => selectStudent(student.studentId)}
 																aria-pressed={isActive}
 																aria-label={`Selecionar ${student.name}`}
-																className={`flex w-full min-w-0 items-center gap-3 overflow-hidden rounded-lg border p-2 text-left transition-colors hover:bg-accent ${isActive ? "border-primary ring-1 ring-primary" : ""}`}
+																className={`flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-lg border p-2 text-left transition-colors hover:bg-accent ${isActive ? "border-primary ring-1 ring-primary" : ""}`}
 															>
-																<Avatar className="size-9 shrink-0">
-																	<AvatarFallback>
+																<Avatar className="size-8 shrink-0">
+																	<AvatarFallback className="text-xs font-medium">
 																		{initials(student.name)}
 																	</AvatarFallback>
 																</Avatar>
@@ -444,7 +444,7 @@ export default function CouncilPage() {
 																		{student.name}
 																	</span>
 																	{student.registrationNumber && (
-																		<span className="block truncate text-xs text-muted-foreground">
+																		<span className="block truncate text-xs leading-tight text-muted-foreground/75">
 																			Matrícula {student.registrationNumber}
 																		</span>
 																	)}
