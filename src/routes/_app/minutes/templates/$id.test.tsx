@@ -87,7 +87,7 @@ describe("MinuteTemplateDetailPage", () => {
 	it("carrega os valores existentes no formulário", () => {
 		renderPage();
 
-		expect(screen.getByText("Configuração")).toBeInTheDocument();
+		expect(screen.getByText("Cabeçalho")).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: "Voltar para a lista" }),
 		).toHaveAttribute("href", "/minutes/templates");

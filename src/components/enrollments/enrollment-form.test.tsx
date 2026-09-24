@@ -13,6 +13,7 @@ function fetchJson(data: unknown, total: number) {
 
 describe("EnrollmentForm", () => {
 	it("carrega estudantes e turmas pesquisáveis", async () => {
+		const user = userEvent.setup();
 		vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
 			const url = typeof input === "string" ? input : String(input);
 			if (url.startsWith("/api/students")) {
@@ -31,10 +32,19 @@ describe("EnrollmentForm", () => {
 				<EnrollmentForm onSubmit={vi.fn()} />
 			</QueryClientProvider>,
 		);
-		expect(await screen.findByText("Ana")).toBeInTheDocument();
-		expect(await screen.findByText("Turma A — 2026")).toBeInTheDocument();
-		expect(screen.getByLabelText("Buscar estudante")).toBeInTheDocument();
-		expect(screen.getByLabelText("Buscar turma")).toBeInTheDocument();
+		await user.click(screen.getByRole("combobox", { name: "Estudante" }));
+		expect(
+			await screen.findByRole("option", { name: "Ana" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByPlaceholderText("Buscar estudante..."),
+		).toBeInTheDocument();
+		await user.keyboard("{Escape}");
+		await user.click(screen.getByRole("combobox", { name: "Turma" }));
+		expect(
+			await screen.findByRole("option", { name: "Turma A — 2026" }),
+		).toBeInTheDocument();
+		expect(screen.getByPlaceholderText("Buscar turma...")).toBeInTheDocument();
 	});
 
 	it("envia matrícula com seletores paginados", async () => {

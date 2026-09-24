@@ -21,6 +21,7 @@ function renderForm() {
 
 describe("OfferForm", () => {
 	it("carrega turmas, componentes e servidores pesquisáveis", async () => {
+		const user = userEvent.setup();
 		vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
 			const url = typeof input === "string" ? input : String(input);
 			if (url.startsWith("/api/classes")) {
@@ -38,11 +39,22 @@ describe("OfferForm", () => {
 			return fetchJson([], 0);
 		});
 		renderForm();
-		expect(await screen.findByText("Turma A — 2026")).toBeInTheDocument();
-		expect(await screen.findByText("Matemática")).toBeInTheDocument();
-		expect(await screen.findByText("Maria")).toBeInTheDocument();
-		expect(screen.getByLabelText("Buscar turma")).toBeInTheDocument();
+		await user.click(screen.getByRole("combobox", { name: "Turma" }));
+		expect(
+			await screen.findByRole("option", { name: "Turma A — 2026" }),
+		).toBeInTheDocument();
+		expect(screen.getByPlaceholderText("Buscar turma...")).toBeInTheDocument();
+		await user.keyboard("{Escape}");
+		await user.click(screen.getByRole("combobox", { name: "Componente" }));
+		expect(
+			await screen.findByRole("option", { name: "Matemática" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByPlaceholderText("Buscar componente..."),
+		).toBeInTheDocument();
+		await user.keyboard("{Escape}");
 		expect(screen.getByLabelText("Buscar servidor")).toBeInTheDocument();
+		expect(await screen.findByText("Maria")).toBeInTheDocument();
 	});
 
 	it("envia oferta com componente e professores selecionados", async () => {
