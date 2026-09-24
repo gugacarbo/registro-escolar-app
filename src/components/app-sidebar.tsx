@@ -87,9 +87,9 @@ export function AppSidebar() {
 
 	return (
 		<Sidebar collapsible="icon" variant="floating">
-			<SidebarHeader>
-				<div className="flex items-center gap-3 px-2 py-2">
-					<span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-primary/15 bg-primary text-primary-foreground shadow-[3px_3px_0_0_color-mix(in_oklab,var(--highlight)_75%,transparent)]">
+			<SidebarHeader className="group-data-[collapsible=icon]:p-0">
+				<div className="flex items-center gap-3 px-2 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
+					<span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-primary/15 bg-primary text-primary-foreground shadow-[3px_3px_0_0_color-mix(in_oklab,var(--highlight)_75%,transparent)] group-data-[collapsible=icon]:size-8">
 						<GraduationCap className="size-4" aria-hidden="true" />
 					</span>
 					<span className="min-w-0 group-data-[collapsible=icon]:hidden">
