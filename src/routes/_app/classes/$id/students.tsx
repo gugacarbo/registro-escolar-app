@@ -9,6 +9,7 @@ import {
 	Users2Icon,
 } from "lucide-react";
 import { useState } from "react";
+import { EditClassDialog } from "#/components/classes/edit-class-dialog";
 import { EnrollmentDialog } from "#/components/enrollments/enrollment-dialog";
 import { EnrollmentStatusBadge } from "#/components/enrollments/enrollment-status-badge";
 import { HistoryEventList } from "#/components/history/history-event-list";
@@ -164,14 +165,22 @@ export default function ClassStudentsPage() {
 					) : undefined
 				}
 				actions={
-					<EnrollmentDialog
-						defaultTurmaId={id}
-						turmaName={data?.turma.name}
-						excludedStudentIds={students
-							.filter((student) => student.status === "ativa")
-							.map((student) => student.studentId)}
-						trigger={<Button variant="secondary">Matricular alunos</Button>}
-					/>
+					data ? (
+						<div className="flex flex-wrap items-center gap-2">
+							<EditClassDialog
+								classRow={data.turma}
+								trigger={<Button variant="outline">Editar turma</Button>}
+							/>
+							<EnrollmentDialog
+								defaultTurmaId={id}
+								turmaName={data?.turma.name}
+								excludedStudentIds={students
+									.filter((student) => student.status === "ativa")
+									.map((student) => student.studentId)}
+								trigger={<Button variant="secondary">Matricular alunos</Button>}
+							/>
+						</div>
+					) : undefined
 				}
 			/>
 

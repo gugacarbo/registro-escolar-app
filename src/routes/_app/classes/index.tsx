@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PackageOpenIcon } from "lucide-react";
 import { useState } from "react";
-
+import { ClassRowActions } from "#/components/classes/class-row-actions";
 import { CreateClassDialog } from "#/components/classes/create-class-dialog";
 import { DataTable } from "#/components/data-table";
 import { Button } from "#/components/ui/button";
@@ -47,6 +47,11 @@ const columns = [
 				</Link>
 			</Button>
 		),
+	},
+	{
+		header: "Ações",
+		align: "right" as const,
+		cell: (classRow: ClassListItem) => <ClassRowActions classRow={classRow} />,
 	},
 ];
 

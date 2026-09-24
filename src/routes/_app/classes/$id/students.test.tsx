@@ -51,6 +51,12 @@ vi.mock("#/components/offers/class-offers-panel", () => ({
 	),
 }));
 
+vi.mock("#/components/classes/edit-class-dialog", () => ({
+	EditClassDialog: ({ trigger }: { trigger?: React.ReactNode }) => (
+		<>{trigger}</>
+	),
+}));
+
 import type { ClassHistoryResult } from "#/lib/history/types";
 import ClassStudentsPage from "./students";
 
@@ -169,6 +175,9 @@ describe("ClassStudentsPage", () => {
 
 		expect(
 			screen.getByRole("button", { name: "Matricular alunos" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Editar turma" }),
 		).toBeInTheDocument();
 	});
 

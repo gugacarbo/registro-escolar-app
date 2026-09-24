@@ -26,6 +26,10 @@ vi.mock("#/components/classes/create-class-dialog", () => ({
 	CreateClassDialog: () => null,
 }));
 
+vi.mock("#/components/classes/class-row-actions", () => ({
+	ClassRowActions: () => null,
+}));
+
 import ClassesPage from "./index";
 
 function makeClass(overrides: Partial<ClassListItem> = {}): ClassListItem {
@@ -121,6 +125,9 @@ describe("ClassesPage", () => {
 		).not.toBeInTheDocument();
 		const offersLink = within(table).getByRole("link", { name: "Ofertas" });
 		expect(offersLink).toHaveAttribute("href", "/classes/$id/offers");
+		expect(
+			within(table).getByRole("columnheader", { name: "Ações" }),
+		).toBeInTheDocument();
 	});
 
 	it("exibe estado vazio quando não há turmas", () => {
