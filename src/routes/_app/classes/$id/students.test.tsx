@@ -194,9 +194,7 @@ describe("ClassStudentsPage", () => {
 		renderPage();
 		await user.click(screen.getByRole("tab", { name: "Reuniões (1)" }));
 
-		expect(
-			screen.getByText("Realizada em 10/05/2026, 21:00"),
-		).toBeInTheDocument();
+		expect(screen.getByText("10/05/2026, 21:00")).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "Conselho 2026" })).toHaveAttribute(
 			"href",
 			"/meetings/$meetingId",
@@ -219,7 +217,11 @@ describe("ClassStudentsPage", () => {
 
 		expect(screen.getByText("Registro")).toBeInTheDocument();
 		expect(screen.getByText("Baixo rendimento")).toBeInTheDocument();
-		expect(screen.getByText("Reunião: Conselho 2026")).toBeInTheDocument();
+		expect(
+			screen.getByText((content) =>
+				content?.includes("Reunião: Conselho 2026"),
+			),
+		).toBeInTheDocument();
 		expect(screen.queryByText("Turma: Turma A")).not.toBeInTheDocument();
 	});
 

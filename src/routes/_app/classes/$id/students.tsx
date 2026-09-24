@@ -9,16 +9,17 @@ import {
 	Users2Icon,
 } from "lucide-react";
 import { useState } from "react";
+import { DataTable } from "#/components/data-table";
 import { EditClassDialog } from "#/components/classes/edit-class-dialog";
 import { EnrollmentDialog } from "#/components/enrollments/enrollment-dialog";
 import { EnrollmentStatusBadge } from "#/components/enrollments/enrollment-status-badge";
-import { HistoryEventList } from "#/components/history/history-event-list";
 import {
 	HistorySearchForm,
 	type HistorySearchValues,
 } from "#/components/history/history-search-form";
 import { MeetingStatusBadge } from "#/components/meetings/meeting-status-badge";
 import { ClassOffersPanel } from "#/components/offers/class-offers-panel";
+import { Badge } from "#/components/ui/badge";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -49,7 +50,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import type { HistoryFilters } from "#/hooks/history/use-history";
 import { useClassHistory } from "#/hooks/history/use-history";
 import { useOffers } from "#/hooks/offers/use-offers";
-import type { ClassHistoryStudent } from "#/lib/history/types";
+import type {
+	ClassHistoryMeeting,
+	ClassHistoryStudent,
+	HistoryEvent,
+} from "#/lib/history/types";
 
 export const Route = createFileRoute("/_app/classes/$id/students")({
 	component: ClassStudentsPage,
@@ -70,6 +75,90 @@ function formatDateTime(value: string) {
 	});
 }
 
+const EVENT_LABELS: Record<string, string> = {
+	matricula: "Matrícula",
+	encerramento_matricula: "Encerramento",
+	reuniao: "Reunião",
+	registro: "Registro",
+	relato_geral: "Relato geral",
+	status_reuniao: "Status na reunião",
+};
+
+function formatEventDetail(event: HistoryEvent) {
+	const context: string[] = [];
+	if (event.studentName) {
+		context.push(`Estudante: ${event.studentName}`);
+	}
+	if (event.reuniaoTitulo) {
+		context.push(`Reunião: ${event.reuniaoTitulo}`);
+	}
+	if (event.interno) {
+		context.push("Registro interno");
+	}
+	return { text: event.texto, context: context.join(" · ") };
+}
+
+function paginate<T>(rows: T[], page: number, pageSize: number): T[] {
+	const start = (page - 1) * pageSize;
+	return rows.slice(start, start + pageSize);
+}
+
+const meetingColumns = [
+	{
+		header: "Título",
+		cell: (meeting: ClassHistoryMeeting) => (
+			<Link
+				to="/meetings/$meetingId"
+				params={{ meetingId: meeting.id }}
+				className="font-medium hover:underline"
+			>
+				{meeting.title}
+			</Link>
+		),
+	},
+	{
+		header: "Data",
+		cell: (meeting: ClassHistoryMeeting) =>
+			meeting.heldAt ? formatDateTime(meeting.heldAt) : "Sem data",
+	},
+	{
+		header: "Status",
+		align: "right" as const,
+		cell: (meeting: ClassHistoryMeeting) => (
+			<MeetingStatusBadge status={meeting.status} />
+		),
+	},
+];
+
+const timelineColumns = [
+	{
+		header: "Data",
+		cell: (event: HistoryEvent) => formatDateTime(event.data),
+	},
+	{
+		header: "Evento",
+		cell: (event: HistoryEvent) => (
+			<Badge variant="outline">{EVENT_LABELS[event.tipo] ?? event.tipo}</Badge>
+		),
+	},
+	{
+		header: "Detalhe",
+		cell: (event: HistoryEvent) => {
+			const { text, context } = formatEventDetail(event);
+			return (
+				<div className="min-w-0">
+					{text && <p className="font-normal">{text}</p>}
+					{context && (
+						<p className="text-xs text-muted-foreground">{context}</p>
+					)}
+					{!text && !context && (
+						<span className="text-muted-foreground">—</span>
+					)}
+				</div>
+			);
+		},
+	},
+];
 function orderStudents(rows: ClassHistoryStudent[]) {
 	return [...rows].sort((a, b) => {
 		const activeDelta =
@@ -85,6 +174,10 @@ export default function ClassStudentsPage() {
 	const { id } = Route.useParams();
 	const [filters, setFilters] = useState<HistoryFilters>({});
 	const [activeTab, setActiveTab] = useState("estudantes");
+	const [meetingsPage, setMeetingsPage] = useState(1);
+	const [meetingsPageSize, setMeetingsPageSize] = useState(10);
+	const [timelinePage, setTimelinePage] = useState(1);
+	const [timelinePageSize, setTimelinePageSize] = useState(10);
 	const { data, isLoading, isError } = useClassHistory(id, filters);
 	const { data: offers } = useOffers(id);
 
@@ -102,6 +195,12 @@ export default function ClassStudentsPage() {
 			componenteId: values.componenteId || undefined,
 			periodo: values.periodo || undefined,
 		});
+		setTimelinePage(1);
+	}
+
+	function handleResetFilters() {
+		setFilters({});
+		setTimelinePage(1);
 	}
 
 	return (
@@ -343,63 +442,50 @@ export default function ClassStudentsPage() {
 				</TabsContent>
 
 				<TabsContent value="reunioes" className="space-y-4">
-					<PageSection
-						title="Reuniões da turma"
-						description="Conselhos de classe vinculados a esta turma."
-					>
-						{isLoading ? (
-							<div className="space-y-2">
-								<Skeleton className="h-16 w-full" />
-							</div>
-						) : meetings.length === 0 ? (
-							<p className="text-sm text-muted-foreground">
-								Nenhuma reunião vinculada a esta turma.
-							</p>
-						) : (
-							<ul aria-label="Reuniões da turma" className="grid gap-2">
-								{meetings.map((meeting) => (
-									<li
-										key={meeting.id}
-										className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-background/40 p-3"
-									>
-										<div className="min-w-0">
-											<Link
-												to="/meetings/$meetingId"
-												params={{ meetingId: meeting.id }}
-												className="font-medium hover:underline"
-											>
-												{meeting.title}
-											</Link>
-											<p className="text-sm text-muted-foreground">
-												{meeting.heldAt
-													? `Realizada em ${formatDateTime(meeting.heldAt)}`
-													: "Sem data"}
-											</p>
-										</div>
-										<MeetingStatusBadge status={meeting.status} />
-									</li>
-								))}
-							</ul>
-						)}
+					<PageSection title="Reuniões da turma">
+						<DataTable
+							columns={meetingColumns}
+							rows={paginate(meetings, meetingsPage, meetingsPageSize)}
+							getRowKey={(meeting) => meeting.id}
+							total={meetings.length}
+							page={meetingsPage}
+							pageSize={meetingsPageSize}
+							onPageChange={setMeetingsPage}
+							onPageSizeChange={(size) => {
+								setMeetingsPageSize(size);
+								setMeetingsPage(1);
+							}}
+							isLoading={isLoading}
+							isError={isError}
+							ariaLabel="Reuniões da turma"
+							emptyTitle="Nenhuma reunião vinculada a esta turma."
+						/>
 					</PageSection>
 				</TabsContent>
 
 				<TabsContent value="linha-do-tempo" className="space-y-4">
-					<PageSection
-						title="Linha do tempo"
-						description="Eventos da turma em ordem cronológica: reuniões, registros e relatos."
-					>
+					<PageSection title="Linha do tempo">
 						<HistorySearchForm
 							hideStudentFilters
 							onSubmit={handleSearch}
-							onReset={() => setFilters({})}
+							onReset={handleResetFilters}
 						/>
-						<HistoryEventList
-							events={events}
+						<DataTable
+							columns={timelineColumns}
+							rows={paginate(events, timelinePage, timelinePageSize)}
+							getRowKey={(event) => event.id}
+							total={events.length}
+							page={timelinePage}
+							pageSize={timelinePageSize}
+							onPageChange={setTimelinePage}
+							onPageSizeChange={(size) => {
+								setTimelinePageSize(size);
+								setTimelinePage(1);
+							}}
 							isLoading={isLoading}
 							isError={isError}
-							emptyMessage="Nenhum evento no histórico da turma."
-							turmaNome={data?.turma.name}
+							ariaLabel="Linha do tempo da turma"
+							emptyTitle="Nenhum evento no histórico da turma."
 						/>
 					</PageSection>
 				</TabsContent>
