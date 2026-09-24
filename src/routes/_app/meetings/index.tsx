@@ -92,9 +92,9 @@ export default function MeetingsPage() {
 	return (
 		<PageShell>
 			<PageHeader
+				className="flex-row items-center justify-between gap-4 sm:items-center"
 				eyebrow="Gestão de reuniões"
 				title="Reuniões"
-				description="Acompanhe cada reunião da abertura ao encerramento pela ata e participe diretamente do conselho."
 				actions={
 					<Button onClick={() => setDialogOpen(true)}>Nova reunião</Button>
 				}
