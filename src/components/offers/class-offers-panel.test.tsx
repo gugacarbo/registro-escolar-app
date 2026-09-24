@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -77,14 +77,37 @@ beforeEach(() => {
 describe("ClassOffersPanel", () => {
 	it("lista componentes ofertados com professores", () => {
 		renderPanel();
-		expect(screen.getByText("Matemática")).toBeInTheDocument();
-		expect(screen.getByText("Professores: Maria")).toBeInTheDocument();
+		const table = screen.getByRole("table", {
+			name: "Componentes ofertados",
+		});
+		expect(
+			within(table).getByRole("columnheader", { name: "Componente" }),
+		).toBeInTheDocument();
+		expect(
+			within(table).getByRole("columnheader", { name: "Professores" }),
+		).toBeInTheDocument();
+		expect(within(table).getByText("Matemática")).toBeInTheDocument();
+		expect(within(table).getByText("Maria")).toBeInTheDocument();
+	});
+
+	it("exibe fallback quando a oferta não tem professor", () => {
+		mocks.useOffers.mockReturnValue({
+			data: [makeOffer({ professors: [] })],
+			isLoading: false,
+		});
+		renderPanel();
+		const table = screen.getByRole("table", {
+			name: "Componentes ofertados",
+		});
+		expect(
+			within(table).getByText("Sem professor atribuído"),
+		).toBeInTheDocument();
 	});
 
 	it("exibe estado vazio sem ofertas", () => {
 		mocks.useOffers.mockReturnValue({ data: [], isLoading: false });
 		renderPanel();
-		expect(screen.getByText("Nenhum componente ofertado")).toBeInTheDocument();
+		expect(screen.getByText("Nenhum componente ofertado.")).toBeInTheDocument();
 	});
 
 	it("abre o formulário de oferta pelo trigger do cabeçalho", async () => {
@@ -142,6 +165,32 @@ describe("ClassOffersPanel", () => {
 		expect(screen.getByRole("alert")).toHaveTextContent(
 			"Falha ao carregar ofertas da turma",
 		);
+	});
+
+	it("pagina os componentes ofertados", () => {
+		const many = Array.from({ length: 11 }, (_, index) =>
+			makeOffer({
+				id: `offer-${index + 1}`,
+				componentId: `comp-${index + 1}`,
+				component: {
+					id: `comp-${index + 1}`,
+					name: `Componente ${index + 1}`,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				},
+			}),
+		);
+		mocks.useOffers.mockReturnValue({ data: many, isLoading: false });
+		renderPanel();
+
+		const table = screen.getByRole("table", {
+			name: "Componentes ofertados",
+		});
+		expect(within(table).getByText("Componente 1")).toBeInTheDocument();
+		expect(
+			within(table).queryByText("Componente 11"),
+		).not.toBeInTheDocument();
+		expect(screen.getByText("Mostrando 1–10 de 11")).toBeInTheDocument();
 	});
 
 	it("mantém o dialog aberto enquanto cria a oferta", async () => {
