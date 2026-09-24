@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { createDb } from "#/db";
 import { getSession } from "#/lib/auth/session";
-import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import { findClassById, updateClass } from "#/lib/classes/repository";
 import { updateClassSchema } from "#/lib/classes/schema";
+import { getRuntimeEnv, requireD1 } from "#/lib/cloudflare-env";
 import { mapClassRequestToRow } from "#/lib/enrollments/mapping";
 import { d1Middleware } from "#/middleware/d1";
 

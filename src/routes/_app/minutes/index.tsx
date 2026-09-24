@@ -102,9 +102,7 @@ export default function MinutesPage() {
 
 	return (
 		<PageShell>
-			<PageHeader
-				title="Atas"
-			/>
+			<PageHeader title="Atas" />
 			<PageToolbar className="sm:justify-between">
 				<SearchInput
 					className="sm:max-w-sm"

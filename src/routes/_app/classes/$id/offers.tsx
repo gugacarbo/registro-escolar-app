@@ -14,9 +14,7 @@ export default function ClassOffersPage() {
 
 	return (
 		<PageShell>
-			<PageHeader
-				title="Ofertas da turma"
-			/>
+			<PageHeader title="Ofertas da turma" />
 			<ClassOffersPanel classId={id} turmaName={history?.turma.name} />
 		</PageShell>
 	);

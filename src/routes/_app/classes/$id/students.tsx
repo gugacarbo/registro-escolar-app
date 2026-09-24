@@ -9,8 +9,8 @@ import {
 	Users2Icon,
 } from "lucide-react";
 import { useState } from "react";
-import { DataTable } from "#/components/data-table";
 import { EditClassDialog } from "#/components/classes/edit-class-dialog";
+import { DataTable } from "#/components/data-table";
 import { EnrollmentDialog } from "#/components/enrollments/enrollment-dialog";
 import { EnrollmentStatusBadge } from "#/components/enrollments/enrollment-status-badge";
 import {
@@ -416,11 +416,7 @@ export default function ClassStudentsPage() {
 						) : (
 							<DataTable
 								columns={studentColumns}
-								rows={paginate(
-									orderedStudents,
-									studentsPage,
-									studentsPageSize,
-								)}
+								rows={paginate(orderedStudents, studentsPage, studentsPageSize)}
 								getRowKey={(student) =>
 									`${student.studentId}-${student.startDate}`
 								}

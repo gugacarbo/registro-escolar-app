@@ -187,9 +187,7 @@ describe("ClassOffersPanel", () => {
 			name: "Componentes ofertados",
 		});
 		expect(within(table).getByText("Componente 1")).toBeInTheDocument();
-		expect(
-			within(table).queryByText("Componente 11"),
-		).not.toBeInTheDocument();
+		expect(within(table).queryByText("Componente 11")).not.toBeInTheDocument();
 		expect(screen.getByText("Mostrando 1–10 de 11")).toBeInTheDocument();
 	});
 

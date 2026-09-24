@@ -95,9 +95,7 @@ export default function AdminUsersPage() {
 
 	return (
 		<PageShell>
-			<PageHeader
-				title="Usuários"
-			/>
+			<PageHeader title="Usuários" />
 			<PageToolbar>
 				<SearchInput
 					className="sm:max-w-md"

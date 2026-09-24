@@ -169,9 +169,7 @@ export default function ImportStudentsPage() {
 
 	return (
 		<PageShell>
-			<PageHeader
-				title="Importar estudantes"
-			/>
+			<PageHeader title="Importar estudantes" />
 			<div className="flex items-center gap-3">
 				<Button
 					variant="outline"

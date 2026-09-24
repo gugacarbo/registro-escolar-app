@@ -174,9 +174,7 @@ describe("ClassStudentsPage", () => {
 		expect(within(studentsTable).getByText("João")).toBeInTheDocument();
 		expect(within(studentsTable).getByText("Maria")).toBeInTheDocument();
 		expect(within(studentsTable).getByText("01/01/2026")).toBeInTheDocument();
-		expect(
-			within(studentsTable).getByText("Em andamento"),
-		).toBeInTheDocument();
+		expect(within(studentsTable).getByText("Em andamento")).toBeInTheDocument();
 	});
 
 	it("oferece matrícula em lote diretamente na visualização da turma", () => {
@@ -264,7 +262,9 @@ describe("ClassStudentsPage", () => {
 		});
 		renderPage();
 
-		expect(screen.getByText("Não foi possível carregar os dados da turma.")).toBeInTheDocument();
+		expect(
+			screen.getByText("Não foi possível carregar os dados da turma."),
+		).toBeInTheDocument();
 	});
 
 	it("envia filtros para a linha do tempo e limpa ao clicar em Limpar", async () => {
