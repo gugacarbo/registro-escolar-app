@@ -1,13 +1,4 @@
-import { useId } from "react";
-
-import { Input } from "#/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
+import { SearchableSelect } from "#/components/ui/searchable-select";
 
 export type EntityOption = { id: string; name: string };
 
@@ -36,61 +27,23 @@ export function EntitySelect({
 	onSearchChange: (value: string) => void;
 	disabled?: boolean;
 }) {
-	const searchId = useId();
-	const statusId = useId();
 	return (
-		<div className="grid gap-2">
-			<Input
-				id={searchId}
-				value={search}
-				onChange={(event) => onSearchChange(event.target.value)}
-				placeholder={`Buscar ${label.toLowerCase()}`}
-				aria-label={`Buscar ${label.toLowerCase()}`}
-				disabled={disabled}
-			/>
-			<Select
-				value={value}
-				onValueChange={onChange}
-				disabled={disabled || (options.length === 0 && !isLoading)}
-			>
-				<SelectTrigger aria-label={label}>
-					<SelectValue placeholder={placeholder} />
-				</SelectTrigger>
-				<SelectContent>
-					{options.map((option) => (
-						<SelectItem key={option.id} value={option.id}>
-							{option.name}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
-			{isLoading && (
-				<p
-					id={statusId}
-					role="status"
-					className="text-xs text-muted-foreground"
-				>
-					Carregando {label.toLowerCase()}...
-				</p>
-			)}
-			{!isLoading && options.length === 0 && (
-				<p
-					id={statusId}
-					role="status"
-					className="text-xs text-muted-foreground"
-				>
-					Nenhum {label.toLowerCase()} encontrado para a busca.
-				</p>
-			)}
-			{!isLoading && !loadedAll && (
-				<p
-					id={statusId}
-					role="status"
-					className="text-xs text-muted-foreground"
-				>
-					Mostrando {options.length} de {total}. Refine a busca para ver mais.
-				</p>
-			)}
-		</div>
+		<SearchableSelect
+			label={label}
+			placeholder={placeholder}
+			value={value}
+			onChange={onChange}
+			options={options}
+			isLoading={isLoading}
+			emptyMessage={`Nenhum ${label.toLowerCase()} encontrado para a busca.`}
+			hint={
+				!isLoading && !loadedAll
+					? `Mostrando ${options.length} de ${total}. Refine a busca para ver mais.`
+					: undefined
+			}
+			search={search}
+			onSearchChange={onSearchChange}
+			disabled={disabled}
+		/>
 	);
 }

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { EntitySelect } from "./entity-select";
 
 describe("EntitySelect", () => {
-	it("renderiza busca, opções e aviso de resultado parcial", async () => {
+	it("combina busca e seleção no mesmo combobox", async () => {
 		const user = userEvent.setup();
 		const onSearchChange = vi.fn();
 		render(
@@ -22,12 +22,15 @@ describe("EntitySelect", () => {
 				onSearchChange={onSearchChange}
 			/>,
 		);
-		expect(screen.getByLabelText("Buscar turma")).toBeInTheDocument();
+		expect(screen.queryByLabelText("Buscar turma")).not.toBeInTheDocument();
+		await user.click(screen.getByRole("combobox", { name: "Turma" }));
+		const search = screen.getByPlaceholderText("Buscar turma...");
 		expect(
 			screen.getByText("Mostrando 1 de 10. Refine a busca para ver mais."),
 		).toBeInTheDocument();
-		await user.type(screen.getByLabelText("Buscar turma"), "A");
+		await user.type(search, "A");
 		expect(onSearchChange).toHaveBeenCalled();
+		await user.click(screen.getByRole("option", { name: "Turma A" }));
 	});
 
 	it("seleciona uma opção", async () => {
@@ -47,7 +50,7 @@ describe("EntitySelect", () => {
 				onSearchChange={vi.fn()}
 			/>,
 		);
-		await user.click(screen.getByLabelText("Turma"));
+		await user.click(screen.getByRole("combobox", { name: "Turma" }));
 		await user.click(await screen.findByRole("option", { name: "Turma A" }));
 		expect(onChange).toHaveBeenCalledWith("1");
 	});
@@ -68,11 +71,10 @@ describe("EntitySelect", () => {
 				disabled
 			/>,
 		);
-		expect(screen.getByLabelText("Buscar turma")).toBeDisabled();
-		expect(screen.getByLabelText("Turma")).toBeDisabled();
+		expect(screen.getByRole("combobox", { name: "Turma" })).toBeDisabled();
 	});
 
-	it("mostra estado vazio e carregamento", () => {
+	it("mostra estado vazio e carregamento", async () => {
 		const { rerender } = render(
 			<EntitySelect
 				label="Turma"
@@ -87,6 +89,8 @@ describe("EntitySelect", () => {
 				onSearchChange={vi.fn()}
 			/>,
 		);
+		const user = userEvent.setup();
+		await user.click(screen.getByRole("combobox", { name: "Turma" }));
 		expect(
 			screen.getByText("Nenhum turma encontrado para a busca."),
 		).toBeInTheDocument();
